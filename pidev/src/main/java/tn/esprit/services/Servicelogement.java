@@ -1,11 +1,14 @@
 package tn.esprit.services;
 
 import tn.esprit.entities.logement;
+import tn.esprit.entities.reservationlog;
 import tn.esprit.utils.MyDataBase;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Servicelogement implements IService<logement> {
     private Connection connection;
@@ -68,4 +71,29 @@ public class Servicelogement implements IService<logement> {
         }
         return logements;
     }
+
+    @Override
+    public List<logement> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException {
+        List<logement> touteslogements = afficher();
+
+        return touteslogements.stream()
+                .filter(log -> {
+                    try {
+                        // Utilisation de la réflexion pour accéder à l'attribut
+                        Field champ = logement.class.getDeclaredField(nomAttribut);
+                        champ.setAccessible(true);
+                        Object valeurChamp = champ.get(log);
+
+                        // Comparaison selon le type de l'attribut
+                        if (valeurChamp == null) {
+                            return valeur == null;
+                        }
+                        return valeurChamp.equals(valeur);
+
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        System.err.println("Attribut non trouvé: " + nomAttribut);
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());    }
 }
