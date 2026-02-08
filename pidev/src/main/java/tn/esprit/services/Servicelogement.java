@@ -79,21 +79,35 @@ public class Servicelogement implements IService<logement> {
         return touteslogements.stream()
                 .filter(log -> {
                     try {
-                        // Utilisation de la réflexion pour accéder à l'attribut
                         Field champ = logement.class.getDeclaredField(nomAttribut);
                         champ.setAccessible(true);
                         Object valeurChamp = champ.get(log);
 
-                        // Comparaison selon le type de l'attribut
-                        if (valeurChamp == null) {
-                            return valeur == null;
+                        // Gestion spéciale pour les comparaisons de nombres flottants
+                        if (valeurChamp instanceof Float && valeurRecherchee instanceof Float) {
+                            float valeurFloat = (Float) valeurChamp;
+                            float rechercheFloat = (Float) valeurRecherchee;
+                            return Math.abs(valeurFloat - rechercheFloat) < 0.001; // Tolérance pour les floats
                         }
-                        return valeurChamp.equals(valeur);
+
+                        // Gestion spéciale pour les booléens
+                        if (valeurChamp instanceof Boolean && valeurRecherchee instanceof String) {
+                            Boolean boolValue = (Boolean) valeurChamp;
+                            String stringValue = (String) valeurRecherchee;
+                            return boolValue.toString().equalsIgnoreCase(stringValue);
+                        }
+
+                        // Comparaison par défaut
+                        if (valeurChamp == null) {
+                            return valeurRecherchee == null;
+                        }
+                        return valeurChamp.equals(valeurRecherchee);
 
                     } catch (NoSuchFieldException | IllegalAccessException e) {
-                        System.err.println("Attribut non trouvé: " + nomAttribut);
+                        System.err.println("Attribut non trouvé: " + nomAttribut + " - " + e.getMessage());
                         return false;
                     }
                 })
-                .collect(Collectors.toList());    }
+                .collect(Collectors.toList());
+    }
 }

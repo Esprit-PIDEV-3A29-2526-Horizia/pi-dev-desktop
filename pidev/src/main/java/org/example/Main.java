@@ -58,6 +58,11 @@ public class Main {
 
                 System.out.println("      - Réservation ID: " + r.getId() + ", Montant: " + r.getMontant());
             }
+            List<logement> log = sl.rechercherParAttribut("adresse", "Tunis");
+            System.out.println("Liste des logements : " + log);
+
+
+
         } catch (SQLException e) {
             System.out.println("Erreur SQL : " + e.getMessage());
         }
