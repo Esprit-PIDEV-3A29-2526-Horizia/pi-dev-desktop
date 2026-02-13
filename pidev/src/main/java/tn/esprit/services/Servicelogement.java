@@ -1,7 +1,6 @@
 package tn.esprit.services;
 
 import tn.esprit.entities.logement;
-import tn.esprit.entities.reservationlog;
 import tn.esprit.utils.MyDataBase;
 
 import java.lang.reflect.Field;
@@ -19,58 +18,89 @@ public class Servicelogement implements IService<logement> {
 
     @Override
     public void ajouter(logement logement) throws SQLException {
-        String sql = "INSERT INTO `logement`(`typelog`, `adresse`, `capacite`, `equipement`, `tarif_nuit`, `disponibilite`) VALUES (?,?,?,?,?,?)";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, logement.getType());
-        ps.setString(2, logement.getAdresse());
-        ps.setInt(3, logement.getCapacite());
-        ps.setString(4, logement.getEquipement());
-        ps.setFloat(5, logement.getTarif_nuit());
-        ps.setBoolean(6, logement.isDisponibilite());
-        ps.executeUpdate();
+        String sql = "INSERT INTO `logement`(`type`, `nom`, `image`, `adresse`, `capacite`, `equipement`, `tarif_nuit`, `disponibilite`) VALUES (?,?,?,?,?,?,?,?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, logement.getType());
+            ps.setString(2, logement.getNom());
+            ps.setString(3, logement.getImage());
+            ps.setString(4, logement.getAdresse());
+            ps.setInt(5, logement.getCapacite());
+            ps.setString(6, logement.getEquipement());
+            ps.setFloat(7, logement.getTarif_nuit());
+            ps.setBoolean(8, logement.isDisponibilite());
+            ps.executeUpdate();
+
+            // Récupérer l'ID généré et le setter dans l'objet (optionnel)
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    logement.setId(generatedKeys.getInt(1));
+                }
+            }
+        }
     }
 
     @Override
     public void modifier(logement logement) throws SQLException {
-        String sql = "UPDATE `logement` SET `typelog`=?,`adresse`=?,`capacite`=?,`equipement`=?,`tarif_nuit`=?,`disponibilite`=? WHERE `idlog`=?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, logement.getType());
-        ps.setString(2, logement.getAdresse());
-        ps.setInt(3, logement.getCapacite());
-        ps.setString(4, logement.getEquipement());
-        ps.setFloat(5, logement.getTarif_nuit());
-        ps.setBoolean(6, logement.isDisponibilite());
-        ps.setInt(7, logement.getId());
-        ps.executeUpdate();
+        String sql = "UPDATE `logement` SET `type`=?, `nom`=?, `image`=?, `adresse`=?, `capacite`=?, `equipement`=?, `tarif_nuit`=?, `disponibilite`=? WHERE `id`=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, logement.getType());
+            ps.setString(2, logement.getNom());
+            ps.setString(3, logement.getImage());
+            ps.setString(4, logement.getAdresse());
+            ps.setInt(5, logement.getCapacite());
+            ps.setString(6, logement.getEquipement());
+            ps.setFloat(7, logement.getTarif_nuit());
+            ps.setBoolean(8, logement.isDisponibilite());
+            ps.setInt(9, logement.getId());
+            ps.executeUpdate();
+        }
     }
 
     @Override
     public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM `logement` WHERE `idlog`=?";
-        PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, id);
-        ps.executeUpdate();
+        String sql = "DELETE FROM `logement` WHERE `id`=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }
     }
 
     @Override
     public List<logement> afficher() throws SQLException {
         List<logement> logements = new ArrayList<>();
         String sql = "SELECT * FROM `logement`";
-        Statement st = connection.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-            logement l =new logement();
-            l.setId(rs.getInt("idlog"));
-            l.setType(rs.getString("typelog"));
-            l.setAdresse(rs.getString("adresse"));
-            l.setCapacite(rs.getInt("capacite"));
-            l.setEquipement(rs.getString("equipement"));
-            l.setTarif_nuit(rs.getFloat("tarif_nuit"));
-            l.setDisponibilite(rs.getBoolean("disponibilite"));
-            logements.add(l);
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                logement l = new logement();
+                l.setId(rs.getInt("id"));
+                l.setType(rs.getString("type"));
+                l.setNom(rs.getString("nom"));
+                l.setImage(rs.getString("image"));
+                l.setAdresse(rs.getString("adresse"));
+                l.setCapacite(rs.getInt("capacite"));
+                l.setEquipement(rs.getString("equipement"));
+                l.setTarif_nuit(rs.getFloat("tarif_nuit"));
+                l.setDisponibilite(rs.getBoolean("disponibilite"));
+                logements.add(l);
+            }
         }
         return logements;
     }
+
+    // Méthode utilitaire pour obtenir le dernier ID inséré (alternative)
+    public int getLastInsertId() throws SQLException {
+        String sql = "SELECT LAST_INSERT_ID() AS last_id";
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt("last_id");
+            }
+        }
+        return -1;
+    }
+
+
 
     @Override
     public List<logement> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException {
@@ -109,5 +139,38 @@ public class Servicelogement implements IService<logement> {
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<logement> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException {
+        List<logement> logements = new ArrayList<>();
+
+        // Updated allowed attributes to match DB column names: removed non-matching ones like "ville", "pays", "id_proprietaire" (not in schema), added "nom", "image"
+        List<String> attributsAutorises = List.of("type", "nom", "image", "adresse", "capacite", "equipement", "tarif_nuit", "disponibilite");
+
+        if (!attributsAutorises.contains(attribut)) {
+            throw new IllegalArgumentException("Attribut de tri non valide : " + attribut);
+        }
+
+        String ordre = ordreCroissant ? "ASC" : "DESC";
+        String sql = "SELECT * FROM `logement` ORDER BY `" + attribut + "` " + ordre;
+
+        Statement st = connection.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            logement l = new logement();
+            // Updated column names in ResultSet getters
+            l.setId(rs.getInt("id"));
+            l.setType(rs.getString("type"));
+            l.setNom(rs.getString("nom"));
+            l.setImage(rs.getString("image"));
+            l.setAdresse(rs.getString("adresse"));
+            l.setCapacite(rs.getInt("capacite"));
+            l.setEquipement(rs.getString("equipement"));
+            l.setTarif_nuit(rs.getFloat("tarif_nuit"));
+            l.setDisponibilite(rs.getBoolean("disponibilite"));
+            logements.add(l);
+        }
+        return logements;
     }
 }

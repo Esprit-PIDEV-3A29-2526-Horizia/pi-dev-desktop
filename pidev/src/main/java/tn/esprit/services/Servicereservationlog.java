@@ -27,9 +27,13 @@ public class Servicereservationlog implements IService<reservationlog> {
         ps.setTimestamp(3, new Timestamp(reservationlog.getDate_debut().getTime()));
         ps.setTimestamp(4, new Timestamp(reservationlog.getDate_fin().getTime()));
         ps.setFloat(5, reservationlog.getMontant());
-        ps.setString(6, reservationlog.getStatus().toString());  // Assumes enum toString() returns the name (e.g., "PENDING")
+        ps.setString(6, reservationlog.getStatus().toString());
         ps.setString(7, reservationlog.getModalite());
         ps.executeUpdate();
+        int rowsAffected = ps.executeUpdate();
+        System.out.println("Rows affected by insert: " + rowsAffected);
+        connection.commit();  // Force le commit
+        ps.close();
     }
 
     @Override
@@ -45,6 +49,10 @@ public class Servicereservationlog implements IService<reservationlog> {
         ps.setString(7, reservationlog.getModalite());
         ps.setInt(8, reservationlog.getId());
         ps.executeUpdate();
+        int rowsAffected = ps.executeUpdate();
+        System.out.println("Rows affected by update: " + rowsAffected);
+        connection.commit();  // Force le commit
+        ps.close();
     }
 
     @Override
@@ -83,12 +91,10 @@ public class Servicereservationlog implements IService<reservationlog> {
         return toutesReservations.stream()
                 .filter(reservation -> {
                     try {
-                        // Utilisation de la réflexion pour accéder à l'attribut
                         Field champ = reservationlog.class.getDeclaredField(nomAttribut);
                         champ.setAccessible(true);
                         Object valeurChamp = champ.get(reservation);
 
-                        // Comparaison selon le type de l'attribut
                         if (valeurChamp == null) {
                             return valeur == null;
                         }
@@ -100,6 +106,37 @@ public class Servicereservationlog implements IService<reservationlog> {
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<reservationlog> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException {
+        List<reservationlog> reservations = new ArrayList<>();
+
+        // Validation des attributs pour éviter les injections SQL
+        List<String> attributsAutorises = List.of("date_debut", "date_fin", "montant",
+                "status", "modalites", "date_reservation");
+
+        if (!attributsAutorises.contains(attribut)) {
+            throw new IllegalArgumentException("Attribut de tri non valide : " + attribut);
+        }
+
+        String ordre = ordreCroissant ? "ASC" : "DESC";
+        String sql = "SELECT * FROM `reservationlog` ORDER BY `" + attribut + "` " + ordre;
+
+        Statement st = connection.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            reservationlog rl = new reservationlog();
+            rl.setId(rs.getInt("idreslog"));
+            rl.setId_l(rs.getInt("idlog"));
+            rl.setIdc(rs.getInt("idc"));
+            rl.setDate_debut(rs.getTimestamp("date_debut"));
+            rl.setDate_fin(rs.getTimestamp("date_fin"));
+            rl.setMontant(rs.getFloat("montant"));
+            rl.setStatus(Status.valueOf(rs.getString("status")));  // Fixed: Convert String to Status enum
+            rl.setModalite(rs.getString("modalites"));
+            reservations.add(rl);        }
+        return reservations;
     }
 
 

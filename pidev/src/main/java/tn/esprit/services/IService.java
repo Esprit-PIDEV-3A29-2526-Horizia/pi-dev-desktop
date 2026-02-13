@@ -14,4 +14,5 @@ public interface IService <T>{
     void supprimer (int id)throws SQLException;
     List<T> afficher()throws SQLException;
     List<T> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException;
+    List<T> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException;
 }

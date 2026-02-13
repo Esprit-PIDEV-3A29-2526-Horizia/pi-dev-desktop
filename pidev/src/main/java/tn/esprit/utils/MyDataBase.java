@@ -5,17 +5,18 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MyDataBase {
-    private final String URL= "jdbc:mysql://localhost:3306/horozia";
-    private final String USER= "root";
-    private final String PSW ="";
+    private final String URL = "jdbc:mysql://localhost:3306/horozia";
+    private final String USER = "root";
+    private final String PSW = "";
 
     private Connection myConnection;
 
     private static MyDataBase instance;
 
-    private MyDataBase(){
+    private MyDataBase() {
         try {
-            myConnection = DriverManager.getConnection(URL,USER,PSW);
+            myConnection = DriverManager.getConnection(URL, USER, PSW);
+            myConnection.setAutoCommit(true);  // Force l'auto-commit
             System.out.println("Connection établie!");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -27,9 +28,8 @@ public class MyDataBase {
     }
 
     public static MyDataBase getInstance() {
-        if(instance == null)
+        if (instance == null)
             instance = new MyDataBase();
         return instance;
     }
 }
-
