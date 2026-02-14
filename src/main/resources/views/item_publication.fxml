@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<HBox spacing="15" style="-fx-background-color:white; -fx-padding:15; -fx-background-radius:10;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+
+    <Region prefWidth="100" prefHeight="80" style="-fx-background-color:#E2E8F0;" />
+
+    <VBox spacing="5" HBox.hgrow="ALWAYS">
+        <Label fx:id="itemTitre" style="-fx-font-weight:bold; -fx-font-size:16;" />
+        <Label fx:id="itemDestination" />
+        <Label fx:id="itemDescription" wrapText="true"/>
+    </VBox>
+
+    <VBox spacing="10">
+        <Label fx:id="itemDate"/>
+        <HBox spacing="5">
+            <Button fx:id="btnEditItem" text="Modifier"/>
+            <Button fx:id="btnDeleteItem" text="Supprimer"/>
+        </HBox>
+    </VBox>
+
+</HBox>

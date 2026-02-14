@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.PublicationFormController"
+      spacing="10" style="-fx-padding: 10">
+    <TextField fx:id="tfTitre" promptText="Titre"/>
+    <TextField fx:id="tfDestination" promptText="Destination"/>
+    <TextArea fx:id="tfDescription" promptText="Description"/>
+    <DatePicker fx:id="dpDate"/>
+    <HBox spacing="10">
+        <Button fx:id="btnSave" text="Enregistrer" onAction="#handleSave"/>
+        <Button fx:id="btnCancel" text="Annuler" onAction="#handleCancel"/>
+    </HBox>
+</VBox>
