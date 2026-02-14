@@ -2,143 +2,153 @@ package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import tn.esprit.entities.logement; // Votre entité (minuscule)
-import tn.esprit.services.Servicelogement; // Votre service
+import tn.esprit.entities.logement; // Attention à la casse (Logement au lieu de logement)
+import tn.esprit.services.Servicelogement;
 
 import java.net.URL;
-import java.sql.SQLException; // Pour gérer les exceptions SQL
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class LogementsController implements Initializable {
 
     @FXML
     private FlowPane logementsFlowPane;
 
-    private Servicelogement servicelogement = new Servicelogement(); // Instance de votre service
+    @FXML
+    private TextField searchField;
+
+    @FXML
+    private Button addButton;
+
+    private Servicelogement servicelogement = new Servicelogement();
+    private List<logement> allLogements; // Pour conserver la liste complète
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
             loadLogements();
         } catch (SQLException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("ERROR");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
-            // Ici, vous pouvez afficher une alerte à l'utilisateur si la DB échoue
+            showAlert("Erreur", "Impossible de charger les logements : " + e.getMessage());
         }
+
+        // Écouteur de recherche
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterLogements(newValue));
+
+        // Action du bouton Ajouter
+        addButton.setOnAction(event -> {
+            // Ouvrir le formulaire d'ajout (à implémenter selon votre architecture)
+            System.out.println("Ouvrir formulaire d'ajout");
+            // Exemple : charger une nouvelle vue
+            // try {
+            //     Parent root = FXMLLoader.load(getClass().getResource("/ajoutLogement.fxml"));
+            //     Stage stage = (Stage) addButton.getScene().getWindow();
+            //     stage.setScene(new Scene(root));
+            // } catch (IOException e) {
+            //     e.printStackTrace();
+            // }
+        });
     }
 
     private void loadLogements() throws SQLException {
-        List<logement> logements = servicelogement.afficher(); // Récupère tous les logements via afficher()
+        allLogements = servicelogement.afficher(); // Récupère tous les logements
+        displayLogements(allLogements);
+    }
 
-        for (logement logement : logements) {
-            // Créer une carte pour chaque logement
-            VBox card = createLogementCard(logement);
+    private void displayLogements(List<logement> logements) {
+        logementsFlowPane.getChildren().clear();
+        for (logement Logement : logements) {
+            VBox card = createLogementCard(Logement);
             logementsFlowPane.getChildren().add(card);
         }
     }
 
-    private VBox createLogementCard(logement logement) {
+    private void filterLogements(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            displayLogements(allLogements);
+        } else {
+            List<logement> filtered = allLogements.stream()
+                    .filter(l -> l.getNom().toLowerCase().contains(keyword.toLowerCase())
+                            || l.getAdresse().toLowerCase().contains(keyword.toLowerCase()))
+                    .collect(Collectors.toList());
+            displayLogements(filtered);
+        }
+    }
+
+    private VBox createLogementCard(logement  logement) {
         VBox card = new VBox();
         card.setSpacing(10);
         card.setStyle("-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
         card.setPrefWidth(250);
 
-        // Image du logement
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(220);
-        imageView.setFitHeight(150);
-        imageView.setPreserveRatio(true);
-        try {
-            String imagePath = logement.getImage();
-            if (imagePath != null && !imagePath.isEmpty()) {
-                if (imagePath.startsWith("http") || imagePath.startsWith("https")) {
-                    // URL externe : Chargez directement
-                    imageView.setImage(new Image(imagePath));
-                } else {
-                    // Chemin relatif/local : Utilisez getResource (ex: "@image/logement1.jpg")
-                    imageView.setImage(new Image(getClass().getResource(imagePath).toExternalForm()));
-                }
-            } else {
-                // Image par défaut si null ou vide
-                imageView.setImage(new Image(getClass().getResource("@image/default.jpg").toExternalForm()));
-            }
-        } catch (Exception e) {
-            // Gestion d'erreur : Image par défaut en cas d'échec (ex: URL invalide, fichier manquant)
-            System.err.println("Erreur de chargement de l'image pour " + logement.getNom() + " : " + e.getMessage());
+        // Image du logement (uniquement si disponible et chargeable)
+        ImageView imageView = null;
+        String imagePath = logement.getImage();
+        if (imagePath != null && !imagePath.isEmpty()) {
             try {
-                imageView.setImage(new Image(getClass().getResource("@image/default.jpg").toExternalForm()));
-            } catch (Exception ex) {
-                // Si même l'image par défaut échoue, laissez vide ou affichez un placeholder
-                System.err.println("Image par défaut introuvable : " + ex.getMessage());
+                if (imagePath.startsWith("http") || imagePath.startsWith("https")) {
+                    // URL externe
+                    imageView = new ImageView(new Image(imagePath));
+                } else {
+                    // Chemin relatif/local (ressource)
+                    imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
+                }
+                imageView.setFitWidth(220);
+                imageView.setFitHeight(150);
+                imageView.setPreserveRatio(true);
+            } catch (Exception e) {
+                // Échec du chargement : on n'ajoute pas l'image
+                System.err.println("Erreur de chargement de l'image pour " + logement.getNom() + " : " + e.getMessage());
+                imageView = null;
             }
         }
 
-        // Label pour le nom
+        // Si l'image a pu être chargée, on l'ajoute à la carte
+        if (imageView != null) {
+            card.getChildren().add(imageView);
+        }
+
+        // Prix
+        Label prixLabel = new Label(logement.getTarif_nuit() + "DT/ nuit");
+        prixLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+
+        // Nom
         Label nomLabel = new Label(logement.getNom());
         nomLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
 
-        // Label pour l'adresse
-        Label adresseLabel = new Label("Adresse: " + logement.getAdresse());
-        adresseLabel.setStyle("-fx-font-size: 12; -fx-text-fill: gray;");
-        adresseLabel.setWrapText(true);
+        // Adresse
+        Label adresseLabel = new Label(logement.getAdresse());
+        adresseLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #7f8c8d;");
 
-        // Label pour la capacité
-        Label capaciteLabel = new Label("Capacité: " + logement.getCapacite() + " personnes");
-        capaciteLabel.setStyle("-fx-font-size: 12; -fx-text-fill: gray;");
-
-        // Label pour le tarif par nuit
-        Label tarifLabel = new Label("Tarif/nuit: " + logement.getTarif_nuit() + " €");
-        tarifLabel.setStyle("-fx-font-size: 14; -fx-text-fill: green;");
-
-        // Label pour la disponibilité
+        // Disponibilité
         Label dispoLabel = new Label(logement.isDisponibilite() ? "Disponible" : "Non disponible");
-        dispoLabel.setStyle("-fx-font-size: 12; -fx-text-fill: " + (logement.isDisponibilite() ? "green" : "red") + ";");
+        dispoLabel.setStyle("-fx-background-color: #81ae8d;-fx-font-size: 12; -fx-text-fill: white; -fx-background-radius: 4;");
 
-        // Bouton "Voir plus" (ou "Réserver")
-        Button voirPlusBtn = new Button("Voir plus");
-        voirPlusBtn.setStyle("-fx-background-color: #007BFF; -fx-text-fill: white; -fx-background-radius: 5;");
-        voirPlusBtn.setOnAction(e -> {
-            // Action pour voir les détails (ex: ouvrir une nouvelle fenêtre ou changer de vue)
-            System.out.println("Voir détails de " + logement.getNom());
-            // Ici, implémentez la navigation vers une vue de détails, ou ouvrez un popup avec plus d'infos
+
+        // Bouton Voir détails
+        Button detailsBtn = new Button("Voir détails");
+        detailsBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;");
+        detailsBtn.setMaxWidth(Double.MAX_VALUE);
+        detailsBtn.setOnAction(e -> {
+            System.out.println("Détails de : " + logement.getNom());
+            // Ouvrir une nouvelle fenêtre ou changer de vue
         });
 
-        // Optionnel : Boutons pour CRUD (Modifier/Supprimer)
-        Button modifierBtn = new Button("Modifier");
-        modifierBtn.setStyle("-fx-background-color: #FFC107; -fx-text-fill: black; -fx-background-radius: 5;");
-        modifierBtn.setOnAction(e -> {
-            // Ouvrir un formulaire de modification (vous devrez créer une nouvelle vue/fenêtre)
-            System.out.println("Modifier " + logement.getNom());
-        });
-
-        Button supprimerBtn = new Button("Supprimer");
-        supprimerBtn.setStyle("-fx-background-color: #DC3545; -fx-text-fill: white; -fx-background-radius: 5;");
-        supprimerBtn.setOnAction(e -> {
-            try {
-                servicelogement.supprimer(logement.getId());
-                // Rafraîchir la vue après suppression
-                logementsFlowPane.getChildren().clear();
-                loadLogements();
-            } catch (SQLException ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("ERROR");
-                alert.setContentText(ex.getMessage());
-                alert.showAndWait();                // Afficher une alerte d'erreur
-            }
-        });
-
-        card.getChildren().addAll(imageView, nomLabel, adresseLabel, capaciteLabel, tarifLabel, dispoLabel, voirPlusBtn, modifierBtn, supprimerBtn);
+        card.getChildren().addAll(prixLabel, nomLabel, adresseLabel, dispoLabel, detailsBtn);
         return card;
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
