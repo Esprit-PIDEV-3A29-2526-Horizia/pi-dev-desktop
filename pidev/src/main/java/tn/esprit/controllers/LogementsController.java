@@ -45,19 +45,8 @@ public class LogementsController implements Initializable {
         // Écouteur de recherche
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterLogements(newValue));
 
-        // Action du bouton Ajouter
-        addButton.setOnAction(event -> {
-            // Ouvrir le formulaire d'ajout (à implémenter selon votre architecture)
-            System.out.println("Ouvrir formulaire d'ajout");
-            // Exemple : charger une nouvelle vue
-            // try {
-            //     Parent root = FXMLLoader.load(getClass().getResource("/ajoutLogement.fxml"));
-            //     Stage stage = (Stage) addButton.getScene().getWindow();
-            //     stage.setScene(new Scene(root));
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-            // }
-        });
+        // Action du bouton Ajouter : charger la vue ajoutLogement dans le dashboard
+        addButton.setOnAction(event -> Dashboard.loadView("/ajoutLogement.fxml"));
     }
 
     private void loadLogements() throws SQLException {

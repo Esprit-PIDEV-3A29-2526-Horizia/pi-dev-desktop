@@ -13,36 +13,46 @@ public class Dashboard {
     @FXML
     private StackPane contentPane;
 
-    // Méthode existante pour les logements
+    private static StackPane staticContentPane;
 
-    public void showlogement(ActionEvent event) {
+    @FXML
+    public void initialize() {
+        // Initialiser la référence statique pour permettre le chargement depuis d'autres contrôleurs
+        staticContentPane = contentPane;
+
+        // Ne charger aucune vue par défaut : contentPane reste vide au démarrage
+        // L'utilisateur devra cliquer sur un bouton pour charger une vue
+    }
+
+    // Méthode statique pour charger les vues depuis d'autres contrôleurs
+    public static void loadView(String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Logements.fxml")); // Chemin vers votre FXML
-            Parent logementsView = loader.load();
-            contentPane.getChildren().clear();
-            contentPane.getChildren().add(logementsView);
+            Parent view = FXMLLoader.load(Dashboard.class.getResource(fxmlPath));
+            staticContentPane.getChildren().clear();
+            staticContentPane.getChildren().add(view);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Ajoutez ces deux méthodes
+    @FXML
+    private void showDashboard() {
+        // Charger une vue d'aperçu dashboard (par défaut, charger Logements si aucune vue spécifique n'existe)
+        loadView("/Logements.fxml"); // Ou créez /DashboardContent.fxml pour un aperçu personnalisé
+    }
+
     @FXML
     private void showVoyages() {
-        // À implémenter plus tard
-        System.out.println("Voyages cliqué");
-        // Exemple : contentPane.getChildren().setAll(charger vue voyages);
+        loadView("/Voyages.fxml"); // Assurez-vous que ce fichier existe sans sidebar
     }
 
     @FXML
     private void showReservations() {
-        // À implémenter plus tard
-        System.out.println("Réservations cliqué");
+        loadView("/Reservations.fxml"); // Assurez-vous que ce fichier existe sans sidebar
     }
 
-    // Si vous avez aussi showDashboard, ajoutez-la
     @FXML
-    private void showDashboard() {
-        // À implémenter
+    private void showlogement(ActionEvent event) {
+        loadView("/Logements.fxml");
     }
 }

@@ -100,7 +100,32 @@ public class Servicelogement implements IService<logement> {
         return -1;
     }
 
-
+    // Nouvelle méthode pour rechercher dans la base de données (optimisée)
+    public List<logement> rechercher(String keyword) throws SQLException {
+        List<logement> logements = new ArrayList<>();
+        String sql = "SELECT * FROM `logement` WHERE `nom` LIKE ? OR `adresse` LIKE ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            String likeKeyword = "%" + keyword + "%";
+            ps.setString(1, likeKeyword);
+            ps.setString(2, likeKeyword);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    logement l = new logement();
+                    l.setId(rs.getInt("id"));
+                    l.setType(rs.getString("type"));
+                    l.setNom(rs.getString("nom"));
+                    l.setImage(rs.getString("image"));
+                    l.setAdresse(rs.getString("adresse"));
+                    l.setCapacite(rs.getInt("capacite"));
+                    l.setEquipement(rs.getString("equipement"));
+                    l.setTarif_nuit(rs.getFloat("tarif_nuit"));
+                    l.setDisponibilite(rs.getBoolean("disponibilite"));
+                    logements.add(l);
+                }
+            }
+        }
+        return logements;
+    }
 
     @Override
     public List<logement> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException {
@@ -125,6 +150,13 @@ public class Servicelogement implements IService<logement> {
                             Boolean boolValue = (Boolean) valeurChamp;
                             String stringValue = (String) valeurRecherchee;
                             return boolValue.toString().equalsIgnoreCase(stringValue);
+                        }
+
+                        // Gestion spéciale pour les chaînes de caractères : recherche partielle et insensible à la casse
+                        if (valeurChamp instanceof String && valeurRecherchee instanceof String) {
+                            String stringValue = (String) valeurChamp;
+                            String searchValue = (String) valeurRecherchee;
+                            return stringValue.toLowerCase().contains(searchValue.toLowerCase());
                         }
 
                         // Comparaison par défaut
