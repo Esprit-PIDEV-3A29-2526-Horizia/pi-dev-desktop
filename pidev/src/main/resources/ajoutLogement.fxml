@@ -8,6 +8,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.input.MouseEvent?>
 
 <VBox prefHeight="700.0" prefWidth="900.0" spacing="0" style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AjoutLogementController">
 
@@ -93,20 +95,38 @@
 
                     <VBox spacing="8" GridPane.columnIndex="0">
                         <Label text="Capacité" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
-                        <Spinner fx:id="capaciteSpinner" maxWidth="Infinity" prefHeight="45" style="-fx-background-radius: 8;" />
+                        <Spinner fx:id="capaciteSpinner" maxWidth="Infinity" prefHeight="45" style="-fx-background-radius: 8;" initialValue="1" min="1" max="20" editable="true" />
                     </VBox>
 
                     <VBox spacing="8" GridPane.columnIndex="1">
                         <Label text="Tarif (DT / Nuit)" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
                         <HBox spacing="5" alignment="CENTER_LEFT">
-                            <TextField fx:id="tarifField" prefHeight="45" HBox.hgrow="ALWAYS" style="-fx-border-radius: 8; -fx-background-color: #f8f9fa;" />
+                            <TextField fx:id="tarifField" prefHeight="45" HBox.hgrow="ALWAYS" promptText="0.0" style="-fx-border-radius: 8; -fx-background-color: #f8f9fa;" />
                             <Button fx:id="tarifMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="18" fitWidth="18"><Image url="@image/micro.png"/></ImageView></graphic></Button>
                         </HBox>
                     </VBox>
 
-                    <VBox spacing="8" alignment="CENTER" GridPane.columnIndex="2">
+                    <!-- SWITCH PERSONNALISÉ - TAILLE RÉDUITE -->
+                    <VBox spacing="6" alignment="CENTER" GridPane.columnIndex="2">
                         <Label text="Disponibilité Immédiate" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
-                        <CheckBox fx:id="disponibiliteCheckBox" selected="true" text="Disponible" style="-fx-font-size: 14;" />
+
+                        <!-- Label d'état -->
+                        <Label fx:id="disponibiliteLabel" text="Non disponible" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #e74c3c;" />
+
+                        <!-- Switch personnalisé - TAILLE 50x26 au lieu de 60x30 -->
+                        <StackPane fx:id="switchContainer" onMouseClicked="#handleSwitchClick" style="-fx-cursor: hand;">
+                            <!-- Fond du switch : 50px largeur, 26px hauteur -->
+                            <HBox fx:id="switchBackground" prefWidth="50" prefHeight="26" maxWidth="50" maxHeight="26" minWidth="50" minHeight="26"
+                                  style="-fx-background-color: #e74c3c; -fx-background-radius: 13; -fx-padding: 2;"
+                                  alignment="CENTER_LEFT">
+                                <!-- Cercle blanc : radius 10 au lieu de 13 -->
+                                <Circle fx:id="switchCircle" radius="10" fill="white"
+                                        style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 3, 0, 0, 1);"/>
+                            </HBox>
+                        </StackPane>
+
+                        <!-- ToggleButton caché pour stocker l'état -->
+                        <ToggleButton fx:id="disponibiliteToggle" visible="false" managed="false" selected="false"/>
                     </VBox>
                 </GridPane>
             </VBox>

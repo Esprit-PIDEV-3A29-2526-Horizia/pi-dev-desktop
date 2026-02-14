@@ -1,20 +1,22 @@
 package tn.esprit.controllers;
 
 import javafx.animation.RotateTransition;
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.esprit.entities.logement;
 import tn.esprit.services.Servicelogement;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.SQLException;
 
 public class AjoutLogementController {
@@ -23,53 +25,147 @@ public class AjoutLogementController {
     private ComboBox<String> typeComboBox;
 
     @FXML
-    private TextField nomField, imageField, adresseField, equipementField, tarifField;
+    private TextField nomField;
+
+    @FXML
+    private TextField imageField;
+
+    @FXML
+    private TextField adresseField;
+
+    @FXML
+    private TextField equipementField;
+
+    @FXML
+    private TextField tarifField;
 
     @FXML
     private Spinner<Integer> capaciteSpinner;
 
     @FXML
-    private CheckBox disponibiliteCheckBox;
+    private ToggleButton disponibiliteToggle;
 
     @FXML
-    private Button ajouterBtn, annulerBtn, nomMicroBtn, imageMicroBtn, adresseMicroBtn, equipementMicroBtn, tarifMicroBtn; // Ajout de tarifMicroBtn
+    private Label disponibiliteLabel;
+
+    @FXML
+    private HBox switchBackground;
+
+    @FXML
+    private Circle switchCircle;
+
+    @FXML
+    private Button ajouterBtn;
+
+    @FXML
+    private Button annulerBtn;
+
+    @FXML
+    private Button nomMicroBtn;
+
+    @FXML
+    private Button imageMicroBtn;
+
+    @FXML
+    private Button adresseMicroBtn;
+
+    @FXML
+    private Button equipementMicroBtn;
+
+    @FXML
+    private Button tarifMicroBtn;
 
     private Servicelogement servicelogement = new Servicelogement();
 
+    // CONSTANTES AJUSTÉES pour switch 50x26
+    private static final double CIRCLE_TRANSLATE_OFF = 0;
+    private static final double CIRCLE_TRANSLATE_ON = 24; // 50 - (2*padding) - (2*radius) = 50 - 4 - 20 = 26, mais 24 pour centrer
+    private static final String COLOR_OFF = "#e74c3c";
+    private static final String COLOR_ON = "#2ecc71";
+
+    public AjoutLogementController() {
+    }
+
     @FXML
     public void initialize() {
-        // Initialiser les actions des boutons micro
         nomMicroBtn.setOnAction(e -> handleMicro(nomField, nomMicroBtn));
         imageMicroBtn.setOnAction(e -> handleMicro(imageField, imageMicroBtn));
         adresseMicroBtn.setOnAction(e -> handleMicro(adresseField, adresseMicroBtn));
         equipementMicroBtn.setOnAction(e -> handleMicro(equipementField, equipementMicroBtn));
-        tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn)); // Ajout pour tarif
+        tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn));
 
-        // Action pour ajouter
         ajouterBtn.setOnAction(e -> ajouterLogement());
-
-        // Action pour annuler (retour à la liste via Dashboard)
         annulerBtn.setOnAction(e -> retourListe());
+
+        initialiserSwitch();
+    }
+
+    private void initialiserSwitch() {
+        mettreAJourSwitchUI();
+    }
+
+    @FXML
+    private void handleSwitchClick(MouseEvent event) {
+        boolean nouveauEtat = !disponibiliteToggle.isSelected();
+        disponibiliteToggle.setSelected(nouveauEtat);
+        animerSwitch(nouveauEtat);
+        mettreAJourLabelDisponibilite(nouveauEtat);
+    }
+
+    private void animerSwitch(boolean actif) {
+        double targetTranslate = actif ? CIRCLE_TRANSLATE_ON : CIRCLE_TRANSLATE_OFF;
+        String targetColor = actif ? COLOR_ON : COLOR_OFF;
+
+        TranslateTransition translate = new TranslateTransition(Duration.millis(200), switchCircle);
+        translate.setToX(targetTranslate);
+        translate.play();
+
+        switchBackground.setStyle(
+                "-fx-background-color: " + targetColor + "; " +
+                        "-fx-background-radius: 13; " +
+                        "-fx-padding: 2;"
+        );
+    }
+
+    private void mettreAJourSwitchUI() {
+        boolean estDisponible = disponibiliteToggle.isSelected();
+        double translateX = estDisponible ? CIRCLE_TRANSLATE_ON : CIRCLE_TRANSLATE_OFF;
+        String color = estDisponible ? COLOR_ON : COLOR_OFF;
+
+        switchCircle.setTranslateX(translateX);
+        switchBackground.setStyle(
+                "-fx-background-color: " + color + "; " +
+                        "-fx-background-radius: 13; " +
+                        "-fx-padding: 2;"
+        );
+
+        mettreAJourLabelDisponibilite(estDisponible);
+    }
+
+    private void mettreAJourLabelDisponibilite(boolean estDisponible) {
+        if (estDisponible) {
+            disponibiliteLabel.setText("Disponible");
+            disponibiliteLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #2ecc71;");
+        } else {
+            disponibiliteLabel.setText("Non disponible");
+            disponibiliteLabel.setStyle("-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #e74c3c;");
+        }
     }
 
     private void handleMicro(TextField field, Button microBtn) {
-        // Animation : rotation du bouton micro pendant l'enregistrement
         RotateTransition rotate = new RotateTransition(Duration.seconds(2), microBtn);
         rotate.setByAngle(360);
         rotate.setCycleCount(RotateTransition.INDEFINITE);
         rotate.play();
 
-        // Simuler l'enregistrement vocal (remplacer par une vraie implémentation speech-to-text)
-        // Ici, on suppose une bibliothèque comme CMU Sphinx ou une API (e.g., Google Speech API)
-        // Pour cet exemple, on simule avec un délai et un texte fictif
         new Thread(() -> {
             try {
-                Thread.sleep(3000); // Simuler 3 secondes d'enregistrement
-                String recognizedText = "Texte reconnu depuis la voix"; // Remplacer par le vrai texte reconnu
+                Thread.sleep(3000);
+                String recognizedText = "Texte reconnu depuis la voix";
                 javafx.application.Platform.runLater(() -> {
-                    field.setText(recognizedText.toUpperCase()); // Convertir en majuscules
-                    rotate.stop(); // Arrêter l'animation
-                    microBtn.setRotate(0); // Remettre à l'état initial
+                    field.setText(recognizedText.toUpperCase());
+                    rotate.stop();
+                    microBtn.setRotate(0);
                 });
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
@@ -78,15 +174,12 @@ public class AjoutLogementController {
     }
 
     private void ajouterLogement() {
-        // Validation des champs
         StringBuilder erreurs = new StringBuilder();
 
-        // Type : obligatoire
         if (typeComboBox.getValue() == null || typeComboBox.getValue().trim().isEmpty()) {
             erreurs.append("- Sélectionnez un type de logement.\n");
         }
 
-        // Nom : obligatoire, non vide, max 255 caractères
         String nom = nomField.getText().trim();
         if (nom.isEmpty()) {
             erreurs.append("- Le nom est obligatoire.\n");
@@ -94,15 +187,6 @@ public class AjoutLogementController {
             erreurs.append("- Le nom ne doit pas dépasser 255 caractères.\n");
         }
 
-        // Image : obligatoire, non vide, vérifier validité
-        String image = imageField.getText().trim();
-        if (image.isEmpty()) {
-            erreurs.append("- L'image est obligatoire.\n");
-        } else if (!isValidImagePath(image)) {
-            erreurs.append("- L'URL ou le chemin de l'image n'est pas valide.\n");
-        }
-
-        // Adresse : obligatoire, non vide, max 255 caractères
         String adresse = adresseField.getText().trim();
         if (adresse.isEmpty()) {
             erreurs.append("- L'adresse est obligatoire.\n");
@@ -110,15 +194,16 @@ public class AjoutLogementController {
             erreurs.append("- L'adresse ne doit pas dépasser 255 caractères.\n");
         }
 
-        // Capacité : déjà contrôlée par le Spinner (min 1, max 20)
+        int capacite = capaciteSpinner.getValue();
+        if (capacite < 1 || capacite > 20) {
+            erreurs.append("- La capacité doit être entre 1 et 20.\n");
+        }
 
-        // Équipement : optionnel, max 255 caractères
         String equipement = equipementField.getText().trim();
         if (equipement.length() > 255) {
             erreurs.append("- Les équipements ne doivent pas dépasser 255 caractères.\n");
         }
 
-        // Tarif : obligatoire, nombre flottant positif
         String tarifStr = tarifField.getText().trim();
         float tarif = 0;
         if (tarifStr.isEmpty()) {
@@ -134,57 +219,39 @@ public class AjoutLogementController {
             }
         }
 
-        // Si erreurs, afficher et arrêter
         if (erreurs.length() > 0) {
-            showAlert("Erreurs de validation", erreurs.toString());
+            showAlert(Alert.AlertType.ERROR, "Erreurs de validation", erreurs.toString());
             return;
         }
 
         try {
-            // Créer l'objet logement (convertir les chaînes en majuscules)
             logement l = new logement();
             l.setType(typeComboBox.getValue());
             l.setNom(nom.toUpperCase());
-            l.setImage(image);
+            l.setImage(imageField.getText().trim());
             l.setAdresse(adresse.toUpperCase());
-            l.setCapacite(capaciteSpinner.getValue());
+            l.setCapacite(capacite);
             l.setEquipement(equipement.toUpperCase());
             l.setTarif_nuit(tarif);
-            l.setDisponibilite(disponibiliteCheckBox.isSelected());
+            l.setDisponibilite(disponibiliteToggle.isSelected());
 
-            // Ajouter via service (déjà implémenté)
             servicelogement.ajouter(l);
 
-            showAlert("Succès", "Logement ajouté avec succès !");
-            retourListe(); // Retour à la liste après ajout
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Logement ajouté avec succès !");
+            retourListe();
         } catch (SQLException e) {
-            showAlert("Erreur", "Erreur lors de l'ajout : " + e.getMessage());
-        }
-    }
-
-    // Méthode utilitaire pour valider le chemin/URL de l'image
-    private boolean isValidImagePath(String path) {
-        if (path.startsWith("http://") || path.startsWith("https://")) {
-            try {
-                new URL(path);
-                return true;
-            } catch (MalformedURLException e) {
-                return false;
-            }
-        } else {
-            // Pour les chemins locaux, on peut vérifier l'extension (simple check)
-            return path.toLowerCase().endsWith(".jpg") || path.toLowerCase().endsWith(".png") || path.toLowerCase().endsWith(".jpeg") || path.toLowerCase().endsWith(".gif");
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'ajout : " + e.getMessage());
         }
     }
 
     private void retourListe() {
-        // Charger la vue Logements dans le dashboard
         Dashboard.loadView("/Logements.fxml");
     }
 
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }
