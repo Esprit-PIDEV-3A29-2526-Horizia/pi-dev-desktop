@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.ProfilListController">
+
+    <VBox layoutX="20.0" layoutY="20.0" spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
+
+        <!-- En-tête avec titre et bouton ajouter -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <children>
+                <Label text="Gestion des Profils" textFill="#111827">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnAdd" onAction="#handleAddProfil" style="-fx-background-color: #10B981; -fx-background-radius: 10; -fx-padding: 10 20;" text="+ Nouveau Profil" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+
+        <!-- Barre de recherche -->
+        <HBox spacing="10.0">
+            <children>
+                <TextField fx:id="searchField" promptText="Rechercher par type ou statut..." HBox.hgrow="ALWAYS" style="-fx-background-radius: 10; -fx-padding: 10;">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </TextField>
+                <Button onAction="#handleSearch" style="-fx-background-color: #3B82F6; -fx-background-radius: 10; -fx-padding: 10 20;" text="Rechercher" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button onAction="#refreshList" style="-fx-background-color: #6B7280; -fx-background-radius: 10; -fx-padding: 10 20;" text="↻" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+
+        <!-- Tableau des profils -->
+        <TableView fx:id="tableProfils" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10;">
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="80" text="ID" />
+                <TableColumn fx:id="colType" prefWidth="200" text="Type" />
+                <TableColumn fx:id="colStatut" prefWidth="200" text="Statut" />
+                <TableColumn fx:id="colNbUsers" prefWidth="200" text="Nombre de membres" />
+                <TableColumn fx:id="colActions" prefWidth="200" text="Actions" />
+            </columns>
+        </TableView>
+
+        <!-- Statistiques -->
+        <HBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+            <children>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalProfilsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Total profils" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalAdminsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Administrateurs" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalAgentsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Agents" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalClientsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Clients" />
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- Message -->
+        <Label fx:id="lblMessage" style="-fx-font-size: 14;" />
+    </VBox>
+
+</AnchorPane>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.MemberListController"
+            prefWidth="1300" prefHeight="700"
+            style="-fx-background-color:#F6F7FB;">
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox spacing="18" style="-fx-background-color:#111827;" prefWidth="260">
+            <padding>
+                <Insets top="22" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <!-- Logo -->
+            <ImageView fitWidth="200" fitHeight="60" preserveRatio="true">
+                <image>
+                    <Image url="@../images/logo.png"/>
+                </image>
+            </ImageView>
+
+            <!-- Menu Items -->
+            <VBox spacing="5">
+                <Button text="Dashboard" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Voyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Réservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Utilisateurs" style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-alignment:center-left; -fx-pref-width:220;"/>
+            </VBox>
+
+            <Separator style="-fx-background-color:#374151;" />
+
+            <!-- Statistiques rapides -->
+            <VBox spacing="10">
+                <Label text="STATISTIQUES" style="-fx-text-fill:#9CA3AF; -fx-font-size:11px; -fx-font-weight:bold;" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="👥" style="-fx-font-size:16px;" />
+                    <Label text="Total:" style="-fx-text-fill:#E5E7EB; -fx-font-size:12px;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label fx:id="totalMembresLabel" text="0" style="-fx-text-fill:#10B981; -fx-font-weight:bold;" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <VBox spacing="20" style="-fx-background-color:#F6F7FB;">
+            <padding>
+                <Insets top="20" right="25" bottom="20" left="25"/>
+            </padding>
+
+            <!-- Header avec titre et bouton ajouter -->
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Gestion des Membres" style="-fx-font-size:24px; -fx-font-weight:bold; -fx-text-fill:#111827;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="+ Nouveau Membre" onAction="#openAddForm"
+                        style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:10 20; -fx-background-radius:5;"/>
+            </HBox>
+
+            <!-- Barre de recherche -->
+            <HBox spacing="10">
+                <TextField fx:id="searchField" promptText="Rechercher un membre..."
+                           style="-fx-background-color:white; -fx-padding:10; -fx-pref-width:400px; -fx-background-radius:5;"/>
+                <Button text="Rechercher" onAction="#searchMembers"
+                        style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-padding:10 20; -fx-background-radius:5;"/>
+            </HBox>
+
+            <!-- TableView avec colonnes d'action -->
+            <!-- TableView avec colonnes -->
+            <TableView fx:id="tableUsers" prefHeight="500" style="-fx-background-color:white; -fx-background-radius:10;">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                    <TableColumn fx:id="colNom" text="Nom" prefWidth="120"/>
+                    <TableColumn fx:id="colPrenom" text="Prénom" prefWidth="120"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
+                    <TableColumn fx:id="colTelephone" text="Téléphone" prefWidth="120"/>
+                    <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
+                    <TableColumn fx:id="colStatut" text="Statut" prefWidth="100"/>
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="150"/>
+                </columns>
+            </TableView>
+
+            <!-- Label message -->
+            <Label fx:id="lblMessage" style="-fx-text-fill:#10B981;" />
+        </VBox>
+    </center>
+</BorderPane>

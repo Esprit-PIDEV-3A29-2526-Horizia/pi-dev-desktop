@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.AddMemberController"
+            prefWidth="1300" prefHeight="700"
+            style="-fx-background-color:#F6F7FB;">
+
+    <!-- SIDEBAR (identique) -->
+    <left>
+        <VBox spacing="18" style="-fx-background-color:#111827;" prefWidth="260">
+            <padding>
+                <Insets top="22" right="18" bottom="18" left="18"/>
+            </padding>
+            <ImageView fitWidth="200" fitHeight="60" preserveRatio="true">
+                <image>
+                    <Image url="@../images/logo.png"/>
+                </image>
+            </ImageView>
+            <VBox spacing="5">
+                <Button text="Dashboard" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Voyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Réservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
+                <Button text="Utilisateurs" style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-alignment:center-left; -fx-pref-width:220;"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent;" hbarPolicy="NEVER">
+            <VBox spacing="25" style="-fx-background-color:#F6F7FB;">
+                <padding>
+                    <Insets top="20" right="25" bottom="20" left="25"/>
+                </padding>
+
+                <!-- Header avec titre et bouton retour -->
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="Ajouter un Membre" style="-fx-font-size:24px; -fx-font-weight:bold; -fx-text-fill:#111827;" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="← Retour à la liste" onAction="#goBack"
+                            style="-fx-background-color:#6B7280; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:10 20; -fx-background-radius:5;"/>
+                </HBox>
+
+                <!-- Formulaire -->
+                <VBox spacing="20" style="-fx-background-color:white; -fx-padding:30; -fx-background-radius:10;">
+
+                    <GridPane hgap="20" vgap="15">
+                        <!-- Ligne 1 -->
+                        <Label text="Nom *" style="-fx-font-weight:bold;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtNom" promptText="Entrez le nom" prefWidth="250" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="Prénom *" style="-fx-font-weight:bold;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                        <TextField fx:id="txtPrenom" promptText="Entrez le prénom" prefWidth="250" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                        <!-- Ligne 2 -->
+                        <Label text="Email *" style="-fx-font-weight:bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtEmail" promptText="exemple@email.com" prefWidth="250" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Mot de passe *" style="-fx-font-weight:bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                        <PasswordField fx:id="txtPassword" promptText="********" prefWidth="250" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                        <!-- Ligne 3 -->
+                        <Label text="Téléphone *" style="-fx-font-weight:bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <TextField fx:id="txtTelephone" promptText="+216 XX XXX XXX" prefWidth="250" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                        <Label text="Adresse *" style="-fx-font-weight:bold;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                        <TextField fx:id="txtAdresse" promptText="Adresse complète" prefWidth="250" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                        <!-- Ligne 4 -->
+                        <Label text="Type *" style="-fx-font-weight:bold;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                        <ComboBox fx:id="cbType" prefWidth="250" promptText="Sélectionner type" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                        <Label text="Statut *" style="-fx-font-weight:bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                        <ComboBox fx:id="cbStatut" prefWidth="250" promptText="Sélectionner statut" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+                    </GridPane>
+
+                    <!-- Champs obligatoires indication -->
+                    <Label text="* Champs obligatoires" style="-fx-text-fill:#6B7280; -fx-font-size:11px;"/>
+
+                    <!-- Séparateur -->
+                    <Separator/>
+
+                    <!-- Boutons -->
+                    <HBox spacing="15" alignment="CENTER">
+                        <Button text="Enregistrer" onAction="#saveMember"
+                                style="-fx-background-color:#10B981; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:12 30; -fx-background-radius:5;"/>
+                        <Button text="Réinitialiser" onAction="#resetForm"
+                                style="-fx-background-color:#6B7280; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:12 30; -fx-background-radius:5;"/>
+                    </HBox>
+
+                    <!-- Message -->
+                    <Label fx:id="lblMessage" style="-fx-text-fill:#10B981; -fx-alignment:CENTER;"/>
+                </VBox>
+
+                <!-- Aperçu des informations -->
+                <VBox spacing="10" style="-fx-background-color:#E5E7EB; -fx-padding:15; -fx-background-radius:10;">
+                    <Label text="ℹ️ Information" style="-fx-font-weight:bold;"/>
+                    <Label text="Les membres ajoutés apparaîtront dans la liste principale." style="-fx-text-fill:#4B5563;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
