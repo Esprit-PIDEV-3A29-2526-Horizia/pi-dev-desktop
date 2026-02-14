@@ -40,8 +40,17 @@
             <Button maxWidth="1.7976931348623157E308" onAction="#showVoyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="Voyages" />
 
             <Button maxWidth="1.7976931348623157E308" onAction="#showReservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="Réservations" />
-         <Button layoutX="28.0" layoutY="370.0" maxWidth="1.7976931348623157E308" onAction="#showlogement" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="Logements" />
-
+            <Button layoutX="28.0" layoutY="370.0"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#showlogement"
+                    style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;"
+                    text="Logements">
+                <graphic>
+                    <ImageView fitHeight="15" fitWidth="15" preserveRatio="true">
+                        <Image url="@image/log.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
             <Region VBox.vgrow="ALWAYS" />
 
             <!-- Footer -->

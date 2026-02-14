@@ -32,7 +32,7 @@ public class AjoutLogementController {
     private CheckBox disponibiliteCheckBox;
 
     @FXML
-    private Button ajouterBtn, annulerBtn, nomMicroBtn, imageMicroBtn, adresseMicroBtn, equipementMicroBtn;
+    private Button ajouterBtn, annulerBtn, nomMicroBtn, imageMicroBtn, adresseMicroBtn, equipementMicroBtn, tarifMicroBtn; // Ajout de tarifMicroBtn
 
     private Servicelogement servicelogement = new Servicelogement();
 
@@ -43,11 +43,12 @@ public class AjoutLogementController {
         imageMicroBtn.setOnAction(e -> handleMicro(imageField, imageMicroBtn));
         adresseMicroBtn.setOnAction(e -> handleMicro(adresseField, adresseMicroBtn));
         equipementMicroBtn.setOnAction(e -> handleMicro(equipementField, equipementMicroBtn));
+        tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn)); // Ajout pour tarif
 
         // Action pour ajouter
         ajouterBtn.setOnAction(e -> ajouterLogement());
 
-        // Action pour annuler (retour à la liste)
+        // Action pour annuler (retour à la liste via Dashboard)
         annulerBtn.setOnAction(e -> retourListe());
     }
 
@@ -177,14 +178,8 @@ public class AjoutLogementController {
     }
 
     private void retourListe() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/Logements.fxml"));
-            Stage stage = (Stage) ajouterBtn.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Liste des Logements");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Charger la vue Logements dans le dashboard
+        Dashboard.loadView("/Logements.fxml");
     }
 
     private void showAlert(String title, String content) {
