@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import java.io.IOException;
+import tn.esprit.entities.logement; // Ajoutez cette import pour l'entité logement
 
 public class Dashboard {
 
@@ -14,6 +15,7 @@ public class Dashboard {
     private StackPane contentPane;
 
     private static StackPane staticContentPane;
+    private static logement selectedLogement; // Variable statique pour stocker le logement sélectionné
 
     @FXML
     public void initialize() {
@@ -33,6 +35,16 @@ public class Dashboard {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Méthode pour définir le logement sélectionné
+    public static void setSelectedLogement(logement log) {
+        selectedLogement = log;
+    }
+
+    // Méthode pour récupérer le logement sélectionné
+    public static logement getSelectedLogement() {
+        return selectedLogement;
     }
 
     @FXML

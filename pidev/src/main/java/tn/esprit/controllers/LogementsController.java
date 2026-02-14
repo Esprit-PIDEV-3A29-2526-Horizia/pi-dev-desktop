@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class LogementsController implements Initializable {
 
@@ -32,12 +31,12 @@ public class LogementsController implements Initializable {
     private Button addButton;
 
     private Servicelogement servicelogement = new Servicelogement();
-    private List<logement> allLogements; // Pour conserver la liste complète
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            loadLogements();
+            // Charger et afficher tous les logements initialement en utilisant la méthode de recherche du service
+            displayLogements(servicelogement.rechercher(""));
         } catch (SQLException e) {
             showAlert("Erreur", "Impossible de charger les logements : " + e.getMessage());
         }
@@ -49,11 +48,6 @@ public class LogementsController implements Initializable {
         addButton.setOnAction(event -> Dashboard.loadView("/ajoutLogement.fxml"));
     }
 
-    private void loadLogements() throws SQLException {
-        allLogements = servicelogement.afficher(); // Récupère tous les logements
-        displayLogements(allLogements);
-    }
-
     private void displayLogements(List<logement> logements) {
         logementsFlowPane.getChildren().clear();
         for (logement Logement : logements) {
@@ -63,14 +57,12 @@ public class LogementsController implements Initializable {
     }
 
     private void filterLogements(String keyword) {
-        if (keyword == null || keyword.isEmpty()) {
-            displayLogements(allLogements);
-        } else {
-            List<logement> filtered = allLogements.stream()
-                    .filter(l -> l.getNom().toLowerCase().contains(keyword.toLowerCase())
-                            || l.getAdresse().toLowerCase().contains(keyword.toLowerCase()))
-                    .collect(Collectors.toList());
+        try {
+            // Utiliser la méthode rechercher du service pour filtrer via la base de données
+            List<logement> filtered = servicelogement.rechercher(keyword);
             displayLogements(filtered);
+        } catch (SQLException e) {
+            showAlert("Erreur", "Erreur lors de la recherche : " + e.getMessage());
         }
     }
 
@@ -140,8 +132,8 @@ public class LogementsController implements Initializable {
         detailsBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;");
         detailsBtn.setMaxWidth(Double.MAX_VALUE);
         detailsBtn.setOnAction(e -> {
-            System.out.println("Détails de : " + logement.getNom());
-            // Ouvrir une nouvelle fenêtre ou changer de vue
+            Dashboard.setSelectedLogement(logement);  // Définir le logement sélectionné
+            Dashboard.loadView("/DetailsLogement.fxml");  // Charger la vue des détails
         });
 
         card.getChildren().addAll(nomLabel, adresseLabel, dispoLabel, detailsBtn);
