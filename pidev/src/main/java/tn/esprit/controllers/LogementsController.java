@@ -2,10 +2,13 @@ package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import tn.esprit.entities.logement; // Attention à la casse (Logement au lieu de logement)
 import tn.esprit.services.Servicelogement;
@@ -82,55 +85,66 @@ public class LogementsController implements Initializable {
         }
     }
 
-    private VBox createLogementCard(logement  logement) {
+    private VBox createLogementCard(logement logement) {
         VBox card = new VBox();
         card.setSpacing(10);
         card.setStyle("-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
         card.setPrefWidth(250);
 
-        // Image du logement (uniquement si disponible et chargeable)
+        // === Conteneur pour l'image avec le prix superposé ===
+        var imageContainer = new StackPane();
+        imageContainer.setPrefSize(220, 150);
+        imageContainer.setStyle("-fx-background-color: #f0f0f0;"); // Fond gris si image absente
+
+        // Image
         ImageView imageView = null;
         String imagePath = logement.getImage();
         if (imagePath != null && !imagePath.isEmpty()) {
             try {
-                if (imagePath.startsWith("http") || imagePath.startsWith("https")) {
-                    // URL externe
+                if (imagePath.startsWith("http")) {
                     imageView = new ImageView(new Image(imagePath));
                 } else {
-                    // Chemin relatif/local (ressource)
                     imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
                 }
                 imageView.setFitWidth(220);
                 imageView.setFitHeight(150);
                 imageView.setPreserveRatio(true);
             } catch (Exception e) {
-                // Échec du chargement : on n'ajoute pas l'image
-                System.err.println("Erreur de chargement de l'image pour " + logement.getNom() + " : " + e.getMessage());
+                System.err.println("Erreur chargement image pour " + logement.getNom() + " : " + e.getMessage());
                 imageView = null;
             }
         }
 
-        // Si l'image a pu être chargée, on l'ajoute à la carte
         if (imageView != null) {
-            card.getChildren().add(imageView);
+            imageContainer.getChildren().add(imageView);
+        } else {
+            // Optionnel : ajouter un placeholder gris si pas d'image
+            Region placeholder = new Region();
+            placeholder.setStyle("-fx-background-color: #e0e0e0;");
+            placeholder.setPrefSize(220, 150);
+            imageContainer.getChildren().add(placeholder);
         }
 
-        // Prix
-        Label prixLabel = new Label(logement.getTarif_nuit() + "DT/ nuit");
-        prixLabel.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        // Prix superposé sur l'image
+        Label prixLabel = new Label(logement.getTarif_nuit() + " DT/nuit");
+        prixLabel.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: #E8B156; -fx-padding: 5; -fx-background-radius: 5;");
+        StackPane.setAlignment(prixLabel, Pos.BOTTOM_RIGHT); // Positionner en bas à droite
+        imageContainer.getChildren().add(prixLabel);
+
+        // Ajouter le conteneur d'image à la carte
+        card.getChildren().add(imageContainer);
 
         // Nom
         Label nomLabel = new Label(logement.getNom());
         nomLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
 
         // Adresse
-        Label adresseLabel = new Label(logement.getAdresse());
+        Label adresseLabel = new Label("📍" + logement.getAdresse());
         adresseLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #7f8c8d;");
 
         // Disponibilité
         Label dispoLabel = new Label(logement.isDisponibilite() ? "Disponible" : "Non disponible");
-        dispoLabel.setStyle("-fx-background-color: #81ae8d;-fx-font-size: 12; -fx-text-fill: white; -fx-background-radius: 4;");
-
+        dispoLabel.setStyle("-fx-background-color: #81ae8d; -fx-font-size: 12; -fx-text-fill: white; -fx-background-radius: 4;");
 
         // Bouton Voir détails
         Button detailsBtn = new Button("Voir détails");
@@ -141,7 +155,7 @@ public class LogementsController implements Initializable {
             // Ouvrir une nouvelle fenêtre ou changer de vue
         });
 
-        card.getChildren().addAll(prixLabel, nomLabel, adresseLabel, dispoLabel, detailsBtn);
+        card.getChildren().addAll(nomLabel, adresseLabel, dispoLabel, detailsBtn);
         return card;
     }
 
