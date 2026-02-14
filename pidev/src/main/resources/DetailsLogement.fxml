@@ -19,36 +19,45 @@
                 <font><Font size="16.0" /></font>
             </Label>
         </VBox>
-        <Label fx:id="dispoBadge" text="Statut" style="-fx-background-color: #6C757D; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;" />
+        <!-- Badge "Disponible" avec fond vert -->
+        <Label fx:id="dispoBadge" text="Disponible" style="-fx-background-color: #28A745; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;" />
     </HBox>
 
     <!-- Barre d'actions -->
     <HBox spacing="15" style="-fx-padding: 20 40; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
         <Button onAction="#retourListe" style="-fx-background-color: #6C757D; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold;" text="⬅ Retour à la liste" />
         <Region HBox.hgrow="ALWAYS" />
-        <Button fx:id="modifierBtn" onAction="#modifierLogement" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold;">
-            <HBox spacing="5" alignment="CENTER">
-                <ImageView fitWidth="16" fitHeight="16">
-                    <image>
-                        <Image url="@/image/mod.png" />
-                    </image>
-                </ImageView>
-                <Label text="Modifier" style="-fx-text-fill: white; -fx-font-weight: bold;" />
-            </HBox>
+
+        <!-- Bouton Modifier avec icône et texte -->
+        <Button fx:id="modifierBtn" onAction="#modifierLogement" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-content-display: graphic-only;">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <image>
+                            <Image url="@image/mod.png" />
+                        </image>
+                    </ImageView>
+                    <Label text="Modifier" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
+                </HBox>
+            </graphic>
         </Button>
-        <Button fx:id="supprimerBtn" onAction="#supprimerLogement" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold;">
-            <HBox spacing="5" alignment="CENTER">
-                <ImageView fitWidth="16" fitHeight="16">
-                    <image>
-                        <Image url="@/image/supp.png" />
-                    </image>
-                </ImageView>
-                <Label text="Supprimer" style="-fx-text-fill: white; -fx-font-weight: bold;" />
-            </HBox>
+
+        <!-- Bouton Supprimer avec icône et texte -->
+        <Button fx:id="supprimerBtn" onAction="#supprimerLogement" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-content-display: graphic-only;">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <image>
+                            <Image url="@image/supp.png" />
+                        </image>
+                    </ImageView>
+                    <Label text="Supprimer" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
+                </HBox>
+            </graphic>
         </Button>
     </HBox>
 
-    <!-- Contenu scrollable -->
+    <!-- Contenu scrollable (inchangé) -->
     <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
         <VBox spacing="25" style="-fx-padding: 30 40;">
 

@@ -100,9 +100,8 @@ public class DetailsLogementController implements Initializable {
 
     @FXML
     private void modifierLogement() {
-        // Pour l'instant, afficher une alerte. Vous pouvez étendre pour charger une vue de modification.
-        showAlert("Modifier", "Fonctionnalité de modification à implémenter.");
-        // Exemple d'extension : Dashboard.setSelectedLogement(selectedLogement); Dashboard.loadView("/modifierLogement.fxml");
+        // Charger la vue de modification
+        Dashboard.loadView("/modifierLogement.fxml");
     }
 
     @FXML
