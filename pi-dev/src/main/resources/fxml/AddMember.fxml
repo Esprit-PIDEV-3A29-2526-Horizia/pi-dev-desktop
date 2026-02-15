@@ -3,17 +3,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/20.0.2"
+<BorderPane xmlns="http://javafx.com/javafx/20.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.AddMemberController"
-            prefWidth="1100" prefHeight="700"
+            prefWidth="1300" prefHeight="700"
             style="-fx-background-color:#F6F7FB;">
 
-    <children>
-        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent;"
-                    hbarPolicy="NEVER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-                    AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color:transparent;" hbarPolicy="NEVER">
             <VBox spacing="25" style="-fx-background-color:#F6F7FB;">
                 <padding>
                     <Insets top="20" right="25" bottom="20" left="25"/>
@@ -85,5 +87,5 @@
                 </VBox>
             </VBox>
         </ScrollPane>
-    </children>
-</AnchorPane>
+    </center>
+</BorderPane>

@@ -27,14 +27,12 @@ public class AddMemberController {
     private ServiceProfil profilService = new ServiceProfil();
     private AdminDashboardController dashboardController;
 
-    // Stocker tous les profils pour référence
     private List<Profil> allProfils;
 
     @FXML
     public void initialize() {
         chargerProfils();
 
-        // Listener pour mettre à jour les statuts quand le type change
         cbType.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 mettreAJourStatuts(newVal);
@@ -44,10 +42,8 @@ public class AddMemberController {
 
     private void chargerProfils() {
         try {
-            // Charger tous les profils
             allProfils = profilService.afficher();
 
-            // Extraire les types uniques
             List<String> types = allProfils.stream()
                     .map(Profil::getType)
                     .distinct()
@@ -62,50 +58,14 @@ public class AddMemberController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showMessage("❌ Erreur de chargement des profils: " + e.getMessage(), "error");
-        }
-    }
-    private User userToEdit; // Pour stocker l'utilisateur à modifier
-    private boolean isEditMode = false; // Pour savoir si on est en mode édition
-
-    // ... votre code existant ...
-
-    /**
-     * Méthode appelée quand on veut modifier un utilisateur existant
-     */
-    public void setUserToEdit(User user) {
-        this.userToEdit = user;
-        this.isEditMode = (user != null);
-
-        if (isEditMode) {
-            // Remplir le formulaire avec les données de l'utilisateur
-            remplirFormulaire(user);
-
-            // Changer le titre et le bouton
-            // (si vous avez un Label pour le titre)
-            // lblTitre.setText("Modifier un Membre");
-        }
-    }
-    private void remplirFormulaire(User user) {
-        txtNom.setText(user.getNom());
-        txtPrenom.setText(user.getPrenom());
-        txtEmail.setText(user.getEmail());
-        txtPassword.setText(user.getPassword()); // Attention: en production, ne pas pré-remplir le mot de passe
-        txtTelephone.setText(user.getTelephone());
-        txtAdresse.setText(user.getAddresse());
-
-        if (user.getProfil() != null) {
-            cbType.setValue(user.getProfil().getType());
-            cbStatut.setValue(user.getProfil().getStatut());
+            showMessage("❌ Erreur de chargement des profils", "error");
         }
     }
 
     private void mettreAJourStatuts(String type) {
         try {
-            // Récupérer les profils du type sélectionné
             List<Profil> profilsDuType = profilService.rechercherParType(type);
 
-            // Extraire les statuts
             List<String> statuts = profilsDuType.stream()
                     .map(Profil::getStatut)
                     .collect(Collectors.toList());
@@ -128,17 +88,17 @@ public class AddMemberController {
 
     @FXML
     private void goBack() {
+        System.out.println("=== Retour à la liste (AddMember) ===");
         if (dashboardController != null) {
-            dashboardController.showUsers();
+            dashboardController.showUsers(); // Retourne à la liste des membres
         }
     }
 
     @FXML
     private void saveMember() {
-        // Validation des champs
+        // Validation
         if (txtNom.getText().isEmpty() || txtPrenom.getText().isEmpty() ||
-                txtEmail.getText().isEmpty() ||
-                (txtPassword.getText().isEmpty() && !isEditMode) || // Mot de passe requis seulement en ajout
+                txtEmail.getText().isEmpty() || txtPassword.getText().isEmpty() ||
                 cbType.getValue() == null || cbStatut.getValue() == null) {
             showMessage("❌ Veuillez remplir tous les champs obligatoires", "error");
             return;
@@ -153,38 +113,20 @@ public class AddMemberController {
                 return;
             }
 
-            if (isEditMode && userToEdit != null) {
-                // Mode ÉDITION
-                userToEdit.setNom(txtNom.getText().trim());
-                userToEdit.setPrenom(txtPrenom.getText().trim());
-                userToEdit.setEmail(txtEmail.getText().trim());
+            // Créer le nouvel utilisateur
+            User user = new User();
+            user.setNom(txtNom.getText().trim());
+            user.setPrenom(txtPrenom.getText().trim());
+            user.setEmail(txtEmail.getText().trim());
+            user.setPassword(txtPassword.getText());
+            user.setTelephone(txtTelephone.getText().trim());
+            user.setAddresse(txtAdresse.getText().trim());
+            user.setProfil(selectedProfil);
 
-                // Ne mettre à jour le mot de passe que s'il a été modifié
-                if (!txtPassword.getText().isEmpty()) {
-                    userToEdit.setPassword(txtPassword.getText());
-                }
+            // Ajouter à la base
+            userService.ajouter(user);
 
-                userToEdit.setTelephone(txtTelephone.getText().trim());
-                userToEdit.setAddresse(txtAdresse.getText().trim());
-                userToEdit.setProfil(selectedProfil);
-
-                userService.modifier(userToEdit);
-                showMessage("✅ Membre modifié avec succès!", "success");
-
-            } else {
-                // Mode AJOUT
-                User newUser = new User();
-                newUser.setNom(txtNom.getText().trim());
-                newUser.setPrenom(txtPrenom.getText().trim());
-                newUser.setEmail(txtEmail.getText().trim());
-                newUser.setPassword(txtPassword.getText());
-                newUser.setTelephone(txtTelephone.getText().trim());
-                newUser.setAddresse(txtAdresse.getText().trim());
-                newUser.setProfil(selectedProfil);
-
-                userService.ajouter(newUser);
-                showMessage("✅ Membre ajouté avec succès!", "success");
-            }
+            showMessage("✅ Membre ajouté avec succès!", "success");
 
             // Retour à la liste après un délai
             new Thread(() -> {
@@ -234,21 +176,9 @@ public class AddMemberController {
     private void showMessage(String message, String type) {
         lblMessage.setText(message);
         if (type.equals("error")) {
-            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 14px;");
+            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
         } else {
-            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold; -fx-font-size: 14px;");
+            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold;");
         }
-    }
-
-
-    @FXML
-    private Label lblTitre; // Ajoutez ce Label dans votre FXML si vous voulez changer le titre
-
-    // Optionnel: Ajouter cette méthode pour réinitialiser le mode
-    public void resetMode() {
-        this.isEditMode = false;
-        this.userToEdit = null;
-        resetForm();
-        // if (lblTitre != null) lblTitre.setText("Ajouter un Membre");
     }
 }

@@ -1,0 +1,133 @@
+/* dashboard.css */
+
+.dashboard-root {
+    -fx-background-color: #F6F7FB;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #111827;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E5E7EB;
+    -fx-alignment: center-left;
+    -fx-pref-width: 220;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #1F2937;
+    -fx-text-fill: white;
+}
+
+.sidebar-button.active {
+    -fx-background-color: #2a5298;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.sidebar-button.active:hover {
+    -fx-background-color: #1e3a6b;
+}
+
+/* Header */
+.header {
+    -fx-background-color: white;
+    -fx-padding: 15 25;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.welcome-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+/* Content Area */
+.content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 20;
+}
+
+/* Logout Button */
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.logout-button:hover {
+    -fx-underline: true;
+}/* dashboard.css */
+
+.dashboard-root {
+    -fx-background-color: #F6F7FB;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #111827;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E5E7EB;
+    -fx-alignment: center-left;
+    -fx-pref-width: 220;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #1F2937;
+    -fx-text-fill: white;
+}
+
+.sidebar-button.active {
+    -fx-background-color: #2a5298;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.sidebar-button.active:hover {
+    -fx-background-color: #1e3a6b;
+}
+
+/* Header */
+.header {
+    -fx-background-color: white;
+    -fx-padding: 15 25;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.welcome-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+/* Content Area */
+.content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 20;
+}
+
+/* Logout Button */
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EF4444;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.logout-button:hover {
+    -fx-underline: true;
+}

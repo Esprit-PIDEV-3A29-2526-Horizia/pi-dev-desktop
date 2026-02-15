@@ -27,7 +27,18 @@ public class AdminDashboardController {
 
     @FXML
     public void initialize() {
-        // Charger la vue par défaut
+        System.out.println("=== Initialisation AdminDashboardController ===");
+        System.out.println("lblWelcome = " + lblWelcome);
+        System.out.println("contentArea = " + contentArea);
+        System.out.println("btnDashboard = " + btnDashboard);
+
+        if (lblWelcome == null) {
+            System.err.println("❌ lblWelcome est null! Vérifiez que:");
+            System.err.println("   1. Le Label a fx:id='lblWelcome' dans le FXML");
+            System.err.println("   2. L'import de Label est présent");
+            System.err.println("   3. Le fichier FXML est correctement chargé");
+        }
+
         showDashboard();
     }
 
@@ -45,7 +56,7 @@ public class AdminDashboardController {
 
     @FXML
     void showUsers() {
-        // Charger la vue de gestion des membres
+        System.out.println("=== Chargement de la liste des membres ===");
         loadPage("/fxml/MemberList.fxml");
         setActiveButton(btnUsers);
     }

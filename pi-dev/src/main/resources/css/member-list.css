@@ -1,0 +1,114 @@
+/* member-list.css */
+
+.member-list-root {
+    -fx-background-color: #F6F7FB;
+}
+
+/* Header avec statistiques */
+.stats-header {
+    -fx-background-color: white;
+    -fx-padding: 15 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 2);
+}
+
+.stats-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6B7280;
+}
+
+.stats-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+/* Barre de recherche */
+.search-field {
+    -fx-background-color: white;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 20;
+    -fx-padding: 8 15;
+    -fx-pref-width: 300;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused {
+    -fx-border-color: #2a5298;
+}
+
+/* Badges pour les types */
+.type-badge-admin {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.type-badge-agent {
+    -fx-background-color: #F59E0B;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.type-badge-client {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Badges pour les statuts */
+.status-badge-actif {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-badge-bloque {
+    -fx-background-color: #EF4444;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-badge-inactif {
+    -fx-background-color: #6B7280;
+    -fx-text-fill: white;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* Bouton d'ajout */
+.add-button {
+    -fx-background-color: #10B981;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.add-button:hover {
+    -fx-background-color: #059669;
+}
+
+.add-button .ikonli {
+    -fx-icon-color: white;
+    -fx-icon-size: 16;
+}
