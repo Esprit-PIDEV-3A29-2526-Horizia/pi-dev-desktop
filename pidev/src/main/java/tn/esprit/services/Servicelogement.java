@@ -205,4 +205,11 @@ public class Servicelogement implements IService<logement> {
         }
         return logements;
     }
+    public logement rechercherParId(int id) throws SQLException {
+        List<logement> tousLesLogements = afficher();  // Récupère tous les logements
+        return tousLesLogements.stream()
+                .filter(log -> log.getId() == id)  // Filtre par ID
+                .findFirst()  // Retourne le premier (ou null si aucun)
+                .orElse(null);
+    }
 }
