@@ -15,9 +15,11 @@ import tn.esprit.services.Servicelogement;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class LogementsController implements Initializable {
 
@@ -30,13 +32,24 @@ public class LogementsController implements Initializable {
     @FXML
     private Button addButton;
 
+    @FXML
+    private ComboBox<String> sortComboBox;  // Ajouté pour le tri
+
     private Servicelogement servicelogement = new Servicelogement();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Configuration du ComboBox pour le tri
+        sortComboBox.getItems().addAll("Tarif croissant", "Tarif décroissant", "Disponible d'abord", "Non disponible d'abord");
+        sortComboBox.setValue("Tarif croissant");  // Valeur par défaut
+
+        // Ajouter un listener pour le tri
+        sortComboBox.valueProperty().addListener((observable, oldValue, newValue) -> filterLogements(searchField.getText()));
+
         try {
-            // Charger et afficher tous les logements initialement en utilisant la méthode de recherche du service
-            displayLogements(servicelogement.rechercher(""));
+            // Charger et afficher tous les logements initialement en utilisant la méthode de recherche du service, puis trier
+            List<logement> allLogements = servicelogement.rechercher("");
+            displayLogements(sortLogements(allLogements, sortComboBox.getValue()));
         } catch (SQLException e) {
             showAlert("Erreur", "Impossible de charger les logements : " + e.getMessage());
         }
@@ -60,9 +73,29 @@ public class LogementsController implements Initializable {
         try {
             // Utiliser la méthode rechercher du service pour filtrer via la base de données
             List<logement> filtered = servicelogement.rechercher(keyword);
+
+            // Appliquer le tri sur les résultats filtrés
+            filtered = sortLogements(filtered, sortComboBox.getValue());
+
             displayLogements(filtered);
         } catch (SQLException e) {
-            showAlert("Erreur", "Erreur lors de la recherche : " + e.getMessage());
+            showAlert("Erreur", "Erreur lors de la recherche/tri : " + e.getMessage());
+        }
+    }
+
+    // Méthode pour trier la liste en mémoire
+    private List<logement> sortLogements(List<logement> logements, String sortOption) {
+        switch (sortOption) {
+            case "Tarif croissant":
+                return logements.stream().sorted(Comparator.comparing(logement::getTarif_nuit)).collect(Collectors.toList());
+            case "Tarif décroissant":
+                return logements.stream().sorted(Comparator.comparing(logement::getTarif_nuit).reversed()).collect(Collectors.toList());
+            case "Disponible d'abord":
+                return logements.stream().sorted(Comparator.comparing(logement::isDisponibilite).reversed()).collect(Collectors.toList());
+            case "Non disponible d'abord":
+                return logements.stream().sorted(Comparator.comparing(logement::isDisponibilite)).collect(Collectors.toList());
+            default:
+                return logements;
         }
     }
 

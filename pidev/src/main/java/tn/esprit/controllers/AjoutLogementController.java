@@ -185,6 +185,8 @@ public class AjoutLogementController {
             erreurs.append("- Le nom est obligatoire.\n");
         } else if (nom.length() > 255) {
             erreurs.append("- Le nom ne doit pas dépasser 255 caractères.\n");
+        } else if (!Character.isUpperCase(nom.charAt(0))) {
+            erreurs.append("- La première lettre du nom doit être en majuscule.\n");
         }
 
         String adresse = adresseField.getText().trim();
@@ -192,16 +194,20 @@ public class AjoutLogementController {
             erreurs.append("- L'adresse est obligatoire.\n");
         } else if (adresse.length() > 255) {
             erreurs.append("- L'adresse ne doit pas dépasser 255 caractères.\n");
+        } else if (!Character.isUpperCase(adresse.charAt(0))) {
+            erreurs.append("- La première lettre de l'adresse doit être en majuscule.\n");
         }
 
         int capacite = capaciteSpinner.getValue();
-        if (capacite < 1 || capacite > 20) {
-            erreurs.append("- La capacité doit être entre 1 et 20.\n");
+        if (capacite <= 2 || capacite > 20) {
+            erreurs.append("- La capacité doit être supérieure à 2 et inférieure ou égale à 20.\n");
         }
 
         String equipement = equipementField.getText().trim();
         if (equipement.length() > 255) {
             erreurs.append("- Les équipements ne doivent pas dépasser 255 caractères.\n");
+        } else if (!equipement.isEmpty() && !Character.isUpperCase(equipement.charAt(0))) {
+            erreurs.append("- La première lettre des équipements doit être en majuscule.\n");
         }
 
         String tarifStr = tarifField.getText().trim();
@@ -211,8 +217,8 @@ public class AjoutLogementController {
         } else {
             try {
                 tarif = Float.parseFloat(tarifStr);
-                if (tarif <= 0) {
-                    erreurs.append("- Le tarif doit être un nombre positif.\n");
+                if (tarif <= 50 || tarif > 3000) {
+                    erreurs.append("- Le tarif doit être supérieur à 50 et inférieur ou égal à 3000.\n");
                 }
             } catch (NumberFormatException e) {
                 erreurs.append("- Le tarif doit être un nombre valide.\n");
