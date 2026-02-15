@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.AjouterMarqueController"
+      spacing="25"
+      style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
+      prefWidth="450" prefHeight="400">
+
+    <padding>
+        <Insets top="30" right="40" bottom="30" left="40"/>
+    </padding>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--                          HEADER SECTION                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <VBox spacing="8" alignment="CENTER">
+        <Label text="🏷️" style="-fx-font-size: 56px;"/>
+        <Label text="Ajouter une Nouvelle Marque"
+               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+            <font>
+                <Font name="System Bold" size="28"/>
+            </font>
+        </Label>
+        <Label text="Enrichissez votre catalogue de marques automobiles"
+               style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+    </VBox>
+
+    <Separator style="-fx-background-color: #bdc3c7;"/>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--                     FORMULAIRE D'AJOUT                           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <VBox spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER">
+
+        <!-- Card Conteneur du Formulaire -->
+        <VBox spacing="20"
+              style="-fx-background-color: white;
+                     -fx-padding: 35;
+                     -fx-background-radius: 15;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);"
+              maxWidth="500">
+
+            <!-- Label + Champ de saisie -->
+            <VBox spacing="10">
+                <Label text="Nom de la marque"
+                       style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;">
+                    <graphic>
+                        <Label text="✏️" style="-fx-font-size: 18px; -fx-padding: 0 8 0 0;"/>
+                    </graphic>
+                </Label>
+
+                <TextField fx:id="txtNomMarque"
+                           promptText="Ex: Toyota, BMW, Mercedes-Benz, Renault..."
+                           style="-fx-font-size: 16px;
+                                  -fx-padding: 15;
+                                  -fx-background-color: #f8f9fa;
+                                  -fx-background-radius: 10;
+                                  -fx-border-color: #e0e0e0;
+                                  -fx-border-radius: 10;
+                                  -fx-border-width: 2;
+                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);"/>
+            </VBox>
+
+            <!-- Message d'aide -->
+            <HBox spacing="8" alignment="CENTER_LEFT"
+                  style="-fx-background-color: #e8f4f8;
+                         -fx-padding: 12;
+                         -fx-background-radius: 8;">
+                <Label text="💡" style="-fx-font-size: 16px;"/>
+                <Label text="Conseil : Utilisez le nom officiel de la marque pour une meilleure cohérence"
+                       wrapText="true"
+                       style="-fx-font-size: 12px; -fx-text-fill: #2980b9; -fx-font-style: italic;"
+                       HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Label d'erreur/succès -->
+            <Label fx:id="lblMessage"
+                   text=""
+                   wrapText="true"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-padding: 10;
+                          -fx-background-radius: 8;"
+                   visible="false"
+                   managed="false"/>
+        </VBox>
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!--                      BOUTONS D'ACTION                            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <HBox spacing="15" alignment="CENTER">
+
+        <!-- Bouton Annuler -->
+        <Button text="✖ Annuler"
+                onAction="#annuler"
+                prefWidth="200"
+                style="-fx-background-color: #95a5a6;
+                       -fx-text-fill: white;
+                       -fx-font-size: 15px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 3);">
+            <font>
+                <Font name="System Bold" size="15"/>
+            </font>
+        </Button>
+
+        <!-- Bouton Réinitialiser -->
+        <Button text="🔄 Réinitialiser"
+                onAction="#reinitialiser"
+                prefWidth="200"
+                style="-fx-background-color: #3498db;
+                       -fx-text-fill: white;
+                       -fx-font-size: 15px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 3);">
+            <font>
+                <Font name="System Bold" size="15"/>
+            </font>
+        </Button>
+
+        <!-- Bouton Ajouter -->
+        <Button fx:id="btnAjouter"
+                text="✓ Ajouter la Marque"
+                onAction="#ajouterMarque"
+                prefWidth="220"
+                defaultButton="true"
+                style="-fx-background-color: linear-gradient(to bottom, #27ae60, #229954);
+                       -fx-text-fill: white;
+                       -fx-font-size: 16px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(39,174,96,0.4), 12, 0, 0, 4);">
+            <font>
+                <Font name="System Bold" size="16"/>
+            </font>
+        </Button>
+    </HBox>
+
+    <!-- Footer Info -->
+    <HBox alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+        <Label text="Les marques sont des données mondiales partagées dans le système"
+               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6; -fx-font-style: italic;"/>
+    </HBox>
+
+</VBox>

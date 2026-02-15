@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.AjouterLocationController"
+            fitToWidth="true"
+            prefHeight="650"
+            maxHeight="650"
+            style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="25"
+          style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
+          prefWidth="700">
+
+        <padding>
+            <Insets top="30" right="40" bottom="30" left="40"/>
+        </padding>
+
+        <!-- HEADER -->
+        <VBox spacing="8" alignment="CENTER">
+            <Label text="📋" style="-fx-font-size: 56px;"/>
+            <Label text="Nouvelle Location"
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <font>
+                    <Font name="System Bold" size="28"/>
+                </font>
+            </Label>
+            <Label text="Enregistrez une nouvelle location de véhicule"
+                   style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #bdc3c7;"/>
+
+        <!-- FORMULAIRE -->
+        <VBox spacing="25"
+              style="-fx-background-color: white;
+                 -fx-padding: 35;
+                 -fx-background-radius: 15;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
+
+            <!-- SECTION 1 : VÉHICULE -->
+            <VBox spacing="18">
+                <Label text="🚗 Sélection du Véhicule"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font><Font name="System Bold" size="18"/></font>
+                </Label>
+
+                <VBox spacing="8">
+                    <Label text="Véhicule à louer *"
+                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                    <ComboBox fx:id="comboVehicule"
+                              promptText="Sélectionnez un véhicule disponible..."
+                              maxWidth="Infinity"
+                              style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    <Label fx:id="lblInfoVehicule"
+                           text=""
+                           wrapText="true"
+                           visible="false"
+                           style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d; -fx-padding: 5;"/>
+                </VBox>
+            </VBox>
+
+            <Separator/>
+
+            <!-- SECTION 2 : INFORMATIONS CLIENT -->
+            <VBox spacing="18">
+                <Label text="👤 Informations Client"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font><Font name="System Bold" size="18"/></font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Nom complet *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtNomClient"
+                                   promptText="Ex: Ahmed Ben Salah"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Téléphone *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtTelephone"
+                                   promptText="Ex: 98 123 456"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="CIN (optionnel)"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtCIN"
+                                   promptText="Ex: 12345678"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <Separator/>
+
+            <!-- SECTION 3 : PÉRIODE DE LOCATION -->
+            <VBox spacing="18">
+                <Label text="📅 Période de Location"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font><Font name="System Bold" size="18"/></font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Date de début *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <DatePicker fx:id="dateDebut"
+                                    promptText="Sélectionnez..."
+                                    maxWidth="Infinity"
+                                    style="-fx-font-size: 14px;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Date de fin prévue *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <DatePicker fx:id="dateFinPrevue"
+                                    promptText="Sélectionnez..."
+                                    maxWidth="Infinity"
+                                    style="-fx-font-size: 14px;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Kilométrage de départ *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtKilometrageDebut"
+                                   promptText="Ex: 15000"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <Separator/>
+
+            <!-- SECTION 4 : TARIFICATION -->
+            <VBox spacing="18">
+                <Label text="💰 Tarification et Paiement"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font><Font name="System Bold" size="18"/></font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="33"/>
+                        <ColumnConstraints percentWidth="33"/>
+                        <ColumnConstraints percentWidth="34"/>
+                    </columnConstraints>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Prix par jour"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtPrixParJour"
+                                   editable="false"
+                                   style="-fx-font-size: 14px; -fx-padding: 10; -fx-background-color: #ecf0f1;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Nombre de jours"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtNombreJours"
+                                   editable="false"
+                                   style="-fx-font-size: 14px; -fx-padding: 10; -fx-background-color: #ecf0f1;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label text="Montant total"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                        <TextField fx:id="txtMontantTotal"
+                                   editable="false"
+                                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10; -fx-background-color: #d5f4e6; -fx-text-fill: #27ae60;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Avance versée"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtAvance"
+                                   promptText="0.000"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="Statut *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <ComboBox fx:id="comboStatut"
+                                  maxWidth="Infinity"
+                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    </VBox>
+                </GridPane>
+
+                <!-- Calcul automatique info -->
+                <HBox spacing="10" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #e8f4f8; -fx-padding: 12; -fx-background-radius: 8;">
+                    <Label text="💡" style="-fx-font-size: 16px;"/>
+                    <Label text="Le montant total se calcule automatiquement : Prix/jour × Nombre de jours"
+                           wrapText="true"
+                           style="-fx-font-size: 12px; -fx-text-fill: #2980b9; -fx-font-style: italic;"
+                           HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
+
+            <Separator/>
+
+            <!-- SECTION 5 : NOTES -->
+            <VBox spacing="10">
+                <Label text="📝 Notes (optionnel)"
+                       style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                <TextArea fx:id="txtNotes"
+                          promptText="Remarques, conditions particulières..."
+                          prefRowCount="3"
+                          wrapText="true"
+                          style="-fx-font-size: 13px;"/>
+            </VBox>
+
+            <!-- Message -->
+            <Label fx:id="lblMessage"
+                   text=""
+                   wrapText="true"
+                   visible="false"
+                   managed="false"
+                   style="-fx-font-size: 13px; -fx-padding: 12; -fx-background-radius: 8;"/>
+        </VBox>
+
+        <!-- BOUTONS -->
+        <HBox spacing="15" alignment="CENTER">
+            <Button text="✖ Annuler"
+                    onAction="#annuler"
+                    prefWidth="200"
+                    style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
+                <font><Font name="System Bold" size="15"/></font>
+            </Button>
+
+            <Button text="🔄 Réinitialiser"
+                    onAction="#reinitialiser"
+                    prefWidth="200"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
+                <font><Font name="System Bold" size="15"/></font>
+            </Button>
+
+            <Button fx:id="btnAjouter"
+                    text="✓ Enregistrer la Location"
+                    onAction="#ajouterLocation"
+                    prefWidth="250"
+                    defaultButton="true"
+                    style="-fx-background-color: linear-gradient(to bottom, #27ae60, #229954); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
+                <font><Font name="System Bold" size="16"/></font>
+            </Button>
+        </HBox>
+
+    </VBox>
+</ScrollPane>

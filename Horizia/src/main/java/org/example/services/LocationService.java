@@ -90,7 +90,20 @@ public class LocationService {
             if (rs.next()) {
                 Location l = new Location();
                 l.setIdLocation(rs.getInt("id_location"));
-                // remplir tous les champs...
+                l.setIdVehicule(rs.getInt("id_vehicule"));
+                l.setClientNomComplet(rs.getString("client_nom_complet"));
+                l.setClientTelephone(rs.getString("client_telephone"));
+                l.setClientCin(rs.getString("client_cin"));
+                l.setDateDebut(rs.getTimestamp("date_debut"));
+                l.setDateFinPrev(rs.getTimestamp("date_fin_prevue"));
+                l.setDateFinReelle(rs.getTimestamp("date_fin_reelle"));
+                l.setKilometrageDebut(rs.getInt("kilometrage_debut"));
+                l.setKilometrageRetour(rs.getInt("kilometrage_retour"));
+                l.setPrixParJour(rs.getDouble("prix_par_jour"));
+                l.setMontantTotal(rs.getDouble("montant_total"));
+                l.setAvance(rs.getDouble("avance"));
+                l.setStatut(rs.getString("statut"));
+                l.setNotes(rs.getString("notes"));
                 return l;
             }
         } catch (SQLException e) {
@@ -159,7 +172,20 @@ public class LocationService {
             while (rs.next()) {
                 Location l = new Location();
                 l.setIdLocation(rs.getInt("id_location"));
-                // remplir...
+                l.setIdVehicule(rs.getInt("id_vehicule"));
+                l.setClientNomComplet(rs.getString("client_nom_complet"));
+                l.setClientTelephone(rs.getString("client_telephone"));
+                l.setClientCin(rs.getString("client_cin"));
+                l.setDateDebut(rs.getTimestamp("date_debut"));
+                l.setDateFinPrev(rs.getTimestamp("date_fin_prevue"));
+                l.setDateFinReelle(rs.getTimestamp("date_fin_reelle"));
+                l.setKilometrageDebut(rs.getInt("kilometrage_debut"));
+                l.setKilometrageRetour(rs.getInt("kilometrage_retour"));
+                l.setPrixParJour(rs.getDouble("prix_par_jour"));
+                l.setMontantTotal(rs.getDouble("montant_total"));
+                l.setAvance(rs.getDouble("avance"));
+                l.setStatut(rs.getString("statut"));
+                l.setNotes(rs.getString("notes"));
                 resultat.add(l);
             }
         } catch (SQLException e) {
