@@ -5,6 +5,7 @@ public class Modele {
     private int idModele;
     private int idMarque;
     private String nomModele;
+    private String image;  // ← NOUVEAU CHAMP
 
     public Modele() {}
 
@@ -17,6 +18,13 @@ public class Modele {
         this.idModele = idModele;
         this.idMarque = idMarque;
         this.nomModele = nomModele;
+    }
+
+    public Modele(int idModele, int idMarque, String nomModele, String image) {
+        this.idModele = idModele;
+        this.idMarque = idMarque;
+        this.nomModele = nomModele;
+        this.image = image;
     }
 
     public int getIdModele() {
@@ -41,6 +49,14 @@ public class Modele {
 
     public void setNomModele(String nomModele) {
         this.nomModele = nomModele;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @Override

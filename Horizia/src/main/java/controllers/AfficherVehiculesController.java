@@ -8,9 +8,12 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import org.example.entities.Marque;
 import org.example.entities.Modele;
@@ -213,20 +216,41 @@ public class AfficherVehiculesController {
     }
 
     private VBox creerCardVehicule(Vehicule vehicule) {
-        VBox card = new VBox(12);
+        VBox card = new VBox(10);
         card.setAlignment(Pos.TOP_CENTER);
         card.setPrefWidth(260);
-        card.setMinHeight(220);
+        card.setMinHeight(380);
         card.setStyle(
                 "-fx-background-color: white;" +
                         "-fx-background-radius: 12;" +
                         "-fx-border-color: #e0e0e0;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 12;" +
-                        "-fx-padding: 18;" +
+                        "-fx-padding: 15;" +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);" +
                         "-fx-cursor: hand;"
         );
+
+        // ══════════════════════════════════════════════════════
+        // IMAGE DU VÉHICULE
+        // ══════════════════════════════════════════════════════
+        ImageView imageView = creerImageVehicule(vehicule.getPhoto());
+
+        StackPane imageContainer = new StackPane(imageView);
+        imageContainer.setStyle(
+                "-fx-background-color: #f8f9fa;" +
+                        "-fx-background-radius: 8;"
+        );
+        imageContainer.setPrefHeight(170);
+        imageContainer.setMaxHeight(170);
+
+        card.getChildren().add(imageContainer);
+
+        // ══════════════════════════════════════════════════════
+        // INFORMATIONS DU VÉHICULE
+        // ══════════════════════════════════════════════════════
+        VBox infoBox = new VBox(8);
+        infoBox.setPadding(new Insets(5, 0, 0, 0));
 
         // Badge État
         String couleurEtat = getCouleurEtat(vehicule.getEtat());
@@ -242,7 +266,7 @@ public class AfficherVehiculesController {
 
         // Immatriculation
         Label immat = new Label(vehicule.getImmatriculation());
-        immat.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+        immat.setStyle("-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
 
         // Modèle
         String nomModele = mapModeles.get(vehicule.getIdModele());
@@ -256,7 +280,7 @@ public class AfficherVehiculesController {
         sep.setStyle("-fx-background-color: #ecf0f1;");
 
         // Infos techniques
-        VBox infos = new VBox(6);
+        VBox infos = new VBox(4);
         infos.getChildren().addAll(
                 creerLigneInfo("📅", "Année : " + vehicule.getAnnee()),
                 creerLigneInfo("⛽", vehicule.getCarburant()),
@@ -265,9 +289,10 @@ public class AfficherVehiculesController {
 
         // Prix
         Label prix = new Label(String.format("%.3f TND/jour", vehicule.getPrixParJour()));
-        prix.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
+        prix.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #27ae60;");
 
-        card.getChildren().addAll(badgeEtat, immat, modele, sep, infos, prix);
+        infoBox.getChildren().addAll(badgeEtat, immat, modele, sep, infos, prix);
+        card.getChildren().add(infoBox);
 
         // Animations
         card.setOnMouseEntered(e -> {
@@ -277,7 +302,7 @@ public class AfficherVehiculesController {
                             "-fx-border-color: #3498db;" +
                             "-fx-border-width: 2;" +
                             "-fx-border-radius: 12;" +
-                            "-fx-padding: 18;" +
+                            "-fx-padding: 15;" +
                             "-fx-effect: dropshadow(gaussian, rgba(52,152,219,0.3), 15, 0, 0, 6);" +
                             "-fx-cursor: hand;"
             );
@@ -295,9 +320,13 @@ public class AfficherVehiculesController {
                             "-fx-border-color: #e0e0e0;" +
                             "-fx-border-width: 2;" +
                             "-fx-border-radius: 12;" +
-                            "-fx-padding: 18;" +
+                            "-fx-padding: 15;" +
                             "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);" +
                             "-fx-cursor: hand;"
+            +
+            "-fx-padding: 18;" +
+                    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);" +
+                    "-fx-cursor: hand;"
             );
 
             ScaleTransition st = new ScaleTransition(Duration.millis(200), card);
@@ -347,6 +376,55 @@ public class AfficherVehiculesController {
             case "indisponible": return "✖ INDISPONIBLE";
             default: return etat.toUpperCase();
         }
+    }
+
+    /**
+     * Crée l'ImageView pour afficher la photo du véhicule
+     */
+    private ImageView creerImageVehicule(String photoUrl) {
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(230);
+        imageView.setFitHeight(160);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        // Image par défaut si URL vide
+        String imageUrlToUse = (photoUrl == null || photoUrl.trim().isEmpty())
+                ? "https://via.placeholder.com/300x200/3498db/ffffff?text=Pas+d%27image"
+                : photoUrl.trim();
+
+        try {
+            Image image = new Image(imageUrlToUse, true); // true = chargement async
+
+            // Gestion d'erreur si l'image ne charge pas
+            image.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    try {
+                        Image defaultImg = new Image(
+                                "https://via.placeholder.com/300x200/3498db/ffffff?text=Pas+d%27image",
+                                true
+                        );
+                        imageView.setImage(defaultImg);
+                    } catch (Exception ex) {
+                        // Silence
+                    }
+                }
+            });
+
+            imageView.setImage(image);
+        } catch (Exception e) {
+            try {
+                Image defaultImg = new Image(
+                        "https://via.placeholder.com/300x200/3498db/ffffff?text=Pas+d%27image",
+                        true
+                );
+                imageView.setImage(defaultImg);
+            } catch (Exception ex) {
+                // Silence
+            }
+        }
+
+        return imageView;
     }
 
     @FXML

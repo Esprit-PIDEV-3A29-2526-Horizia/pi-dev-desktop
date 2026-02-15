@@ -13,71 +13,9 @@ public class MarqueService {
         return DatabaseConnection.getInstance().getConnection();
     }
 
-    // ───────────────────────────────────────────────
-    // Vérifier si une marque existe déjà par nom
-    // ───────────────────────────────────────────────
-    private boolean existeDeja(String nomMarque) {
-        if (nomMarque == null || nomMarque.trim().isEmpty()) {
-            System.out.println("Erreur : Le nom de la marque ne peut pas être vide.");
-            return true; // bloque l'ajout
-        }
-
-        String sql = "SELECT COUNT(*) FROM marque WHERE LOWER(TRIM(nom_marque)) = LOWER(?)";
-
-        try (Connection conn = getConn();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, nomMarque.trim());
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
-            }
-        } catch (SQLException e) {
-            System.err.println("Erreur vérification unicité marque : " + e.getMessage());
-        }
-        return false;
-    }
-
-    // ───────────────────────────────────────────────
-    // Ajouter une nouvelle marque
-    // ───────────────────────────────────────────────
-    public boolean ajouterMarque(Marque marque) {
-        if (marque == null || marque.getNomMarque() == null || marque.getNomMarque().trim().isEmpty()) {
-            System.out.println("Erreur : Nom de marque invalide ou vide.");
-            return false;
-        }
-
-        String nom = marque.getNomMarque().trim();
-
-        if (existeDeja(nom)) {
-            System.out.println("Erreur : La marque '" + nom + "' existe déjà dans la base.");
-            return false;
-        }
-
-        String sql = "INSERT INTO marque (nom_marque) VALUES (?)";
-
-        try (Connection conn = getConn();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            ps.setString(1, nom);
-
-            if (ps.executeUpdate() > 0) {
-                ResultSet rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    marque.setIdMarque(rs.getInt(1));
-                }
-                System.out.println("Succès : Marque '" + nom + "' ajoutée (ID: " + marque.getIdMarque() + ")");
-                return true;
-            }
-        } catch (SQLException e) {
-            System.err.println("Erreur ajout marque : " + e.getMessage());
-        }
-        return false;
-    }
-
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     // Lister toutes les marques (avec tri alphabétique)
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     public List<Marque> getAllMarques(String tri) {
         List<Marque> marques = new ArrayList<>();
 
@@ -86,7 +24,8 @@ public class MarqueService {
             orderBy = "DESC";
         }
 
-        String sql = "SELECT * FROM marque ORDER BY nom_marque " + orderBy;
+        // ← IMPORTANT : Sélectionner aussi la colonne "logo"
+        String sql = "SELECT id_marque, nom_marque, logo FROM marque ORDER BY nom_marque " + orderBy;
 
         try (Connection conn = getConn();
              Statement stmt = conn.createStatement();
@@ -96,13 +35,14 @@ public class MarqueService {
                 Marque m = new Marque();
                 m.setIdMarque(rs.getInt("id_marque"));
                 m.setNomMarque(rs.getString("nom_marque"));
+                m.setLogo(rs.getString("logo"));  // ← RÉCUPÉRER LE LOGO
                 marques.add(m);
             }
 
             if (marques.isEmpty()) {
-                System.out.println("Aucune marque présente dans la base pour le moment.");
+                System.out.println("Aucune marque présente dans la base.");
             } else {
-                System.out.println("Marques trouvées (" + marques.size() + ") - triées " + orderBy + " :");
+                System.out.println("Marques trouvées (" + marques.size() + ") - triées " + orderBy);
             }
 
         } catch (SQLException e) {
@@ -112,7 +52,6 @@ public class MarqueService {
         return marques;
     }
 
-    // Méthodes de commodité pour tri
     public List<Marque> getAllMarquesAlphabetique() {
         return getAllMarques("ASC");
     }
@@ -121,18 +60,17 @@ public class MarqueService {
         return getAllMarques("DESC");
     }
 
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     // Rechercher une marque par nom (partiel)
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     public List<Marque> rechercherMarqueParNom(String recherche) {
         List<Marque> resultat = new ArrayList<>();
 
         if (recherche == null || recherche.trim().isEmpty()) {
-            System.out.println("Recherche vide → affichage de toutes les marques.");
             return getAllMarques("ASC");
         }
 
-        String sql = "SELECT * FROM marque WHERE LOWER(nom_marque) LIKE LOWER(?) ORDER BY nom_marque ASC";
+        String sql = "SELECT id_marque, nom_marque, logo FROM marque WHERE LOWER(nom_marque) LIKE LOWER(?) ORDER BY nom_marque ASC";
 
         try (Connection conn = getConn();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -144,13 +82,8 @@ public class MarqueService {
                 Marque m = new Marque();
                 m.setIdMarque(rs.getInt("id_marque"));
                 m.setNomMarque(rs.getString("nom_marque"));
+                m.setLogo(rs.getString("logo"));  // ← RÉCUPÉRER LE LOGO
                 resultat.add(m);
-            }
-
-            if (resultat.isEmpty()) {
-                System.out.println("Aucune marque trouvée contenant '" + recherche + "'.");
-            } else {
-                System.out.println(resultat.size() + " marque(s) trouvée(s) pour '" + recherche + "'");
             }
 
         } catch (SQLException e) {
@@ -160,16 +93,16 @@ public class MarqueService {
         return resultat;
     }
 
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     // Récupérer une marque par ID
-    // ───────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════
     public Marque getMarqueById(int id) {
         if (id <= 0) {
-            System.out.println("ID invalide (doit être > 0).");
+            System.out.println("ID invalide.");
             return null;
         }
 
-        String sql = "SELECT * FROM marque WHERE id_marque = ?";
+        String sql = "SELECT id_marque, nom_marque, logo FROM marque WHERE id_marque = ?";
 
         try (Connection conn = getConn();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -181,13 +114,43 @@ public class MarqueService {
                 Marque m = new Marque();
                 m.setIdMarque(rs.getInt("id_marque"));
                 m.setNomMarque(rs.getString("nom_marque"));
+                m.setLogo(rs.getString("logo"));  // ← RÉCUPÉRER LE LOGO
                 return m;
-            } else {
-                System.out.println("Aucune marque trouvée avec l'ID " + id);
             }
         } catch (SQLException e) {
             System.err.println("Erreur getMarqueById : " + e.getMessage());
         }
         return null;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // Ajouter une marque
+    // ═══════════════════════════════════════════════════════
+    public boolean ajouterMarque(Marque marque) {
+        if (marque == null || marque.getNomMarque() == null || marque.getNomMarque().trim().isEmpty()) {
+            System.out.println("Erreur : Nom de marque invalide.");
+            return false;
+        }
+
+        String sql = "INSERT INTO marque (nom_marque, logo) VALUES (?, ?)";
+
+        try (Connection conn = getConn();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            ps.setString(1, marque.getNomMarque().trim());
+            ps.setString(2, marque.getLogo());  // ← INSÉRER LE LOGO
+
+            if (ps.executeUpdate() > 0) {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    marque.setIdMarque(rs.getInt(1));
+                }
+                System.out.println("Succès : Marque ajoutée (ID: " + marque.getIdMarque() + ")");
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur ajout marque : " + e.getMessage());
+        }
+        return false;
     }
 }

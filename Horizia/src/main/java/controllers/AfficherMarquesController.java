@@ -8,8 +8,12 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 import org.example.entities.Marque;
 import org.example.services.MarqueService;
@@ -163,27 +167,40 @@ public class AfficherMarquesController {
     }
 
     /**
-     * Crée une card élégante pour une marque
+     * Crée une card élégante pour une marque avec son logo
      */
     private VBox creerCardMarque(Marque marque) {
-        VBox card = new VBox(12);
+        VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(180);
-        card.setPrefHeight(140);
+        card.setPrefHeight(200);
         card.setStyle(
                 "-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8f9fa);" +
                         "-fx-background-radius: 12;" +
                         "-fx-border-color: #e0e0e0;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 12;" +
-                        "-fx-padding: 20;" +
+                        "-fx-padding: 15;" +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 3);" +
                         "-fx-cursor: hand;"
         );
 
-        // Icône de la marque
-        Label icone = new Label("🚗");
-        icone.setStyle("-fx-font-size: 42px;");
+        // ══════════════════════════════════════════════════════
+        // LOGO DE LA MARQUE (CIRCULAIRE)
+        // ══════════════════════════════════════════════════════
+        ImageView logoView = creerLogoMarque(marque.getLogo());
+
+        StackPane logoContainer = new StackPane(logoView);
+        logoContainer.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 50;" +
+                        "-fx-border-color: #e0e0e0;" +
+                        "-fx-border-width: 2;" +
+                        "-fx-border-radius: 50;" +
+                        "-fx-padding: 5;"
+        );
+        logoContainer.setPrefSize(80, 80);
+        logoContainer.setMaxSize(80, 80);
 
         // Nom de la marque
         Label nom = new Label(marque.getNomMarque());
@@ -208,7 +225,7 @@ public class AfficherMarquesController {
                         "-fx-background-radius: 10;"
         );
 
-        card.getChildren().addAll(icone, nom, badge);
+        card.getChildren().addAll(logoContainer, nom, badge);
 
         // ═══════════════════════════════════════════════════════
         // ANIMATIONS & INTERACTIONS
@@ -270,6 +287,58 @@ public class AfficherMarquesController {
         fade.play();
 
         return card;
+    }
+
+    /**
+     * Crée l'ImageView circulaire pour le logo de la marque
+     */
+    private ImageView creerLogoMarque(String logoUrl) {
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(70);
+        imageView.setFitHeight(70);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        // Créer un clip circulaire
+        Circle clip = new Circle(35, 35, 35);
+        imageView.setClip(clip);
+
+        // Image par défaut si URL vide
+        String imageUrlToUse = (logoUrl == null || logoUrl.trim().isEmpty())
+                ? "https://via.placeholder.com/150/2ecc71/ffffff?text=Logo"
+                : logoUrl.trim();
+
+        try {
+            Image image = new Image(imageUrlToUse, true);
+
+            image.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    try {
+                        Image defaultImg = new Image(
+                                "https://via.placeholder.com/150/2ecc71/ffffff?text=Logo",
+                                true
+                        );
+                        imageView.setImage(defaultImg);
+                    } catch (Exception ex) {
+                        // Silence
+                    }
+                }
+            });
+
+            imageView.setImage(image);
+        } catch (Exception e) {
+            try {
+                Image defaultImg = new Image(
+                        "https://via.placeholder.com/150/2ecc71/ffffff?text=Logo",
+                        true
+                );
+                imageView.setImage(defaultImg);
+            } catch (Exception ex) {
+                // Silence
+            }
+        }
+
+        return imageView;
     }
 
     /**

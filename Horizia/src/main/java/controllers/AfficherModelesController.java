@@ -7,8 +7,11 @@ import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import org.example.entities.Marque;
 import org.example.entities.Modele;
@@ -243,21 +246,30 @@ public class AfficherModelesController {
         VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(220);
-        card.setPrefHeight(160);
+        card.setPrefHeight(260);
         card.setStyle(
                 "-fx-background-color: linear-gradient(to bottom right, #ffffff, #f8f9fa);" +
                         "-fx-background-radius: 12;" +
                         "-fx-border-color: #e0e0e0;" +
                         "-fx-border-width: 2;" +
                         "-fx-border-radius: 12;" +
-                        "-fx-padding: 20;" +
+                        "-fx-padding: 15;" +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 3);" +
                         "-fx-cursor: hand;"
         );
 
-        // Icône du modèle
-        Label icone = new Label("🚙");
-        icone.setStyle("-fx-font-size: 40px;");
+        // ══════════════════════════════════════════════════════
+        // IMAGE DU MODÈLE
+        // ══════════════════════════════════════════════════════
+        ImageView imageView = creerImageModele(modele.getImage());
+
+        StackPane imageContainer = new StackPane(imageView);
+        imageContainer.setStyle(
+                "-fx-background-color: #f8f9fa;" +
+                        "-fx-background-radius: 8;"
+        );
+        imageContainer.setPrefHeight(120);
+        imageContainer.setMaxHeight(120);
 
         // Nom de la marque (en petit)
         String nomMarque = mapMarques.get(modele.getIdMarque());
@@ -292,7 +304,7 @@ public class AfficherModelesController {
                         "-fx-background-radius: 10;"
         );
 
-        card.getChildren().addAll(icone, marque, nom, badge);
+        card.getChildren().addAll(imageContainer, marque, nom, badge);
 
         // ═══════════════════════════════════════════════════════
         // ANIMATIONS & INTERACTIONS
@@ -355,6 +367,54 @@ public class AfficherModelesController {
         fade.play();
 
         return card;
+    }
+
+    /**
+     * Crée l'ImageView pour afficher l'image du modèle
+     */
+    private ImageView creerImageModele(String imageUrl) {
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(190);
+        imageView.setFitHeight(110);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+
+        // Image par défaut si URL vide
+        String imageUrlToUse = (imageUrl == null || imageUrl.trim().isEmpty())
+                ? "https://via.placeholder.com/300x200/e74c3c/ffffff?text=Modele"
+                : imageUrl.trim();
+
+        try {
+            Image image = new Image(imageUrlToUse, true);
+
+            image.errorProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal) {
+                    try {
+                        Image defaultImg = new Image(
+                                "https://via.placeholder.com/300x200/e74c3c/ffffff?text=Modele",
+                                true
+                        );
+                        imageView.setImage(defaultImg);
+                    } catch (Exception ex) {
+                        // Silence
+                    }
+                }
+            });
+
+            imageView.setImage(image);
+        } catch (Exception e) {
+            try {
+                Image defaultImg = new Image(
+                        "https://via.placeholder.com/300x200/e74c3c/ffffff?text=Modele",
+                        true
+                );
+                imageView.setImage(defaultImg);
+            } catch (Exception ex) {
+                // Silence
+            }
+        }
+
+        return imageView;
     }
 
     /**
