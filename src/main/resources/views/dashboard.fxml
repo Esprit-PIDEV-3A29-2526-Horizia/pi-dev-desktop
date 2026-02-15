@@ -13,54 +13,62 @@
 
 <BorderPane prefHeight="700" prefWidth="1200" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.Dashboard">
 
+    <!-- SIDEBAR -->
     <left>
         <VBox prefWidth="260" spacing="18" style="-fx-background-color:#111827;">
             <padding>
                 <Insets bottom="18" left="18" right="18" top="22" />
             </padding>
 
+            <!-- Brand -->
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <ImageView fitHeight="60.0" fitWidth="180.0" preserveRatio="true">
+                <ImageView fitHeight="200.0" fitWidth="200.0" preserveRatio="true">
                     <image>
                         <Image url="@image/logo.png" />
                     </image>
                 </ImageView>
             </HBox>
 
+            <!-- Divider -->
             <Region prefHeight="8" />
-            <Label style="-fx-text-fill:#6B7280; -fx-font-size:11; -fx-font-weight:700;" text="MENU PRINCIPAL" />
 
-            <VBox spacing="10">
-                <Button maxWidth="1.7976931348623157E308" onAction="#showDashboard" style="-fx-background-color:#3B82F6; -fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;" text="Tableau de Bord" />
+            <Label style="-fx-text-fill:#6B7280; -fx-font-size:11; -fx-font-weight:700;" text="MENU" />
 
-                <Button maxWidth="1.7976931348623157E308" onAction="#showVoyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14;" text="Voyages" />
+            <!-- Buttons -->
+            <Button maxWidth="1.7976931348623157E308" onAction="#showDashboard" style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;" text="Dashboard" />
 
-                <Button maxWidth="1.7976931348623157E308" onAction="#showReservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14;" text="Réservations" />
+            <Button maxWidth="1.7976931348623157E308" onAction="#showVoyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="Voyages" />
 
-                <Button maxWidth="1.7976931348623157E308" onAction="#showPublications" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14;" text="Publications">
-                    <graphic>
-                        <ImageView fitHeight="16" fitWidth="16" preserveRatio="true">
-                            <Image url="@image/pub_icon.png" />
-                        </ImageView>
-                    </graphic>
-                </Button>
-
-                <Button maxWidth="1.7976931348623157E308" onAction="#showlogement" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14;" text="Logements" />
-            </VBox>
+            <Button maxWidth="1.7976931348623157E308" onAction="#showReservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="Réservations" />
+            <Button layoutX="28.0" layoutY="370.0"
+                    maxWidth="1.7976931348623157E308"
+                    onAction="#showlogement"
+                    style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;"
+                    text="Logements">
+                <graphic>
+                    <ImageView fitHeight="15" fitWidth="15" preserveRatio="true">
+                        <Image url="@image/log.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button maxWidth="1.7976931348623157E308" onAction="#showpublications" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800;                            -fx-background-radius:14; -fx-padding:12 14; -fx-cursor:hand;                            -fx-border-color:#273244; -fx-border-radius:14; -fx-border-width:1;" text="publications" />
 
             <Region VBox.vgrow="ALWAYS" />
 
-            <VBox spacing="6" style="-fx-background-color:#1F2937; -fx-background-radius:16; -fx-padding:12;">
-                <Label style="-fx-text-fill:white; -fx-font-size:12; -fx-font-weight:800;" text="Gestion Horizia" />
-                <Label style="-fx-text-fill:#9CA3AF; -fx-font-size:11;" text="Gérez vos articles et contenus ici." wrapText="true" />
+            <!-- Footer -->
+            <VBox spacing="6" style="-fx-background-color:#0B1220; -fx-background-radius:16; -fx-padding:12;">
+                <Label style="-fx-text-fill:white; -fx-font-size:12; -fx-font-weight:800;" text="Conseil" />
+                <Label style="-fx-text-fill:#9CA3AF; -fx-font-size:11;" text="Utilisez le menu pour naviguer." wrapText="true" />
             </VBox>
 
-            <Label style="-fx-text-fill:#6B7280; -fx-font-size:11;" text="© 2026 Horizia" />
+            <Label style="-fx-text-fill:#6B7280; -fx-font-size:11;" text="© Horizia" />
         </VBox>
     </left>
 
+    <!-- CONTENT -->
     <center>
-        <StackPane fx:id="contentPane" style="-fx-padding: 20;">
+        <StackPane fx:id="contentPane">
+            <!-- page loaded here -->
         </StackPane>
     </center>
 

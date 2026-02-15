@@ -1,122 +1,274 @@
 package tn.esprit.controllers;
 
 import javafx.animation.RotateTransition;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.esprit.entities.Publication;
 import tn.esprit.services.ServicePublication;
 
-import java.net.MalformedURLException;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class AjoutPublicationController {
 
-    @FXML private ComboBox<String> typeComboBox;
-    @FXML private TextField titreField, imageField, lieuField, descriptionField, tarifField;
-    @FXML private CheckBox actifCheckBox;
-    @FXML private Button ajouterBtn, annulerBtn, titreMicroBtn, imageMicroBtn, lieuMicroBtn, descriptionMicroBtn, tarifMicroBtn;
+    // ============ FXML FIELDS ============
 
-    private ServicePublication servicePublication = new ServicePublication();
+    @FXML
+    private ComboBox<String> typeComboBox;
+
+    @FXML
+    private TextField titreField;
+
+    @FXML
+    private TextField lieuField;
+
+    @FXML
+    private TextField descriptionField;
+
+    @FXML
+    private TextField tarifField;
+
+    @FXML
+    private CheckBox actifCheckBox;
+
+    @FXML
+    private Button ajouterBtn;
+
+    @FXML
+    private Button annulerBtn;
+
+    @FXML
+    private Button imageSelectBtn;
+
+    @FXML
+    private Button titreMicroBtn;
+
+    @FXML
+    private Button lieuMicroBtn;
+
+    @FXML
+    private Button descriptionMicroBtn;
+
+    @FXML
+    private Button tarifMicroBtn;
+
+    @FXML
+    private Label errorLabel;
+
+    @FXML
+    private Label imagePathLabel;
+
+    // ============ PRIVATE FIELDS ============
+
+    private ServicePublication servicePublication;
+    private String selectedImagePath;
+
+    // ============ INITIALIZATION ============
 
     @FXML
     public void initialize() {
-        // Micro boutons
-        titreMicroBtn.setOnAction(e -> handleMicro(titreField, titreMicroBtn));
-        imageMicroBtn.setOnAction(e -> handleMicro(imageField, imageMicroBtn));
-        lieuMicroBtn.setOnAction(e -> handleMicro(lieuField, lieuMicroBtn));
-        descriptionMicroBtn.setOnAction(e -> handleMicro(descriptionField, descriptionMicroBtn));
-        tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn));
+        // Initialiser le service
+        this.servicePublication = new ServicePublication();
 
-        // Actions boutons
-        ajouterBtn.setOnAction(e -> ajouterPublication());
-        annulerBtn.setOnAction(e -> retourListe());
+        // Initialiser ComboBox
+        if (typeComboBox != null) {
+            typeComboBox.getItems().addAll("Voyage", "Loisir", "Conseil", "Expérience", "Guide");
+        }
+
+        // Micro boutons
+        if (titreMicroBtn != null) {
+            titreMicroBtn.setOnAction(e -> handleMicro(titreField, titreMicroBtn));
+        }
+        if (lieuMicroBtn != null) {
+            lieuMicroBtn.setOnAction(e -> handleMicro(lieuField, lieuMicroBtn));
+        }
+        if (descriptionMicroBtn != null) {
+            descriptionMicroBtn.setOnAction(e -> handleMicro(descriptionField, descriptionMicroBtn));
+        }
+        if (tarifMicroBtn != null) {
+            tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn));
+        }
+
+        // Actions principales
+        if (ajouterBtn != null) {
+            ajouterBtn.setOnAction(e -> ajouterPublication());
+        }
+        if (annulerBtn != null) {
+            annulerBtn.setOnAction(e -> retourListe());
+        }
+        if (imageSelectBtn != null) {
+            imageSelectBtn.setOnAction(e -> selectImage());
+        }
     }
 
+    // ============ PRIVATE METHODS ============
+
     private void handleMicro(TextField field, Button microBtn) {
+        if (field == null || microBtn == null) return;
+
         RotateTransition rotate = new RotateTransition(Duration.seconds(2), microBtn);
         rotate.setByAngle(360);
         rotate.setCycleCount(RotateTransition.INDEFINITE);
-        rotate.play();
 
-        new Thread(() -> {
-            try {
+        Task<String> voiceTask = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
                 Thread.sleep(3000);
-                String recognizedText = "Texte reconnu";
-                javafx.application.Platform.runLater(() -> {
-                    field.setText(recognizedText.toUpperCase());
-                    rotate.stop();
-                    microBtn.setRotate(0);
-                });
-            } catch (InterruptedException ex) { ex.printStackTrace(); }
-        }).start();
+                return "Texte reconnu par voix";
+            }
+        };
+
+        voiceTask.setOnRunning(e -> rotate.play());
+        voiceTask.setOnSucceeded(e -> {
+            field.setText(voiceTask.getValue().toUpperCase());
+            rotate.stop();
+            microBtn.setRotate(0);
+        });
+        voiceTask.setOnFailed(e -> {
+            rotate.stop();
+            microBtn.setRotate(0);
+        });
+
+        Thread thread = new Thread(voiceTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void selectImage() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Choisir une image");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        Stage stage = (Stage) imageSelectBtn.getScene().getWindow();
+        File file = chooser.showOpenDialog(stage);
+
+        if (file != null) {
+            selectedImagePath = file.toURI().toString();
+            if (imagePathLabel != null) {
+                imagePathLabel.setText(file.getName());
+            }
+        }
     }
 
     private void ajouterPublication() {
-        StringBuilder erreurs = new StringBuilder();
-        String titre = titreField.getText().trim();
-        String lieu = lieuField.getText().trim();
-        String image = imageField.getText().trim();
-        String description = descriptionField.getText().trim();
-        String type = typeComboBox.getValue();
-        String tarifStr = tarifField.getText().trim();
-        float tarif = 0;
+        // Reset error
+        if (errorLabel != null) {
+            errorLabel.setText("");
+        }
 
-        if (titre.isEmpty()) erreurs.append("- Le titre est obligatoire\n");
-        if (lieu.isEmpty()) erreurs.append("- Le lieu est obligatoire\n");
-        if (image.isEmpty() || !isValidImagePath(image)) erreurs.append("- Image invalide\n");
-        if (description.length() > 255) erreurs.append("- Description trop longue\n");
-        if (type == null) erreurs.append("- Sélectionner un type\n");
-        if (tarifStr.isEmpty()) erreurs.append("- Tarif obligatoire\n");
-        else {
+        StringBuilder erreurs = new StringBuilder();
+
+        // Récupération des valeurs
+        String titre = (titreField != null) ? titreField.getText().trim() : "";
+        String lieu = (lieuField != null) ? lieuField.getText().trim() : "";
+        String description = (descriptionField != null) ? descriptionField.getText().trim() : "";
+        String type = (typeComboBox != null) ? typeComboBox.getValue() : null;
+        String tarifStr = (tarifField != null) ? tarifField.getText().trim() : "";
+
+        float tarif = 0.0f;
+
+        // Validations
+        if (titre.isEmpty()) {
+            erreurs.append("• Titre obligatoire\n");
+        }
+        if (lieu.isEmpty()) {
+            erreurs.append("• Lieu obligatoire\n");
+        }
+        if (selectedImagePath == null || selectedImagePath.isEmpty()) {
+            erreurs.append("• Image obligatoire\n");
+        }
+        if (description.length() > 255) {
+            erreurs.append("• Description trop longue (max 255)\n");
+        }
+        if (type == null) {
+            erreurs.append("• Type obligatoire\n");
+        }
+
+        if (tarifStr.isEmpty()) {
+            erreurs.append("• Tarif obligatoire\n");
+        } else {
             try {
                 tarif = Float.parseFloat(tarifStr);
-                if (tarif <= 0) erreurs.append("- Tarif doit être positif\n");
+                if (tarif <= 0) {
+                    erreurs.append("• Tarif doit être positif\n");
+                }
             } catch (NumberFormatException e) {
-                erreurs.append("- Tarif invalide\n");
+                erreurs.append("• Tarif invalide\n");
             }
         }
 
+        // Si erreurs, afficher et arrêter
         if (erreurs.length() > 0) {
-            showAlert("Erreur", erreurs.toString());
+            showError(erreurs.toString());
             return;
         }
 
+        // Création et sauvegarde
         try {
             Publication p = new Publication();
             p.setTitre(titre.toUpperCase());
             p.setLieu(lieu.toUpperCase());
-            p.setImage(image);
-            p.setContenu(description.toUpperCase());
+            p.setImage(selectedImagePath);
+            p.setContenu(description);
             p.setTarif(tarif);
-            p.setActif(actifCheckBox.isSelected());
+            p.setActif(actifCheckBox != null && actifCheckBox.isSelected());
             p.setType(type);
-            p.setDatePublication(LocalDate.now());
+            p.setDatePublication(LocalDateTime.now());
+            p.setLikes(0);
+            p.setEstPublie(true);
 
             servicePublication.ajouter(p);
-            showAlert("Succès", "Publication ajoutée !");
+
+            showAlert("Succès", "Publication ajoutée avec succès !\nID: " + p.getId());
             retourListe();
+
         } catch (SQLException e) {
-            showAlert("Erreur", e.getMessage());
+            showError("Erreur base de données: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    private boolean isValidImagePath(String path) {
-        if (path.startsWith("http://") || path.startsWith("https://")) {
-            try { new URL(path); return true; }
-            catch (MalformedURLException e) { return false; }
-        } else return path.toLowerCase().matches(".*\\.(jpg|png|jpeg|gif)$");
+    private void retourListe() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Publications.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) annulerBtn.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            showError("Erreur navigation: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void retourListe() {
-        Dashboard.loadView("/Publications.fxml");
+    private void showError(String message) {
+        if (errorLabel != null) {
+            errorLabel.setStyle("-fx-text-fill: #e74c3c;");
+            errorLabel.setText(message);
+        } else {
+            System.err.println("ERROR: " + message);
+        }
     }
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

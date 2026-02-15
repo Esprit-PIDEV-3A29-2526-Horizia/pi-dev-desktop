@@ -1,113 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import java.lang.String?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="700.0" prefWidth="900.0" spacing="0" style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AjoutPublicationController">
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.AjoutPublicationController"
+      spacing="15" alignment="CENTER" style="-fx-padding: 20;">
 
-    <HBox alignment="CENTER_LEFT" prefHeight="100.0" spacing="20" style="-fx-background-color: linear-gradient(to right, #2c3e50, #4ca1af); -fx-padding: 0 40;">
-        <ImageView fitHeight="45" fitWidth="45" preserveRatio="true">
-            <Image url="@image/pub_icon.png" />
-        </ImageView>
-        <VBox alignment="CENTER_LEFT">
-            <Label text="Espace Rédactionnel" textFill="WHITE" style="-fx-opacity: 0.8;">
-                <font><Font name="System Bold" size="14" /></font>
-            </Label>
-            <Label text="Créer une Nouvelle Publication" textFill="WHITE">
-                <font><Font name="System Bold" size="26" /></font>
-            </Label>
-        </VBox>
+    <Label text="Nouvelle Publication" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+
+    <GridPane vgap="10" hgap="10" alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints minWidth="100"/>
+            <ColumnConstraints minWidth="250"/>
+            <ColumnConstraints minWidth="50"/>
+        </columnConstraints>
+
+        <!-- Type -->
+        <Label text="Type:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="typeComboBox" promptText="Choisir un type" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <!-- Titre -->
+        <Label text="Titre:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="titreField" promptText="Titre de la publication" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Button fx:id="titreMicroBtn" text="🎤" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+        <!-- Lieu -->
+        <Label text="Lieu:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="lieuField" promptText="Lieu" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Button fx:id="lieuMicroBtn" text="🎤" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+        <!-- Description -->
+        <Label text="Description:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="descriptionField" promptText="Description (max 255 caractères)" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Button fx:id="descriptionMicroBtn" text="🎤" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+
+        <!-- Tarif -->
+        <Label text="Tarif:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="tarifField" promptText="Prix en DT" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Button fx:id="tarifMicroBtn" text="🎤" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+
+        <!-- Image -->
+        <Label text="Image:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <HBox spacing="10" GridPane.rowIndex="5" GridPane.columnIndex="1">
+            <Button fx:id="imageSelectBtn" text="Choisir une image"/>
+            <Label fx:id="imagePathLabel" text="Aucune image sélectionnée"/>
+        </HBox>
+
+        <!-- Actif -->
+        <Label text="Actif:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <CheckBox fx:id="actifCheckBox" selected="true" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+    </GridPane>
+
+    <!-- Label d'erreur -->
+    <Label fx:id="errorLabel" wrapText="true" maxWidth="400" style="-fx-text-fill: #e74c3c;"/>
+
+    <!-- Boutons -->
+    <HBox spacing="15" alignment="CENTER">
+        <Button fx:id="ajouterBtn" text="Ajouter"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 10 20;"/>
+        <Button fx:id="annulerBtn" text="Annuler"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 10 20;"/>
     </HBox>
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent; -fx-background: transparent;">
-        <padding>
-            <Insets bottom="30.0" left="50.0" right="50.0" top="30.0" />
-        </padding>
-
-        <VBox spacing="25">
-            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25;">
-                <effect><DropShadow color="#00000015" radius="10" offsetY="4" /></effect>
-                <Label text="✍️ Détails de l'article" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #34495e;" />
-                <Separator />
-
-                <GridPane hgap="25" vgap="20">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="50" />
-                        <ColumnConstraints percentWidth="50" />
-                    </columnConstraints>
-
-                    <VBox spacing="8" GridPane.columnIndex="0">
-                        <Label text="Titre de la Publication" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
-                        <HBox spacing="10">
-                            <TextField fx:id="titreField" HBox.hgrow="ALWAYS" prefHeight="45" promptText="Ex: Les secrets de Djerba"
-                                       style="-fx-background-color: #f8f9fa; -fx-border-color: #dcdde1; -fx-border-radius: 8;" />
-                            <Button fx:id="titreMicroBtn" style="-fx-background-color: #3498db; -fx-background-radius: 8; -fx-pref-width: 45;">
-                                <graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@image/micro.png"/></ImageView></graphic>
-                            </Button>
-                        </HBox>
-                    </VBox>
-
-                    <VBox spacing="8" GridPane.columnIndex="1">
-                        <Label text="Catégorie" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
-                        <ComboBox fx:id="categorieComboBox" maxWidth="Infinity" prefHeight="45" promptText="Choisir un type"
-                                  style="-fx-background-color: #f8f9fa; -fx-border-color: #dcdde1; -fx-border-radius: 8;">
-                            <items>
-                                <FXCollections fx:factory="observableArrayList">
-                                    <String fx:value="Conseils Voyage" />
-                                    <String fx:value="Promotion" />
-                                    <String fx:value="Guide Culturel" />
-                                    <String fx:value="Témoignage" />
-                                </FXCollections>
-                            </items>
-                        </ComboBox>
-                    </VBox>
-                </GridPane>
-            </VBox>
-
-            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25;">
-                <effect><DropShadow color="#00000015" radius="10" offsetY="4" /></effect>
-                <Label text="📖 Contenu de la Publication" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #34495e;" />
-                <Separator />
-
-                <VBox spacing="8">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Rédigez votre texte ici" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="contenuMicroBtn" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5;">
-                            <graphic><ImageView fitHeight="15" fitWidth="15"><Image url="@image/micro.png"/></ImageView></graphic>
-                        </Button>
-                    </HBox>
-                    <TextArea fx:id="contenuArea" prefHeight="200.0" promptText="Décrivez l'expérience, les lieux à visiter..." wrapText="true"
-                              style="-fx-background-color: #f8f9fa; -fx-border-color: #dcdde1; -fx-border-radius: 8;" />
-                </VBox>
-            </VBox>
-
-            <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25;">
-                <effect><DropShadow color="#00000015" radius="10" offsetY="4" /></effect>
-                <Label text="🖼️ Image de Couverture" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #34495e;" />
-                <Separator />
-                <HBox spacing="10">
-                    <TextField fx:id="imageField" HBox.hgrow="ALWAYS" prefHeight="45" promptText="URL de l'image ou chemin du fichier"
-                               style="-fx-background-color: #f8f9fa; -fx-border-radius: 8;" />
-                    <Button fx:id="browseBtn" text="Parcourir" style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-pref-height: 45; -fx-background-radius: 8;" />
-                </HBox>
-            </VBox>
-
-            <HBox alignment="CENTER_RIGHT" spacing="20" style="-fx-padding: 20 0;">
-                <Button fx:id="annulerBtn" onAction="#retourListe" prefHeight="50" prefWidth="150" text="ANNULER"
-                        style="-fx-background-color: transparent; -fx-border-color: #e74c3c; -fx-border-radius: 10; -fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-cursor: hand;" />
-
-                <Button fx:id="ajouterBtn" onAction="#ajouterPublication" prefHeight="50" prefWidth="280" text="PUBLIER L'ARTICLE"
-                        style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10; -fx-font-size: 14; -fx-cursor: hand;">
-                    <effect><DropShadow color="#2ecc7144" radius="15" offsetY="5" /></effect>
-                </Button>
-            </HBox>
-        </VBox>
-    </ScrollPane>
 </VBox>

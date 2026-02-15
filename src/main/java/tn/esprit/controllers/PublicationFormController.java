@@ -9,11 +9,12 @@ import javafx.stage.Stage;
 import tn.esprit.entities.Publication;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PublicationFormController {
 
     @FXML
-    private TextField tfTitre, tfLieu;   // tfDestination → tfLieu
+    private TextField tfTitre, tfLieu;
     @FXML
     private TextArea tfDescription;
     @FXML
@@ -27,9 +28,12 @@ public class PublicationFormController {
     public void setPublicationToEdit(Publication p) {
         if (p != null) {
             tfTitre.setText(p.getTitre());
-            tfLieu.setText(p.getLieu());         // getDestination → getLieu
-            tfDescription.setText(p.getContenu()); // getDescription → getContenu
-            dpDate.setValue(p.getDatePublication());
+            tfLieu.setText(p.getLieu());
+            tfDescription.setText(p.getContenu());
+            // CORRECTION: Convertir LocalDateTime → LocalDate
+            if (p.getDatePublication() != null) {
+                dpDate.setValue(p.getDatePublication().toLocalDate());
+            }
         } else {
             dpDate.setValue(LocalDate.now());
         }
@@ -46,8 +50,16 @@ public class PublicationFormController {
         publicationCreated.setTitre(tfTitre.getText());
         publicationCreated.setLieu(tfLieu.getText());
         publicationCreated.setContenu(tfDescription.getText());
-        publicationCreated.setDatePublication(dpDate.getValue());
-        publicationCreated.setActif(true);  // ou false selon ton choix par défaut
+
+        // CORRECTION: Convertir LocalDate → LocalDateTime
+        LocalDate date = dpDate.getValue();
+        if (date != null) {
+            publicationCreated.setDatePublication(date.atStartOfDay()); // ou .atTime(LocalTime.now())
+        } else {
+            publicationCreated.setDatePublication(LocalDateTime.now());
+        }
+
+        publicationCreated.setActif(true);
 
         ((Stage) tfTitre.getScene().getWindow()).close();
     }
