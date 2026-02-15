@@ -1,0 +1,42 @@
+/* Styles pour les boutons de navigation */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 10;
+}
+
+.nav-button-active {
+    -fx-background-color: #E8B156;
+    -fx-text-fill: #23779C;
+    -fx-background-radius: 10;
+}
+
+/* Styles pour les boutons de filtre */
+.filter-button {
+    -fx-background-color: #DACEB6;
+    -fx-text-fill: #23779C;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.filter-button:hover {
+    -fx-background-color: #E8B156;
+}
+
+.filter-button-active {
+    -fx-background-color: #E67E22;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 25;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
