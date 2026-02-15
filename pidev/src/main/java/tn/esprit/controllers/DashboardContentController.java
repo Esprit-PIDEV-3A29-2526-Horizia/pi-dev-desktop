@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -9,6 +10,7 @@ import javafx.scene.layout.VBox;
 import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.user;
+import tn.esprit.entities.Status;  // Import de l'enum Status
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.services.Serviceuser;
@@ -32,14 +34,27 @@ public class DashboardContentController implements Initializable {
     @FXML
     private HBox activityBarsContainer;
     @FXML
-    private VBox reservationsVBox;  // Nouveau : conteneur pour les cartes de réservations
+    private VBox reservationsVBox;
+    @FXML
+    private TextField searchField;  // Nouveau : champ de recherche
+    @FXML
+    private ComboBox<String> sortComboBox;  // Nouveau : combo pour le tri
 
     private Servicereservationlog serviceReservation = new Servicereservationlog();
     private Servicelogement serviceLogement = new Servicelogement();
     private Serviceuser serviceUser = new Serviceuser();
+    private List<reservationlog> allReservations;  // Stocke toutes les réservations pour filtrage/tri
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Configurer le ComboBox pour le tri
+        sortComboBox.setItems(FXCollections.observableArrayList("Montant croissant", "Montant décroissant"));
+        sortComboBox.setValue("Montant décroissant");  // Valeur par défaut
+
+        // Ajouter des listeners pour la recherche et le tri
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> updateReservationsDisplay());
+        sortComboBox.valueProperty().addListener((observable, oldValue, newValue) -> updateReservationsDisplay());
+
         try {
             loadDashboardData();
         } catch (SQLException e) {
@@ -48,15 +63,15 @@ public class DashboardContentController implements Initializable {
     }
 
     private void loadDashboardData() throws SQLException {
-        List<reservationlog> reservations = serviceReservation.afficher();
+        allReservations = serviceReservation.afficher();
 
-        // Calcul des statistiques
-        int total = reservations.size();
+        // Calcul des statistiques (inchangé)
+        int total = allReservations.size();
         int todayCount = 0;
         double revenu = 0.0;
         LocalDate aujourdhui = LocalDate.now();
 
-        for (reservationlog r : reservations) {
+        for (reservationlog r : allReservations) {
             LocalDate dateDebut = r.getDate_debut().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             if (dateDebut.equals(aujourdhui)) {
                 todayCount++;
@@ -68,15 +83,38 @@ public class DashboardContentController implements Initializable {
         reservationsJourLabel.setText(String.valueOf(todayCount));
         revenuTotalLabel.setText(String.format("%.0f DT", revenu));
 
-        // Création des barres d'activité (basées sur les données réelles)
-        createActivityBars(reservations);
+        // Création des barres d'activité (inchangé)
+        createActivityBars(allReservations);
 
-        // Remplir le VBox avec toutes les réservations sous forme de cartes
-        loadReservationsCards(reservations);
+        // Charger les réservations avec recherche/tri appliqués
+        updateReservationsDisplay();
+    }
+
+    private void updateReservationsDisplay() {
+        try {
+            List<reservationlog> filteredAndSorted = applySearchAndSort(allReservations);
+            loadReservationsCards(filteredAndSorted);
+        } catch (SQLException e) {
+            showAlert("Erreur", "Erreur lors de la mise à jour : " + e.getMessage());
+        }
+    }
+
+    private List<reservationlog> applySearchAndSort(List<reservationlog> reservations) throws SQLException {
+        // Appliquer la recherche par statut
+        String searchText = searchField.getText().toLowerCase();
+        List<reservationlog> filtered = reservations;
+        if (!searchText.isEmpty()) {
+            filtered = serviceReservation.rechercherParAttribut("status", searchText);  // Recherche par statut
+        }
+
+        // Appliquer le tri par montant
+        String sortOption = sortComboBox.getValue();
+        boolean ascending = "Montant croissant".equals(sortOption);
+        return serviceReservation.trierParAttribut("montant", ascending);
     }
 
     private void createActivityBars(List<reservationlog> reservations) {
-        String[] jours = {"L", "M", "M", "J", "J", "V", "S", "D"};  // Lundi à Dimanche
+        String[] jours = {"L", "M", "M", "J", "V", "S", "D"};  // Lundi à Dimanche
         Map<String, Integer> counts = new HashMap<>();
         for (String jour : jours) {
             counts.put(jour, 0);
@@ -117,12 +155,14 @@ public class DashboardContentController implements Initializable {
     private void loadReservationsCards(List<reservationlog> reservations) {
         reservationsVBox.getChildren().clear();  // Vider les cartes existantes
 
-        // Trier par date de début décroissante
-        List<reservationlog> triees = reservations.stream()
-                .sorted((r1, r2) -> r2.getDate_debut().compareTo(r1.getDate_debut()))
-                .collect(Collectors.toList());
+        if (reservations.isEmpty()) {
+            Label noDataLabel = new Label("Aucune réservation trouvée.");
+            noDataLabel.setStyle("-fx-font-size: 14; -fx-text-fill: #6B7280;");
+            reservationsVBox.getChildren().add(noDataLabel);
+            return;
+        }
 
-        for (reservationlog r : triees) {
+        for (reservationlog r : reservations) {
             HBox carte = creerCarteReservation(r);
             reservationsVBox.getChildren().add(carte);
         }
@@ -154,11 +194,12 @@ public class DashboardContentController implements Initializable {
         String dateDebut = sdf.format(r.getDate_debut());
         String dateFin = sdf.format(r.getDate_fin());
         String total = String.format("%.0f DT", r.getMontant());
-        String status = r.getStatus().name();
+        String status = r.getStatus().name().toLowerCase();
         String statusDisplay = switch (status) {
-            case "CONFIRMED" -> "Confirmé";
-            case "PENDING" -> "En Attente";
-            case "COMPLETED" -> "Terminé";
+            case "confirmée" -> "Confirmée";
+            case "annulée" -> "Annulée";
+            case "en_attente" -> "En Attente";
+            case "terminée" -> "Terminée";
             default -> status;
         };
 
