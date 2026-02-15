@@ -14,7 +14,7 @@
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.GestionVehiculesController"
       spacing="25" style="-fx-background-color: #f5f7fa;"
-      prefWidth="1400" prefHeight="850">
+      >
 
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
@@ -85,7 +85,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="CRUD · Create"
+            <Label text="Create"
                    style="-fx-font-size: 11px; -fx-text-fill: #059669; -fx-background-color: #d1fae5; -fx-padding: 5 15; -fx-background-radius: 12; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -120,7 +120,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="CRUD · Read"
+            <Label text="Read History"
                    style="-fx-font-size: 11px; -fx-text-fill: #2563eb; -fx-background-color: #dbeafe; -fx-padding: 5 15; -fx-background-radius: 12; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -142,7 +142,7 @@
                          -fx-background-radius: 20;
                          -fx-pref-width: 100;
                          -fx-pref-height: 100;">
-                <Label text="✏️" style="-fx-font-size: 48px;"/>
+                <Label text="📝" style="-fx-font-size: 48px;"/>
             </VBox>
 
             <!-- Titre et Description -->
@@ -155,7 +155,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="CRUD · Update"
+            <Label text="Update"
                    style="-fx-font-size: 11px; -fx-text-fill: #d97706; -fx-background-color: #fef3c7; -fx-padding: 5 15; -fx-background-radius: 12; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -177,8 +177,7 @@
                          -fx-background-radius: 20;
                          -fx-pref-width: 100;
                          -fx-pref-height: 100;">
-                <Label text="🗑️" style="-fx-font-size: 48px;"/>
-            </VBox>
+                <Label text="🗑" style="-fx-font-size: 48px;"/>            </VBox>
 
             <!-- Titre et Description -->
             <VBox spacing="8" alignment="CENTER">
@@ -190,7 +189,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="CRUD · Delete"
+            <Label text="Delete"
                    style="-fx-font-size: 11px; -fx-text-fill: #dc2626; -fx-background-color: #fee2e2; -fx-padding: 5 15; -fx-background-radius: 12; -fx-font-weight: bold;"/>
         </VBox>
 

@@ -33,6 +33,7 @@
         </VBox>
         <HBox HBox.hgrow="ALWAYS"/>
         <Button text="🔄 Rafraîchir"
+                onAction="#rafraichirDashboard"
                 style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
     </HBox>
 

@@ -54,26 +54,34 @@ public class Dashboardcontroller {
      * Charge les statistiques principales
      */
     private void chargerStatistiques() {
+        System.out.println("=== Chargement des statistiques ===");
+
         // Modèle le plus loué
         Map<String, Object> topModele = dashboardservice.getModeleLesPlusLoue();
         String marque = (String) topModele.get("nomMarque");
         String modele = (String) topModele.get("nomModele");
         int nbLocations = (int) topModele.get("nombreLocations");
 
+        System.out.println("Modèle le plus loué : " + marque + " " + modele + " (" + nbLocations + " locations)");
         lblModeleTopNom.setText(marque + " " + modele);
         lblModeleTopCount.setText(nbLocations + " location" + (nbLocations > 1 ? "s" : ""));
 
         // Locations actives
         int locationsActives = dashboardservice.getNombreLocationsActives();
+        System.out.println("Locations actives : " + locationsActives);
         lblLocationsActives.setText(String.valueOf(locationsActives));
 
         // Véhicules disponibles
         int vehiculesDisponibles = dashboardservice.getNombreVehiculesDisponibles();
+        System.out.println("Véhicules disponibles : " + vehiculesDisponibles);
         lblVehiculesDisponibles.setText(String.valueOf(vehiculesDisponibles));
 
         // Véhicules loués
         int vehiculesLoues = dashboardservice.getNombreVehiculesLoues();
+        System.out.println("Véhicules loués : " + vehiculesLoues);
         lblVehiculesLoues.setText(String.valueOf(vehiculesLoues));
+
+        System.out.println("=== Statistiques chargées ===");
     }
 
     /**
@@ -179,7 +187,7 @@ public class Dashboardcontroller {
     }
 
     /**
-     * Charge une nouvelle interface dans une nouvelle fenêtre
+     * Charge une nouvelle interface dans une nouvelle fenêtre (plein écran)
      */
     private void chargerNouvelleInterface(String fxmlPath, String titre) {
         try {
@@ -189,6 +197,8 @@ public class Dashboardcontroller {
             Stage stage = new Stage();
             stage.setTitle(titre);
             stage.setScene(new Scene(root));
+            stage.setMaximized(true); // Plein écran
+            stage.setResizable(true); // Responsive
             stage.show();
 
         } catch (IOException e) {

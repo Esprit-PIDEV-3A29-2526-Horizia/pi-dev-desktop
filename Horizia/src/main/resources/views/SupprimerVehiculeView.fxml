@@ -5,212 +5,226 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.SupprimerVehiculeController"
-      spacing="25"
-      style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
-      prefWidth="700" prefHeight="600">
+<!-- ═══════════════════════════════════════════════════════════════════
+     SCROLLPANE PRINCIPAL - Permet de scroller toute la page
+     ═══════════════════════════════════════════════════════════════════ -->
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.SupprimerVehiculeController"
+            fitToWidth="true"
+            style="-fx-background-color: transparent; -fx-background: transparent;">
 
-    <padding>
-        <Insets top="30" right="40" bottom="30" left="40"/>
-    </padding>
+    <content>
+        <VBox spacing="25"
+              style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
+              prefWidth="700" minHeight="600">
 
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!--                          HEADER SECTION                          -->
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <VBox spacing="8" alignment="CENTER">
-        <Label text="🗑️" style="-fx-font-size: 56px;"/>
-        <Label text="Supprimer un Véhicule"
-               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-            <font>
-                <Font name="System Bold" size="28"/>
-            </font>
-        </Label>
-        <Label text="Recherchez le véhicule puis confirmez la suppression"
-               style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
-    </VBox>
+            <padding>
+                <Insets top="30" right="40" bottom="30" left="40"/>
+            </padding>
 
-    <Separator style="-fx-background-color: #bdc3c7;"/>
-
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!--                   SECTION RECHERCHE                              -->
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <VBox spacing="15"
-          style="-fx-background-color: white;
-                 -fx-padding: 25;
-                 -fx-background-radius: 15;
-                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
-
-        <Label text="🔍 Rechercher le véhicule à supprimer"
-               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;">
-            <font>
-                <Font name="System Bold" size="16"/>
-            </font>
-        </Label>
-
-        <HBox spacing="15" alignment="CENTER_LEFT">
-            <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Immatriculation du véhicule"
-                       style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                <TextField fx:id="txtRechercheImmat"
-                           promptText="Ex: 123 TUN 456"
-                           style="-fx-font-size: 15px; -fx-padding: 12;"
-                           HBox.hgrow="ALWAYS"/>
-            </VBox>
-
-            <VBox spacing="6" alignment="BOTTOM_CENTER">
-                <Label text=" " style="-fx-font-size: 13px;"/>
-                <Button text="🔎 Rechercher"
-                        onAction="#rechercherVehicule"
-                        prefWidth="150"
-                        style="-fx-background-color: #3498db;
-                               -fx-text-fill: white;
-                               -fx-font-size: 14px;
-                               -fx-font-weight: bold;
-                               -fx-padding: 12 0;
-                               -fx-background-radius: 8;
-                               -fx-cursor: hand;">
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!--                          HEADER SECTION                          -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <VBox spacing="8" alignment="CENTER">
+                <Label text="🗑️" style="-fx-font-size: 56px;"/>
+                <Label text="Supprimer un Véhicule"
+                       style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
                     <font>
-                        <Font name="System Bold" size="14"/>
+                        <Font name="System Bold" size="28"/>
                     </font>
-                </Button>
+                </Label>
+                <Label text="Recherchez le véhicule puis confirmez la suppression"
+                       style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
             </VBox>
-        </HBox>
 
-        <Label fx:id="lblMessageRecherche"
-               text=""
-               wrapText="true"
-               visible="false"
-               managed="false"
-               style="-fx-font-size: 12px; -fx-padding: 10; -fx-background-radius: 8;"/>
-    </VBox>
+            <Separator style="-fx-background-color: #bdc3c7;"/>
 
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!--               SECTION DÉTAILS ET CONFIRMATION                    -->
-    <!-- ═══════════════════════════════════════════════════════════════ -->
-    <VBox fx:id="vboxConfirmation"
-          spacing="20"
-          visible="false"
-          managed="false"
-          style="-fx-background-color: white;
-                 -fx-padding: 30;
-                 -fx-background-radius: 15;
-                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!--                   SECTION RECHERCHE                              -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <VBox spacing="15"
+                  style="-fx-background-color: white;
+                         -fx-padding: 25;
+                         -fx-background-radius: 15;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
 
-        <Label text="⚠️ Détails du véhicule"
-               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;">
-            <font>
-                <Font name="System Bold" size="18"/>
-            </font>
-        </Label>
+                <Label text="🔍 Rechercher le véhicule à supprimer"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;">
+                    <font>
+                        <Font name="System Bold" size="16"/>
+                    </font>
+                </Label>
 
-        <!-- Détails du véhicule -->
-        <VBox spacing="12"
-              style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 10;">
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Immatriculation du véhicule"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtRechercheImmat"
+                                   promptText="Ex: 123 TUN 456"
+                                   style="-fx-font-size: 15px; -fx-padding: 12;"
+                                   HBox.hgrow="ALWAYS"/>
+                    </VBox>
 
-            <GridPane hgap="15" vgap="10">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="40"/>
-                    <ColumnConstraints percentWidth="60"/>
-                </columnConstraints>
+                    <VBox spacing="6" alignment="BOTTOM_CENTER">
+                        <Label text=" " style="-fx-font-size: 13px;"/>
+                        <Button text="🔎 Rechercher"
+                                onAction="#rechercherVehicule"
+                                prefWidth="150"
+                                style="-fx-background-color: #3498db;
+                                       -fx-text-fill: white;
+                                       -fx-font-size: 14px;
+                                       -fx-font-weight: bold;
+                                       -fx-padding: 12 0;
+                                       -fx-background-radius: 8;
+                                       -fx-cursor: hand;">
+                            <font>
+                                <Font name="System Bold" size="14"/>
+                            </font>
+                        </Button>
+                    </VBox>
+                </HBox>
 
-                <Label text="Immatriculation :" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblImmat" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"
-                       style="-fx-font-size: 13px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;"/>
-
-                <Label text="Marque et Modèle :" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblModele" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"
-                       style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
-
-                <Label text="Année :" GridPane.columnIndex="0" GridPane.rowIndex="2"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblAnnee" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"
-                       style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
-
-                <Label text="État :" GridPane.columnIndex="0" GridPane.rowIndex="3"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblEtat" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"
-                       style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
-
-                <Label text="Kilométrage :" GridPane.columnIndex="0" GridPane.rowIndex="4"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblKilometrage" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"
-                       style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
-
-                <Label text="Prix par jour :" GridPane.columnIndex="0" GridPane.rowIndex="5"
-                       style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
-                <Label fx:id="lblPrix" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"
-                       style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
-            </GridPane>
-        </VBox>
-
-        <!-- Avertissement -->
-        <HBox spacing="10" alignment="CENTER_LEFT"
-              style="-fx-background-color: #fff3cd;
-                     -fx-padding: 15;
-                     -fx-background-radius: 8;
-                     -fx-border-color: #ffc107;
-                     -fx-border-width: 2;
-                     -fx-border-radius: 8;">
-            <Label text="⚠️" style="-fx-font-size: 24px;"/>
-            <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="ATTENTION : Cette action est irréversible !"
-                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
-                <Label text="Le véhicule sera définitivement supprimé de la base de données."
+                <Label fx:id="lblMessageRecherche"
+                       text=""
                        wrapText="true"
-                       style="-fx-font-size: 12px; -fx-text-fill: #856404;"/>
+                       visible="false"
+                       managed="false"
+                       style="-fx-font-size: 12px; -fx-padding: 10; -fx-background-radius: 8;"/>
             </VBox>
-        </HBox>
 
-        <!-- Message -->
-        <Label fx:id="lblMessage"
-               text=""
-               wrapText="true"
-               visible="false"
-               managed="false"
-               style="-fx-font-size: 13px; -fx-padding: 12; -fx-background-radius: 8;"/>
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!--               SECTION DÉTAILS ET CONFIRMATION                    -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <VBox fx:id="vboxConfirmation"
+                  spacing="20"
+                  visible="false"
+                  managed="false"
+                  style="-fx-background-color: white;
+                         -fx-padding: 30;
+                         -fx-background-radius: 15;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
 
-        <!-- Boutons -->
-        <HBox spacing="15" alignment="CENTER">
-            <Button text="✖ Annuler"
-                    onAction="#annuler"
-                    prefWidth="200"
-                    style="-fx-background-color: #95a5a6;
-                           -fx-text-fill: white;
-                           -fx-font-size: 15px;
-                           -fx-font-weight: bold;
-                           -fx-padding: 14 0;
-                           -fx-background-radius: 10;
-                           -fx-cursor: hand;">
-                <font>
-                    <Font name="System Bold" size="15"/>
-                </font>
-            </Button>
+                <Label text="⚠️ Détails du véhicule"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;">
+                    <font>
+                        <Font name="System Bold" size="18"/>
+                    </font>
+                </Label>
 
-            <Button text="🗑️ Confirmer la suppression"
-                    onAction="#confirmerSuppression"
-                    prefWidth="250"
-                    style="-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);
-                           -fx-text-fill: white;
-                           -fx-font-size: 16px;
-                           -fx-font-weight: bold;
-                           -fx-padding: 14 0;
-                           -fx-background-radius: 10;
-                           -fx-cursor: hand;
-                           -fx-effect: dropshadow(gaussian, rgba(231,76,60,0.4), 12, 0, 0, 4);">
-                <font>
-                    <Font name="System Bold" size="16"/>
-                </font>
-            </Button>
-        </HBox>
-    </VBox>
+                <!-- Détails du véhicule -->
+                <VBox spacing="12"
+                      style="-fx-background-color: #f8f9fa; -fx-padding: 20; -fx-background-radius: 10;">
 
-</VBox>
+                    <GridPane hgap="15" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="40"/>
+                            <ColumnConstraints percentWidth="60"/>
+                        </columnConstraints>
+
+                        <Label text="Immatriculation :" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblImmat" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               style="-fx-font-size: 13px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;"/>
+
+                        <Label text="Marque et Modèle :" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblModele" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Année :" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblAnnee" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                               style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+
+                        <Label text="État :" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblEtat" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                               style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Kilométrage :" GridPane.columnIndex="0" GridPane.rowIndex="4"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblKilometrage" text="-" GridPane.columnIndex="1" GridPane.rowIndex="4"
+                               style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Prix par jour :" GridPane.columnIndex="0" GridPane.rowIndex="5"
+                               style="-fx-font-size: 13px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <Label fx:id="lblPrix" text="-" GridPane.columnIndex="1" GridPane.rowIndex="5"
+                               style="-fx-font-size: 13px; -fx-text-fill: #27ae60; -fx-font-weight: bold;"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- Avertissement -->
+                <HBox spacing="10" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #fff3cd;
+                             -fx-padding: 15;
+                             -fx-background-radius: 8;
+                             -fx-border-color: #ffc107;
+                             -fx-border-width: 2;
+                             -fx-border-radius: 8;">
+                    <Label text="⚠️" style="-fx-font-size: 24px;"/>
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
+                        <Label text="ATTENTION : Cette action est irréversible !"
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #856404;"/>
+                        <Label text="Le véhicule sera définitivement supprimé de la base de données."
+                               wrapText="true"
+                               style="-fx-font-size: 12px; -fx-text-fill: #856404;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Message -->
+                <Label fx:id="lblMessage"
+                       text=""
+                       wrapText="true"
+                       visible="false"
+                       managed="false"
+                       style="-fx-font-size: 13px; -fx-padding: 12; -fx-background-radius: 8;"/>
+
+                <!-- Boutons -->
+                <HBox spacing="15" alignment="CENTER">
+                    <Button text="✖ Annuler"
+                            onAction="#annuler"
+                            prefWidth="200"
+                            style="-fx-background-color: #95a5a6;
+                                   -fx-text-fill: white;
+                                   -fx-font-size: 15px;
+                                   -fx-font-weight: bold;
+                                   -fx-padding: 14 0;
+                                   -fx-background-radius: 10;
+                                   -fx-cursor: hand;">
+                        <font>
+                            <Font name="System Bold" size="15"/>
+                        </font>
+                    </Button>
+
+                    <Button text="🗑️ Confirmer la suppression"
+                            onAction="#confirmerSuppression"
+                            prefWidth="250"
+                            style="-fx-background-color: linear-gradient(to bottom, #e74c3c, #c0392b);
+                                   -fx-text-fill: white;
+                                   -fx-font-size: 16px;
+                                   -fx-font-weight: bold;
+                                   -fx-padding: 14 0;
+                                   -fx-background-radius: 10;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(231,76,60,0.4), 12, 0, 0, 4);">
+                        <font>
+                            <Font name="System Bold" size="16"/>
+                        </font>
+                    </Button>
+                </HBox>
+            </VBox>
+
+            <!-- Espace en bas pour le scroll -->
+            <Region prefHeight="50"/>
+
+        </VBox>
+    </content>
+</ScrollPane>

@@ -12,8 +12,7 @@
 <?import javafx.scene.control.Button?>
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.GestionMarqueController"
-      spacing="25" style="-fx-background-color: #f5f7fa;"
-      prefWidth="1400" prefHeight="850">
+      spacing="25" style="-fx-background-color: #f5f7fa;">
 
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
@@ -85,7 +84,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="Marque · Create"
+            <Label text="Marque - Create"
                    style="-fx-font-size: 10px; -fx-text-fill: #059669; -fx-background-color: #d1fae5; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -120,7 +119,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="Marque · Read"
+            <Label text="Marque - Read"
                    style="-fx-font-size: 10px; -fx-text-fill: #2563eb; -fx-background-color: #dbeafe; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -155,7 +154,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="Modèle · Create"
+            <Label text="Modèle - Create"
                    style="-fx-font-size: 10px; -fx-text-fill: #d97706; -fx-background-color: #fef3c7; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-weight: bold;"/>
         </VBox>
 
@@ -191,7 +190,7 @@
             </VBox>
 
             <!-- Badge -->
-            <Label text="Modèle · Read · Complet"
+            <Label text="Modèle - Read "
                    style="-fx-font-size: 11px; -fx-text-fill: #7c3aed; -fx-background-color: #f3e8ff; -fx-padding: 5 15; -fx-background-radius: 12; -fx-font-weight: bold;"/>
         </VBox>
 

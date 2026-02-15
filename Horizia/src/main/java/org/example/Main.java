@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.example.utils.DatabaseConnection;
 
@@ -32,7 +33,10 @@ public class Main extends Application {
             } else {
                 throw new Exception("Connexion à la base de données échouée !");
             }
-
+            // Test simple : une seule grande
+            Image icon64 = new Image(getClass().getResourceAsStream("/images/logo.png"));
+            primaryStage.getIcons().clear(); // vide les précédentes si besoin
+            primaryStage.getIcons().add(icon64);
             // ═══════════════════════════════════════════════════════
             // CHARGEMENT DE L'INTERFACE AVEC SIDEBAR
             // ═══════════════════════════════════════════════════════

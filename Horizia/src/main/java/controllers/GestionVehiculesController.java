@@ -134,6 +134,8 @@ public class GestionVehiculesController {
             stage.setTitle(titre + " - Horizia");
             stage.setScene(new Scene(root));
             stage.show();
+            stage.setMaximized(true);  // Plein écran
+            stage.setResizable(true);  // Responsive
 
             System.out.println("✓ Interface chargée : " + titre);
 
@@ -150,23 +152,9 @@ public class GestionVehiculesController {
     @FXML
     private void retourDashboard() {
         System.out.println("← Retour au Dashboard");
-        try {
-            // Récupérer la fenêtre actuelle
-            Stage currentStage = (Stage) cardAjouter.getScene().getWindow();
-
-            // Charger le Dashboard dans le MainLayout
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/DashboardView.fxml"));
-            Parent dashboard = loader.load();
-
-            // Récupérer le contrôleur du MainLayout (via la scène parente si elle existe)
-            // Si on est dans la fenêtre principale, recharger le Dashboard
-            currentStage.getScene().setRoot(dashboard);
-
-            System.out.println("✓ Retour au Dashboard effectué");
-
-        } catch (IOException e) {
-            System.err.println("✗ Erreur lors du retour au Dashboard : " + e.getMessage());
-            e.printStackTrace();
-        }
+        // Récupérer la fenêtre actuelle et la fermer
+        Stage currentStage = (Stage) cardAjouter.getScene().getWindow();
+        currentStage.close();
+        System.out.println("✓ Fenêtre fermée - retour au Dashboard");
     }
 }

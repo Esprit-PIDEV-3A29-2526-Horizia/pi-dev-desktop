@@ -16,11 +16,16 @@ public class LocationService {
     // CREATE - Ajouter une location
     public boolean ajouterLocation(Location l) {
         String sql = "INSERT INTO location (id_vehicule, client_nom_complet, client_telephone, client_cin, " +
-                "date_debut, date_fin_prevue, kilometrage_debut, prix_par_jour, montant_total, statut) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "date_debut, date_fin_prevue, kilometrage_debut, prix_par_jour, montant_total, statut, avance, notes) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = getConn();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getConn();
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             ps.setInt(1, l.getIdVehicule());
             ps.setString(2, l.getClientNomComplet());
@@ -32,17 +37,44 @@ public class LocationService {
             ps.setDouble(8, l.getPrixParJour());
             ps.setDouble(9, l.getMontantTotal());
             ps.setString(10, l.getStatut());
+            ps.setDouble(11, l.getAvance());
+            ps.setString(12, l.getNotes());
 
             if (ps.executeUpdate() > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) l.setIdLocation(rs.getInt(1));
-                System.out.println("Location ajoutée : ID " + l.getIdLocation());
+
+                // Mettre le véhicule à "louée"
+                String updateVehicule = "UPDATE vehicule SET etat = 'louee' WHERE id_vehicule = ?";
+                PreparedStatement psUpdate = conn.prepareStatement(updateVehicule);
+                psUpdate.setInt(1, l.getIdVehicule());
+                psUpdate.executeUpdate();
+                psUpdate.close();
+
+                conn.commit();
+                System.out.println("✓ Location ajoutée : ID " + l.getIdLocation());
+                System.out.println("✓ Véhicule " + l.getIdVehicule() + " → louée");
                 return true;
             }
+
+            conn.rollback();
+            return false;
+
         } catch (SQLException e) {
             System.err.println("Erreur ajout location : " + e.getMessage());
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {}
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {}
         }
-        return false;
     }
 
     // READ - Toutes les locations
@@ -119,8 +151,13 @@ public class LocationService {
                 "prix_par_jour=?, montant_total=?, avance=?, statut=?, notes=? " +
                 "WHERE id_location=?";
 
-        try (Connection conn = getConn();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getConn();
+            conn.setAutoCommit(false);
+
+            ps = conn.prepareStatement(sql);
 
             ps.setInt(1, l.getIdVehicule());
             ps.setString(2, l.getClientNomComplet());
@@ -138,25 +175,107 @@ public class LocationService {
             ps.setString(14, l.getNotes());
             ps.setInt(15, l.getIdLocation());
 
-            return ps.executeUpdate() > 0;
+            if (ps.executeUpdate() > 0) {
+                // Gérer le statut du véhicule selon le statut de la location
+                String statut = l.getStatut().toLowerCase();
+                String nouvelEtat = null;
+
+                if ("terminée".equals(statut) || "annulée".equals(statut) || "no_show".equals(statut)) {
+                    nouvelEtat = "disponible";
+                } else if ("réservée".equals(statut) || "en_cours".equals(statut)) {
+                    nouvelEtat = "louee";
+                }
+
+                if (nouvelEtat != null) {
+                    String updateVehicule = "UPDATE vehicule SET etat = ? WHERE id_vehicule = ?";
+                    PreparedStatement psUpdate = conn.prepareStatement(updateVehicule);
+                    psUpdate.setString(1, nouvelEtat);
+                    psUpdate.setInt(2, l.getIdVehicule());
+                    psUpdate.executeUpdate();
+                    psUpdate.close();
+                    System.out.println("✓ Véhicule " + l.getIdVehicule() + " → " + nouvelEtat);
+                }
+
+                conn.commit();
+                return true;
+            }
+
+            conn.rollback();
+            return false;
+
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {}
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {}
         }
-        return false;
     }
 
     // DELETE - Supprimer une location
     public boolean supprimerLocation(int id) {
-        String sql = "DELETE FROM location WHERE id_location = ?";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = getConn();
+            conn.setAutoCommit(false);
 
-        try (Connection conn = getConn();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            // Récupérer l'ID du véhicule avant suppression
+            String getVehicule = "SELECT id_vehicule FROM location WHERE id_location = ?";
+            PreparedStatement psGet = conn.prepareStatement(getVehicule);
+            psGet.setInt(1, id);
+            ResultSet rs = psGet.executeQuery();
+
+            int idVehicule = 0;
+            if (rs.next()) {
+                idVehicule = rs.getInt("id_vehicule");
+            }
+            psGet.close();
+
+            // Supprimer la location
+            String sql = "DELETE FROM location WHERE id_location = ?";
+            ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+
+            if (ps.executeUpdate() > 0 && idVehicule > 0) {
+                // Remettre le véhicule à "disponible"
+                String updateVehicule = "UPDATE vehicule SET etat = 'disponible' WHERE id_vehicule = ?";
+                PreparedStatement psUpdate = conn.prepareStatement(updateVehicule);
+                psUpdate.setInt(1, idVehicule);
+                psUpdate.executeUpdate();
+                psUpdate.close();
+                System.out.println("✓ Location supprimée, véhicule " + idVehicule + " → disponible");
+
+                conn.commit();
+                return true;
+            }
+
+            conn.rollback();
+            return false;
+
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {}
+            return false;
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {}
         }
-        return false;
     }
 
     // Recherche par client (nom ou téléphone)
