@@ -12,12 +12,10 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ResourceBundle;
 
 public class EditEventFormController implements Initializable {
 
-    @FXML private Label idLabel; // Not shown, just for reference
     @FXML private TextField titreField;
     @FXML private TextArea descriptionField;
     @FXML private ComboBox<String> categorieCombo;
@@ -29,14 +27,34 @@ public class EditEventFormController implements Initializable {
     @FXML private TextField imageUrlField;
     @FXML private ComboBox<String> statutCombo;
 
+    // Labels d'erreur
+    @FXML private Label titreError;
+    @FXML private Label descriptionError;
+    @FXML private Label categorieError;
+    @FXML private Label locationError;
+    @FXML private Label dateDebutError;
+    @FXML private Label dateFinError;
+    @FXML private Label prixError;
+    @FXML private Label capaciteError;
+    @FXML private Label imageError;
+    @FXML private Label statutError;
+
     private ServiceEvent serviceEvent;
     private Events currentEvent;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
+
+        // Initialisation des combos
         categorieCombo.getItems().addAll("Concert", "Spectacle", "Conférence", "Festival", "Sport", "Autre");
         statutCombo.getItems().addAll("Actif", "Annulé", "Reporté", "Complet");
+
+        // Initialisation du spinner
+        capaciteSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10000, 100));
+
+        // Mettre en place toutes les validations
+        setupValidation();
     }
 
     public void setEvent(Events event) {
@@ -58,28 +76,239 @@ public class EditEventFormController implements Initializable {
         }
 
         prixField.setText(String.valueOf(currentEvent.getPrix()));
-        capaciteSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1000, currentEvent.getCapaciteMax()));
+        capaciteSpinner.getValueFactory().setValue(currentEvent.getCapaciteMax());
         imageUrlField.setText(currentEvent.getImage_url());
         statutCombo.setValue(currentEvent.getStatut());
     }
 
+    private void setupValidation() {
+        // ===== TITRE =====
+        titreField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.isEmpty()) {
+                titreError.setText("❌ Le titre est obligatoire");
+                titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else if (newVal.length() < 3) {
+                titreError.setText("❌ Minimum 3 caractères");
+                titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else if (newVal.length() > 100) {
+                titreError.setText("❌ Maximum 100 caractères");
+                titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                titreError.setText("✓ Valide");
+                titreError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== DESCRIPTION =====
+        descriptionField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.length() > 500) {
+                descriptionError.setText("❌ Maximum 500 caractères");
+                descriptionError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else if (newVal.isEmpty()) {
+                descriptionError.setText("ℹ️ Optionnel");
+                descriptionError.setStyle("-fx-text-fill: gray; -fx-font-size: 11px;");
+            } else {
+                descriptionError.setText("✓ Valide");
+                descriptionError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== CATÉGORIE =====
+        categorieCombo.valueProperty().addListener((obs, old, newVal) -> {
+            if (newVal == null || newVal.isEmpty()) {
+                categorieError.setText("❌ Sélectionnez une catégorie");
+                categorieError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                categorieError.setText("✓ Valide");
+                categorieError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== STATUT =====
+        statutCombo.valueProperty().addListener((obs, old, newVal) -> {
+            if (newVal == null || newVal.isEmpty()) {
+                statutError.setText("❌ Sélectionnez un statut");
+                statutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                statutError.setText("✓ Valide");
+                statutError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== LIEU =====
+        locationField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.isEmpty()) {
+                locationError.setText("❌ Le lieu est obligatoire");
+                locationError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else if (newVal.length() < 3) {
+                locationError.setText("❌ Minimum 3 caractères");
+                locationError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                locationError.setText("✓ Valide");
+                locationError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== DATES =====
+        dateDebutPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
+        dateFinPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
+
+        // ===== PRIX =====
+        prixField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.isEmpty()) {
+                prixError.setText("❌ Le prix est obligatoire");
+                prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+                return;
+            }
+
+            if (!newVal.matches("\\d*(\\.\\d*)?")) {
+                prixError.setText("❌ Chiffres uniquement");
+                prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+                return;
+            }
+
+            try {
+                float prix = Float.parseFloat(newVal);
+                if (prix <= 0) {
+                    prixError.setText("❌ Prix doit être > 0");
+                    prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+                } else if (prix > 100000) {
+                    prixError.setText("❌ Prix maximum 100000 DT");
+                    prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+                } else {
+                    prixError.setText("✓ Valide");
+                    prixError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+                }
+            } catch (NumberFormatException e) {
+                prixError.setText("❌ Format invalide");
+                prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== CAPACITÉ =====
+        capaciteSpinner.valueProperty().addListener((obs, old, newVal) -> {
+            if (newVal == null || newVal <= 0) {
+                capaciteError.setText("❌ Capacité invalide");
+                capaciteError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                capaciteError.setText("✓ Valide");
+                capaciteError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+
+        // ===== IMAGE URL =====
+        imageUrlField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.isEmpty()) {
+                imageError.setText("ℹ️ Optionnel");
+                imageError.setStyle("-fx-text-fill: gray; -fx-font-size: 11px;");
+            } else if (!newVal.matches("^(http|https)://.*\\.(jpg|jpeg|png|gif|webp|bmp|svg).*$")) {
+                imageError.setText("❌ URL d'image invalide");
+                imageError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                imageError.setText("✓ Valide");
+                imageError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        });
+    }
+
+    private void validateDates() {
+        LocalDate debut = dateDebutPicker.getValue();
+        LocalDate fin = dateFinPicker.getValue();
+
+        // Validation date début
+        if (debut == null) {
+            dateDebutError.setText("❌ Date début obligatoire");
+            dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+        } else {
+            dateDebutError.setText("✓ Valide");
+            dateDebutError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+        }
+
+        // Validation date fin
+        if (fin != null) {
+            if (debut != null && fin.isBefore(debut)) {
+                dateFinError.setText("❌ Après date début");
+                dateFinError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            } else {
+                dateFinError.setText("✓ Valide");
+                dateFinError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
+            }
+        } else {
+            dateFinError.setText("ℹ️ Optionnel");
+            dateFinError.setStyle("-fx-text-fill: gray; -fx-font-size: 11px;");
+        }
+    }
+
+    private boolean validateAll() {
+        boolean isValid = true;
+
+        // Titre
+        if (titreField.getText().isEmpty() || titreField.getText().length() < 3) {
+            titreError.setText("❌ Titre invalide");
+            titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        // Catégorie
+        if (categorieCombo.getValue() == null) {
+            categorieError.setText("❌ Catégorie requise");
+            categorieError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        // Statut
+        if (statutCombo.getValue() == null) {
+            statutError.setText("❌ Statut requis");
+            statutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        // Lieu
+        if (locationField.getText().isEmpty() || locationField.getText().length() < 3) {
+            locationError.setText("❌ Lieu invalide");
+            locationError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        // Date début
+        if (dateDebutPicker.getValue() == null) {
+            dateDebutError.setText("❌ Date début requise");
+            dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        // Prix
+        try {
+            float prix = Float.parseFloat(prixField.getText());
+            if (prix <= 0 || prix > 100000) {
+                prixError.setText("❌ Prix invalide");
+                prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+                isValid = false;
+            }
+        } catch (Exception e) {
+            prixError.setText("❌ Prix invalide");
+            prixError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     @FXML
     private void handleSave() {
-        // Validate fields
-        if (titreField.getText().isEmpty() || locationField.getText().isEmpty() ||
-                prixField.getText().isEmpty() || dateDebutPicker.getValue() == null) {
-            showAlert("Erreur", "Veuillez remplir tous les champs obligatoires");
+        if (!validateAll()) {
+            showAlert("Erreur de validation", "Veuillez corriger les erreurs dans le formulaire");
             return;
         }
 
         try {
-            // Update event
+            // Mise à jour de l'événement
             currentEvent.setTitre(titreField.getText());
             currentEvent.setDescription(descriptionField.getText());
             currentEvent.setCategorie(categorieCombo.getValue());
             currentEvent.setLocation(locationField.getText());
 
-            // Update dates
+            // Mise à jour des dates
             LocalDate debutDate = dateDebutPicker.getValue();
             LocalDateTime debutDateTime = debutDate.atStartOfDay();
             currentEvent.setDateDebut(Timestamp.valueOf(debutDateTime));
@@ -92,7 +321,7 @@ public class EditEventFormController implements Initializable {
 
             currentEvent.setPrix(Float.parseFloat(prixField.getText()));
 
-            // Update capacity if changed
+            // Mise à jour de la capacité
             int oldCapacity = currentEvent.getCapaciteMax();
             int newCapacity = capaciteSpinner.getValue();
             if (newCapacity != oldCapacity) {
@@ -104,16 +333,12 @@ public class EditEventFormController implements Initializable {
             currentEvent.setImage_url(imageUrlField.getText());
             currentEvent.setStatut(statutCombo.getValue());
 
-            // Save to database
+            // Sauvegarde
             serviceEvent.modifier(currentEvent);
 
             showAlert("Succès", "Événement modifié avec succès!");
-
-            // Close window
             ((Stage) titreField.getScene().getWindow()).close();
 
-        } catch (NumberFormatException e) {
-            showAlert("Erreur", "Le prix doit être un nombre valide");
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Erreur lors de la modification: " + e.getMessage());

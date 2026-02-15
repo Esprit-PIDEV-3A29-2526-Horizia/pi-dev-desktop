@@ -14,34 +14,53 @@
         <columnConstraints>
             <ColumnConstraints minWidth="120" />
             <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints minWidth="180" /> <!-- Pour les messages d'erreur -->
         </columnConstraints>
 
+        <!-- TITRE -->
         <Label text="Titre :" GridPane.rowIndex="0" GridPane.columnIndex="0" />
         <TextField fx:id="titreField" promptText="Titre de l'événement" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+        <Label fx:id="titreError" text=" " GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- DESCRIPTION -->
         <Label text="Description :" GridPane.rowIndex="1" GridPane.columnIndex="0" />
         <TextArea fx:id="descriptionField" promptText="Description" prefRowCount="3" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+        <Label fx:id="descriptionError" text=" " GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- CATÉGORIE -->
         <Label text="Catégorie :" GridPane.rowIndex="2" GridPane.columnIndex="0" />
         <ComboBox fx:id="categorieCombo" promptText="Sélectionner" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+        <Label fx:id="categorieError" text=" " GridPane.rowIndex="2" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- LIEU -->
         <Label text="Lieu :" GridPane.rowIndex="3" GridPane.columnIndex="0" />
         <TextField fx:id="locationField" promptText="Lieu" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+        <Label fx:id="locationError" text=" " GridPane.rowIndex="3" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- DATE DÉBUT -->
         <Label text="Date début :" GridPane.rowIndex="4" GridPane.columnIndex="0" />
         <DatePicker fx:id="dateDebutPicker" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+        <Label fx:id="dateDebutError" text=" " GridPane.rowIndex="4" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- DATE FIN -->
         <Label text="Date fin :" GridPane.rowIndex="5" GridPane.columnIndex="0" />
         <DatePicker fx:id="dateFinPicker" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+        <Label fx:id="dateFinError" text=" " GridPane.rowIndex="5" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- PRIX -->
         <Label text="Prix :" GridPane.rowIndex="6" GridPane.columnIndex="0" />
         <TextField fx:id="prixField" promptText="Prix" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+        <Label fx:id="prixError" text=" " GridPane.rowIndex="6" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- CAPACITÉ MAX -->
         <Label text="Capacité max :" GridPane.rowIndex="7" GridPane.columnIndex="0" />
         <Spinner fx:id="capaciteSpinner" initialValue="100" min="1" max="1000" GridPane.rowIndex="7" GridPane.columnIndex="1" />
+        <Label fx:id="capaciteError" text=" " GridPane.rowIndex="7" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
+        <!-- IMAGE URL -->
         <Label text="Image URL :" GridPane.rowIndex="8" GridPane.columnIndex="0" />
         <TextField fx:id="imageUrlField" promptText="URL de l'image" GridPane.rowIndex="8" GridPane.columnIndex="1" />
+        <Label fx:id="imageError" text=" " GridPane.rowIndex="8" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
     </GridPane>
 
     <Region VBox.vgrow="ALWAYS" />

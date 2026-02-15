@@ -19,7 +19,9 @@
         <VBox>
             <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
                 <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
-                    <image><Image url="@images/LOGO.png" /></image>
+                    <image>
+                        <Image url="@images/LOGO.png" />
+                    </image>
                 </ImageView>
                 <Region HBox.hgrow="ALWAYS" />
                 <HBox spacing="25" alignment="CENTER">
@@ -40,9 +42,7 @@
     <!-- CONTENT -->
     <center>
         <VBox spacing="25" style="-fx-padding: 30;" alignment="TOP_CENTER">
-
             <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Mes réservations" />
-
             <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                 <content>
                     <FlowPane fx:id="myEventsFlow" hgap="25" vgap="25" prefWrapLength="1100" style="-fx-padding: 10;" />

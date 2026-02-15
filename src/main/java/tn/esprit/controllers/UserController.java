@@ -28,6 +28,7 @@ public class UserController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
     @FXML private Button allFilterBtn;
+    @FXML private Button myEventsBtn;
     @FXML private Button concertFilterBtn;
     @FXML private Button spectacleFilterBtn;
     @FXML private Button conferenceFilterBtn;
@@ -42,6 +43,7 @@ public class UserController implements Initializable {
         sortCombo.getItems().addAll("Titre", "Prix", "Date", "Places");
 
         setupCategoryFilters();
+        myEventsBtn.setOnAction(e -> navigateToMyEvents());
         loadEvents();
 
         // Search functionality
@@ -307,7 +309,7 @@ public class UserController implements Initializable {
         }
     }
 
-    private void navigateToMyEvents() {
+   /* private void navigateToMyEvents() {
         try{
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
             Parent root = loader.load();
@@ -317,8 +319,40 @@ public class UserController implements Initializable {
         }catch(Exception e){
             e.printStackTrace();
         }
-    }
+    }*/
+   private void navigateToMyEvents() {
+       try{
+           FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
+           Parent root = loader.load();
+           Stage stage = (Stage) flowEvents.getScene().getWindow();
 
+           // FORCE the size
+           Scene scene = new Scene(root, 1200, 700);
+           stage.setScene(scene);
+           stage.setWidth(1200);
+           stage.setHeight(700);
+           stage.setTitle("EventHub - Mes réservations");
+
+       }catch(Exception e){
+           e.printStackTrace();
+       }
+   }
+
+    /*private void navigateToEventDetails(Events event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
+            Parent root = loader.load();
+            EventDetailsController controller = loader.getController();
+            controller.setEvent(event);
+
+            Stage stage = (Stage) flowEvents.getScene().getWindow();
+            stage.setScene(new Scene(root, 1200, 700)); // This sets full size
+            stage.setTitle("Détails de l'événement");
+        }catch (Exception e){
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir les détails");
+        }
+    }*/
     private void navigateToEventDetails(Events event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
@@ -327,8 +361,14 @@ public class UserController implements Initializable {
             controller.setEvent(event);
 
             Stage stage = (Stage) flowEvents.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
+
+            // FORCE the size
+            Scene scene = new Scene(root, 1200, 700);
+            stage.setScene(scene);
+            stage.setWidth(1200);
+            stage.setHeight(700);
             stage.setTitle("Détails de l'événement");
+
         }catch (Exception e){
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir les détails");
