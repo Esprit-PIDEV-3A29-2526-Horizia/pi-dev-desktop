@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.client.AccueilClientController"
+            fitToWidth="true" style="-fx-background-color: #f5f7fa;">
+
+    <VBox spacing="0" style="-fx-background-color: #f5f7fa;">
+
+        <!-- ════════════════════════════════════════════════════════ -->
+        <!-- HERO SECTION -->
+        <!-- ════════════════════════════════════════════════════════ -->
+        <VBox fx:id="heroSection" alignment="CENTER" spacing="30"
+              style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #3498db);
+                     -fx-padding: 80 40 80 40;">
+
+            <!-- Logo / Titre -->
+            <Label text="🚗 HORIZIA" style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+
+            <!-- Slogan -->
+            <Label text="Votre Solution Multi-Plateforme pour les voyages"
+                   style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-style: italic;"/>
+
+            <!-- Description -->
+            <Text wrappingWidth="800" textAlignment="CENTER"
+                  style="-fx-fill: white; -fx-font-size: 16px; -fx-line-spacing: 1.5;"
+                  text="Face aux limites des plateformes existantes, nous proposons Horizia : une solution intelligente et durable pour la découverte et la gestion d'événements touristiques et de loisirs. Réservez votre voiture en quelques clics !"/>
+
+            <!-- Barre de Recherche Rapide -->
+            <VBox spacing="20" alignment="CENTER" style="-fx-background-color: white;
+                   -fx-background-radius: 16; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 0, 10);">
+
+                <Label text="🔍 Trouvez votre voiture idéale"
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                <HBox spacing="15" alignment="CENTER">
+                    <!-- Date début -->
+                    <VBox spacing="5">
+                        <Label text="Date de début" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <DatePicker fx:id="dpDateDebut" prefWidth="180"
+                                    style="-fx-font-size: 14px; -fx-background-color: #f8f9fa; -fx-background-radius: 8;"/>
+                    </VBox>
+
+                    <!-- Date fin -->
+                    <VBox spacing="5">
+                        <Label text="Date de retour" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <DatePicker fx:id="dpDateFin" prefWidth="180"
+                                    style="-fx-font-size: 14px; -fx-background-color: #f8f9fa; -fx-background-radius: 8;"/>
+                    </VBox>
+
+                    <!-- Type véhicule -->
+                    <VBox spacing="5">
+                        <Label text="Type de carburant" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-font-weight: bold;"/>
+                        <ComboBox fx:id="cbTypeVehicule" prefWidth="180"
+                                  style="-fx-font-size: 14px; -fx-background-color: #f8f9fa; -fx-background-radius: 8;"/>
+                    </VBox>
+
+                    <!-- Bouton Rechercher -->
+                    <VBox alignment="BOTTOM_CENTER" spacing="5">
+                        <Label text=" " style="-fx-font-size: 12px;"/>
+                        <Button fx:id="btnRechercher" text="🔍 Rechercher" onAction="#rechercherVoitures"
+                                prefWidth="150" prefHeight="40"
+                                style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                                       -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Lien voir toutes -->
+                <Hyperlink text="Ou voir toutes les voitures disponibles →" onAction="#voirToutesLesVoitures"
+                           style="-fx-text-fill: #3498db; -fx-font-size: 14px; -fx-underline: true;"/>
+            </VBox>
+        </VBox>
+
+        <!-- ════════════════════════════════════════════════════════ -->
+        <!-- FEATURES SECTION -->
+        <!-- ════════════════════════════════════════════════════════ -->
+        <VBox fx:id="featuresSection" spacing="40" alignment="CENTER"
+              style="-fx-padding: 60 40 60 40; -fx-background-color: #f5f7fa;">
+
+            <Label text="Pourquoi choisir Horizia ?"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+            <HBox spacing="40" alignment="CENTER">
+                <!-- Feature 1 -->
+                <VBox spacing="15" alignment="CENTER" prefWidth="300"
+                      style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);">
+                    <Label text="⚡" style="-fx-font-size: 48px;"/>
+                    <Label text="Réservation Rapide" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <Text wrappingWidth="250" textAlignment="CENTER"
+                          style="-fx-fill: #7f8c8d; -fx-font-size: 14px;"
+                          text="Réservez votre voiture en moins de 3 minutes avec notre processus simplifié."/>
+                </VBox>
+
+                <!-- Feature 2 -->
+                <VBox spacing="15" alignment="CENTER" prefWidth="300"
+                      style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);">
+                    <Label text="💰" style="-fx-font-size: 48px;"/>
+                    <Label text="Prix Transparents" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <Text wrappingWidth="250" textAlignment="CENTER"
+                          style="-fx-fill: #7f8c8d; -fx-font-size: 14px;"
+                          text="Aucun frais caché. Le prix affiché est le prix final, taxes incluses."/>
+                </VBox>
+
+                <!-- Feature 3 -->
+                <VBox spacing="15" alignment="CENTER" prefWidth="300"
+                      style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 30;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);">
+                    <Label text="🔒" style="-fx-font-size: 48px;"/>
+                    <Label text="Sécurisé et Fiable" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    <Text wrappingWidth="250" textAlignment="CENTER"
+                          style="-fx-fill: #7f8c8d; -fx-font-size: 14px;"
+                          text="Vos données sont protégées. Service client disponible 7j/7."/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- ════════════════════════════════════════════════════════ -->
+        <!-- FOOTER -->
+        <!-- ════════════════════════════════════════════════════════ -->
+        <VBox spacing="10" alignment="CENTER"
+              style="-fx-padding: 30; -fx-background-color: #2c3e50;">
+            <Label text="© 2026 Horizia - Tous droits réservés"
+                   style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+            <Label text="Une solution intelligente pour vos déplacements"
+                   style="-fx-text-fill: #95a5a6; -fx-font-size: 11px;"/>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

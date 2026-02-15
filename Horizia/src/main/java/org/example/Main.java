@@ -33,33 +33,19 @@ public class Main extends Application {
             } else {
                 throw new Exception("Connexion à la base de données échouée !");
             }
-            // Test simple : une seule grande
+
+            // Icône de l'application
             Image icon64 = new Image(getClass().getResourceAsStream("/images/logo.png"));
-            primaryStage.getIcons().clear(); // vide les précédentes si besoin
+            primaryStage.getIcons().clear();
             primaryStage.getIcons().add(icon64);
-            // ═══════════════════════════════════════════════════════
-            // CHARGEMENT DE L'INTERFACE AVEC SIDEBAR
-            // ═══════════════════════════════════════════════════════
-            System.out.println("\n[2/3] Chargement de l'interface principale...");
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainLayout.fxml"));
-            Parent root = loader.load();
-
-            System.out.println("✓ Interface principale chargée avec succès");
 
             // ═══════════════════════════════════════════════════════
-            // AFFICHAGE DE LA FENÊTRE PRINCIPALE
+            // ÉCRAN DE SÉLECTION ADMIN / CLIENT
             // ═══════════════════════════════════════════════════════
-            System.out.println("\n[3/3] Lancement de l'application...");
+            System.out.println("\n[2/3] Affichage de l'écran de sélection...");
 
-            Scene scene = new Scene(root, 1400, 800);
-            primaryStage.setTitle("Horizia - Gestion de Location de Voitures");
-            primaryStage.setScene(scene);
-            primaryStage.setResizable(true);
-            primaryStage.setMaximized(true); // Plein écran pour mieux voir la sidebar
-            primaryStage.show();
+            showSelectionScreen(primaryStage, icon64);
 
-            System.out.println("✓ Application lancée avec succès !");
             System.out.println("\n╔════════════════════════════════════════════════╗");
             System.out.println("║         APPLICATION PRÊTE À L'EMPLOI !         ║");
             System.out.println("╚════════════════════════════════════════════════╝\n");
@@ -87,6 +73,207 @@ public class Main extends Application {
             alert.showAndWait();
 
             System.exit(1);
+        }
+    }
+
+    /**
+     * Affiche l'écran de sélection Admin/Client
+     */
+    private void showSelectionScreen(Stage stage, Image icon) {
+        try {
+            javafx.scene.layout.VBox root = new javafx.scene.layout.VBox(30);
+            root.setAlignment(javafx.geometry.Pos.CENTER);
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e); -fx-padding: 50;");
+
+            // Titre
+            javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("HORIZIA");
+            titleLabel.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+            javafx.scene.control.Label subtitleLabel = new javafx.scene.control.Label("Système de Gestion de Location");
+            subtitleLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #e94560;");
+
+            // Conteneur des boutons
+            javafx.scene.layout.HBox buttonContainer = new javafx.scene.layout.HBox(40);
+            buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
+
+            // Bouton Admin
+            javafx.scene.control.Button btnAdmin = createStyledButton("👤 ADMIN", "#e94560");
+            btnAdmin.setOnAction(e -> openAdminPanel(stage, icon));
+
+            // Bouton Client
+            javafx.scene.control.Button btnClient = createStyledButton("🚗 CLIENT", "#0f3460");
+            btnClient.setOnAction(e -> openClientPanel(stage, icon));
+
+            buttonContainer.getChildren().addAll(btnAdmin, btnClient);
+
+            root.getChildren().addAll(titleLabel, subtitleLabel, buttonContainer);
+
+            Scene scene = new Scene(root, 800, 500);
+            stage.setTitle("Horizia - Sélection du mode");
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            stage.show();
+
+            System.out.println("✓ Écran de sélection affiché avec succès");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Crée un bouton stylisé
+     */
+    private javafx.scene.control.Button createStyledButton(String text, String color) {
+        javafx.scene.control.Button button = new javafx.scene.control.Button(text);
+        button.setPrefSize(250, 120);
+        button.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-cursor: hand;"
+        );
+
+        // Effet hover
+        button.setOnMouseEntered(e -> button.setStyle(
+                "-fx-background-color: derive(" + color + ", 20%);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-scale-x: 1.05;" +
+                        "-fx-scale-y: 1.05;"
+        ));
+
+        button.setOnMouseExited(e -> button.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 24px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 15;" +
+                        "-fx-cursor: hand;"
+        ));
+
+        return button;
+    }
+
+    // Variables pour suivre les fenêtres ouvertes
+    private Stage currentAdminStage = null;
+    private Stage currentClientStage = null;
+
+    /**
+     * Ouvre le panel Admin dans une nouvelle fenêtre
+     */
+    private void openAdminPanel(Stage selectionStage, Image icon) {
+        try {
+            // Vérifier si une fenêtre admin est déjà ouverte
+            if (currentAdminStage != null && currentAdminStage.isShowing()) {
+                // Ramener la fenêtre au premier plan
+                currentAdminStage.toFront();
+                currentAdminStage.requestFocus();
+                System.out.println("⚠ Panel Admin déjà ouvert - fenêtre ramenée au premier plan");
+                return;
+            }
+
+            // Fermer la fenêtre client si elle est ouverte
+            if (currentClientStage != null && currentClientStage.isShowing()) {
+                currentClientStage.close();
+                currentClientStage = null;
+                System.out.println("✓ Fenêtre Client fermée");
+            }
+
+            Stage adminStage = new Stage();
+            adminStage.getIcons().add(icon);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainLayout.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 1400, 800);
+            adminStage.setTitle("Horizia - Panel Administrateur");
+            adminStage.setScene(scene);
+            adminStage.setResizable(true);
+            adminStage.setMaximized(true);
+
+            // Gérer la fermeture de la fenêtre
+            adminStage.setOnCloseRequest(e -> {
+                currentAdminStage = null;
+                System.out.println("✓ Panel Admin fermé");
+            });
+
+            adminStage.show();
+            currentAdminStage = adminStage;
+
+            System.out.println("✓ Panel Admin ouvert avec succès");
+
+        } catch (Exception e) {
+            System.err.println("✗ Erreur lors de l'ouverture du panel Admin : " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible d'ouvrir le panel Admin");
+            alert.setContentText("Vérifiez que le fichier MainLayout.fxml existe dans /views/");
+            alert.showAndWait();
+        }
+    }
+
+    /**
+     * Ouvre le panel Client dans une nouvelle fenêtre
+     */
+    private void openClientPanel(Stage selectionStage, Image icon) {
+        try {
+            // Vérifier si une fenêtre client est déjà ouverte
+            if (currentClientStage != null && currentClientStage.isShowing()) {
+                // Ramener la fenêtre au premier plan
+                currentClientStage.toFront();
+                currentClientStage.requestFocus();
+                System.out.println("⚠ Panel Client déjà ouvert - fenêtre ramenée au premier plan");
+                return;
+            }
+
+            // Fermer la fenêtre admin si elle est ouverte
+            if (currentAdminStage != null && currentAdminStage.isShowing()) {
+                currentAdminStage.close();
+                currentAdminStage = null;
+                System.out.println("✓ Fenêtre Admin fermée");
+            }
+
+            Stage clientStage = new Stage();
+            clientStage.getIcons().add(icon);
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/client/AccueilClient.fxml"));
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root, 1400, 800);
+            clientStage.setTitle("Horizia - Location de Voitures");
+            clientStage.setScene(scene);
+            clientStage.setResizable(true);
+            clientStage.setMaximized(true);
+
+            // Gérer la fermeture de la fenêtre
+            clientStage.setOnCloseRequest(e -> {
+                currentClientStage = null;
+                System.out.println("✓ Panel Client fermé");
+            });
+
+            clientStage.show();
+            currentClientStage = clientStage;
+
+            System.out.println("✓ Panel Client ouvert avec succès");
+
+        } catch (Exception e) {
+            System.err.println("✗ Erreur lors de l'ouverture du panel Client : " + e.getMessage());
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur");
+            alert.setHeaderText("Impossible d'ouvrir le panel Client");
+            alert.setContentText("Vérifiez que le fichier AccueilClient.fxml existe dans /views/client/");
+            alert.showAndWait();
         }
     }
 
