@@ -14,6 +14,7 @@ import tn.esprit.entities.Status;
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -172,8 +173,8 @@ public class MesReservationsController {
     }
 
     private void modifierReservation(reservationlog r) {
-        // À implémenter : ouvrir un formulaire de modification pré-rempli
-        showAlert("Modifier", "Fonctionnalité de modification à implémenter. Réservation ID: " + r.getId());
+        SessionManager.setEditingReservation(r);
+        NavigationManager.loadView("/ReservationForm.fxml");
     }
 
     private void supprimerReservation(reservationlog r) {

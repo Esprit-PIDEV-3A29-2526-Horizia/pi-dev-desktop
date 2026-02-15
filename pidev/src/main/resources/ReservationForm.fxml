@@ -122,7 +122,11 @@
                         </HBox>
 
                         <!-- Bouton Confirmer -->
-                        <Button fx:id="confirmerBtn" text="Confirmer" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" maxWidth="Infinity" />
+                        <!-- Après le bouton Confirmer -->
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button fx:id="confirmerBtn" text="Confirmer" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                            <Button fx:id="annulerBtn" text="Annuler" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                        </HBox>
                     </VBox>
                 </VBox>
             </VBox>

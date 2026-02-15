@@ -1,5 +1,6 @@
 package tn.esprit.utils;
 
+import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.user;  // Import de l'entité user
 import tn.esprit.entities.logement;  // Import de l'entité logement
 
@@ -64,5 +65,18 @@ public class SessionManager {
         adminUser.setEmail("admin@example.com");
         adminUser.setProfil_id(1);  // Profil admin
         setCurrentUser(adminUser);
+    }
+    private static reservationlog editingReservation;
+
+    public static reservationlog getEditingReservation() {
+        return editingReservation;
+    }
+
+    public static void setEditingReservation(reservationlog reservation) {
+        editingReservation = reservation;
+    }
+
+    public static void clearEditingReservation() {
+        editingReservation = null;
     }
 }
