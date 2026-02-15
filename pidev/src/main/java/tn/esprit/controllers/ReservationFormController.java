@@ -33,7 +33,6 @@ public class ReservationFormController {
     private DatePicker dateDepartPicker;
     @FXML
     private Spinner<Integer> dureeSpinner;
-
     @FXML
     private ComboBox<Status> statusCombo;
     @FXML
@@ -51,7 +50,6 @@ public class ReservationFormController {
 
     @FXML
     public void initialize() {
-        // Récupérer le logement sélectionné
         selectedLogement = SessionManager.getSelectedLogement();
         if (selectedLogement == null) {
             showAlert("Erreur", "Aucun logement sélectionné.");
@@ -59,29 +57,22 @@ public class ReservationFormController {
             return;
         }
 
-        // Charger les détails du logement
         nomLabel.setText(selectedLogement.getNom());
         adresseLabel.setText(selectedLogement.getAdresse());
         prixLabel.setText(selectedLogement.getTarif_nuit() + " DT / nuit");
         equipementLabel.setText("Équipement: " + selectedLogement.getEquipement());
         disponibiliteLabel.setText(selectedLogement.isDisponibilite() ? "Disponible" : "Non disponible");
 
-        // Initialiser le ComboBox pour status
         statusCombo.getItems().addAll(Status.confirmée, Status.annulée, Status.en_attente, Status.terminée);
-        statusCombo.setValue(Status.en_attente);  // Valeur par défaut
+        statusCombo.setValue(Status.en_attente);
 
-        // Valeur par défaut pour modalite
         modaliteField.setText("En ligne");
 
-        // Calculer le total en temps réel
         dureeSpinner.valueProperty().addListener((obs, oldVal, newVal) -> calculerTotal());
         dateArriveePicker.valueProperty().addListener((obs, oldVal, newVal) -> calculerDuree());
         dateDepartPicker.valueProperty().addListener((obs, oldVal, newVal) -> calculerDuree());
 
-        // Action du bouton Confirmer
         confirmerBtn.setOnAction(e -> confirmerReservation());
-
-        // Action du bouton Accueil
         accueilBtn.setOnAction(e -> NavigationManager.loadView("/accueil.fxml"));
     }
 
@@ -102,53 +93,110 @@ public class ReservationFormController {
         totalLabel.setText(total + " DT");
     }
 
-    private void confirmerReservation() {
-        // Vérifications
+    /**
+     * Valide les données saisies avant confirmation.
+     * @return true si toutes les validations passent, sinon false.
+     */
+    private boolean validerSaisie() {
+        // Vérifier disponibilité du logement
         if (!selectedLogement.isDisponibilite()) {
             showAlert("Erreur", "Le logement n'est pas disponible.");
+            return false;
+        }
+
+        LocalDate arrivee = dateArriveePicker.getValue();
+        LocalDate depart = dateDepartPicker.getValue();
+
+        // Vérifier que les dates sont sélectionnées
+        if (arrivee == null) {
+            showAlert("Erreur", "Veuillez sélectionner une date d'arrivée.");
+            return false;
+        }
+        if (depart == null) {
+            showAlert("Erreur", "Veuillez sélectionner une date de départ.");
+            return false;
+        }
+
+        // Vérifier que la date d'arrivée n'est pas dans le passé (avant aujourd'hui)
+        LocalDate aujourdHui = LocalDate.now();
+        if (arrivee.isBefore(aujourdHui)) {
+            showAlert("Erreur", "La date d'arrivée ne peut pas être dans le passé.");
+            return false;
+        }
+
+        // Vérifier que la date de départ est après la date d'arrivée
+        if (!depart.isAfter(arrivee)) {
+            showAlert("Erreur", "La date de départ doit être postérieure à la date d'arrivée.");
+            return false;
+        }
+
+        // Vérifier que le statut est sélectionné
+        Status status = statusCombo.getValue();
+        if (status == null) {
+            showAlert("Erreur", "Veuillez sélectionner un statut.");
+            return false;
+        }
+
+        // Vérifier que la modalité n'est pas vide
+        String modalite = modaliteField.getText().trim();
+        if (modalite.isEmpty()) {
+            showAlert("Erreur", "Veuillez saisir une modalité.");
+            return false;
+        }
+
+        // (Optionnel) Vérifier que la durée est positive (normalement déjà assuré par le spinner)
+        int nuits = dureeSpinner.getValue();
+        if (nuits <= 0) {
+            showAlert("Erreur", "La durée doit être d'au moins 1 nuit.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void confirmerReservation() {
+        if (!validerSaisie()) {
+            return; // Arrêter si validation échoue
+        }
+
+        // Optionnel : demande de confirmation avant l'insertion
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirmation");
+        confirmation.setHeaderText("Voulez-vous confirmer cette réservation ?");
+        confirmation.setContentText("Vérifiez les informations avant de confirmer.");
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return;
         }
+
         LocalDate arrivee = dateArriveePicker.getValue();
         LocalDate depart = dateDepartPicker.getValue();
         Status status = statusCombo.getValue();
         String modalite = modaliteField.getText().trim();
-        if (arrivee == null || depart == null || !depart.isAfter(arrivee)) {
-            showAlert("Erreur", "Veuillez sélectionner des dates valides.");
-            return;
-        }
-        if (status == null) {
-            showAlert("Erreur", "Veuillez sélectionner un statut.");
-            return;
-        }
-        if (modalite.isEmpty()) {
-            showAlert("Erreur", "Veuillez saisir une modalité.");
-            return;
-        }
 
-        // Calculer le montant
         int nuits = dureeSpinner.getValue();
         float montant = nuits * selectedLogement.getTarif_nuit();
 
-        // Créer la réservation
         reservationlog reservation = new reservationlog();
         reservation.setId_l(selectedLogement.getId());
-        // ID client statique en attendant l'intégration
-        reservation.setIdc(14); // ← ID fixe, à adapter
+        reservation.setIdc(14); // ID statique
         reservation.setDate_debut(Date.from(arrivee.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         reservation.setDate_fin(Date.from(depart.atStartOfDay(ZoneId.systemDefault()).toInstant()));
         reservation.setMontant(montant);
         reservation.setStatus(status);
         reservation.setModalite(modalite);
 
-        // Sauvegarder
         try {
             serviceReservation.ajouter(reservation);
-            showAlert("Succès", "Réservation confirmée pour " + selectedLogement.getNom() + " ! Montant : " + montant + " DT, Statut : " + status + ", Modalité : " + modalite);
-            NavigationManager.loadView("/accueil.fxml");
+            showAlert("Succès", "Réservation confirmée pour " + selectedLogement.getNom() + " !\n" +
+                    "Montant : " + montant + " DT\n" +
+                    "Statut : " + status + "\n" +
+                    "Modalité : " + modalite);
+            NavigationManager.loadView("/mesreservations.fxml");
         } catch (SQLException e) {
             showAlert("Erreur", "Impossible de sauvegarder la réservation : " + e.getMessage());
         }
     }
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

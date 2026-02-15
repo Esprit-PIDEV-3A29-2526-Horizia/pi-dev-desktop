@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import tn.esprit.entities.logement;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
-import tn.esprit.utils.SessionManager;  // Import ajouté
+import tn.esprit.utils.SessionManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,6 +39,14 @@ public class AccueilController {
     private FlowPane flowLogements;
     @FXML
     private Button btnNosLogements;
+    @FXML
+    private Button btnMesReservations; // Nouveau
+
+    // Optionnel : pour personnaliser le bloc utilisateur
+    @FXML
+    private HBox userBox;
+    @FXML
+    private Label userNameLabel;
 
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
@@ -49,13 +57,23 @@ public class AccueilController {
     public void initialize() {
         serviceLogement = new Servicelogement();
 
-        // Appliquer le style de sélection au bouton de navigation
         btnNosLogements.getStyleClass().add("nav-button-active");
 
-        // Options de tri
+        // Gestion du bouton Mes Réservations
+        if (SessionManager.isLoggedIn()) {
+            btnMesReservations.setVisible(true);
+            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/mesreservations.fxml"));
+            // Optionnel : afficher le nom de l'utilisateur
+            // userNameLabel.setText(SessionManager.getCurrentUser().getNom());
+        } else {
+            btnMesReservations.setVisible(false);
+            // Optionnel : transformer le bloc utilisateur en bouton de connexion
+            // userNameLabel.setText("Connexion");
+            // userBox.setOnMouseClicked(e -> NavigationManager.loadView("/login.fxml"));
+        }
+
         sortCombo.getItems().addAll("Prix croissant", "Prix décroissant");
 
-        // Chargement des logements depuis la base
         try {
             tousLesLogements = serviceLogement.afficher();
             logementsFiltres = new ArrayList<>(tousLesLogements);
@@ -65,10 +83,8 @@ public class AccueilController {
             e.printStackTrace();
         }
 
-        // Initialiser le bouton actif (Tous par défaut)
         activeFilterBtn = allFilterBtn;
 
-        // Actions des boutons de filtre
         allFilterBtn.setOnAction(e -> {
             setActiveFilter(allFilterBtn);
             logementsFiltres = new ArrayList<>(tousLesLogements);
@@ -87,12 +103,12 @@ public class AccueilController {
             filtrerParType("Appartement");
         });
 
-        // Recherche en direct
         searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
-
-        // Tri
         sortCombo.setOnAction(e -> trier());
     }
+
+    // ... le reste des méthodes inchangées ...
+
 
     private void setActiveFilter(Button newActiveBtn) {
         if (activeFilterBtn != null) {
