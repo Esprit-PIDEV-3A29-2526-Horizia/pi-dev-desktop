@@ -107,6 +107,7 @@ public class PublicationsController implements Initializable {
         }
     }
 
+    // UNE SEULE méthode createPublicationCard - version complète avec Modifier/Supprimer
     private VBox createPublicationCard(Publication publication) {
         VBox card = new VBox();
         card.setSpacing(10);
@@ -173,36 +174,53 @@ public class PublicationsController implements Initializable {
         descriptionLabel.setMaxWidth(250);
         descriptionLabel.setMaxHeight(60);
 
-        // Boutons d'action
+        // Boutons d'action - MODIFIER ET SUPPRIMER
         HBox buttonsBox = new HBox(10);
         buttonsBox.setAlignment(Pos.CENTER_RIGHT);
 
+        // Bouton Modifier
         Button modifierBtn = new Button("Modifier");
-        modifierBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 6 15;");
+        modifierBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 8 15;");
         modifierBtn.setOnAction(e -> {
+            // Stocker la publication sélectionnée et ouvrir la page de modification
             Dashboard.setSelectedPublication(publication);
             Dashboard.loadView("/ModifierPublication.fxml");
         });
 
+        // Bouton Supprimer
         Button supprimerBtn = new Button("Supprimer");
-        supprimerBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 6 15;");
+        supprimerBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 8 15;");
         supprimerBtn.setOnAction(e -> {
+            // Confirmation avant suppression
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Confirmation");
+            confirm.setTitle("Confirmation de suppression");
             confirm.setHeaderText("Supprimer la publication");
             confirm.setContentText("Êtes-vous sûr de vouloir supprimer '" + publication.getTitre() + "' ?");
 
+            // Style personnalisé pour la boîte de dialogue
+            confirm.getDialogPane().setStyle("-fx-font-family: 'Segoe UI';");
+
             confirm.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
+                    // Supprimer de la base de données
                     publicationService.supprimer(publication.getId());
+
+                    // Rafraîchir l'affichage
                     filterPublications(searchField.getText());
+
+                    // Message de succès
+                    Alert success = new Alert(Alert.AlertType.INFORMATION);
+                    success.setTitle("Succès");
+                    success.setHeaderText(null);
+                    success.setContentText("Publication supprimée avec succès !");
+                    success.showAndWait();
                 }
             });
         });
 
         buttonsBox.getChildren().addAll(modifierBtn, supprimerBtn);
-
         card.getChildren().addAll(titreLabel, descriptionLabel, buttonsBox);
+
         return card;
     }
 

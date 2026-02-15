@@ -23,7 +23,6 @@ import java.util.UUID;
 
 public class ModifierPublicationController implements Initializable {
 
-    @FXML private TextField idField;
     @FXML private TextField titreField;
     @FXML private TextArea descriptionField;
     @FXML private ImageView currentImageView;
@@ -43,17 +42,22 @@ public class ModifierPublicationController implements Initializable {
         // Récupérer la publication sélectionnée
         this.publication = Dashboard.getSelectedPublication();
 
-        if (publication != null) {
-            remplirChamps();
+        if (publication == null) {
+            showAlert("Erreur", "Aucune publication sélectionnée !");
+            Dashboard.loadView("/Publications.fxml");
+            return;
         }
 
+        // Remplir les champs avec les données actuelles
+        remplirChamps();
+
+        // Actions des boutons
         browseButton.setOnAction(e -> choisirImage());
         enregistrerButton.setOnAction(e -> enregistrer());
-        annulerButton.setOnAction(e -> annuler());
+        annulerButton.setOnAction(e -> Dashboard.loadView("/Publications.fxml"));
     }
 
     private void remplirChamps() {
-        idField.setText(String.valueOf(publication.getId()));
         titreField.setText(publication.getTitre());
         descriptionField.setText(publication.getDescription());
 
@@ -63,7 +67,7 @@ public class ModifierPublicationController implements Initializable {
                 Image image = new Image(getClass().getResource(publication.getImage()).toExternalForm());
                 currentImageView.setImage(image);
             } catch (Exception e) {
-                System.out.println("Image non trouvée: " + publication.getImage());
+                System.out.println("Image actuelle non trouvée: " + publication.getImage());
             }
         }
     }
@@ -80,6 +84,7 @@ public class ModifierPublicationController implements Initializable {
             selectedImageFile = file;
             imageField.setText(file.getName());
 
+            // Afficher la prévisualisation
             Image image = new Image(file.toURI().toString());
             previewImage.setImage(image);
         }
@@ -97,11 +102,11 @@ public class ModifierPublicationController implements Initializable {
             return;
         }
 
-        // Mettre à jour
+        // Mettre à jour les données
         publication.setTitre(titreField.getText().trim());
         publication.setDescription(descriptionField.getText().trim());
 
-        // Nouvelle image ?
+        // Nouvelle image sélectionnée ?
         if (selectedImageFile != null) {
             String imagePath = saveImage();
             if (imagePath != null) {
@@ -109,23 +114,33 @@ public class ModifierPublicationController implements Initializable {
             }
         }
 
-        // Sauvegarder
+        // Sauvegarder dans la base
         publicationService.modifier(publication);
 
-        showAlert("Succès", "Publication modifiée avec succès !");
+        // Message de succès
+        Alert success = new Alert(Alert.AlertType.INFORMATION);
+        success.setTitle("Succès");
+        success.setHeaderText(null);
+        success.setContentText("Publication modifiée avec succès !");
+        success.showAndWait();
+
+        // Retour à la liste
         Dashboard.loadView("/Publications.fxml");
     }
 
     private String saveImage() {
         try {
+            // Créer le dossier s'il n'existe pas
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
+            // Nom unique pour l'image
             String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
             Path targetPath = uploadPath.resolve(fileName);
 
+            // Copier le fichier
             Files.copy(selectedImageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
             return "/images/" + fileName;
@@ -136,12 +151,8 @@ public class ModifierPublicationController implements Initializable {
         }
     }
 
-    private void annuler() {
-        Dashboard.loadView("/Publications.fxml");
-    }
-
     private void showAlert(String title, String content) {
-        Alert alert = new Alert(title.equals("Erreur") ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

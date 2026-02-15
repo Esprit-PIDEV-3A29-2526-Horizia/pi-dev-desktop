@@ -14,9 +14,6 @@
         <!-- Titre -->
         <Label text="Modifier Publication" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
 
-        <!-- ID caché -->
-        <TextField fx:id="idField" visible="false" managed="false" />
-
         <!-- Formulaire -->
         <VBox spacing="15">
             <!-- Titre -->
@@ -31,12 +28,11 @@
                 <TextArea fx:id="descriptionField" promptText="Entrez la description..." wrapText="true" prefRowCount="4" style="-fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
             </VBox>
 
-            <!-- Image actuelle -->
+            <!-- Image -->
             <VBox spacing="5">
                 <Label text="Image actuelle" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
                 <ImageView fx:id="currentImageView" fitHeight="150" fitWidth="250" preserveRatio="true" style="-fx-background-color: #ecf0f1; -fx-background-radius: 8;" />
 
-                <!-- Changer image -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <TextField fx:id="imageField" promptText="Nouvelle image (optionnel)" HBox.hgrow="ALWAYS" editable="false" style="-fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #ddd; -fx-border-radius: 8;" />
                     <Button fx:id="browseButton" text="Changer" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-padding: 12 20; -fx-background-radius: 8; -fx-font-weight: bold;" />
