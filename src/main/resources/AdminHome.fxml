@@ -7,7 +7,6 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -17,8 +16,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.layout.ColumnConstraints?>
+
 <BorderPane prefHeight="700" prefWidth="1200" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AdminController">
 
     <!-- SIDEBAR - Admin style -->
@@ -38,9 +37,7 @@
 
             <!-- Navigation Buttons -->
             <Button fx:id="btnDashboard" maxWidth="1.7976931348623157E308" style="-fx-background-color:#2d9cdb; -fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand;" text="📊  Dashboard" />
-
             <Button fx:id="btnEvents" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📅  Gestion Événements" />
-
             <Button fx:id="btnParticipations" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📋  Participations" />
 
             <Region VBox.vgrow="ALWAYS" />
@@ -72,41 +69,35 @@
                             <ColumnConstraints percentWidth="25" />
                         </columnConstraints>
 
-                        <!-- Total Events -->
                         <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="0">
                             <Label style="-fx-text-fill: #6B7280;" text="Total événements" />
                             <Label fx:id="totalEventsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="0" />
                         </VBox>
-
-                        <!-- Total Places -->
                         <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="1">
                             <Label style="-fx-text-fill: #6B7280;" text="Places totales" />
                             <Label fx:id="totalPlacesLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #3D94CA;" text="0" />
                         </VBox>
-
-                        <!-- Total Participations -->
                         <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="2">
                             <Label style="-fx-text-fill: #6B7280;" text="Participations" />
                             <Label fx:id="totalParticipationsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #81AE8D;" text="0" />
                         </VBox>
-
-                        <!-- Fill Rate -->
                         <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="3">
                             <Label style="-fx-text-fill: #6B7280;" text="Taux remplissage" />
                             <Label fx:id="fillRateLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #E8B156;" text="0%" />
                         </VBox>
                     </GridPane>
 
-                    <!-- Recent Activity -->
-                    <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Activité récente" />
-                    <TableView fx:id="recentActivityTable" style="-fx-background-radius: 10;" />
+                    <!-- Recent Events (removed TableView, using FlowPane) -->
+                    <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Événements récents" />
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" prefHeight="200">
+                        <FlowPane fx:id="recentEventsFlow" hgap="15" vgap="15" prefWrapLength="900" />
+                    </ScrollPane>
                 </VBox>
             </Tab>
 
             <!-- EVENTS MANAGEMENT TAB -->
             <Tab text="Gestion Événements">
                 <VBox spacing="20" style="-fx-padding: 25;">
-                    <!-- Search and Actions -->
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <TextField fx:id="adminSearchField" promptText="Rechercher un événement..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
                         <Button onAction="#handleAdminSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
@@ -115,18 +106,26 @@
                         <Button onAction="#openAddEventForm" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Nouvel événement" />
                     </HBox>
 
-                    <!-- Events Grid -->
                     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
                         <FlowPane fx:id="adminFlowEvents" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
                     </ScrollPane>
                 </VBox>
             </Tab>
 
-            <!-- PARTICIPATIONS TAB -->
+            <!-- PARTICIPATIONS TAB - Now using FlowPane instead of TableView -->
             <Tab text="Participations">
                 <VBox spacing="20" style="-fx-padding: 25;">
                     <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Liste des participations" />
-                    <TableView fx:id="participationsTable" style="-fx-background-radius: 10;" VBox.vgrow="ALWAYS" />
+
+                    <!-- Search for participations -->
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <TextField fx:id="participationSearchField" promptText="Rechercher une participation..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
+                        <Button onAction="#handleParticipationSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
+                    </HBox>
+
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                        <FlowPane fx:id="participationsFlow" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
+                    </ScrollPane>
                 </VBox>
             </Tab>
         </TabPane>

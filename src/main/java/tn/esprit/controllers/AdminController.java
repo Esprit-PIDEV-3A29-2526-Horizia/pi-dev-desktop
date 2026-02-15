@@ -8,10 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
@@ -20,7 +17,6 @@ import tn.esprit.services.ServiceParticipation;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -33,7 +29,7 @@ public class AdminController implements Initializable {
     @FXML private Label totalPlacesLabel;
     @FXML private Label totalParticipationsLabel;
     @FXML private Label fillRateLabel;
-    @FXML private TableView<Events> recentActivityTable;
+    @FXML private FlowPane recentEventsFlow;
 
     // Events Management Tab
     @FXML private TextField adminSearchField;
@@ -41,7 +37,8 @@ public class AdminController implements Initializable {
     @FXML private FlowPane adminFlowEvents;
 
     // Participations Tab
-    @FXML private TableView<Participation> participationsTable;
+    @FXML private TextField participationSearchField;
+    @FXML private FlowPane participationsFlow;
 
     // Navigation Buttons
     @FXML private Button btnDashboard;
@@ -61,15 +58,23 @@ public class AdminController implements Initializable {
 
         setupNavigation();
         setupSortCombo();
-        setupTables();
         loadData();
 
-        // Search functionality
+        // Search functionality for events
         adminSearchField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 displayEvents(allEvents);
             } else {
                 filterEvents(newVal);
+            }
+        });
+
+        // Search functionality for participations
+        participationSearchField.textProperty().addListener((obs, old, newVal) -> {
+            if (newVal.isEmpty()) {
+                displayParticipations(allParticipations);
+            } else {
+                filterParticipations(newVal);
             }
         });
 
@@ -82,7 +87,6 @@ public class AdminController implements Initializable {
         btnEvents.setOnAction(e -> tabPane.getSelectionModel().select(1));
         btnParticipations.setOnAction(e -> tabPane.getSelectionModel().select(2));
 
-        // Style for active/inactive states
         tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, old, newVal) -> {
             updateButtonStyles(newVal.intValue());
         });
@@ -90,7 +94,6 @@ public class AdminController implements Initializable {
 
     private void updateButtonStyles(int selectedIndex) {
         Button[] buttons = {btnDashboard, btnEvents, btnParticipations};
-        String[] colors = {"#2d9cdb", "transparent", "transparent"};
 
         for (int i = 0; i < buttons.length; i++) {
             if (i == selectedIndex) {
@@ -105,62 +108,21 @@ public class AdminController implements Initializable {
         adminSortCombo.getItems().addAll("Titre", "Prix", "Date", "Places", "Capacité");
     }
 
-    private void setupTables() {
-        // Recent Activity Table
-        TableColumn<Events, String> titleCol = new TableColumn<>("Titre");
-        titleCol.setCellValueFactory(new PropertyValueFactory<>("titre"));
-        titleCol.setPrefWidth(200);
-
-        TableColumn<Events, String> categoryCol = new TableColumn<>("Catégorie");
-        categoryCol.setCellValueFactory(new PropertyValueFactory<>("categorie"));
-        categoryCol.setPrefWidth(100);
-
-        TableColumn<Events, Integer> placesCol = new TableColumn<>("Places restantes");
-        placesCol.setCellValueFactory(new PropertyValueFactory<>("placesRestantes"));
-        placesCol.setPrefWidth(120);
-
-        TableColumn<Events, Float> priceCol = new TableColumn<>("Prix");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("prix"));
-        priceCol.setPrefWidth(80);
-
-        recentActivityTable.getColumns().addAll(titleCol, categoryCol, placesCol, priceCol);
-
-        // Participations Table
-        TableColumn<Participation, Integer> idCol = new TableColumn<>("ID Événement");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id_event"));
-        idCol.setPrefWidth(100);
-
-        TableColumn<Participation, Integer> placesBookedCol = new TableColumn<>("Places");
-        placesBookedCol.setCellValueFactory(new PropertyValueFactory<>("nombrePlaces"));
-        placesBookedCol.setPrefWidth(80);
-
-        TableColumn<Participation, Float> totalCol = new TableColumn<>("Montant");
-        totalCol.setCellValueFactory(new PropertyValueFactory<>("montantTotal"));
-        totalCol.setPrefWidth(100);
-
-        TableColumn<Participation, String> statusCol = new TableColumn<>("Statut");
-        statusCol.setCellValueFactory(new PropertyValueFactory<>("statut"));
-        statusCol.setPrefWidth(100);
-
-        TableColumn<Participation, Timestamp> dateCol = new TableColumn<>("Date");
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("dateParticipation"));
-        dateCol.setPrefWidth(150);
-
-        participationsTable.getColumns().addAll(idCol, placesBookedCol, totalCol, statusCol, dateCol);
-    }
-
     private void loadData() {
         try {
             allEvents = serviceEvent.afficher();
             allParticipations = serviceParticipation.afficher();
 
+            System.out.println("✅ Données chargées: " + allEvents.size() + " événements, " + allParticipations.size() + " participations");
+
             updateStatistics();
             displayEvents(allEvents);
             displayParticipations(allParticipations);
+            displayRecentEvents();
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger les données");
+            showAlert("Erreur", "Impossible de charger les données: " + e.getMessage());
         }
     }
 
@@ -168,10 +130,13 @@ public class AdminController implements Initializable {
         int totalEvents = allEvents.size();
         int totalPlaces = 0;
         int totalBooked = 0;
+        int totalRevenue = 0;
 
         for (Events event : allEvents) {
             totalPlaces += event.getCapaciteMax();
-            totalBooked += (event.getCapaciteMax() - event.getPlacesRestantes());
+            int booked = event.getCapaciteMax() - event.getPlacesRestantes();
+            totalBooked += booked;
+            totalRevenue += booked * event.getPrix();
         }
 
         totalEventsLabel.setText(String.valueOf(totalEvents));
@@ -181,9 +146,35 @@ public class AdminController implements Initializable {
         int fillRate = totalPlaces > 0 ? (totalBooked * 100 / totalPlaces) : 0;
         fillRateLabel.setText(fillRate + "%");
 
-        // Show recent events in table
-        recentActivityTable.getItems().clear();
-        recentActivityTable.getItems().addAll(allEvents.stream().limit(5).toList());
+        // Optional: Add revenue stat
+        // revenueLabel.setText(String.format("%.0f DT", totalRevenue));
+    }
+
+    private void displayRecentEvents() {
+        recentEventsFlow.getChildren().clear();
+        List<Events> recent = allEvents.stream().limit(3).toList();
+        for (Events event : recent) {
+            recentEventsFlow.getChildren().add(createMiniEventCard(event));
+        }
+    }
+
+    private VBox createMiniEventCard(Events event) {
+        VBox card = new VBox();
+        card.setPrefWidth(280);
+        card.setSpacing(8);
+        card.setPadding(new Insets(12));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);");
+
+        Label title = new Label(event.getTitre());
+        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+
+        Label details = new Label(String.format("%.0f DT | %d/%d places",
+                event.getPrix(), event.getPlacesRestantes(), event.getCapaciteMax()));
+        details.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+
+        card.getChildren().addAll(title, details);
+        return card;
     }
 
     private void displayEvents(List<Events> events) {
@@ -202,26 +193,21 @@ public class AdminController implements Initializable {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
                 "-fx-border-color: #DACEB6; -fx-border-radius: 15; -fx-border-width: 1;");
 
-        // Title
         Label title = new Label(event.getTitre());
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
         title.setWrapText(true);
 
-        // Category
         Label category = new Label(event.getCategorie());
         category.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
                 "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 12px;");
 
-        // Details (no IDs shown)
         Label details = new Label(String.format("%.0f DT | %d/%d places",
                 event.getPrix(), event.getPlacesRestantes(), event.getCapaciteMax()));
         details.setStyle("-fx-text-fill: #666; -fx-font-size: 14px;");
 
-        // Location
         Label location = new Label("📍 " + (event.getLocation() != null ? event.getLocation() : "N/A"));
         location.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
 
-        // Dates
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String dateText = "";
         if (event.getDateDebut() != null) {
@@ -230,7 +216,6 @@ public class AdminController implements Initializable {
         Label dates = new Label(dateText);
         dates.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
 
-        // Action Buttons
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -251,14 +236,123 @@ public class AdminController implements Initializable {
     }
 
     private void displayParticipations(List<Participation> participations) {
-        participationsTable.getItems().clear();
-        participationsTable.getItems().addAll(participations);
+        participationsFlow.getChildren().clear();
+        for (Participation p : participations) {
+            participationsFlow.getChildren().add(createParticipationCard(p));
+        }
     }
 
+    private VBox createParticipationCard(Participation p) {
+        VBox card = new VBox();
+        card.setPrefWidth(300);
+        card.setSpacing(12);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
+                "-fx-border-color: #3D94CA; -fx-border-radius: 15; -fx-border-width: 1;");
+
+        // Find event title
+        String eventTitle = "Événement #" + p.getId_event();
+        for (Events e : allEvents) {
+            if (e.getId_event() == p.getId_event()) {
+                eventTitle = e.getTitre();
+                break;
+            }
+        }
+
+        // Event info
+        Label eventLabel = new Label("🎫 " + eventTitle);
+        eventLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        eventLabel.setWrapText(true);
+
+        // Basic info
+        Label placesLabel = new Label("📋 " + p.getNombrePlaces() + " place(s)");
+        placesLabel.setStyle("-fx-text-fill: #666;");
+
+        Label totalLabel = new Label(String.format("💰 %.0f DT", p.getMontantTotal()));
+        totalLabel.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 18px; -fx-font-weight: bold;");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Label dateLabel = new Label("📅 " + sdf.format(p.getDateParticipation()));
+        dateLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
+
+        // Button to show participant details
+        Button detailsBtn = new Button("👤 Détails participant");
+        detailsBtn.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; " +
+                "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
+        detailsBtn.setMaxWidth(Double.MAX_VALUE);
+
+        // Pass the participation to the details method
+        detailsBtn.setOnAction(e -> showParticipantDetails(p));
+
+        card.getChildren().addAll(eventLabel, placesLabel, totalLabel, dateLabel, detailsBtn);
+        return card;
+    }
+
+    // Add this method to show participant details (using static data for now)
+    private void showParticipantDetails(Participation p) {
+        // Create dialog
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Détails du participant");
+        dialog.setHeaderText("Informations de réservation");
+
+        // Set button
+        ButtonType closeButton = new ButtonType("Fermer", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(closeButton);
+
+        // Create content
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+        content.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
+
+        // Find event title
+        String eventTitle = "Événement #" + p.getId_event();
+        for (Events e : allEvents) {
+            if (e.getId_event() == p.getId_event()) {
+                eventTitle = e.getTitre();
+                break;
+            }
+        }
+
+        // Add details (placeholder until user module is integrated)
+        Label eventInfo = new Label("📌 " + eventTitle);
+        eventInfo.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-font-size: 16px;");
+
+        //Label userIdLabel = new Label("🆔 ID Utilisateur: " + p.getId_utilisateur());
+        //userIdLabel.setStyle("-fx-text-fill: #666;");
+
+        Label placesInfo = new Label("📋 Places réservées: " + p.getNombrePlaces());
+        placesInfo.setStyle("-fx-text-fill: #666;");
+
+        Label totalInfo = new Label("💰 Montant total: " + String.format("%.0f DT", p.getMontantTotal()));
+        totalInfo.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 16px; -fx-font-weight: bold;");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        Label dateInfo = new Label("📅 Date: " + sdf.format(p.getDateParticipation()));
+        dateInfo.setStyle("-fx-text-fill: #666;");
+
+        // Note about user details (since user module not ready)
+        Label noteLabel = new Label("ℹ️ Les détails utilisateur seront disponibles après intégration avec le module Utilisateurs");
+        noteLabel.setStyle("-fx-text-fill: #E8B156; -fx-font-size: 11px; -fx-font-style: italic; -fx-wrap-text: true;");
+
+        content.getChildren().addAll(eventInfo, placesInfo, totalInfo, dateInfo, noteLabel);
+
+        dialog.getDialogPane().setContent(content);
+        dialog.showAndWait();
+    }
     private void filterEvents(String keyword) {
         try {
             List<Events> filtered = serviceEvent.rechercher(keyword);
             displayEvents(filtered);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void filterParticipations(String keyword) {
+        try {
+            List<Participation> filtered = serviceParticipation.rechercher(keyword);
+            displayParticipations(filtered);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -296,6 +390,16 @@ public class AdminController implements Initializable {
     }
 
     @FXML
+    private void handleParticipationSearch() {
+        String keyword = participationSearchField.getText();
+        if (!keyword.isEmpty()) {
+            filterParticipations(keyword);
+        } else {
+            displayParticipations(allParticipations);
+        }
+    }
+
+    @FXML
     private void openAddEventForm() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddEventForm.fxml"));
@@ -306,11 +410,11 @@ public class AdminController implements Initializable {
             stage.setScene(new Scene(root, 500, 600));
             stage.showAndWait();
 
-            // Refresh after adding
-            loadData();
+            loadData(); // Refresh after adding
 
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire: " + e.getMessage());
         }
     }
 
@@ -319,7 +423,6 @@ public class AdminController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/EditEventForm.fxml"));
             Parent root = loader.load();
 
-            // Pass event to edit form
             EditEventFormController controller = loader.getController();
             controller.setEvent(event);
 
@@ -328,11 +431,11 @@ public class AdminController implements Initializable {
             stage.setScene(new Scene(root, 500, 600));
             stage.showAndWait();
 
-            // Refresh after editing
-            loadData();
+            loadData(); // Refresh after editing
 
         } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification");
         }
     }
 

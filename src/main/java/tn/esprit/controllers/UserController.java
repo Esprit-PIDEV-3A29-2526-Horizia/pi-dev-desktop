@@ -1,13 +1,18 @@
 package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.services.ServiceEvent;
 
@@ -151,19 +156,26 @@ public class UserController implements Initializable {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
                 "-fx-border-color: #DACEB6; -fx-border-radius: 20; -fx-border-width: 1;");
 
-        // Image
+        // Image container with fixed size and clip
         StackPane imageContainer = new StackPane();
+        imageContainer.setPrefWidth(280);
         imageContainer.setPrefHeight(180);
         imageContainer.setStyle("-fx-background-color: #f0f0f0; -fx-background-radius: 15;");
+
+        // Create a clip to ensure image fits within rounded corners
+        Rectangle clip = new Rectangle(280, 180);
+        clip.setArcWidth(15);
+        clip.setArcHeight(15);
+        imageContainer.setClip(clip);
 
         ImageView imageView = new ImageView();
         imageView.setFitWidth(280);
         imageView.setFitHeight(180);
-        imageView.setPreserveRatio(true);
+        imageView.setPreserveRatio(false);
 
         if (event.getImage_url() != null && !event.getImage_url().isEmpty()) {
             try {
-                Image image = new Image(event.getImage_url(), true);
+                Image image = new Image(event.getImage_url(), 280, 180, false, true);
                 imageView.setImage(image);
                 imageContainer.getChildren().add(imageView);
             } catch (Exception e) {
@@ -226,23 +238,24 @@ public class UserController implements Initializable {
         total.setStyle("-fx-text-fill: #999; -fx-font-size: 11px;");
         progressLabels.getChildren().addAll(filled, total);
 
-        // Book button
-        Button bookBtn = new Button("Réserver");
-        bookBtn.setMaxWidth(Double.MAX_VALUE);
-        bookBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; -fx-font-size: 16px; " +
+        // Details button - now opens a new page instead of showing form in card
+        Button detailsBtn = new Button("Voir détails");
+        detailsBtn.setMaxWidth(Double.MAX_VALUE);
+        detailsBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; -fx-font-size: 16px; " +
                 "-fx-font-weight: bold; -fx-padding: 12; -fx-background-radius: 12; -fx-cursor: hand;");
 
         if (event.getPlacesRestantes() == 0) {
-            bookBtn.setDisable(true);
-            bookBtn.setText("COMPLET");
-            bookBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; " +
+            detailsBtn.setDisable(true);
+            detailsBtn.setText("COMPLET");
+            detailsBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; " +
                     "-fx-font-weight: bold; -fx-padding: 12; -fx-background-radius: 12;");
         } else {
-            bookBtn.setOnAction(e -> showBookingForm(event, card));
+            //detailsBtn.setOnAction(e -> openEventDetails(event));\
+            detailsBtn.setOnAction(e -> navigateToEventDetails(event));
         }
 
         card.getChildren().addAll(imageContainer, category, title, dateLabel, location,
-                priceBox, progressBar, progressLabels, bookBtn);
+                priceBox, progressBar, progressLabels, detailsBtn);
         return card;
     }
 
@@ -252,76 +265,24 @@ public class UserController implements Initializable {
         container.getChildren().add(placeholder);
     }
 
-    private void showBookingForm(Events event, VBox card) {
-        // Remove any existing form
-        if (card.getChildren().size() > 9) {
-            card.getChildren().remove(9, card.getChildren().size());
+    // Replace the existing openEventDetails method with this:
+    private void openEventDetails(Events event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
+            Parent root = loader.load();
+
+            EventDetailsController controller = loader.getController();
+            controller.setEvent(event);
+
+            // REPLACE current scene instead of opening new window
+            Stage stage = (Stage) flowEvents.getScene().getWindow();
+            stage.setScene(new Scene(root, 1200, 700));
+            stage.setTitle("Détails de l'événement");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir les détails de l'événement");
         }
-
-        // Create booking form directly in the card
-        VBox form = new VBox(15);
-        form.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 15; -fx-padding: 20; -fx-margin: 10 0 0 0;");
-
-        Label formTitle = new Label("Réservation");
-        formTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
-
-        // Form fields
-        TextField nomField = new TextField();
-        nomField.setPromptText("Votre nom complet");
-        nomField.setStyle("-fx-background-radius: 10; -fx-padding: 10;");
-
-        TextField emailField = new TextField();
-        emailField.setPromptText("Votre email");
-        emailField.setStyle("-fx-background-radius: 10; -fx-padding: 10;");
-
-        // Number of places
-        HBox placesBox = new HBox(10);
-        placesBox.setAlignment(Pos.CENTER_LEFT);
-        Label placesLabel = new Label("Places:");
-        Spinner<Integer> placesSpinner = new Spinner<>(1, event.getPlacesRestantes(), 1);
-        placesSpinner.setPrefWidth(80);
-        placesBox.getChildren().addAll(placesLabel, placesSpinner);
-
-        // Total price
-        Label totalPrice = new Label("Total: " + event.getPrix() + " DT");
-        totalPrice.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #81AE8D;");
-
-        placesSpinner.valueProperty().addListener((obs, old, val) -> {
-            totalPrice.setText("Total: " + (val * event.getPrix()) + " DT");
-        });
-
-        // Confirm button
-        Button confirmBtn = new Button("Confirmer");
-        confirmBtn.setMaxWidth(Double.MAX_VALUE);
-        confirmBtn.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-font-size: 14px; " +
-                "-fx-font-weight: bold; -fx-padding: 12; -fx-background-radius: 10; -fx-cursor: hand;");
-
-        confirmBtn.setOnAction(e -> {
-            if (nomField.getText().isEmpty() || emailField.getText().isEmpty()) {
-                showAlert("Erreur", "Veuillez remplir tous les champs");
-                return;
-            }
-
-            try {
-                // Update places in database
-                int newPlaces = event.getPlacesRestantes() - placesSpinner.getValue();
-                serviceEvent.updatePlaces(event.getId_event(), newPlaces);
-                event.setPlacesRestantes(newPlaces);
-
-                showAlert("Succès", "Réservation effectuée!");
-
-                // Refresh display
-                flowEvents.getChildren().clear();
-                loadEvents();
-
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-                showAlert("Erreur", "Erreur lors de la réservation");
-            }
-        });
-
-        form.getChildren().addAll(formTitle, nomField, emailField, placesBox, totalPrice, confirmBtn);
-        card.getChildren().add(form);
     }
 
     private void showAlert(String title, String message) {
@@ -343,6 +304,34 @@ public class UserController implements Initializable {
             } else {
                 filterByCategory(currentCategory);
             }
+        }
+    }
+
+    private void navigateToMyEvents() {
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) flowEvents.getScene().getWindow();
+            stage.setScene(new Scene(root, 1200, 700));
+            stage.setTitle("EventHub - Mes réservations");
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void navigateToEventDetails(Events event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
+            Parent root = loader.load();
+            EventDetailsController controller = loader.getController();
+            controller.setEvent(event);
+
+            Stage stage = (Stage) flowEvents.getScene().getWindow();
+            stage.setScene(new Scene(root, 1200, 700));
+            stage.setTitle("Détails de l'événement");
+        }catch (Exception e){
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir les détails");
         }
     }
 }
