@@ -15,7 +15,9 @@ public class MainFX extends Application {
         // Définir le Stage principal pour NavigationManager
         NavigationManager.setPrimaryStage(stage);
 // Pour les tests : définir un utilisateur fictif (à supprimer après intégration)
-        SessionManager.setTestAdminUser();  // Lance l'accueil avec un utilisateur connecté
+      // SessionManager.setTestAdminUser();
+        //
+        SessionManager.setTestUser();// Lance l'accueil avec un utilisateur connecté
         // Vérifier la session utilisateur
         String fxmlPath;
         if (SessionManager.isLoggedIn() && SessionManager.isAdmin()) {
