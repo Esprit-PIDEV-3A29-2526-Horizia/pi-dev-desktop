@@ -11,7 +11,7 @@ public class MainFx extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Démarrer avec Dashboard
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Dashboard.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/dashboard.fxml"));
         Parent root = loader.load();
 
         Scene scene = new Scene(root, 1200, 700);

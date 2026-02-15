@@ -21,12 +21,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
-public class ModifierPublicationController implements Initializable {
+public class AjouterPublicationController implements Initializable {
 
-    @FXML private TextField idField;
     @FXML private TextField titreField;
     @FXML private TextArea descriptionField;
-    @FXML private ImageView currentImageView;
     @FXML private TextField imageField;
     @FXML private Button browseButton;
     @FXML private ImageView previewImage;
@@ -34,43 +32,24 @@ public class ModifierPublicationController implements Initializable {
     @FXML private Button enregistrerButton;
 
     private PublicationService publicationService = new PublicationService();
-    private Publication publication;
     private File selectedImageFile;
     private static final String UPLOAD_DIR = "src/main/resources/images/";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Récupérer la publication sélectionnée
-        this.publication = Dashboard.getSelectedPublication();
-
-        if (publication != null) {
-            remplirChamps();
-        }
-
+        // Bouton Parcourir
         browseButton.setOnAction(e -> choisirImage());
+
+        // Bouton Enregistrer
         enregistrerButton.setOnAction(e -> enregistrer());
+
+        // Bouton Annuler
         annulerButton.setOnAction(e -> annuler());
-    }
-
-    private void remplirChamps() {
-        idField.setText(String.valueOf(publication.getId()));
-        titreField.setText(publication.getTitre());
-        descriptionField.setText(publication.getDescription());
-
-        // Afficher l'image actuelle
-        if (publication.getImage() != null && !publication.getImage().isEmpty()) {
-            try {
-                Image image = new Image(getClass().getResource(publication.getImage()).toExternalForm());
-                currentImageView.setImage(image);
-            } catch (Exception e) {
-                System.out.println("Image non trouvée: " + publication.getImage());
-            }
-        }
     }
 
     private void choisirImage() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Choisir une nouvelle image");
+        fileChooser.setTitle("Choisir une image");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
@@ -78,8 +57,9 @@ public class ModifierPublicationController implements Initializable {
         File file = fileChooser.showOpenDialog(browseButton.getScene().getWindow());
         if (file != null) {
             selectedImageFile = file;
-            imageField.setText(file.getName());
+            imageField.setText(file.getAbsolutePath());
 
+            // Afficher la prévisualisation
             Image image = new Image(file.toURI().toString());
             previewImage.setImage(image);
         }
@@ -97,37 +77,46 @@ public class ModifierPublicationController implements Initializable {
             return;
         }
 
-        // Mettre à jour
+        // Créer la publication
+        Publication publication = new Publication();
         publication.setTitre(titreField.getText().trim());
         publication.setDescription(descriptionField.getText().trim());
 
-        // Nouvelle image ?
-        if (selectedImageFile != null) {
-            String imagePath = saveImage();
-            if (imagePath != null) {
-                publication.setImage(imagePath);
-            }
+        // Gérer l'image
+        String imagePath = saveImage();
+        if (imagePath != null) {
+            publication.setImage(imagePath);
         }
 
-        // Sauvegarder
-        publicationService.modifier(publication);
+        // Enregistrer
+        publicationService.ajouter(publication);
 
-        showAlert("Succès", "Publication modifiée avec succès !");
+        showAlert("Succès", "Publication ajoutée avec succès !");
+
+        // Retour à la liste
         Dashboard.loadView("/Publications.fxml");
     }
 
     private String saveImage() {
+        if (selectedImageFile == null) {
+            return null;
+        }
+
         try {
+            // Créer le dossier images s'il n'existe pas
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
+            // Générer un nom unique
             String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
             Path targetPath = uploadPath.resolve(fileName);
 
+            // Copier le fichier
             Files.copy(selectedImageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
+            // Retourner le chemin relatif pour la DB
             return "/images/" + fileName;
 
         } catch (Exception e) {

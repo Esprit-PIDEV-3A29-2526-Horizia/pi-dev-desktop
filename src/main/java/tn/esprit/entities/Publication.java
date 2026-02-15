@@ -5,35 +5,32 @@ import java.time.LocalDateTime;
 public class Publication {
     private int id;
     private String titre;
-    private String lieu;
-    private String image;
-    private String contenu;
-    private float tarif;
-    private boolean actif;
-    private String type;
+    private String description;
     private LocalDateTime datePublication;
-    private int likes;
-    private boolean estPublie;
+    private String image;
 
     // Constructeur par défaut
     public Publication() {
+        // La date sera définie automatiquement lors de la création
+        this.datePublication = LocalDateTime.now();
     }
 
-    // Constructeur avec paramètres
-    public Publication(int id, String titre, String lieu, String image, String contenu,
-                       float tarif, boolean actif, String type, LocalDateTime datePublication,
-                       int likes, boolean estPublie) {
+    // Constructeur avec paramètres (sans date - elle se met auto)
+    public Publication(int id, String titre, String description, String image) {
         this.id = id;
         this.titre = titre;
-        this.lieu = lieu;
+        this.description = description;
         this.image = image;
-        this.contenu = contenu;
-        this.tarif = tarif;
-        this.actif = actif;
-        this.type = type;
+        this.datePublication = LocalDateTime.now();
+    }
+
+    // Constructeur complet (si tu veux définir la date manuellement)
+    public Publication(int id, String titre, String description, LocalDateTime datePublication, String image) {
+        this.id = id;
+        this.titre = titre;
+        this.description = description;
         this.datePublication = datePublication;
-        this.likes = likes;
-        this.estPublie = estPublie;
+        this.image = image;
     }
 
     // Getters et Setters
@@ -53,52 +50,12 @@ public class Publication {
         this.titre = titre;
     }
 
-    public String getLieu() {
-        return lieu;
+    public String getDescription() {
+        return description;
     }
 
-    public void setLieu(String lieu) {
-        this.lieu = lieu;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getContenu() {
-        return contenu;
-    }
-
-    public void setContenu(String contenu) {
-        this.contenu = contenu;
-    }
-
-    public float getTarif() {
-        return tarif;
-    }
-
-    public void setTarif(float tarif) {
-        this.tarif = tarif;
-    }
-
-    public boolean isActif() {
-        return actif;
-    }
-
-    public void setActif(boolean actif) {
-        this.actif = actif;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public LocalDateTime getDatePublication() {
@@ -109,20 +66,12 @@ public class Publication {
         this.datePublication = datePublication;
     }
 
-    public int getLikes() {
-        return likes;
+    public String getImage() {
+        return image;
     }
 
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-
-    public boolean isEstPublie() {
-        return estPublie;
-    }
-
-    public void setEstPublie(boolean estPublie) {
-        this.estPublie = estPublie;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     @Override
@@ -130,9 +79,9 @@ public class Publication {
         return "Publication{" +
                 "id=" + id +
                 ", titre='" + titre + '\'' +
-                ", lieu='" + lieu + '\'' +
-                ", type='" + type + '\'' +
-                ", tarif=" + tarif +
+                ", description='" + description + '\'' +
+                ", datePublication=" + datePublication +
+                ", image='" + image + '\'' +
                 '}';
     }
 }
