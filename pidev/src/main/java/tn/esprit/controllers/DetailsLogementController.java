@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
+
 public class DetailsLogementController implements Initializable {
 
     @FXML

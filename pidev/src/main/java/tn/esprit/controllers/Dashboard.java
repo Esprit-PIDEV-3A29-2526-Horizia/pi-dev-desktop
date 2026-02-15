@@ -50,7 +50,7 @@ public class Dashboard {
     @FXML
     private void showDashboard() {
         // Charger une vue d'aperçu dashboard (par défaut, charger Logements si aucune vue spécifique n'existe)
-        loadView("/Logements.fxml"); // Ou créez /DashboardContent.fxml pour un aperçu personnalisé
+        loadView("/DashboardContent.fxml"); // Ou créez /DashboardContent.fxml pour un aperçu personnalisé
     }
 
     @FXML
