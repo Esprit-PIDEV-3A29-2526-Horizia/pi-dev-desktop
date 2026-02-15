@@ -39,12 +39,12 @@ public class AdminDashboardController {
     @FXML
     private void showDashboard() {
         // Charger la vue du tableau de bord
-        loadPage("/fxml/AdminDashboard.fxml");
+        loadPage("/fxml/DashboardContent.fxml");
         setActiveButton(btnDashboard);
     }
 
     @FXML
-    private void showUsers() {
+    void showUsers() {
         // Charger la vue de gestion des membres
         loadPage("/fxml/MemberList.fxml");
         setActiveButton(btnUsers);
@@ -71,14 +71,15 @@ public class AdminDashboardController {
         setActiveButton(btnSettings);
     }
 
-    private void loadPage(String fxmlFile) {
+    void loadPage(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent page = loader.load();
 
-            // Si la page a besoin de l'utilisateur connecté
-            if (loader.getController() instanceof MemberListController) {
-                ((MemberListController) loader.getController()).refreshList();
+            // Passer la référence du dashboard
+            Object controller = loader.getController();
+            if (controller instanceof MemberListController) {
+                ((MemberListController) controller).setDashboardController(this);
             }
 
             contentArea.getChildren().setAll(page);
@@ -91,7 +92,13 @@ public class AdminDashboardController {
             e.printStackTrace();
         }
     }
-
+    public void setContent(Parent content) {
+        contentArea.getChildren().setAll(content);
+        AnchorPane.setTopAnchor(content, 0.0);
+        AnchorPane.setBottomAnchor(content, 0.0);
+        AnchorPane.setLeftAnchor(content, 0.0);
+        AnchorPane.setRightAnchor(content, 0.0);
+    }
     private void setActiveButton(Button activeButton) {
         // Réinitialiser tous les boutons
         btnDashboard.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
@@ -102,6 +109,16 @@ public class AdminDashboardController {
 
         // Mettre en surbrillance le bouton actif
         activeButton.setStyle("-fx-background-color: #2a5298; -fx-background-radius: 10; -fx-text-fill: white;");
+    }
+    @FXML
+    private void showAddMember() {
+        loadPage("/fxml/AddMember.fxml");
+        // Vous pouvez ajouter un style spécial pour le bouton si nécessaire
+    }
+
+    // Ou si vous voulez l'ouvrir depuis la liste des membres
+    public void openAddMemberForm() {
+        loadPage("/fxml/AddMember.fxml");
     }
 
     @FXML

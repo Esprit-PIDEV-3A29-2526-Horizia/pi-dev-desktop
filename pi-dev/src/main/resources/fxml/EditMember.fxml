@@ -6,7 +6,7 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/20.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.esprit.controllers.AddMemberController"
+            fx:controller="tn.esprit.controllers.EditMemberController"
             prefWidth="1100" prefHeight="700"
             style="-fx-background-color:#F6F7FB;">
 
@@ -21,7 +21,7 @@
 
                 <!-- Header avec titre et bouton retour -->
                 <HBox alignment="CENTER_LEFT" spacing="20">
-                    <Label text="Ajouter un Membre" style="-fx-font-size:24px; -fx-font-weight:bold; -fx-text-fill:#111827;" />
+                    <Label text="Modifier un Membre" style="-fx-font-size:24px; -fx-font-weight:bold; -fx-text-fill:#111827;" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button text="← Retour à la liste" onAction="#goBack"
                             style="-fx-background-color:#6B7280; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:10 20; -fx-background-radius:5;"/>
@@ -42,8 +42,8 @@
                         <Label text="Email *" style="-fx-font-weight:bold;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                         <TextField fx:id="txtEmail" promptText="exemple@email.com" prefWidth="250" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                        <Label text="Mot de passe *" style="-fx-font-weight:bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-                        <PasswordField fx:id="txtPassword" promptText="********" prefWidth="250" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                        <Label text="Mot de passe" style="-fx-font-weight:bold;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                        <PasswordField fx:id="txtPassword" promptText="Laisser vide pour conserver" prefWidth="250" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
 
                         <!-- Ligne 3 -->
                         <Label text="Téléphone *" style="-fx-font-weight:bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
@@ -58,30 +58,35 @@
 
                         <Label text="Statut *" style="-fx-font-weight:bold;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
                         <ComboBox fx:id="cbStatut" prefWidth="250" promptText="Sélectionner statut" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+
+                        <!-- ID caché -->
+                        <Label fx:id="lblId" visible="false" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
                     </GridPane>
 
                     <!-- Champs obligatoires indication -->
-                    <Label text="* Champs obligatoires" style="-fx-text-fill:#6B7280; -fx-font-size:11px;"/>
+                    <Label text="* Champs obligatoires | Mot de passe: laisser vide pour conserver l'ancien"
+                           style="-fx-text-fill:#6B7280; -fx-font-size:11px;"/>
 
                     <!-- Séparateur -->
                     <Separator/>
 
                     <!-- Boutons -->
                     <HBox spacing="15" alignment="CENTER">
-                        <Button text="Enregistrer" onAction="#saveMember"
-                                style="-fx-background-color:#10B981; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:12 30; -fx-background-radius:5;"/>
+                        <Button text="Mettre à jour" onAction="#updateMember"
+                                style="-fx-background-color:#2a5298; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:12 30; -fx-background-radius:5;"/>
                         <Button text="Réinitialiser" onAction="#resetForm"
                                 style="-fx-background-color:#6B7280; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:12 30; -fx-background-radius:5;"/>
                     </HBox>
 
                     <!-- Message -->
-                    <Label fx:id="lblMessage" style="-fx-text-fill:#10B981; -fx-alignment:CENTER;"/>
+                    <Label fx:id="lblMessage" style="-fx-alignment:CENTER;"/>
                 </VBox>
 
                 <!-- Aperçu des informations -->
                 <VBox spacing="10" style="-fx-background-color:#E5E7EB; -fx-padding:15; -fx-background-radius:10;">
                     <Label text="ℹ️ Information" style="-fx-font-weight:bold;"/>
-                    <Label text="Les membres ajoutés apparaîtront dans la liste principale." style="-fx-text-fill:#4B5563;"/>
+                    <Label text="Modifiez les informations du membre et cliquez sur Mettre à jour."
+                           style="-fx-text-fill:#4B5563;"/>
                 </VBox>
             </VBox>
         </ScrollPane>

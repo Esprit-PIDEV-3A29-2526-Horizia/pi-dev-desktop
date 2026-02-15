@@ -1,94 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="tn.esprit.controllers.MemberListController"
-            prefWidth="1300" prefHeight="700"
-            style="-fx-background-color:#F6F7FB;">
+<?import javafx.scene.layout.Region?>
+<AnchorPane prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.MemberListController">
 
-    <!-- SIDEBAR -->
-    <left>
-        <VBox spacing="18" style="-fx-background-color:#111827;" prefWidth="260">
-            <padding>
-                <Insets top="22" right="18" bottom="18" left="18"/>
-            </padding>
+    <VBox layoutX="20.0" layoutY="20.0" spacing="20.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="20.0">
 
-            <!-- Logo -->
-            <ImageView fitWidth="200" fitHeight="60" preserveRatio="true">
-                <image>
-                    <Image url="@../images/logo.png"/>
-                </image>
-            </ImageView>
-
-            <!-- Menu Items -->
-            <VBox spacing="5">
-                <Button text="Dashboard" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
-                <Button text="Voyages" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
-                <Button text="Réservations" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-alignment:center-left; -fx-pref-width:220;"/>
-                <Button text="Utilisateurs" style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-alignment:center-left; -fx-pref-width:220;"/>
-            </VBox>
-
-            <Separator style="-fx-background-color:#374151;" />
-
-            <!-- Statistiques rapides -->
-            <VBox spacing="10">
-                <Label text="STATISTIQUES" style="-fx-text-fill:#9CA3AF; -fx-font-size:11px; -fx-font-weight:bold;" />
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="👥" style="-fx-font-size:16px;" />
-                    <Label text="Total:" style="-fx-text-fill:#E5E7EB; -fx-font-size:12px;" />
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Label fx:id="totalMembresLabel" text="0" style="-fx-text-fill:#10B981; -fx-font-weight:bold;" />
-                </HBox>
-            </VBox>
-        </VBox>
-    </left>
-
-    <!-- MAIN CONTENT -->
-    <center>
-        <VBox spacing="20" style="-fx-background-color:#F6F7FB;">
-            <padding>
-                <Insets top="20" right="25" bottom="20" left="25"/>
-            </padding>
-
-            <!-- Header avec titre et bouton ajouter -->
-            <HBox alignment="CENTER_LEFT" spacing="20">
-                <Label text="Gestion des Membres" style="-fx-font-size:24px; -fx-font-weight:bold; -fx-text-fill:#111827;" />
+        <!-- En-tête avec titre et bouton ajouter -->
+        <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <children>
+                <Label text="Gestion des Membres" textFill="#111827">
+                    <font>
+                        <Font name="System Bold" size="24.0" />
+                    </font>
+                </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="+ Nouveau Membre" onAction="#openAddForm"
-                        style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-font-size:14px; -fx-padding:10 20; -fx-background-radius:5;"/>
-            </HBox>
+                <Button fx:id="btnAdd" onAction="#openAddForm" style="-fx-background-color: #10B981; -fx-background-radius: 10; -fx-padding: 10 20;" text="+ Nouveau Membre" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
 
-            <!-- Barre de recherche -->
-            <HBox spacing="10">
-                <TextField fx:id="searchField" promptText="Rechercher un membre..."
-                           style="-fx-background-color:white; -fx-padding:10; -fx-pref-width:400px; -fx-background-radius:5;"/>
-                <Button text="Rechercher" onAction="#searchMembers"
-                        style="-fx-background-color:#1F2937; -fx-text-fill:white; -fx-padding:10 20; -fx-background-radius:5;"/>
-            </HBox>
+        <!-- Barre de recherche -->
+        <HBox spacing="10.0">
+            <children>
+                <TextField fx:id="searchField" promptText="Rechercher par nom, email..." HBox.hgrow="ALWAYS" style="-fx-background-radius: 10; -fx-padding: 10;">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </TextField>
+                <Button onAction="#searchMembers" style="-fx-background-color: #3B82F6; -fx-background-radius: 10; -fx-padding: 10 20;" text="Rechercher" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button onAction="#refreshList" style="-fx-background-color: #6B7280; -fx-background-radius: 10; -fx-padding: 10 20;" text="↻" textFill="white">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
 
-            <!-- TableView avec colonnes d'action -->
-            <!-- TableView avec colonnes -->
-            <TableView fx:id="tableUsers" prefHeight="500" style="-fx-background-color:white; -fx-background-radius:10;">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
-                    <TableColumn fx:id="colNom" text="Nom" prefWidth="120"/>
-                    <TableColumn fx:id="colPrenom" text="Prénom" prefWidth="120"/>
-                    <TableColumn fx:id="colEmail" text="Email" prefWidth="200"/>
-                    <TableColumn fx:id="colTelephone" text="Téléphone" prefWidth="120"/>
-                    <TableColumn fx:id="colType" text="Type" prefWidth="100"/>
-                    <TableColumn fx:id="colStatut" text="Statut" prefWidth="100"/>
-                    <TableColumn fx:id="colActions" text="Actions" prefWidth="150"/>
-                </columns>
-            </TableView>
+        <!-- Tableau des membres -->
+        <TableView fx:id="tableUsers" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10;">
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="50" text="ID" />
+                <TableColumn fx:id="colNom" prefWidth="100" text="Nom" />
+                <TableColumn fx:id="colPrenom" prefWidth="100" text="Prénom" />
+                <TableColumn fx:id="colEmail" prefWidth="200" text="Email" />
+                <TableColumn fx:id="colTelephone" prefWidth="100" text="Téléphone" />
+                <TableColumn fx:id="colType" prefWidth="80" text="Type" />
+                <TableColumn fx:id="colStatut" prefWidth="80" text="Statut" />
+                <TableColumn fx:id="colActions" prefWidth="150" text="Actions" />
+            </columns>
+        </TableView>
 
-            <!-- Label message -->
-            <Label fx:id="lblMessage" style="-fx-text-fill:#10B981;" />
-        </VBox>
-    </center>
-</BorderPane>
+        <!-- Statistiques -->
+        <HBox spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+            <children>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalMembresLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Total membres" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalAdminsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Administrateurs" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalAgentsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Agents" />
+                </VBox>
+                <VBox alignment="CENTER" spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label fx:id="totalClientsLabel" style="-fx-font-size: 24; -fx-font-weight: bold;" text="0" />
+                    <Label style="-fx-text-fill: #6B7280;" text="Clients" />
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- Message -->
+        <Label fx:id="lblMessage" style="-fx-font-size: 14;" />
+    </VBox>
+
+</AnchorPane>

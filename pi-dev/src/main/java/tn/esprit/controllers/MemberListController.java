@@ -26,8 +26,8 @@ public class MemberListController {
     @FXML private TableColumn<User, String> colPrenom;
     @FXML private TableColumn<User, String> colEmail;
     @FXML private TableColumn<User, String> colTelephone;
-    @FXML private TableColumn<User, String> colType;      // Viendra du profil
-    @FXML private TableColumn<User, String> colStatut;    // Viendra du profil
+    @FXML private TableColumn<User, String> colType;
+    @FXML private TableColumn<User, String> colStatut;
     @FXML private TableColumn<User, Void> colActions;
 
     @FXML private TextField searchField;
@@ -36,19 +36,16 @@ public class MemberListController {
 
     private final ServiceUser serviceUser = new ServiceUser();
     private final ObservableList<User> usersList = FXCollections.observableArrayList();
+    private AdminDashboardController dashboardController;
 
     @FXML
     public void initialize() {
         System.out.println("=== Initialisation MemberListController ===");
 
-        // Tester la connexion d'abord
         serviceUser.testConnexion();
 
-        // Configurer les colonnes
         setupTableColumns();
         setupActionsColumn();
-
-        // Charger les données
         loadUsers();
     }
 
@@ -61,7 +58,6 @@ public class MemberListController {
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colTelephone.setCellValueFactory(new PropertyValueFactory<>("telephone"));
 
-        // Pour type et statut, on utilise une cellule personnalisée
         colType.setCellValueFactory(cellData -> {
             String type = cellData.getValue().getType();
             return new javafx.beans.property.SimpleStringProperty(type != null ? type : "");
@@ -72,7 +68,7 @@ public class MemberListController {
             return new javafx.beans.property.SimpleStringProperty(statut != null ? statut : "");
         });
 
-        // Styliser la colonne type avec des couleurs
+        // Styliser la colonne type
         colType.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -120,7 +116,6 @@ public class MemberListController {
             }
         });
 
-        // Centrer certaines colonnes
         colId.setStyle("-fx-alignment: CENTER;");
         colType.setStyle("-fx-alignment: CENTER;");
         colStatut.setStyle("-fx-alignment: CENTER;");
@@ -176,7 +171,6 @@ public class MemberListController {
             } else {
                 System.out.println("📊 " + users.size() + " utilisateur(s) trouvé(s)");
 
-                // Afficher les 3 premiers pour debug
                 for (int i = 0; i < Math.min(3, users.size()); i++) {
                     User u = users.get(i);
                     System.out.println("  " + (i+1) + ". " + u.getNom() + " " + u.getPrenom() +
@@ -204,12 +198,9 @@ public class MemberListController {
         int total = usersList.size();
         totalMembresLabel.setText(String.valueOf(total));
 
-        // Compter par type
         long admins = usersList.stream().filter(u -> "ADMIN".equals(u.getType())).count();
         long agents = usersList.stream().filter(u -> "AGENT".equals(u.getType())).count();
         long clients = usersList.stream().filter(u -> "CLIENT".equals(u.getType())).count();
-
-        // Compter par statut
         long actifs = usersList.stream().filter(u -> "ACTIF".equals(u.getStatut())).count();
         long bloques = usersList.stream().filter(u -> "BLOQUE".equals(u.getStatut())).count();
 
@@ -246,16 +237,60 @@ public class MemberListController {
         System.out.println("🔍 Recherche '" + searchTerm + "': " + filteredList.size() + " résultat(s)");
     }
 
+    public void setDashboardController(AdminDashboardController controller) {
+        this.dashboardController = controller;
+    }
+
     @FXML
     private void openAddForm() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AddMember.fxml"));
-            Parent root = loader.load();
+        if (dashboardController != null) {
+            dashboardController.loadPage("/fxml/AddMember.fxml");
+        } else {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AddMember.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) tableUsers.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Ajouter un membre");
+                stage.centerOnScreen();
+            } catch (IOException e) {
+                e.printStackTrace();
+                showMessage("Erreur d'ouverture du formulaire", "error");
+            }
+        }
+    }
 
-            Stage stage = (Stage) tableUsers.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Ajouter un membre");
-            stage.centerOnScreen();
+    /**
+     * MODIFICATION ICI - Utilise EditMember.fxml au lieu de AddMember.fxml
+     */
+    private void openEditForm(User user) {
+        try {
+            if (dashboardController != null) {
+                // Mode DASHBOARD
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditMember.fxml"));
+                Parent root = loader.load();
+
+                EditMemberController controller = loader.getController();
+                controller.setDashboardController(dashboardController);
+                controller.setUserToEdit(user);
+
+                // Utiliser setContent() au lieu de loadPage()
+                dashboardController.setContent(root);
+
+            } else {
+                // Mode FENÊTRE
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditMember.fxml"));
+                Parent root = loader.load();
+
+                EditMemberController controller = loader.getController();
+                controller.setUserToEdit(user);
+
+                Stage stage = new Stage();
+                stage.setScene(new Scene(root));
+                stage.setTitle("Modifier " + user.getNom() + " " + user.getPrenom());
+                stage.centerOnScreen();
+                stage.show();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -263,23 +298,30 @@ public class MemberListController {
         }
     }
 
-    private void openEditForm(User user) {
+    /**
+     * Alternative: Utiliser une méthode statique pour passer les données
+     */
+    private void openEditFormAlternative(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AddMember.fxml"));
-            Parent root = loader.load();
+            // Utiliser une propriété partagée ou un bus d'événements
+            // Mais pour simplifier, on peut utiliser le contrôleur du dashboard
 
-            AddMemberController controller = loader.getController();
-            controller.setUserToEdit(user);
-            controller.setPreviousController(this);
+            if (dashboardController != null) {
+                // 1. Charger d'abord le fichier
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditMember.fxml"));
+                Parent root = loader.load();
 
-            Stage stage = (Stage) tableUsers.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Modifier " + user.getNom() + " " + user.getPrenom());
-            stage.centerOnScreen();
+                // 2. Obtenir le contrôleur et passer les données
+                EditMemberController controller = loader.getController();
+                controller.setUserToEdit(user);
+                controller.setDashboardController(dashboardController);
+
+                // 3. Remplacer le contenu
+                dashboardController.setContent(root);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
-            showMessage("Erreur d'ouverture du formulaire", "error");
         }
     }
 
@@ -296,10 +338,8 @@ public class MemberListController {
             try {
                 serviceUser.supprimer(user.getId());
                 System.out.println("✅ Suppression réussie en base");
-
                 loadUsers();
                 System.out.println("✅ Liste rechargée");
-
                 showMessage("✅ Membre supprimé avec succès", "success");
 
             } catch (SQLException e) {
@@ -309,6 +349,7 @@ public class MemberListController {
             }
         }
     }
+
     public void refreshList() {
         loadUsers();
     }
@@ -332,33 +373,24 @@ public class MemberListController {
         try {
             System.out.println("🔍 Filtrage par profil ID: " + profilId);
 
-            // Récupérer tous les utilisateurs
             List<User> allUsers = serviceUser.afficher();
-
-            // Utiliser Stream pour filtrer
             List<User> filteredUsers = allUsers.stream()
-                    .filter(user -> user.getProfil() != null)  // Éviter NullPointerException
+                    .filter(user -> user.getProfil() != null)
                     .filter(user -> user.getProfil().getId() == profilId)
                     .collect(Collectors.toList());
 
-            // Optionnel: Récupérer le type du premier élément pour affichage
             String profilType = filteredUsers.stream()
                     .findFirst()
                     .map(User::getType)
                     .orElse("Inconnu");
 
-            // Mettre à jour la liste observable
             usersList.clear();
             usersList.addAll(filteredUsers);
 
-            // Mettre à jour le tableau
             tableUsers.setItems(usersList);
             tableUsers.refresh();
-
-            // Mettre à jour les stats
             updateStats();
 
-            // Afficher un message
             long count = filteredUsers.size();
             if (count > 0) {
                 showMessage(String.format("✅ %d membre(s) de type %s", count, profilType), "success");
