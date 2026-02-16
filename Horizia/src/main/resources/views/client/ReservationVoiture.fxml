@@ -116,14 +116,19 @@
                         <!-- Téléphone -->
                         <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
                             <Label text="Téléphone *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                            <TextField fx:id="txtTelephone" promptText="Ex: 98 123 456"
-                                       style="-fx-font-size: 14px; -fx-background-radius: 8;"/>
+                            <HBox spacing="10">
+                                <ComboBox fx:id="comboPays" promptText="Pays" prefWidth="170"
+                                          style="-fx-font-size: 13px; -fx-background-radius: 8;"/>
+                                <TextField fx:id="txtTelephone" promptText="Ex: 98 123 456"
+                                           style="-fx-font-size: 14px; -fx-background-radius: 8;"
+                                           HBox.hgrow="ALWAYS"/>
+                            </HBox>
                         </VBox>
 
                         <!-- CIN -->
                         <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                            <Label text="Numéro CIN *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                            <TextField fx:id="txtCIN" promptText="Ex: 12345678"
+                            <Label text="CIN / Passport *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                            <TextField fx:id="txtCIN" promptText="Ex: 12345678 ou AB123456"
                                        style="-fx-font-size: 14px; -fx-background-radius: 8;"/>
                         </VBox>
 

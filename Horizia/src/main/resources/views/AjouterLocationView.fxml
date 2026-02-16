@@ -100,9 +100,16 @@
                     <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
                         <Label text="Téléphone *"
                                style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtTelephone"
-                                   promptText="Ex: 98 123 456"
-                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                        <HBox spacing="10">
+                            <ComboBox fx:id="comboPays"
+                                      promptText="Pays"
+                                      prefWidth="180"
+                                      style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                            <TextField fx:id="txtTelephone"
+                                       promptText="Ex: 98 123 456"
+                                       style="-fx-font-size: 14px; -fx-padding: 10;"
+                                       HBox.hgrow="ALWAYS"/>
+                        </HBox>
                     </VBox>
 
                     <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">

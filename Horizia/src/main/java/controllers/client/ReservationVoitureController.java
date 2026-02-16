@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import org.example.entities.Location;
 import org.example.entities.Modele;
 import org.example.entities.Vehicule;
+import org.example.entities.Pays;
 import org.example.services.LocationService;
 import org.example.services.ModeleService;
 
@@ -19,6 +20,8 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class ReservationVoitureController {
 
@@ -33,6 +36,7 @@ public class ReservationVoitureController {
     @FXML private Spinner<Integer> spHeureFin;
 
     @FXML private TextField txtNomComplet;
+    @FXML private ComboBox<Pays> comboPays;
     @FXML private TextField txtTelephone;
     @FXML private TextField txtCIN;
     @FXML private TextArea txtNotes;
@@ -50,6 +54,17 @@ public class ReservationVoitureController {
     private LocationService locationService;
     private ModeleService modeleService;
 
+    // Patterns de validation pour différents pays
+    private static final Pattern PHONE_TUNISIA = Pattern.compile("^(\\+216)?[2459]\\d{7}$");
+    private static final Pattern PHONE_FRANCE = Pattern.compile("^(\\+33|0)[1-9]\\d{8}$");
+    private static final Pattern PHONE_MAROC = Pattern.compile("^(\\+212|0)[5-7]\\d{8}$");
+    private static final Pattern PHONE_ALGERIE = Pattern.compile("^(\\+213|0)[5-7]\\d{8}$");
+    private static final Pattern PHONE_INTERNATIONAL = Pattern.compile("^\\+?[1-9]\\d{7,14}$");
+
+    // Patterns pour CIN/Passport
+    private static final Pattern CIN_TUNISIA = Pattern.compile("^[0-9]{8}$");
+    private static final Pattern PASSPORT_INTERNATIONAL = Pattern.compile("^[A-Z0-9]{6,12}$");
+
     public ReservationVoitureController() {
         this.locationService = new LocationService();
         this.modeleService = new ModeleService();
@@ -59,6 +74,121 @@ public class ReservationVoitureController {
     public void initialize() {
         configurerSpinners();
         configurerCalculAuto();
+        initialiserPays();
+        configurerValidationEnTempsReel();
+    }
+
+    /**
+     * Initialise le ComboBox des pays
+     */
+    private void initialiserPays() {
+        comboPays.getItems().addAll(Pays.getPaysSupportes());
+        comboPays.setValue(comboPays.getItems().get(0)); // Tunisie par défaut
+
+        // Mettre à jour le placeholder du téléphone selon le pays sélectionné
+        comboPays.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                txtTelephone.setPromptText("Ex: " + newVal.getFormatExemple());
+                System.out.println("📱 Pays sélectionné : " + newVal.getNom() + " " + newVal.getIndicatif());
+            }
+        });
+    }
+
+    /**
+     * Configure la validation en temps réel des champs
+     */
+    private void configurerValidationEnTempsReel() {
+        // Validation téléphone en temps réel
+        txtTelephone.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.trim().isEmpty() && comboPays.getValue() != null) {
+                if (validerTelephoneAvecPays(comboPays.getValue(), newVal)) {
+                    txtTelephone.setStyle("-fx-border-color: #27ae60; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;");
+                } else {
+                    txtTelephone.setStyle("-fx-border-color: #e74c3c; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;");
+                }
+            } else {
+                txtTelephone.setStyle("-fx-font-size: 14px; -fx-background-radius: 8;");
+            }
+        });
+
+        // Revalider le téléphone quand le pays change
+        comboPays.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (txtTelephone.getText() != null && !txtTelephone.getText().trim().isEmpty()) {
+                txtTelephone.setText(txtTelephone.getText());
+            }
+        });
+
+        // Validation CIN en temps réel
+        txtCIN.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && !newVal.trim().isEmpty()) {
+                if (validerCinOuPassport(newVal)) {
+                    txtCIN.setStyle("-fx-border-color: #27ae60; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;");
+                } else {
+                    txtCIN.setStyle("-fx-border-color: #e74c3c; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;");
+                }
+            } else {
+                txtCIN.setStyle("-fx-font-size: 14px; -fx-background-radius: 8;");
+            }
+        });
+    }
+
+    /**
+     * Valide le format du numéro de téléphone selon le pays sélectionné
+     */
+    private boolean validerTelephoneAvecPays(Pays pays, String telephone) {
+        if (pays == null || telephone == null || telephone.trim().isEmpty()) {
+            return false;
+        }
+
+        String telClean = telephone.replaceAll("[\\s-]", "");
+
+        if (pays.getNom().equals("Autre")) {
+            return PHONE_INTERNATIONAL.matcher(telClean).matches();
+        }
+
+        switch (pays.getIndicatif()) {
+            case "+216": return PHONE_TUNISIA.matcher(telClean).matches();
+            case "+33": return PHONE_FRANCE.matcher(telClean).matches();
+            case "+212": return PHONE_MAROC.matcher(telClean).matches();
+            case "+213": return PHONE_ALGERIE.matcher(telClean).matches();
+            default: return PHONE_INTERNATIONAL.matcher(telClean).matches();
+        }
+    }
+
+    /**
+     * Valide le format CIN tunisien ou Passport international
+     */
+    private boolean validerCinOuPassport(String document) {
+        if (document == null || document.trim().isEmpty()) {
+            return false; // Obligatoire pour la réservation
+        }
+
+        String docClean = document.trim().toUpperCase().replaceAll("[\\s-]", "");
+        return CIN_TUNISIA.matcher(docClean).matches() ||
+                PASSPORT_INTERNATIONAL.matcher(docClean).matches();
+    }
+
+    /**
+     * Vérifie si le CIN/Passport existe déjà dans la base de données
+     */
+    private boolean cinDejaExiste(String cin) {
+        if (cin == null || cin.trim().isEmpty()) {
+            return false;
+        }
+
+        String cinClean = cin.trim().toUpperCase().replaceAll("[\\s-]", "");
+        List<Location> locations = locationService.getAllLocations();
+
+        for (Location loc : locations) {
+            if (loc.getClientCin() != null) {
+                String existingCin = loc.getClientCin().trim().toUpperCase().replaceAll("[\\s-]", "");
+                if (existingCin.equals(cinClean)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -179,13 +309,19 @@ public class ReservationVoitureController {
         }
 
         try {
+            // Formater le numéro avec l'indicatif du pays
+            String telephoneComplet = comboPays.getValue().formaterNumero(txtTelephone.getText().trim());
+
             // Créer la location
             Location location = new Location();
 
             location.setIdVehicule(voiture.getIdVehicule());
             location.setClientNomComplet(txtNomComplet.getText().trim());
-            location.setClientTelephone(txtTelephone.getText().trim());
-            location.setClientCin(txtCIN.getText().trim());
+            location.setClientTelephone(telephoneComplet);
+
+            // Normaliser le CIN/Passport
+            String cinNormalise = txtCIN.getText().trim().toUpperCase().replaceAll("[\\s-]", "");
+            location.setClientCin(cinNormalise);
 
             LocalDateTime debut = dpDateDebut.getValue().atTime(spHeureDebut.getValue(), 0);
             LocalDateTime fin = dpDateFin.getValue().atTime(spHeureFin.getValue(), 0);
@@ -225,24 +361,82 @@ public class ReservationVoitureController {
      * Valide le formulaire
      */
     private boolean validerFormulaire() {
+        // Validation nom
         if (txtNomComplet.getText().trim().isEmpty()) {
             afficherAlerte("Champ requis", "Veuillez saisir votre nom complet.", Alert.AlertType.WARNING);
             txtNomComplet.requestFocus();
             return false;
         }
 
+        // Validation pays
+        if (comboPays.getValue() == null) {
+            afficherAlerte("Champ requis", "Veuillez sélectionner votre pays.", Alert.AlertType.WARNING);
+            comboPays.requestFocus();
+            return false;
+        }
+
+        // Validation téléphone
         if (txtTelephone.getText().trim().isEmpty()) {
             afficherAlerte("Champ requis", "Veuillez saisir votre numéro de téléphone.", Alert.AlertType.WARNING);
             txtTelephone.requestFocus();
             return false;
         }
 
+        if (!validerTelephoneAvecPays(comboPays.getValue(), txtTelephone.getText())) {
+            afficherAlerte("Format invalide",
+                    "Format de téléphone invalide pour " + comboPays.getValue().getNom() + " !\n\n" +
+                            "Format attendu : " + comboPays.getValue().getFormatExemple() + "\n" +
+                            "Indicatif : " + comboPays.getValue().getIndicatif(),
+                    Alert.AlertType.WARNING);
+            txtTelephone.requestFocus();
+            return false;
+        }
+
+        // Validation CIN
         if (txtCIN.getText().trim().isEmpty()) {
-            afficherAlerte("Champ requis", "Veuillez saisir votre CIN.", Alert.AlertType.WARNING);
+            afficherAlerte("Champ requis", "Veuillez saisir votre CIN/Passport.", Alert.AlertType.WARNING);
             txtCIN.requestFocus();
             return false;
         }
 
+        if (!validerCinOuPassport(txtCIN.getText())) {
+            afficherAlerte("Format invalide",
+                    "Format de CIN/Passport invalide !\n\n" +
+                            "Formats acceptés :\n" +
+                            "• CIN Tunisien : 8 chiffres (ex: 12345678)\n" +
+                            "• Passport : 6 à 12 caractères alphanumériques (ex: AB123456)",
+                    Alert.AlertType.WARNING);
+            txtCIN.requestFocus();
+            return false;
+        }
+
+        // Vérification unicité CIN
+        if (cinDejaExiste(txtCIN.getText())) {
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("⚠️ CIN/Passport déjà enregistré");
+            confirmAlert.setHeaderText("Ce CIN/Passport existe déjà dans nos enregistrements");
+            confirmAlert.setContentText(
+                    "Un client avec ce CIN/Passport a déjà effectué une réservation.\n\n" +
+                            "Voulez-vous continuer quand même ?\n" +
+                            "(Il est possible qu'un même client effectue plusieurs réservations)"
+            );
+
+            ButtonType btnContinuer = new ButtonType("Continuer");
+            ButtonType btnAnnuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+            confirmAlert.getButtonTypes().setAll(btnContinuer, btnAnnuler);
+
+            confirmAlert.showAndWait().ifPresent(response -> {
+                if (response != btnContinuer) {
+                    txtCIN.requestFocus();
+                }
+            });
+
+            if (confirmAlert.getResult() != btnContinuer) {
+                return false;
+            }
+        }
+
+        // Validation dates
         if (dpDateDebut.getValue() == null || dpDateFin.getValue() == null) {
             afficherAlerte("Dates requises", "Veuillez sélectionner les dates.", Alert.AlertType.WARNING);
             return false;
@@ -253,6 +447,7 @@ public class ReservationVoitureController {
             return false;
         }
 
+        // Validation conditions
         if (!cbAccepteConditions.isSelected()) {
             afficherAlerte("Conditions", "Veuillez accepter les conditions générales.", Alert.AlertType.WARNING);
             return false;
@@ -271,7 +466,8 @@ public class ReservationVoitureController {
         confirmation.setContentText(
                 "Numéro de réservation : #" + location.getIdLocation() + "\n\n" +
                         "Client : " + location.getClientNomComplet() + "\n" +
-                        "Téléphone : " + location.getClientTelephone() + "\n\n" +
+                        "Téléphone : " + location.getClientTelephone() + "\n" +
+                        "CIN/Passport : " + location.getClientCin() + "\n\n" +
                         "Montant total : " + String.format("%.3f TND", location.getMontantTotal()) + "\n" +
                         "Avance à payer : " + String.format("%.3f TND", location.getAvance()) + "\n\n" +
                         "Nous vous contacterons bientôt pour finaliser votre réservation."
