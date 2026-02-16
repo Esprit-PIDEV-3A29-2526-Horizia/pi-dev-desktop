@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionVoyageController">
+    <children>
+        <VBox layoutX="20.0" layoutY="20.0" spacing="10.0" prefWidth="250.0">
+            <children>
+                <Label text="Destination :" />
+                <TextField fx:id="tfDestination" />
+
+                <Label text="Prix (DT) :" />
+                <TextField fx:id="tfPrix" />
+
+                <Label text="Catégorie :" />
+                <ComboBox fx:id="cbCategorie" prefWidth="250.0" promptText="Choisir..." />
+
+                <Label text="Date Départ :" />
+                <DatePicker fx:id="dpDepart" prefWidth="250.0" />
+
+                <Label text="Date Retour :" />
+                <DatePicker fx:id="dpRetour" prefWidth="250.0" />
+
+                <Label text="Lien Image (URL) :" />
+                <TextField fx:id="tfImage" />
+
+                <HBox spacing="10.0">
+                    <Button onAction="#handleAjouter" text="Ajouter" style="-fx-background-color: green; -fx-text-fill: white;" />
+                    <Button onAction="#handleModifier" text="Modifier" />
+                    <Button onAction="#handleSupprimer" text="Supprimer" style="-fx-background-color: red; -fx-text-fill: white;" />
+                </HBox>
+            </children>
+        </VBox>
+        <TextField fx:id="tfRecherche" layoutX="300.0" layoutY="-10.0" prefWidth="580.0" promptText="🔍 Rechercher une destination ou un prix..." />
+        <TableView fx:id="tableVoyages" layoutX="300.0" layoutY="20.0" prefHeight="550.0" prefWidth="580.0">
+            <columns>
+                <TableColumn fx:id="colDest" text="Destination" prefWidth="120" />
+                <TableColumn fx:id="colPrix" text="Prix" prefWidth="80" />
+                <TableColumn fx:id="colDates" text="Période" prefWidth="200" />
+                <TableColumn fx:id="colCat" text="Catégorie" prefWidth="100" />
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>
