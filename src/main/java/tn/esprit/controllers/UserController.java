@@ -354,23 +354,21 @@ public class UserController implements Initializable {
     }*/
     private void navigateToEventDetails(Events event) {
         try {
+            System.out.println("Tentative de chargement de EventDetails.fxml");
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
             Parent root = loader.load();
+
             EventDetailsController controller = loader.getController();
             controller.setEvent(event);
 
             Stage stage = (Stage) flowEvents.getScene().getWindow();
-
-            // FORCE the size
-            Scene scene = new Scene(root, 1200, 700);
-            stage.setScene(scene);
-            stage.setWidth(1200);
-            stage.setHeight(700);
+            stage.setScene(new Scene(root, 1200, 700));
             stage.setTitle("Détails de l'événement");
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir les détails");
+            showAlert("Erreur", "Impossible d'ouvrir les détails: " + e.getMessage());
         }
     }
 }
