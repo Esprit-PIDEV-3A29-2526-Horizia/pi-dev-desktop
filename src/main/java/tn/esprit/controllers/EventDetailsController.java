@@ -60,13 +60,11 @@ public class EventDetailsController implements Initializable {
     }
 
     private void displayEventDetails() {
-        // Set basic info
         titleLabel.setText(event.getTitre());
         categoryLabel.setText(event.getCategorie());
         descriptionLabel.setText(event.getDescription() != null ? event.getDescription() : "Aucune description disponible");
         locationLabel.setText(event.getLocation() != null ? event.getLocation() : "Lieu non spécifié");
 
-        // Format dates
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
         String dateText = "";
         if (event.getDateDebut() != null) {
@@ -85,7 +83,6 @@ public class EventDetailsController implements Initializable {
         // Load image
         loadEventImage();
 
-        // Setup booking form if places available
         if (event.getPlacesRestantes() > 0) {
             setupBookingForm();
             bookingForm.setVisible(true);

@@ -267,7 +267,6 @@ public class UserController implements Initializable {
         container.getChildren().add(placeholder);
     }
 
-    // Replace the existing openEventDetails method with this:
     private void openEventDetails(Events event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));

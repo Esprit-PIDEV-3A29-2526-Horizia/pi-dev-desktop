@@ -46,7 +46,6 @@ public class MyEventsController implements Initializable {
     private void setupNavigation() {
         homeBtn.setOnAction(e -> navigateTo("/UserHome.fxml", "EventHub - Accueil"));
         eventsBtn.setOnAction(e -> navigateTo("/UserHome.fxml", "EventHub - Accueil"));
-        // myEventsBtn is current page
     }
 
     private void navigateTo(String fxml, String title) {
@@ -81,7 +80,6 @@ public class MyEventsController implements Initializable {
             return;
         }
 
-        // Show ALL participations
         for (Participation p : allParticipations) {
             Events event = findEventById(p.getId_event());
             if (event != null) {
@@ -108,17 +106,14 @@ public class MyEventsController implements Initializable {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
                 "-fx-border-color: #81AE8D; -fx-border-radius: 20; -fx-border-width: 2;");
 
-        // Event title
         Label title = new Label(event.getTitre());
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
         title.setWrapText(true);
 
-        // Event category
         Label category = new Label(event.getCategorie());
         category.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
                 "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 12px;");
 
-        // Reservation details
         Label places = new Label("📋 " + participation.getNombrePlaces() + " place(s) réservée(s)");
         places.setStyle("-fx-text-fill: #666;");
 
@@ -133,12 +128,10 @@ public class MyEventsController implements Initializable {
         status.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; " +
                 "-fx-padding: 5 15; -fx-background-radius: 15; -fx-font-size: 12px;");
 
-        // Action buttons
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
         buttonBox.setPadding(new Insets(10, 0, 0, 0));
 
-        // Modify button
         Button modifyBtn = new Button("✏️ Modifier");
         modifyBtn.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
@@ -146,7 +139,6 @@ public class MyEventsController implements Initializable {
         HBox.setHgrow(modifyBtn, Priority.ALWAYS);
         modifyBtn.setOnAction(e -> showModifyDialog(participation, event));
 
-        // Delete button
         Button deleteBtn = new Button("🗑️ Annuler");
         deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
@@ -156,7 +148,6 @@ public class MyEventsController implements Initializable {
 
         buttonBox.getChildren().addAll(modifyBtn, deleteBtn);
 
-        // View event details button
         Button viewBtn = new Button("Voir l'événement");
         viewBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
@@ -172,11 +163,9 @@ public class MyEventsController implements Initializable {
         dialog.setTitle("Modifier la réservation");
         dialog.setHeaderText("Modifier le nombre de places pour " + event.getTitre());
 
-        // Set buttons
         ButtonType saveButtonType = new ButtonType("Enregistrer", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-        // Create form
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -199,7 +188,6 @@ public class MyEventsController implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
 
-        // Handle result
         dialog.showAndWait().ifPresent(response -> {
             if (response == saveButtonType) {
                 try {
@@ -207,19 +195,15 @@ public class MyEventsController implements Initializable {
                     int newPlaces = placesSpinner.getValue();
 
                     if (newPlaces != oldPlaces) {
-                        // Update participation
                         participation.setNombrePlaces(newPlaces);
                         participation.setMontantTotal((float) (newPlaces * event.getPrix()));
 
-                        // Update event places
                         int placesDiff = oldPlaces - newPlaces;
                         int newEventPlaces = event.getPlacesRestantes() + placesDiff;
 
-                        // Save to database
                         serviceParticipation.modifier(participation);
                         serviceEvent.updatePlaces(event.getId_event(), newEventPlaces);
 
-                        // Refresh
                         loadData();
 
                         showAlert("Succès", "Réservation modifiée avec succès!");
@@ -241,14 +225,11 @@ public class MyEventsController implements Initializable {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                // Add back the places to event
                 int newPlaces = event.getPlacesRestantes() + participation.getNombrePlaces();
                 serviceEvent.updatePlaces(event.getId_event(), newPlaces);
 
-                // Delete participation
                 serviceParticipation.supprimer(participation.getId_participation());
 
-                // Refresh
                 loadData();
 
                 showAlert("Succès", "Réservation annulée avec succès!");

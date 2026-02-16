@@ -24,23 +24,19 @@ import java.util.Optional;
 
 public class AdminController implements Initializable {
 
-    // Dashboard Tab
     @FXML private Label totalEventsLabel;
     @FXML private Label totalPlacesLabel;
     @FXML private Label totalParticipationsLabel;
     @FXML private Label fillRateLabel;
     @FXML private FlowPane recentEventsFlow;
 
-    // Events Management Tab
     @FXML private TextField adminSearchField;
     @FXML private ComboBox<String> adminSortCombo;
     @FXML private FlowPane adminFlowEvents;
 
-    // Participations Tab
     @FXML private TextField participationSearchField;
     @FXML private FlowPane participationsFlow;
 
-    // Navigation Buttons
     @FXML private Button btnDashboard;
     @FXML private Button btnEvents;
     @FXML private Button btnParticipations;
@@ -60,7 +56,6 @@ public class AdminController implements Initializable {
         setupSortCombo();
         loadData();
 
-        // Search functionality for events
         adminSearchField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 displayEvents(allEvents);
@@ -69,7 +64,6 @@ public class AdminController implements Initializable {
             }
         });
 
-        // Search functionality for participations
         participationSearchField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 displayParticipations(allParticipations);
@@ -78,7 +72,6 @@ public class AdminController implements Initializable {
             }
         });
 
-        // Sort functionality
         adminSortCombo.setOnAction(e -> sortEvents());
     }
 
@@ -251,7 +244,6 @@ public class AdminController implements Initializable {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
                 "-fx-border-color: #3D94CA; -fx-border-radius: 15; -fx-border-width: 1;");
 
-        // Find event title
         String eventTitle = "Événement #" + p.getId_event();
         for (Events e : allEvents) {
             if (e.getId_event() == p.getId_event()) {
@@ -260,12 +252,10 @@ public class AdminController implements Initializable {
             }
         }
 
-        // Event info
         Label eventLabel = new Label("🎫 " + eventTitle);
         eventLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
         eventLabel.setWrapText(true);
 
-        // Basic info
         Label placesLabel = new Label("📋 " + p.getNombrePlaces() + " place(s)");
         placesLabel.setStyle("-fx-text-fill: #666;");
 
@@ -276,36 +266,30 @@ public class AdminController implements Initializable {
         Label dateLabel = new Label("📅 " + sdf.format(p.getDateParticipation()));
         dateLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
 
-        // Button to show participant details
         Button detailsBtn = new Button("👤 Détails participant");
         detailsBtn.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
         detailsBtn.setMaxWidth(Double.MAX_VALUE);
 
-        // Pass the participation to the details method
         detailsBtn.setOnAction(e -> showParticipantDetails(p));
 
         card.getChildren().addAll(eventLabel, placesLabel, totalLabel, dateLabel, detailsBtn);
         return card;
     }
 
-    // Add this method to show participant details (using static data for now)
+
     private void showParticipantDetails(Participation p) {
-        // Create dialog
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Détails du participant");
         dialog.setHeaderText("Informations de réservation");
 
-        // Set button
         ButtonType closeButton = new ButtonType("Fermer", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(closeButton);
 
-        // Create content
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
         content.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
 
-        // Find event title
         String eventTitle = "Événement #" + p.getId_event();
         for (Events e : allEvents) {
             if (e.getId_event() == p.getId_event()) {
@@ -314,7 +298,6 @@ public class AdminController implements Initializable {
             }
         }
 
-        // Add details (placeholder until user module is integrated)
         Label eventInfo = new Label("📌 " + eventTitle);
         eventInfo.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-font-size: 16px;");
 
@@ -331,7 +314,6 @@ public class AdminController implements Initializable {
         Label dateInfo = new Label("📅 Date: " + sdf.format(p.getDateParticipation()));
         dateInfo.setStyle("-fx-text-fill: #666;");
 
-        // Note about user details (since user module not ready)
         Label noteLabel = new Label("ℹ️ Les détails utilisateur seront disponibles après intégration avec le module Utilisateurs");
         noteLabel.setStyle("-fx-text-fill: #E8B156; -fx-font-size: 11px; -fx-font-style: italic; -fx-wrap-text: true;");
 
@@ -410,7 +392,7 @@ public class AdminController implements Initializable {
             stage.setScene(new Scene(root, 500, 600));
             stage.showAndWait();
 
-            loadData(); // Refresh after adding
+            loadData();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -431,7 +413,7 @@ public class AdminController implements Initializable {
             stage.setScene(new Scene(root, 500, 600));
             stage.showAndWait();
 
-            loadData(); // Refresh after editing
+            loadData();
 
         } catch (Exception e) {
             e.printStackTrace();

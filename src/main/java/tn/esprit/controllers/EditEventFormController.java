@@ -27,7 +27,6 @@ public class EditEventFormController implements Initializable {
     @FXML private TextField imageUrlField;
     @FXML private ComboBox<String> statutCombo;
 
-    // Labels d'erreur
     @FXML private Label titreError;
     @FXML private Label descriptionError;
     @FXML private Label categorieError;
@@ -46,14 +45,11 @@ public class EditEventFormController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
 
-        // Initialisation des combos
         categorieCombo.getItems().addAll("Concert", "Spectacle", "Conférence", "Festival", "Sport", "Autre");
         statutCombo.getItems().addAll("Actif", "Annulé", "Reporté", "Complet");
 
-        // Initialisation du spinner
         capaciteSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10000, 100));
 
-        // Mettre en place toutes les validations
         setupValidation();
     }
 
@@ -82,7 +78,6 @@ public class EditEventFormController implements Initializable {
     }
 
     private void setupValidation() {
-        // ===== TITRE =====
         titreField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 titreError.setText("❌ Le titre est obligatoire");
@@ -99,7 +94,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== DESCRIPTION =====
         descriptionField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.length() > 500) {
                 descriptionError.setText("❌ Maximum 500 caractères");
@@ -113,7 +107,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== CATÉGORIE =====
         categorieCombo.valueProperty().addListener((obs, old, newVal) -> {
             if (newVal == null || newVal.isEmpty()) {
                 categorieError.setText("❌ Sélectionnez une catégorie");
@@ -124,7 +117,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== STATUT =====
         statutCombo.valueProperty().addListener((obs, old, newVal) -> {
             if (newVal == null || newVal.isEmpty()) {
                 statutError.setText("❌ Sélectionnez un statut");
@@ -135,7 +127,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== LIEU =====
         locationField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 locationError.setText("❌ Le lieu est obligatoire");
@@ -149,11 +140,10 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== DATES =====
         dateDebutPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
         dateFinPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
 
-        // ===== PRIX =====
+
         prixField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 prixError.setText("❌ Le prix est obligatoire");
@@ -185,7 +175,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== CAPACITÉ =====
         capaciteSpinner.valueProperty().addListener((obs, old, newVal) -> {
             if (newVal == null || newVal <= 0) {
                 capaciteError.setText("❌ Capacité invalide");
@@ -196,7 +185,6 @@ public class EditEventFormController implements Initializable {
             }
         });
 
-        // ===== IMAGE URL =====
         imageUrlField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 imageError.setText("ℹ️ Optionnel");
@@ -215,7 +203,6 @@ public class EditEventFormController implements Initializable {
         LocalDate debut = dateDebutPicker.getValue();
         LocalDate fin = dateFinPicker.getValue();
 
-        // Validation date début
         if (debut == null) {
             dateDebutError.setText("❌ Date début obligatoire");
             dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
@@ -224,7 +211,6 @@ public class EditEventFormController implements Initializable {
             dateDebutError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
         }
 
-        // Validation date fin
         if (fin != null) {
             if (debut != null && fin.isBefore(debut)) {
                 dateFinError.setText("❌ Après date début");
@@ -242,42 +228,36 @@ public class EditEventFormController implements Initializable {
     private boolean validateAll() {
         boolean isValid = true;
 
-        // Titre
         if (titreField.getText().isEmpty() || titreField.getText().length() < 3) {
             titreError.setText("❌ Titre invalide");
             titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Catégorie
         if (categorieCombo.getValue() == null) {
             categorieError.setText("❌ Catégorie requise");
             categorieError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Statut
         if (statutCombo.getValue() == null) {
             statutError.setText("❌ Statut requis");
             statutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Lieu
         if (locationField.getText().isEmpty() || locationField.getText().length() < 3) {
             locationError.setText("❌ Lieu invalide");
             locationError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Date début
         if (dateDebutPicker.getValue() == null) {
             dateDebutError.setText("❌ Date début requise");
             dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Prix
         try {
             float prix = Float.parseFloat(prixField.getText());
             if (prix <= 0 || prix > 100000) {
@@ -302,13 +282,11 @@ public class EditEventFormController implements Initializable {
         }
 
         try {
-            // Mise à jour de l'événement
             currentEvent.setTitre(titreField.getText());
             currentEvent.setDescription(descriptionField.getText());
             currentEvent.setCategorie(categorieCombo.getValue());
             currentEvent.setLocation(locationField.getText());
 
-            // Mise à jour des dates
             LocalDate debutDate = dateDebutPicker.getValue();
             LocalDateTime debutDateTime = debutDate.atStartOfDay();
             currentEvent.setDateDebut(Timestamp.valueOf(debutDateTime));
@@ -321,7 +299,6 @@ public class EditEventFormController implements Initializable {
 
             currentEvent.setPrix(Float.parseFloat(prixField.getText()));
 
-            // Mise à jour de la capacité
             int oldCapacity = currentEvent.getCapaciteMax();
             int newCapacity = capaciteSpinner.getValue();
             if (newCapacity != oldCapacity) {
@@ -333,7 +310,6 @@ public class EditEventFormController implements Initializable {
             currentEvent.setImage_url(imageUrlField.getText());
             currentEvent.setStatut(statutCombo.getValue());
 
-            // Sauvegarde
             serviceEvent.modifier(currentEvent);
 
             showAlert("Succès", "Événement modifié avec succès!");

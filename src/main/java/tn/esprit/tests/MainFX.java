@@ -11,14 +11,12 @@ public class MainFX extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Check if files exist
             System.out.println("=== CHECKING FXML FILES ===");
             System.out.println("UserHome.fxml exists? " + (getClass().getResource("/UserHome.fxml") != null));
             System.out.println("AdminHome.fxml exists? " + (getClass().getResource("/AdminHome.fxml") != null));
             System.out.println("UserHome URL: " + getClass().getResource("/UserHome.fxml"));
             System.out.println("AdminHome URL: " + getClass().getResource("/AdminHome.fxml"));
 
-            // Load User Interface
             System.out.println("\n=== LOADING USER INTERFACE ===");
             FXMLLoader userLoader = new FXMLLoader(getClass().getResource("/UserHome.fxml"));
             Parent userRoot = userLoader.load();
@@ -33,7 +31,6 @@ public class MainFX extends Application {
             userStage.show();
             System.out.println("✅ User window shown");
 
-            // Load Admin Interface
             System.out.println("\n=== LOADING ADMIN INTERFACE ===");
             FXMLLoader adminLoader = new FXMLLoader(getClass().getResource("/AdminHome.fxml"));
             Parent adminRoot = adminLoader.load();

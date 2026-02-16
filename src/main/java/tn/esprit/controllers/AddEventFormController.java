@@ -26,7 +26,6 @@ public class AddEventFormController implements Initializable {
     @FXML private Spinner<Integer> capaciteSpinner;
     @FXML private TextField imageUrlField;
 
-    // Labels d'erreur
     @FXML private Label titreError;
     @FXML private Label descriptionError;
     @FXML private Label categorieError;
@@ -43,19 +42,15 @@ public class AddEventFormController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
 
-        // Initialisation de la combo catégorie
         categorieCombo.getItems().addAll("Concert", "Spectacle", "Conférence", "Festival", "Sport", "Autre");
         categorieCombo.setValue("Concert");
 
-        // Initialisation du spinner
         capaciteSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10000, 100));
 
-        // Mettre en place toutes les validations
         setupValidation();
     }
 
     private void setupValidation() {
-        // ===== TITRE =====
         titreField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 titreError.setText("❌ Le titre est obligatoire");
@@ -72,7 +67,6 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== DESCRIPTION =====
         descriptionField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.length() > 500) {
                 descriptionError.setText("❌ Maximum 500 caractères");
@@ -86,7 +80,6 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== CATÉGORIE =====
         categorieCombo.valueProperty().addListener((obs, old, newVal) -> {
             if (newVal == null || newVal.isEmpty()) {
                 categorieError.setText("❌ Sélectionnez une catégorie");
@@ -97,7 +90,6 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== LIEU =====
         locationField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 locationError.setText("❌ Le lieu est obligatoire");
@@ -111,11 +103,9 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== DATES =====
         dateDebutPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
         dateFinPicker.valueProperty().addListener((obs, old, newVal) -> validateDates());
 
-        // ===== PRIX =====
         prixField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 prixError.setText("❌ Le prix est obligatoire");
@@ -147,7 +137,6 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== CAPACITÉ =====
         capaciteSpinner.valueProperty().addListener((obs, old, newVal) -> {
             if (newVal == null || newVal <= 0) {
                 capaciteError.setText("❌ Capacité invalide");
@@ -158,7 +147,6 @@ public class AddEventFormController implements Initializable {
             }
         });
 
-        // ===== IMAGE URL =====
         imageUrlField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 imageError.setText("ℹ️ Optionnel");
@@ -177,7 +165,6 @@ public class AddEventFormController implements Initializable {
         LocalDate debut = dateDebutPicker.getValue();
         LocalDate fin = dateFinPicker.getValue();
 
-        // Validation date début
         if (debut == null) {
             dateDebutError.setText("❌ Date début obligatoire");
             dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
@@ -189,7 +176,6 @@ public class AddEventFormController implements Initializable {
             dateDebutError.setStyle("-fx-text-fill: green; -fx-font-size: 11px;");
         }
 
-        // Validation date fin
         if (fin != null) {
             if (debut != null && fin.isBefore(debut)) {
                 dateFinError.setText("❌ Après date début");
@@ -207,35 +193,30 @@ public class AddEventFormController implements Initializable {
     private boolean validateAll() {
         boolean isValid = true;
 
-        // Titre
         if (titreField.getText().isEmpty() || titreField.getText().length() < 3) {
             titreError.setText("❌ Titre invalide");
             titreError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Catégorie
         if (categorieCombo.getValue() == null) {
             categorieError.setText("❌ Catégorie requise");
             categorieError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Lieu
         if (locationField.getText().isEmpty() || locationField.getText().length() < 3) {
             locationError.setText("❌ Lieu invalide");
             locationError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Date début
         if (dateDebutPicker.getValue() == null || dateDebutPicker.getValue().isBefore(LocalDate.now())) {
             dateDebutError.setText("❌ Date début invalide");
             dateDebutError.setStyle("-fx-text-fill: red; -fx-font-size: 11px;");
             isValid = false;
         }
 
-        // Prix
         try {
             float prix = Float.parseFloat(prixField.getText());
             if (prix <= 0 || prix > 100000) {
