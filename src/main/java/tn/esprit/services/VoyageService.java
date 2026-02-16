@@ -11,48 +11,54 @@ public class VoyageService implements IService<Voyage> {
     private Connection cnx;
 
     public VoyageService() {
-        // Récupération de l'instance unique de connexion (Singleton)
         cnx = MyDataBase.getInstance().getCnx();
     }
 
     @Override
     public void ajouter(Voyage v) {
-        String qry = "INSERT INTO voyage (destination, description, prix, date_depart, date_retour, image_url, id_categorie) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setString(1, v.getDestination());
-            pstm.setString(2, v.getDescription());
-            pstm.setDouble(3, v.getPrix());
-            pstm.setDate(4, v.getDateDepart());
-            pstm.setDate(5, v.getDateRetour());
-            pstm.setString(6, v.getImageUrl());
-            pstm.setInt(7, v.getIdCategorie());
+        // Ajout des colonnes places_total et places_restantes (9 points d'interrogation)
+        String sql = "INSERT INTO voyage (destination, description, prix, date_depart, date_retour, image_url, id_categorie, places_total, places_restantes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, v.getDestination());
+            ps.setString(2, v.getDescription());
+            ps.setDouble(3, v.getPrix());
+            ps.setDate(4, v.getDate_depart());
+            ps.setDate(5, v.getDate_retour());
+            ps.setString(6, v.getImage_url());
+            ps.setInt(7, v.getId_categorie());
+            ps.setInt(8, v.getPlaces_total());     // Nouveau
+            ps.setInt(9, v.getPlaces_restantes()); // Nouveau
 
-            pstm.executeUpdate();
-            System.out.println("Voyage vers " + v.getDestination() + " ajouté avec succès !");
-        } catch (SQLException ex) {
-            System.err.println("Erreur lors de l'ajout du voyage : " + ex.getMessage());
+            ps.executeUpdate();
+            System.out.println("Voyage ajouté avec succès !");
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de l'ajout : " + e.getMessage());
         }
     }
 
     @Override
     public void modifier(Voyage v) {
-        String qry = "UPDATE voyage SET destination = ?, description = ?, prix = ?, date_depart = ?, date_retour = ?, image_url = ?, id_categorie = ? WHERE id = ?";
-        try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setString(1, v.getDestination());
-            pstm.setString(2, v.getDescription());
-            pstm.setDouble(3, v.getPrix());
-            pstm.setDate(4, v.getDateDepart());
-            pstm.setDate(5, v.getDateRetour());
-            pstm.setString(6, v.getImageUrl());
-            pstm.setInt(7, v.getIdCategorie());
-            pstm.setInt(8, v.getId());
+        // Requête SQL basée sur votre structure de table
+        String sql = "UPDATE voyage SET destination=?, description=?, prix=?, date_depart=?, " +
+                "date_retour=?, image_url=?, id_categorie=?, places_total=?, places_restantes=? " +
+                "WHERE id=?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setString(1, v.getDestination());
+            ps.setString(2, v.getDescription());
+            ps.setDouble(3, v.getPrix());
+            ps.setDate(4, v.getDate_depart());
+            ps.setDate(5, v.getDate_retour());
+            ps.setString(6, v.getImage_url());
+            ps.setInt(7, v.getId_categorie());
+            ps.setInt(8, v.getPlaces_total());
+            ps.setInt(9, v.getPlaces_restantes());
+            ps.setInt(10, v.getId()); // L'ID indispensable pour trouver la ligne à modifier
 
-            int rowsUpdated = pstm.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("Voyage ID " + v.getId() + " mis à jour !");
-            }
-        } catch (SQLException ex) {
-            System.err.println("Erreur lors de la modification : " + ex.getMessage());
+            ps.executeUpdate();
+            System.out.println("Modification enregistrée en base de données !");
+        } catch (SQLException e) {
+            System.out.println("Erreur lors de la modification : " + e.getMessage());
         }
     }
 
@@ -61,12 +67,8 @@ public class VoyageService implements IService<Voyage> {
         String qry = "DELETE FROM voyage WHERE id = ?";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
             pstm.setInt(1, id);
-            int rowsDeleted = pstm.executeUpdate();
-            if (rowsDeleted > 0) {
-                System.out.println("Voyage supprimé avec succès !");
-            } else {
-                System.out.println("Aucun voyage trouvé avec l'ID : " + id);
-            }
+            pstm.executeUpdate();
+            System.out.println("Voyage supprimé avec succès !");
         } catch (SQLException ex) {
             System.err.println("Erreur lors de la suppression : " + ex.getMessage());
         }
@@ -83,15 +85,17 @@ public class VoyageService implements IService<Voyage> {
                 v.setDestination(rs.getString("destination"));
                 v.setDescription(rs.getString("description"));
                 v.setPrix(rs.getDouble("prix"));
-                v.setDateDepart(rs.getDate("date_depart"));
-                v.setDateRetour(rs.getDate("date_retour"));
-                v.setImageUrl(rs.getString("image_url"));
-                v.setIdCategorie(rs.getInt("id_categorie"));
+                v.setDate_depart(rs.getDate("date_depart"));
+                v.setDate_retour(rs.getDate("date_retour"));
+                v.setImage_url(rs.getString("image_url"));
+                v.setId_categorie(rs.getInt("id_categorie"));
+                v.setPlaces_total(rs.getInt("places_total"));         // Nouveau
+                v.setPlaces_restantes(rs.getInt("places_restantes")); // Nouveau
 
                 voyages.add(v);
             }
         } catch (SQLException ex) {
-            System.err.println("Erreur lors de la récupération des voyages : " + ex.getMessage());
+            System.err.println("Erreur lors de la récupération : " + ex.getMessage());
         }
         return voyages;
     }

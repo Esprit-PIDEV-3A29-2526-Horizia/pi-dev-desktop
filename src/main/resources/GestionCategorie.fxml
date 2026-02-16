@@ -35,7 +35,11 @@
                 </ImageView>
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="📂  Catégories" />
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;" text="✈  Voyages" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
+                        onAction="#naviguerVoyages"
+                        prefHeight="45.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6;"
+                        text="✈  Voyages" />
 
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;" text="📑  Réservations" />
 

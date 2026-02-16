@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Region?>
+
+<VBox prefWidth="550.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsVoyageController">
+    <padding>
+        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+    </padding>
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="DESTINATION" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lblStatut" style="-fx-background-color: #E3D9C6; -fx-text-fill: #7A6B4B; -fx-padding: 5 15; -fx-background-radius: 10; -fx-font-weight: bold;" text="DISPONIBLE" />
+        </HBox>
+
+        <ImageView fx:id="imgVoyage" fitHeight="250.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="false" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);" />
+
+        <VBox spacing="12.0">
+            <HBox spacing="50.0">
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Destination" />
+                <Label fx:id="lblDest" style="-fx-text-fill: #333;" text="Ville, Pays" />
+            </HBox>
+            <HBox spacing="50.0">
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Description" />
+                <Label fx:id="lblDescription" wrapText="true" style="-fx-text-fill: #333;" text="..." />
+            </HBox>
+            <HBox spacing="50.0">
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Dates" />
+                <Label fx:id="lblDates" style="-fx-text-fill: #333;" text="Du ... au ..." />
+            </HBox>
+            <HBox spacing="50.0">
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Prix" />
+                <Label fx:id="lblPrix" style="-fx-text-fill: #333;" text="0 DT" />
+            </HBox>
+            <HBox spacing="50.0">
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Places" />
+                <Label fx:id="lblPlaces" style="-fx-text-fill: #333;" text="0/0" />
+            </HBox>
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <HBox spacing="15.0">
+            <Button onAction="#handleSupprimer" style="-fx-background-color: #C5302E; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 20; -fx-font-weight: bold;" text="Supprimer" />
+            <Button onAction="#handleModifier" style="-fx-background-color: #23779C; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 20; -fx-font-weight: bold;" text="Modifier" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#handleFermer" style="-fx-background-color: #E2E8F0; -fx-text-fill: #4A5568; -fx-background-radius: 8; -fx-padding: 8 20;" text="Fermer" />
+        </HBox>
+    </children>
+</VBox>

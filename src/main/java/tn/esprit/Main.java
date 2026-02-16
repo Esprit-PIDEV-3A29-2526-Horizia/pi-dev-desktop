@@ -22,8 +22,10 @@ public class Main {
             System.out.println("4. Afficher tout (Check BDD)");
             System.out.println("0. Quitter");
             System.out.print("Choix : ");
+
+            if (!sc.hasNextInt()) { sc.next(); continue; } // Sécurité saisie
             int choix = sc.nextInt();
-            sc.nextLine(); // Nettoyer le buffer
+            sc.nextLine();
 
             switch (choix) {
                 case 1:
@@ -47,22 +49,37 @@ public class Main {
                     Date d1 = Date.valueOf(sc.nextLine());
                     System.out.print("Date retour (YYYY-MM-DD) : ");
                     Date d2 = Date.valueOf(sc.nextLine());
+
+                    // --- AJOUT DES SAISIES POUR LES PLACES ---
+                    System.out.print("Nombre de places totales : ");
+                    int pTotal = sc.nextInt();
+                    System.out.print("Nombre de places restantes : ");
+                    int pRestantes = sc.nextInt();
+
                     System.out.print("ID de la catégorie choisie : ");
                     int idCat = sc.nextInt();
+                    sc.nextLine(); // Nettoyer après le nextInt
 
-                    vs.ajouter(new Voyage(dest, "Description voyage", prix, d1, d2, "http://image.url", idCat));
+                    // Vérification de la contrainte avant l'envoi
+                    if (pRestantes > pTotal) {
+                        System.out.println("Erreur : Les places restantes ne peuvent pas dépasser le total !");
+                    } else {
+                        // APPEL AU CONSTRUCTEUR MIS À JOUR (9 ARGUMENTS)
+                        vs.ajouter(new Voyage(dest, "Description voyage", prix, d1, d2, "http://image.url", idCat, pTotal, pRestantes));
+                        System.out.println("Voyage ajouté avec succès !");
+                    }
                     break;
 
                 case 3:
                     System.out.println("--- Liste des voyages ---");
-                    vs.afficher().forEach(v -> System.out.println("ID: " + v.getId() + " | Destination: " + v.getDestination()));
+                    vs.afficher().forEach(v -> System.out.println("ID: " + v.getId() + " | Destination: " + v.getDestination() + " (" + v.getPlaces_restantes() + " places libres)"));
 
                     System.out.print("ID du voyage : ");
                     int idV = sc.nextInt();
                     System.out.print("Nombre de personnes : ");
                     int nb = sc.nextInt();
-                    // On suppose l'utilisateur ID 1 pour le test
                     rs.ajouter(new Reservation(nb, "En attente", idV, 1));
+                    System.out.println("Réservation enregistrée !");
                     break;
 
                 case 4:
@@ -73,6 +90,7 @@ public class Main {
                     break;
 
                 case 0:
+                    System.out.println("Au revoir !");
                     System.exit(0);
             }
         }

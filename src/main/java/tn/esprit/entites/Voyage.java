@@ -7,54 +7,77 @@ public class Voyage {
     private String destination;
     private String description;
     private double prix;
-    private Date dateDepart;
-    private Date dateRetour;
-    private String imageUrl; // Rappel contrainte : URL, pas de BLOB
-    private int idCategorie; // Clé étrangère
+    private Date date_depart;
+    private Date date_retour;
+    private String image_url;
+    private int id_categorie;
+    private int places_total;
+    private int places_restantes;
 
-    // Constructeurs
+    // 1. Constructeur vide (nécessaire pour certains frameworks)
     public Voyage() {}
 
-    // Constructeur sans ID (pour l'ajout)
-    public Voyage(String destination, String description, double prix, Date dateDepart, Date dateRetour, String imageUrl, int idCategorie) {
+    // 2. Constructeur pour l'ajout (SANS ID) - Utilisé dans ton formulaire
+    // Ce constructeur possède 8 ou 9 paramètres selon tes besoins,
+    // voici la version complète pour ton interface actuelle :
+    public Voyage(String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.destination = destination;
         this.description = description;
         this.prix = prix;
-        this.dateDepart = dateDepart;
-        this.dateRetour = dateRetour;
-        this.imageUrl = imageUrl;
-        this.idCategorie = idCategorie;
+        this.date_depart = date_depart;
+        this.date_retour = date_retour;
+        this.image_url = image_url;
+        this.id_categorie = id_categorie;
+        this.places_total = places_total;
+        this.places_restantes = places_restantes;
     }
 
-    // Constructeur complet (pour l'affichage)
-    public Voyage(int id, String destination, String description, double prix, Date dateDepart, Date dateRetour, String imageUrl, int idCategorie) {
+    // 3. Constructeur complet (AVEC ID) - Utilisé pour l'affichage (Read) et la modification (Update)
+    public Voyage(int id, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.id = id;
         this.destination = destination;
         this.description = description;
         this.prix = prix;
-        this.dateDepart = dateDepart;
-        this.dateRetour = dateRetour;
-        this.imageUrl = imageUrl;
-        this.idCategorie = idCategorie;
+        this.date_depart = date_depart;
+        this.date_retour = date_retour;
+        this.image_url = image_url;
+        this.id_categorie = id_categorie;
+        this.places_total = places_total;
+        this.places_restantes = places_restantes;
     }
 
-    // Getters et Setters
+    // --- GETTERS ET SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
     public String getDestination() { return destination; }
     public void setDestination(String destination) { this.destination = destination; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
     public double getPrix() { return prix; }
     public void setPrix(double prix) { this.prix = prix; }
-    public Date getDateDepart() { return dateDepart; }
-    public void setDateDepart(Date dateDepart) { this.dateDepart = dateDepart; }
-    public Date getDateRetour() { return dateRetour; }
-    public void setDateRetour(Date dateRetour) { this.dateRetour = dateRetour; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public int getIdCategorie() { return idCategorie; }
-    public void setIdCategorie(int idCategorie) { this.idCategorie = idCategorie; }
+
+    public Date getDate_depart() { return date_depart; }
+    public void setDate_depart(Date date_depart) { this.date_depart = date_depart; }
+
+    public Date getDate_retour() { return date_retour; }
+    public void setDate_retour(Date date_retour) { this.date_retour = date_retour; }
+
+    public String getImage_url() { return image_url; }
+    public void setImage_url(String image_url) { this.image_url = image_url; }
+
+    public int getId_categorie() { return id_categorie; }
+    public void setId_categorie(int id_categorie) { this.id_categorie = id_categorie; }
+
+    public int getPlaces_total() { return places_total; }
+    public void setPlaces_total(int places_total) { this.places_total = places_total; }
+
+    public int getPlaces_restantes() { return places_restantes; }
+    public void setPlaces_restantes(int places_restantes) { this.places_restantes = places_restantes; }
+
+
 
     @Override
     public String toString() {
@@ -63,10 +86,12 @@ public class Voyage {
                 ", destination='" + destination + '\'' +
                 ", description='" + description + '\'' +
                 ", prix=" + prix +
-                ", dateDepart=" + dateDepart +
-                ", dateRetour=" + dateRetour +
-                ", imageUrl='" + imageUrl + '\'' +
-                ", idCategorie=" + idCategorie +
+                ", date_depart=" + date_depart +
+                ", date_retour=" + date_retour +
+                ", image_url='" + image_url + '\'' +
+                ", id_categorie=" + id_categorie +
+                ", places_total=" + places_total +
+                ", places_restantes=" + places_restantes +
                 '}';
     }
 }

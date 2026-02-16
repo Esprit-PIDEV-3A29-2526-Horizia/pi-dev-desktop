@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefWidth="800.0" spacing="0.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-border-radius: 15; -fx-border-color: #ddd; -fx-overflow: hidden;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AjouterVoyageController">
+    <children>
+        <HBox alignment="CENTER" prefHeight="70.0" style="-fx-background-color: #23779C;">
+            <children>
+                <Label text="Ajouter un nouveau voyage" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="22.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+
+        <GridPane hgap="30.0" vgap="20.0">
+            <padding>
+                <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+            </padding>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50.0" />
+                <ColumnConstraints percentWidth="50.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+                <RowConstraints />
+            </rowConstraints>
+            <children>
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                    <Label text="Titre" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextField fx:id="tfTitre" prefHeight="40.0" promptText="Voyage France" style="-fx-background-radius: 10; -fx-border-color: #3D94CA; -fx-border-radius: 10;" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <Label text="Destination" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextField fx:id="tfDestination" prefHeight="40.0" promptText="Paris" style="-fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                    <Label text="Catégorie" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <ComboBox fx:id="cbCategorie" prefHeight="40.0" maxWidth="Infinity" promptText="Choisir une catégorie" style="-fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
+                    <Label text="Description du voyage" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextArea fx:id="taDescription" prefHeight="80.0" promptText="Décrivez l'itinéraire, les activités..." style="-fx-background-radius: 10; -fx-border-color: #ddd; -fx-border-radius: 10;" wrapText="true" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                    <Label text="Date de départ" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <DatePicker fx:id="dpDepart" maxWidth="Infinity" prefHeight="40.0" style="-fx-background-radius: 10;" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <Label text="Date de retour" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <DatePicker fx:id="dpRetour" maxWidth="Infinity" prefHeight="40.0" style="-fx-background-radius: 10;" />
+                </VBox>
+
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                    <Label text="Prix (DT)" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextField fx:id="tfPrix" prefHeight="40.0" promptText="900.0" style="-fx-background-radius: 10;" />
+                </VBox>
+                <VBox spacing="8.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <Label text="Places total" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextField fx:id="tfPlacesTotal" prefHeight="40.0" promptText="40" style="-fx-background-radius: 10;" />
+                </VBox>
+
+                <VBox spacing="8.0" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                    <Label text="Places restantes" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <TextField fx:id="tfPlacesRestantes" prefHeight="40.0" promptText="10" style="-fx-background-radius: 10;" />
+                </VBox>
+                <VBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                    <Label text="Image du voyage" style="-fx-font-weight: bold; -fx-text-fill: #555;" />
+                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                        <Button onAction="#handleUpload" style="-fx-background-color: #82B9C2; -fx-text-fill: white; -fx-background-radius: 8;" text="☁ Uploader une image" />
+                        <Label text="Image existante" textFill="#aaa" style="-fx-font-size: 11;" />
+                    </HBox>
+                    <ImageView fx:id="imgPreview" fitHeight="100.0" fitWidth="180.0" pickOnBounds="true" preserveRatio="true" />
+                </VBox>
+            </children>
+        </GridPane>
+
+        <HBox alignment="CENTER_RIGHT" spacing="15.0" style="-fx-padding: 0 40 30 0;">
+            <Button onAction="#handleVider" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #eee; -fx-background-radius: 10;" text="Vider" />
+            <Button onAction="#annuler" prefHeight="40.0" prefWidth="80.0" style="-fx-background-color: #eee; -fx-background-radius: 10;" text="Annuler" />
+            <Button onAction="#enregistrer" prefHeight="40.0" prefWidth="130.0" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="Enregistrer" />
+        </HBox>
+    </children>
+</VBox>
