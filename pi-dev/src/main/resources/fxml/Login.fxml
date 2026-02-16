@@ -33,7 +33,7 @@
                 <!-- Logo / Icône admin -->
                 <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="160.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
                     <image>
-                        <Image url="@../images/admin-avatar.jpg" />
+                        <Image url="/images/admin-avatar.jpg" />
                     </image>
                 </ImageView>
 
@@ -93,6 +93,13 @@
                         <Font name="System Bold" size="16.0" />
                     </font>
                 </Button>
+                <!-- Lien vers inscription -->
+                <HBox alignment="CENTER" layoutX="50.0" layoutY="390.0" prefWidth="300.0" spacing="5.0">
+                    <children>
+                        <Label text="Pas encore de compte ?" textFill="#666666" />
+                        <Hyperlink onAction="#goToSignUp" text="S'inscrire" textFill="#2a5298" underline="true" />
+                    </children>
+                </HBox>
 
                 <!-- Message d'erreur -->
                 <Label fx:id="lblMessage" alignment="CENTER" layoutX="50.0" layoutY="380.0" prefWidth="300.0" textFill="RED" wrapText="true" />
@@ -100,15 +107,24 @@
         </AnchorPane>
 
         <!-- Partie droite (image) -->
+        <!-- Partie droite avec logo -->
         <AnchorPane layoutX="650.0" layoutY="100.0" prefHeight="400.0" prefWidth="200.0">
             <children>
+                <!-- Rectangle décoratif (optionnel, vous pouvez le garder ou l'enlever) -->
                 <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ffffff20" height="150.0" layoutX="25.0" layoutY="100.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="2.0" width="150.0" />
-                <Label alignment="CENTER" layoutX="35.0" layoutY="160.0" text="Administration" textAlignment="CENTER" textFill="WHITE" wrapText="true">
-                    <font>
-                        <Font name="System Bold" size="24.0" />
-                    </font>
-                </Label>
-                <Label alignment="CENTER" layoutX="20.0" layoutY="210.0" prefWidth="160.0" text="Gérez vos membres et profils en toute simplicité" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+
+                <!-- Logo -->
+                <!-- Logo centré -->
+                <ImageView fitHeight="350.0" fitWidth="200.0" layoutX="0.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <!-- Texte sous le logo (optionnel) -->
+                <Label alignment="CENTER" layoutX="20.0" layoutY="260.0" prefWidth="160.0"
+                       text="Gérez vos membres et profils en toute simplicité"
+                       textAlignment="CENTER" textFill="WHITE" wrapText="true">
                     <font>
                         <Font size="14.0" />
                     </font>

@@ -38,25 +38,36 @@
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
+    -fx-effect: dropshadow(three-pass-box, rgba(16, 185, 129, 0.2), 8, 0, 0, 0);
 }
 
 .btn-add:hover {
     -fx-background-color: #059669;
+    -fx-effect: dropshadow(three-pass-box, rgba(5, 150, 105, 0.3), 10, 0, 0, 0);
+}
+
+.btn-add:pressed {
+    -fx-translate-y: 1;
 }
 
 /* ===== CHAMP DE RECHERCHE ===== */
 .search-field {
     -fx-background-color: white;
     -fx-border-color: #E5E7EB;
-    -fx-border-radius: 5;
-    -fx-padding: 8 12;
+    -fx-border-radius: 8;
+    -fx-padding: 10 15;
     -fx-font-size: 14px;
     -fx-pref-width: 300;
+    -fx-background-radius: 8;
 }
 
 .search-field:focused {
     -fx-border-color: #2a5298;
     -fx-border-width: 2;
+}
+
+.search-field:disabled {
+    -fx-opacity: 0.6;
 }
 
 /* ===== COMBOBOX FILTRES ===== */
@@ -66,6 +77,7 @@
     -fx-border-radius: 5;
     -fx-font-size: 13px;
     -fx-pref-width: 120;
+    -fx-background-radius: 5;
 }
 
 .filter-combo:focused {
@@ -79,31 +91,12 @@
     -fx-font-weight: bold;
 }
 
-/* ===== OPTIONS DE TRI ===== */
-.sort-combo {
-    -fx-background-color: white;
-    -fx-border-color: #E5E7EB;
-    -fx-border-radius: 5;
-    -fx-font-size: 13px;
-    -fx-pref-width: 100;
-}
-
-.sort-order-btn {
-    -fx-background-color: transparent;
-    -fx-padding: 2;
-}
-
-.sort-order-btn:selected {
-    -fx-background-color: #2a5298;
-    -fx-background-radius: 5;
-    -fx-text-fill: white;
-}
-
 /* ===== STATISTIQUES ===== */
 .stats-container {
     -fx-background-color: #F3F4F6;
     -fx-padding: 8 15;
     -fx-background-radius: 20;
+    -fx-spacing: 10;
 }
 
 .stats-label {
@@ -117,34 +110,37 @@
     -fx-font-size: 14px;
 }
 
-/* ===== TABLEAU SIMPLE ===== */
+/* ===== TABLEAU ===== */
 .table-view {
     -fx-background-color: white;
-    -fx-background-radius: 8;
+    -fx-background-radius: 10;
     -fx-border-color: #E5E7EB;
-    -fx-border-radius: 8;
+    -fx-border-radius: 10;
+    -fx-padding: 0;
 }
 
 .table-view .column-header-background {
     -fx-background-color: #F9FAFB;
-    -fx-background-radius: 8 8 0 0;
+    -fx-background-radius: 10 10 0 0;
+    -fx-padding: 10 0;
 }
 
 .table-view .column-header {
     -fx-background-color: transparent;
     -fx-border-color: #E5E7EB;
-    -fx-border-width: 0 1 1 0;
+    -fx-border-width: 0 1 0 0;
     -fx-font-weight: bold;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-text-fill: #374151;
 }
 
+/* CORRECTION ICI - Suppression de :last-visible */
 .table-view .column-header:last-child {
-    -fx-border-width: 0 0 1 0;
+    -fx-border-width: 0;
 }
 
 .table-view .table-cell {
-    -fx-padding: 8 5;
+    -fx-padding: 12 5;
     -fx-border-color: transparent;
     -fx-font-size: 13px;
     -fx-alignment: CENTER;

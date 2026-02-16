@@ -8,21 +8,12 @@ public class User {
     private String password;
     private String telephone;
     private String addresse;
-    private Profil profil;  // Relation avec Profil
+    private Profil profil;
 
     public User() {}
 
     public User(int id, String nom, String prenom, String email, String password, String telephone, String addresse) {
         this.id = id;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.email = email;
-        this.password = password;
-        this.telephone = telephone;
-        this.addresse = addresse;
-    }
-
-    public User(String nom, String prenom, String email, String password, String telephone, String addresse) {
         this.nom = nom;
         this.prenom = prenom;
         this.email = email;
@@ -56,13 +47,12 @@ public class User {
     public Profil getProfil() { return profil; }
     public void setProfil(Profil profil) { this.profil = profil; }
 
-    // MÉTHODES AJOUTÉES pour accéder au type et statut du profil
     public String getType() {
-        return profil != null ? profil.getType() : "";
+        return profil != null ? profil.getType() : null;
     }
 
     public String getStatut() {
-        return profil != null ? profil.getStatut() : "";
+        return profil != null ? profil.getStatut() : null;
     }
 
     @Override
@@ -73,8 +63,9 @@ public class User {
                 ", prenom='" + prenom + '\'' +
                 ", email='" + email + '\'' +
                 ", telephone='" + telephone + '\'' +
-                ", type=" + getType() +
-                ", statut=" + getStatut() +
+                ", addresse='" + addresse + '\'' +
+                ", type=" + (profil != null ? profil.getType() : "null") +
+                ", statut=" + (profil != null ? profil.getStatut() : "null") +
                 '}';
     }
 }

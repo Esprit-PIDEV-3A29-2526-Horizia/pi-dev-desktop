@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
-
+import tn.esprit.controllers.ProfilListController;
+import tn.esprit.controllers.AddProfilController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,13 +10,23 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
+import tn.esprit.services.ServiceUser;
 
 import java.io.IOException;
+import java.util.List;
 
 public class AdminDashboardController {
 
     @FXML private Label lblWelcome;
+    @FXML private Label lblAdminName;
+    @FXML private Label lblAdminEmail;
     @FXML private AnchorPane contentArea;
+
+    // AJOUTEZ CES 4 LIGNES - Labels pour les statistiques de la sidebar
+    @FXML private Label totalMembresLabel;
+    @FXML private Label totalAdminsLabel;
+    @FXML private Label totalAgentsLabel;
+    @FXML private Label totalClientsLabel;
 
     @FXML private Button btnDashboard;
     @FXML private Button btnUsers;
@@ -24,6 +35,7 @@ public class AdminDashboardController {
     @FXML private Button btnSettings;
 
     private User currentUser;
+    private ServiceUser serviceUser = new ServiceUser(); // AJOUTEZ CETTE LIGNE
 
     @FXML
     public void initialize() {
@@ -39,17 +51,51 @@ public class AdminDashboardController {
             System.err.println("   3. Le fichier FXML est correctement chargé");
         }
 
+        // Charger les statistiques au démarrage
+        loadStats();
         showDashboard();
+    }
+
+    // AJOUTEZ CETTE MÉTHODE - Pour charger les statistiques
+    private void loadStats() {
+        try {
+            List<User> users = serviceUser.afficher();
+            int total = users.size();
+
+            long admins = users.stream().filter(u -> u.getType() != null && u.getType().equals("ADMIN")).count();
+            long agents = users.stream().filter(u -> u.getType() != null && u.getType().equals("AGENT")).count();
+            long clients = users.stream().filter(u -> u.getType() != null && u.getType().equals("CLIENT")).count();
+
+            updateStats(total, (int) admins, (int) agents, (int) clients);
+
+            System.out.println("✅ Statistiques chargées: Total=" + total +
+                    " Admins=" + admins + " Agents=" + agents + " Clients=" + clients);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors du chargement des statistiques:");
+            e.printStackTrace();
+        }
+    }
+
+    public void updateStats(int total, int admins, int agents, int clients) {
+        // Vérifier que les labels ne sont pas null avant de les utiliser
+        if (totalMembresLabel != null) totalMembresLabel.setText(String.valueOf(total));
+        if (totalAdminsLabel != null) totalAdminsLabel.setText(String.valueOf(admins));
+        if (totalAgentsLabel != null) totalAgentsLabel.setText(String.valueOf(agents));
+        if (totalClientsLabel != null) totalClientsLabel.setText(String.valueOf(clients));
     }
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
-        lblWelcome.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+        if (user != null) {
+            lblWelcome.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+            if (lblAdminName != null) lblAdminName.setText(user.getNom() + " " + user.getPrenom());
+            if (lblAdminEmail != null) lblAdminEmail.setText(user.getEmail());
+        }
     }
 
     @FXML
     private void showDashboard() {
-        // Charger la vue du tableau de bord
         loadPage("/fxml/DashboardContent.fxml");
         setActiveButton(btnDashboard);
     }
@@ -62,35 +108,83 @@ public class AdminDashboardController {
     }
 
     @FXML
-    private void showProfils() {
-        // Charger la vue de gestion des profils
+    void showProfils() {
+        System.out.println("=== Chargement de la liste des profils ===");
         loadPage("/fxml/ProfilList.fxml");
         setActiveButton(btnProfils);
     }
 
     @FXML
     private void showStats() {
-        // Charger la vue des statistiques
-        loadPage("/fxml/Statistics.fxml");
-        setActiveButton(btnStats);
+        System.out.println("=== Accès aux statistiques ===");
+        animatePageTransition("/fxml/Statistics.fxml");
+    }
+    private void animatePageTransition(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent newContent = loader.load();
+
+            // Passer le contrôleur
+            Object controller = loader.getController();
+            if (controller instanceof StatisticsController) {
+                ((StatisticsController) controller).setDashboardController(this);
+            }
+
+            // Animation simple (optionnelle)
+            newContent.setOpacity(0);
+            contentArea.getChildren().setAll(newContent);
+
+            // Animation de fondu
+            javafx.animation.FadeTransition ft = new javafx.animation.FadeTransition(
+                    javafx.util.Duration.millis(300), newContent
+            );
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
+
+            System.out.println("✅ Page chargée avec animation : " + fxmlPath);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void showSettings() {
-        // Charger la vue des paramètres
         loadPage("/fxml/Settings.fxml");
         setActiveButton(btnSettings);
     }
 
     void loadPage(String fxmlFile) {
         try {
+            System.out.println("loadPage: " + fxmlFile);
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Parent page = loader.load();
 
-            // Passer la référence du dashboard
             Object controller = loader.getController();
+
+            // Membres
             if (controller instanceof MemberListController) {
                 ((MemberListController) controller).setDashboardController(this);
+                System.out.println("✅ DashboardController passé à MemberListController");
+            }
+            if (controller instanceof AddMemberController) {
+                ((AddMemberController) controller).setDashboardController(this);
+                System.out.println("✅ DashboardController passé à AddMemberController");
+            }
+            if (controller instanceof EditMemberController) {
+                ((EditMemberController) controller).setDashboardController(this);
+                System.out.println("✅ DashboardController passé à EditMemberController");
+            }
+
+            // Profils
+            if (controller instanceof ProfilListController) {
+                ((ProfilListController) controller).setDashboardController(this);
+                System.out.println("✅ DashboardController passé à ProfilListController");
+            }
+            if (controller instanceof AddProfilController) {
+                ((AddProfilController) controller).setDashboardController(this);
+                System.out.println("✅ DashboardController passé à AddProfilController");
             }
 
             contentArea.getChildren().setAll(page);
@@ -99,7 +193,10 @@ public class AdminDashboardController {
             AnchorPane.setLeftAnchor(page, 0.0);
             AnchorPane.setRightAnchor(page, 0.0);
 
+            System.out.println("✅ Page affichée dans contentArea");
+
         } catch (IOException e) {
+            System.err.println("❌ Erreur loadPage pour " + fxmlFile);
             e.printStackTrace();
         }
     }
@@ -110,24 +207,23 @@ public class AdminDashboardController {
         AnchorPane.setLeftAnchor(content, 0.0);
         AnchorPane.setRightAnchor(content, 0.0);
     }
-    private void setActiveButton(Button activeButton) {
-        // Réinitialiser tous les boutons
-        btnDashboard.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
-        btnUsers.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
-        btnProfils.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
-        btnStats.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
-        btnSettings.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 10;");
 
-        // Mettre en surbrillance le bouton actif
-        activeButton.setStyle("-fx-background-color: #2a5298; -fx-background-radius: 10; -fx-text-fill: white;");
+    private void setActiveButton(Button activeButton) {
+        // Utiliser les classes CSS au lieu des styles inline
+        btnDashboard.getStyleClass().remove("active");
+        btnUsers.getStyleClass().remove("active");
+        btnProfils.getStyleClass().remove("active");
+        btnStats.getStyleClass().remove("active");
+        btnSettings.getStyleClass().remove("active");
+
+        activeButton.getStyleClass().add("active");
     }
+
     @FXML
     private void showAddMember() {
         loadPage("/fxml/AddMember.fxml");
-        // Vous pouvez ajouter un style spécial pour le bouton si nécessaire
     }
 
-    // Ou si vous voulez l'ouvrir depuis la liste des membres
     public void openAddMemberForm() {
         loadPage("/fxml/AddMember.fxml");
     }

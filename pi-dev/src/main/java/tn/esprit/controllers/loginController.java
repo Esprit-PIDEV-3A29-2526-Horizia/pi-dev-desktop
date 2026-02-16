@@ -98,6 +98,21 @@ public class loginController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void goToSignUp() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/SignUp.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) txtEmail.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Inscription");
+            stage.centerOnScreen();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void showMessage(String message, String type) {
         lblMessage.setText(message);

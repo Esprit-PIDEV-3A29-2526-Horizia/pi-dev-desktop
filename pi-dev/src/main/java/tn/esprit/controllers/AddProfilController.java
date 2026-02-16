@@ -13,84 +13,135 @@ public class AddProfilController {
     @FXML private ComboBox<String> cbType;
     @FXML private ComboBox<String> cbStatut;
     @FXML private Label lblMessage;
+    @FXML private Label lblTitre;
+    @FXML private Button btnSave;
+    @FXML private Button btnReset;
+    @FXML private Button btnBack;
 
-    private final ServiceProfil serviceProfil = new ServiceProfil();
+    private ServiceProfil serviceProfil = new ServiceProfil();
+    private AdminDashboardController dashboardController;
+    private boolean isStandaloneWindow = false;
+
     private Profil profilToEdit;
-    private ProfilListController previousController;
+    private boolean isEditMode = false;
 
-    @FXML
-    public void initialize() {
-        // Les ComboBox sont déjà remplies dans le FXML
+    public void setDashboardController(AdminDashboardController controller) {
+        this.dashboardController = controller;
+        this.isStandaloneWindow = (controller == null);
     }
 
     public void setProfilToEdit(Profil profil) {
         this.profilToEdit = profil;
-        if (profil != null) {
+        this.isEditMode = (profil != null);
+
+        if (isEditMode) {
             cbType.setValue(profil.getType());
             cbStatut.setValue(profil.getStatut());
+
+            if (lblTitre != null) {
+                lblTitre.setText("✏️ Modifier un Profil");
+            }
         }
     }
 
-    public void setPreviousController(ProfilListController controller) {
-        this.previousController = controller;
+    @FXML
+    public void initialize() {
+        System.out.println("=== Initialisation AddProfilController ===");
+
+        cbType.getItems().addAll("ADMIN", "AGENT", "CLIENT");
+        cbStatut.getItems().addAll("ACTIF", "INACTIF", "BLOQUE");
+
+        if (!isEditMode) {
+            cbType.setValue("CLIENT");
+            cbStatut.setValue("ACTIF");
+        }
     }
 
     @FXML
     private void saveProfil() {
-        if (!validateForm()) {
+        System.out.println("=== Sauvegarde du profil ===");
+
+        String type = cbType.getValue();
+        String statut = cbStatut.getValue();
+
+        if (type == null || statut == null) {
+            showMessage("Veuillez sélectionner un type et un statut", "error");
             return;
         }
 
         try {
-            if (profilToEdit == null) {
-                // Ajout
-                Profil profil = new Profil(cbType.getValue(), cbStatut.getValue());
-                serviceProfil.ajouter(profil);  // Utilise votre serviceProfil.ajouter()
-                showMessage("✅ Profil ajouté avec succès", "success");
+            if (isEditMode && profilToEdit != null) {
+                profilToEdit.setType(type);
+                profilToEdit.setStatut(statut);
+                serviceProfil.modifier(profilToEdit);
+                showMessage("✅ Profil modifié avec succès!", "success");
             } else {
-                // Modification
-                profilToEdit.setType(cbType.getValue());
-                profilToEdit.setStatut(cbStatut.getValue());
-                serviceProfil.modifier(profilToEdit);  // Utilise votre serviceProfil.modifier()
-                showMessage("✅ Profil modifié avec succès", "success");
+                Profil profil = new Profil(type, statut);
+                serviceProfil.ajouter(profil);
+                showMessage("✅ Profil ajouté avec succès!", "success");
             }
 
-            // Fermer après 1.5 secondes
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(this::cancel);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            // Retour après succès
+            goBackAfterDelay();
 
         } catch (SQLException e) {
-            showMessage("❌ Erreur: " + e.getMessage(), "error");
             e.printStackTrace();
+            showMessage("❌ Erreur: " + e.getMessage(), "error");
         }
     }
 
-    private boolean validateForm() {
-        if (cbType.getValue() == null || cbStatut.getValue() == null) {
-            showMessage("Tous les champs sont obligatoires", "error");
-            return false;
-        }
-        return true;
+    private void goBackAfterDelay() {
+        new Thread(() -> {
+            try {
+                Thread.sleep(1500);
+                javafx.application.Platform.runLater(() -> {
+                    goBack();
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @FXML
-    private void cancel() {
-        Stage stage = (Stage) cbType.getScene().getWindow();
-        stage.close();
+    private void resetForm() {
+        if (isEditMode && profilToEdit != null) {
+            cbType.setValue(profilToEdit.getType());
+            cbStatut.setValue(profilToEdit.getStatut());
+        } else {
+            cbType.setValue("CLIENT");
+            cbStatut.setValue("ACTIF");
+        }
+    }
+
+    @FXML
+    private void goBack() {
+        System.out.println("=== Retour à la liste des profils ===");
+
+        if (isStandaloneWindow) {
+            // Mode FENÊTRE AUTONOME
+            try {
+                Stage stage = (Stage) lblMessage.getScene().getWindow();
+                stage.close();
+                System.out.println("✅ Fenêtre fermée");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Mode DASHBOARD
+            if (dashboardController != null) {
+                dashboardController.showProfils(); // Important : cette méthode doit exister
+                System.out.println("✅ Retour au dashboard - Liste des profils");
+            }
+        }
     }
 
     private void showMessage(String message, String type) {
         lblMessage.setText(message);
         if ("error".equals(type)) {
-            lblMessage.setStyle("-fx-text-fill: #EF4444;");
+            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
         } else {
-            lblMessage.setStyle("-fx-text-fill: #10B981;");
+            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold;");
         }
     }
 }

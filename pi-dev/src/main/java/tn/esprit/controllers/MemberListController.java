@@ -2,6 +2,8 @@ package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,56 +14,67 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import tn.esprit.entities.User;
 import tn.esprit.services.ServiceUser;
-import java.util.stream.Collectors;
+
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 public class MemberListController {
 
     @FXML private TableView<User> tableUsers;
-    @FXML private TableColumn<User, Integer> colId;
+    // La colonne ID a été supprimée
     @FXML private TableColumn<User, String> colNom;
     @FXML private TableColumn<User, String> colPrenom;
     @FXML private TableColumn<User, String> colEmail;
     @FXML private TableColumn<User, String> colTelephone;
-    @FXML private TableColumn<User, String> colType;      // Viendra du profil
-    @FXML private TableColumn<User, String> colStatut;    // Viendra du profil
+    @FXML private TableColumn<User, String> colType;
+    @FXML private TableColumn<User, String> colStatut;
     @FXML private TableColumn<User, Void> colActions;
 
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> filterTypeCombo;
+    @FXML private ComboBox<String> filterStatutCombo;
+    @FXML private ComboBox<String> sortByCombo;
+    @FXML private RadioButton rbAscending;
+    @FXML private RadioButton rbDescending;
+    @FXML private ToggleGroup sortOrderGroup;
+    @FXML private Button applySortBtn;
     @FXML private Label totalMembresLabel;
     @FXML private Label lblMessage;
+    @FXML private Button btnAdd;
 
     private final ServiceUser serviceUser = new ServiceUser();
-    private final ObservableList<User> usersList = FXCollections.observableArrayList();
+    private ObservableList<User> masterData = FXCollections.observableArrayList();
+    private FilteredList<User> filteredData;
+    private SortedList<User> sortedData;
+
+    private AdminDashboardController dashboardController;
 
     @FXML
     public void initialize() {
         System.out.println("=== Initialisation MemberListController ===");
 
-        // Tester la connexion d'abord
         serviceUser.testConnexion();
 
-        // Configurer les colonnes
         setupTableColumns();
         setupActionsColumn();
-
-        // Charger les données
+        setupFilterControls();
+        setupSortingControls();
         loadUsers();
+        setupDynamicSearch();
     }
 
     private void setupTableColumns() {
         System.out.println("Configuration des colonnes...");
 
-        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        // L'ID n'est plus affiché mais on peut toujours l'utiliser en interne
         colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
         colPrenom.setCellValueFactory(new PropertyValueFactory<>("prenom"));
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colTelephone.setCellValueFactory(new PropertyValueFactory<>("telephone"));
 
-        // Pour type et statut, on utilise une cellule personnalisée
         colType.setCellValueFactory(cellData -> {
             String type = cellData.getValue().getType();
             return new javafx.beans.property.SimpleStringProperty(type != null ? type : "");
@@ -72,7 +85,7 @@ public class MemberListController {
             return new javafx.beans.property.SimpleStringProperty(statut != null ? statut : "");
         });
 
-        // Styliser la colonne type avec des couleurs
+        // Styliser la colonne type
         colType.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -121,7 +134,6 @@ public class MemberListController {
         });
 
         // Centrer certaines colonnes
-        colId.setStyle("-fx-alignment: CENTER;");
         colType.setStyle("-fx-alignment: CENTER;");
         colStatut.setStyle("-fx-alignment: CENTER;");
 
@@ -162,143 +174,207 @@ public class MemberListController {
         colActions.setPrefWidth(200);
     }
 
-    private void loadUsers() {
-        System.out.println("=== Chargement des utilisateurs ===");
+    private void setupFilterControls() {
+        // Initialiser les filtres
+        filterTypeCombo.setItems(FXCollections.observableArrayList(
+                "Tous", "ADMIN", "AGENT", "CLIENT"
+        ));
+        filterTypeCombo.setValue("Tous");
 
-        try {
-            usersList.clear();
+        filterStatutCombo.setItems(FXCollections.observableArrayList(
+                "Tous", "ACTIF", "BLOQUE"
+        ));
+        filterStatutCombo.setValue("Tous");
 
-            List<User> users = serviceUser.afficher();
+        // Ajouter les écouteurs pour les filtres
+        filterTypeCombo.setOnAction(event -> applyFilters());
+        filterStatutCombo.setOnAction(event -> applyFilters());
+    }
 
-            if (users == null || users.isEmpty()) {
-                System.out.println("⚠️ Aucun utilisateur trouvé");
-                showMessage("Aucun membre trouvé", "info");
-            } else {
-                System.out.println("📊 " + users.size() + " utilisateur(s) trouvé(s)");
+    private void setupSortingControls() {
+        // Initialiser les options de tri (sans l'ID)
+        sortByCombo.setItems(FXCollections.observableArrayList(
+                "Nom", "Prénom", "Email", "Téléphone", "Type", "Statut"
+        ));
+        sortByCombo.setValue("Nom");
 
-                // Afficher les 3 premiers pour debug
-                for (int i = 0; i < Math.min(3, users.size()); i++) {
-                    User u = users.get(i);
-                    System.out.println("  " + (i+1) + ". " + u.getNom() + " " + u.getPrenom() +
-                            " | Type: " + u.getType() +
-                            " | Statut: " + u.getStatut());
+        // Action du bouton Appliquer
+        applySortBtn.setOnAction(event -> applySort());
+
+        // Optionnel : tri automatique
+        sortByCombo.setOnAction(event -> applySort());
+        sortOrderGroup.selectedToggleProperty().addListener((obs, oldVal, newVal) -> applySort());
+    }
+
+    private void applyFilters() {
+        if (filteredData == null) return;
+
+        String selectedType = filterTypeCombo.getValue();
+        String selectedStatut = filterStatutCombo.getValue();
+
+        filteredData.setPredicate(user -> {
+            // Filtre par texte (recherche)
+            String searchText = searchField.getText();
+            if (searchText != null && !searchText.isEmpty()) {
+                if (!searchInUser(user, searchText.toLowerCase())) {
+                    return false;
                 }
-
-                usersList.addAll(users);
             }
 
-            tableUsers.setItems(usersList);
-            tableUsers.refresh();
-            updateStats();
+            // Filtre par type
+            if (selectedType != null && !"Tous".equals(selectedType)) {
+                if (!selectedType.equals(user.getType())) {
+                    return false;
+                }
+            }
 
-            System.out.println("✅ Table mise à jour avec " + usersList.size() + " éléments");
+            // Filtre par statut
+            if (selectedStatut != null && !"Tous".equals(selectedStatut)) {
+                if (!selectedStatut.equals(user.getStatut())) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        updateStats();
+        applySort(); // Réappliquer le tri après filtrage
+    }
+
+    private void applySort() {
+        if (sortedData == null || filteredData == null) return;
+
+        String selectedField = sortByCombo.getValue();
+        if (selectedField == null) return;
+
+        Comparator<User> comparator = null;
+
+        switch (selectedField) {
+            case "Nom":
+                comparator = Comparator.comparing(User::getNom, Comparator.nullsLast(String::compareTo));
+                break;
+            case "Prénom":
+                comparator = Comparator.comparing(User::getPrenom, Comparator.nullsLast(String::compareTo));
+                break;
+            case "Email":
+                comparator = Comparator.comparing(User::getEmail, Comparator.nullsLast(String::compareTo));
+                break;
+            case "Téléphone":
+                comparator = Comparator.comparing(User::getTelephone, Comparator.nullsLast(String::compareTo));
+                break;
+            case "Type":
+                comparator = Comparator.comparing(u -> u.getType() != null ? u.getType() : "", String::compareTo);
+                break;
+            case "Statut":
+                comparator = Comparator.comparing(u -> u.getStatut() != null ? u.getStatut() : "", String::compareTo);
+                break;
+        }
+
+        if (comparator != null) {
+            // Appliquer l'ordre (croissant/décroissant)
+            if (rbDescending.isSelected()) {
+                comparator = comparator.reversed();
+            }
+
+            sortedData.setComparator(comparator);
+            tableUsers.refresh();
+        }
+    }
+
+    private void setupDynamicSearch() {
+        filteredData = new FilteredList<>(masterData, p -> true);
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            applyFilters(); // Les filtres incluent maintenant la recherche
+        });
+
+        sortedData = new SortedList<>(filteredData);
+        tableUsers.setItems(sortedData);
+    }
+
+    private boolean searchInUser(User user, String keyword) {
+        if (user.getNom() != null && user.getNom().toLowerCase().contains(keyword)) return true;
+        if (user.getPrenom() != null && user.getPrenom().toLowerCase().contains(keyword)) return true;
+        if (user.getEmail() != null && user.getEmail().toLowerCase().contains(keyword)) return true;
+        if (user.getTelephone() != null && user.getTelephone().toLowerCase().contains(keyword)) return true;
+        if (user.getType() != null && user.getType().toLowerCase().contains(keyword)) return true;
+        if (user.getStatut() != null && user.getStatut().toLowerCase().contains(keyword)) return true;
+        // L'ID est toujours recherchable mais pas affiché
+        if (String.valueOf(user.getId()).contains(keyword)) return true;
+        return false;
+    }
+
+    private void loadUsers() {
+        try {
+            masterData.clear();
+            List<User> users = serviceUser.afficher();
+
+            if (users != null && !users.isEmpty()) {
+                masterData.addAll(users);
+            }
+
+            updateStats();
+            applyFilters(); // Appliquer les filtres après chargement
+            applySort(); // Appliquer le tri après chargement
 
         } catch (Exception e) {
-            System.err.println("❌ Erreur chargement:");
             e.printStackTrace();
             showMessage("Erreur de chargement: " + e.getMessage(), "error");
         }
     }
 
-
-
     private void updateStats() {
-        int total = usersList.size();
-        totalMembresLabel.setText(String.valueOf(total));
+        if (filteredData != null) {
+            int filteredCount = filteredData.size();
+            int totalCount = masterData.size();
 
-        // Compter par type
-        long admins = usersList.stream().filter(u -> "ADMIN".equals(u.getType())).count();
-        long agents = usersList.stream().filter(u -> "AGENT".equals(u.getType())).count();
-        long clients = usersList.stream().filter(u -> "CLIENT".equals(u.getType())).count();
-
-        // Compter par statut
-        long actifs = usersList.stream().filter(u -> "ACTIF".equals(u.getStatut())).count();
-        long bloques = usersList.stream().filter(u -> "BLOQUE".equals(u.getStatut())).count();
-
-        System.out.println("📊 Stats: Total=" + total +
-                " | Admins=" + admins +
-                " | Agents=" + agents +
-                " | Clients=" + clients +
-                " | Actifs=" + actifs +
-                " | Bloqués=" + bloques);
-    }
-
-    @FXML
-    private void searchMembers() {
-        String searchTerm = searchField.getText().toLowerCase().trim();
-
-        if (searchTerm.isEmpty()) {
-            tableUsers.setItems(usersList);
-            totalMembresLabel.setText(String.valueOf(usersList.size()));
-            return;
-        }
-
-        ObservableList<User> filteredList = FXCollections.observableArrayList();
-        for (User user : usersList) {
-            if (user.getNom().toLowerCase().contains(searchTerm) ||
-                    user.getPrenom().toLowerCase().contains(searchTerm) ||
-                    user.getEmail().toLowerCase().contains(searchTerm) ||
-                    (user.getType() != null && user.getType().toLowerCase().contains(searchTerm))) {
-                filteredList.add(user);
+            if (filteredCount == totalCount) {
+                totalMembresLabel.setText(String.valueOf(totalCount));
+            } else {
+                totalMembresLabel.setText(filteredCount + " / " + totalCount);
             }
+        } else {
+            totalMembresLabel.setText(String.valueOf(masterData.size()));
         }
-
-        tableUsers.setItems(filteredList);
-        totalMembresLabel.setText(filteredList.size() + " / " + usersList.size());
-        System.out.println("🔍 Recherche '" + searchTerm + "': " + filteredList.size() + " résultat(s)");
-    }
-
-    private AdminDashboardController dashboardController;
-
-    public void setDashboardController(AdminDashboardController controller) {
-        this.dashboardController = controller;
     }
 
     @FXML
     private void openAddForm() {
         try {
             if (dashboardController != null) {
-                // Mode DASHBOARD
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AddMember.fxml"));
                 Parent root = loader.load();
 
                 AddMemberController controller = loader.getController();
                 controller.setDashboardController(dashboardController);
-
-                // Utiliser setContent() au lieu de loadPage()
                 dashboardController.setContent(root);
-
             } else {
-                // Mode FENÊTRE (fallback)
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AddMember.fxml"));
                 Parent root = loader.load();
 
-                Stage stage = (Stage) tableUsers.getScene().getWindow();
+                Stage stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.setTitle("Ajouter un membre");
-                stage.centerOnScreen();
+                stage.show();
             }
         } catch (IOException e) {
             e.printStackTrace();
             showMessage("Erreur d'ouverture du formulaire", "error");
         }
     }
+
     private void openEditForm(User user) {
         try {
             if (dashboardController != null) {
-                // Mode DASHBOARD
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditMember.fxml"));
                 Parent root = loader.load();
 
                 EditMemberController controller = loader.getController();
                 controller.setDashboardController(dashboardController);
                 controller.setUserToEdit(user);
-
-                // Utiliser setContent() au lieu de loadPage()
                 dashboardController.setContent(root);
-
             } else {
-                // Mode FENÊTRE
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/EditMember.fxml"));
                 Parent root = loader.load();
 
@@ -308,43 +384,44 @@ public class MemberListController {
                 Stage stage = new Stage();
                 stage.setScene(new Scene(root));
                 stage.setTitle("Modifier " + user.getNom() + " " + user.getPrenom());
-                stage.centerOnScreen();
                 stage.show();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
             showMessage("Erreur d'ouverture du formulaire", "error");
         }
     }
+
     private void deleteUser(User user) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation de suppression");
         alert.setHeaderText("Supprimer " + user.getNom() + " " + user.getPrenom() + " ?");
-        alert.setContentText("Cette action supprimera aussi son profil associé.");
+        alert.setContentText("Cette action est irréversible.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            System.out.println("🗑️ Tentative de suppression de l'utilisateur ID: " + user.getId());
-
             try {
-                serviceUser.supprimer(user.getId());
-                System.out.println("✅ Suppression réussie en base");
-
-                loadUsers();
-                System.out.println("✅ Liste rechargée");
-
+                serviceUser.supprimer(user.getId()); // On utilise l'ID en interne
                 showMessage("✅ Membre supprimé avec succès", "success");
-
+                loadUsers();
             } catch (SQLException e) {
-                System.err.println("❌ Échec de la suppression:");
                 e.printStackTrace();
                 showMessage("❌ Erreur: " + e.getMessage(), "error");
             }
         }
     }
+
     public void refreshList() {
         loadUsers();
+        searchField.clear();
+        filterTypeCombo.setValue("Tous");
+        filterStatutCombo.setValue("Tous");
+        sortByCombo.setValue("Nom");
+        rbAscending.setSelected(true);
+    }
+
+    public void setDashboardController(AdminDashboardController controller) {
+        this.dashboardController = controller;
     }
 
     private void showMessage(String message, String type) {
@@ -360,52 +437,16 @@ public class MemberListController {
                 lblMessage.setStyle("-fx-text-fill: #3B82F6; -fx-font-weight: bold;");
                 break;
         }
-    }
 
-    public void filterByProfil(int profilId) {
-        try {
-            System.out.println("🔍 Filtrage par profil ID: " + profilId);
-
-            // Récupérer tous les utilisateurs
-            List<User> allUsers = serviceUser.afficher();
-
-            // Utiliser Stream pour filtrer
-            List<User> filteredUsers = allUsers.stream()
-                    .filter(user -> user.getProfil() != null)  // Éviter NullPointerException
-                    .filter(user -> user.getProfil().getId() == profilId)
-                    .collect(Collectors.toList());
-
-            // Optionnel: Récupérer le type du premier élément pour affichage
-            String profilType = filteredUsers.stream()
-                    .findFirst()
-                    .map(User::getType)
-                    .orElse("Inconnu");
-
-            // Mettre à jour la liste observable
-            usersList.clear();
-            usersList.addAll(filteredUsers);
-
-            // Mettre à jour le tableau
-            tableUsers.setItems(usersList);
-            tableUsers.refresh();
-
-            // Mettre à jour les stats
-            updateStats();
-
-            // Afficher un message
-            long count = filteredUsers.size();
-            if (count > 0) {
-                showMessage(String.format("✅ %d membre(s) de type %s", count, profilType), "success");
-            } else {
-                showMessage("⚠️ Aucun membre trouvé pour ce profil", "info");
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000);
+                javafx.application.Platform.runLater(() ->
+                        lblMessage.setText("")
+                );
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            System.out.println("✅ " + count + " membre(s) trouvé(s)");
-
-        } catch (Exception e) {
-            System.err.println("❌ Erreur lors du filtrage:");
-            e.printStackTrace();
-            showMessage("Erreur de filtrage", "error");
-        }
+        }).start();
     }
 }
