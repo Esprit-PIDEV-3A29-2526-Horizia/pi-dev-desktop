@@ -81,20 +81,26 @@ public class PublicationService {
         return null;
     }
 
+    // UNE SEULE méthode getAll() avec debug
     public List<Publication> getAll() {
         List<Publication> list = new ArrayList<>();
         String sql = "SELECT * FROM publication ORDER BY date_publication DESC";
+
+        System.out.println("🔍 Exécution requête: " + sql);
 
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
                 list.add(mapPublication(rs));
+                System.out.println("✅ Publication trouvée: " + rs.getString("titre"));
             }
 
         } catch (SQLException e) {
-            System.out.println("Erreur liste: " + e.getMessage());
+            System.err.println("❌ Erreur SQL: " + e.getMessage());
         }
+
+        System.out.println("📊 Total récupéré: " + list.size());
         return list;
     }
 
@@ -116,6 +122,7 @@ public class PublicationService {
         return list;
     }
 
+    // UNE SEULE méthode mapPublication
     private Publication mapPublication(ResultSet rs) throws SQLException {
         Publication p = new Publication();
         p.setId(rs.getInt("id"));
@@ -124,5 +131,41 @@ public class PublicationService {
         p.setImage(rs.getString("image"));
         p.setDatePublication(rs.getTimestamp("date_publication").toLocalDateTime());
         return p;
+    }
+    public List<Publication> getAll(String tri) {
+        List<Publication> list = new ArrayList<>();
+        String sql;
+
+        switch (tri) {
+            case "Plus récentes":
+                sql = "SELECT * FROM publication ORDER BY date_publication DESC";
+                break;
+            case "Plus anciennes":
+                sql = "SELECT * FROM publication ORDER BY date_publication ASC";
+                break;
+            case "A-Z":
+                sql = "SELECT * FROM publication ORDER BY titre ASC";
+                break;
+            case "Z-A":
+                sql = "SELECT * FROM publication ORDER BY titre DESC";
+                break;
+            default:
+                sql = "SELECT * FROM publication ORDER BY date_publication DESC";
+        }
+
+        System.out.println("🔍 Tri: " + tri + " | Requête: " + sql);
+
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(mapPublication(rs));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur SQL: " + e.getMessage());
+        }
+
+        return list;
     }
 }

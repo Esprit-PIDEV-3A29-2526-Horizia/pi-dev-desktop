@@ -1,234 +1,135 @@
 package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import tn.esprit.entities.Publication;
 import tn.esprit.services.PublicationService;
 
+import java.io.IOException;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class PublicationsController implements Initializable {
 
-    @FXML
-    private FlowPane publicationsFlowPane;
-
-    @FXML
-    private TextField searchField;
-
-    @FXML
-    private Button addButton;
-
-    @FXML
-    private ComboBox<String> sortComboBox;
+    @FXML private TextField searchField;
+    @FXML private Button addButton;
+    @FXML private FlowPane publicationsFlowPane;
+    @FXML private ComboBox<String> sortComboBox;
 
     private PublicationService publicationService = new PublicationService();
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Configuration du ComboBox pour le tri
-        sortComboBox.getItems().addAll(
-                "Plus récentes d'abord",
-                "Plus anciennes d'abord",
-                "Titre A-Z",
-                "Titre Z-A"
-        );
-        sortComboBox.setValue("Plus récentes d'abord");
+    public void initialize(URL url, ResourceBundle rb) {
+        sortComboBox.getItems().addAll("Plus récentes", "Plus anciennes", "A-Z", "Z-A");
+        sortComboBox.setValue("Plus récentes");
+        sortComboBox.setOnAction(e -> loadPublications());
 
-        // Ajouter un listener pour le tri
-        sortComboBox.valueProperty().addListener((observable, oldValue, newValue) -> filterPublications(searchField.getText()));
+        loadPublications();
 
-        // Charger les publications initialement
-        List<Publication> allPublications = publicationService.getAll();
-        displayPublications(sortPublications(allPublications, sortComboBox.getValue()));
-
-        // Écouteur de recherche
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPublications(newValue));
-
-        // Action du bouton Ajouter
-        addButton.setOnAction(event -> Dashboard.loadView("/AjouterPublication.fxml"));
-    }
-
-    private void displayPublications(List<Publication> publications) {
-        publicationsFlowPane.getChildren().clear();
-        for (Publication publication : publications) {
-            VBox card = createPublicationCard(publication);
-            publicationsFlowPane.getChildren().add(card);
-        }
-    }
-
-    private void filterPublications(String keyword) {
-        List<Publication> filtered;
-
-        if (keyword == null || keyword.trim().isEmpty()) {
-            filtered = publicationService.getAll();
-        } else {
-            filtered = publicationService.rechercherParTitre(keyword);
-        }
-
-        // Appliquer le tri sur les résultats filtrés
-        filtered = sortPublications(filtered, sortComboBox.getValue());
-
-        displayPublications(filtered);
-    }
-
-    // Méthode pour trier la liste en mémoire
-    private List<Publication> sortPublications(List<Publication> publications, String sortOption) {
-        switch (sortOption) {
-            case "Plus récentes d'abord":
-                return publications.stream()
-                        .sorted(Comparator.comparing(Publication::getDatePublication).reversed())
-                        .collect(Collectors.toList());
-            case "Plus anciennes d'abord":
-                return publications.stream()
-                        .sorted(Comparator.comparing(Publication::getDatePublication))
-                        .collect(Collectors.toList());
-            case "Titre A-Z":
-                return publications.stream()
-                        .sorted(Comparator.comparing(Publication::getTitre, String.CASE_INSENSITIVE_ORDER))
-                        .collect(Collectors.toList());
-            case "Titre Z-A":
-                return publications.stream()
-                        .sorted(Comparator.comparing(Publication::getTitre, String.CASE_INSENSITIVE_ORDER).reversed())
-                        .collect(Collectors.toList());
-            default:
-                return publications;
-        }
-    }
-
-    // UNE SEULE méthode createPublicationCard - version complète avec Modifier/Supprimer
-    private VBox createPublicationCard(Publication publication) {
-        VBox card = new VBox();
-        card.setSpacing(10);
-        card.setStyle("-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);");
-        card.setPrefWidth(280);
-
-        // === Conteneur pour l'image avec la date superposée ===
-        StackPane imageContainer = new StackPane();
-        imageContainer.setPrefSize(250, 180);
-        imageContainer.setStyle("-fx-background-color: #f0f0f0; -fx-background-radius: 8;");
-
-        // Image
-        ImageView imageView = null;
-        String imagePath = publication.getImage();
-        if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                if (imagePath.startsWith("http")) {
-                    imageView = new ImageView(new Image(imagePath, true));
-                } else {
-                    imageView = new ImageView(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.isEmpty()) {
+                loadPublications();
+            } else {
+                publicationsFlowPane.getChildren().clear();
+                for (Publication p : publicationService.rechercherParTitre(newVal)) {
+                    addPublicationCard(p);
                 }
-                imageView.setFitWidth(250);
-                imageView.setFitHeight(180);
-                imageView.setPreserveRatio(true);
-            } catch (Exception e) {
-                System.err.println("Erreur chargement image pour " + publication.getTitre() + " : " + e.getMessage());
-                imageView = null;
             }
-        }
-
-        if (imageView != null) {
-            imageContainer.getChildren().add(imageView);
-        } else {
-            // Placeholder si pas d'image
-            Region placeholder = new Region();
-            placeholder.setStyle("-fx-background-color: #e0e0e0; -fx-background-radius: 8;");
-            placeholder.setPrefSize(250, 180);
-            imageContainer.getChildren().add(placeholder);
-        }
-
-        // Date de publication superposée sur l'image
-        Label dateLabel = new Label(publication.getDatePublication().format(dateFormatter));
-        dateLabel.setStyle("-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: rgba(52, 152, 219, 0.9); -fx-padding: 5 10; -fx-background-radius: 5;");
-        StackPane.setAlignment(dateLabel, Pos.TOP_RIGHT);
-        imageContainer.getChildren().add(dateLabel);
-
-        // Ajouter le conteneur d'image à la carte
-        card.getChildren().add(imageContainer);
-
-        // Titre
-        Label titreLabel = new Label(publication.getTitre());
-        titreLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
-        titreLabel.setWrapText(true);
-        titreLabel.setMaxWidth(250);
-
-        // Description (tronquée)
-        String description = publication.getDescription();
-        if (description != null && description.length() > 100) {
-            description = description.substring(0, 100) + "...";
-        }
-        Label descriptionLabel = new Label(description);
-        descriptionLabel.setStyle("-fx-font-size: 13; -fx-text-fill: #7f8c8d;");
-        descriptionLabel.setWrapText(true);
-        descriptionLabel.setMaxWidth(250);
-        descriptionLabel.setMaxHeight(60);
-
-        // Boutons d'action - MODIFIER ET SUPPRIMER
-        HBox buttonsBox = new HBox(10);
-        buttonsBox.setAlignment(Pos.CENTER_RIGHT);
-
-        // Bouton Modifier
-        Button modifierBtn = new Button("Modifier");
-        modifierBtn.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 8 15;");
-        modifierBtn.setOnAction(e -> {
-            // Stocker la publication sélectionnée et ouvrir la page de modification
-            Dashboard.setSelectedPublication(publication);
-            Dashboard.loadView("/ModifierPublication.fxml");
         });
 
-        // Bouton Supprimer
-        Button supprimerBtn = new Button("Supprimer");
-        supprimerBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-padding: 8 15;");
-        supprimerBtn.setOnAction(e -> {
-            // Confirmation avant suppression
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Confirmation de suppression");
-            confirm.setHeaderText("Supprimer la publication");
-            confirm.setContentText("Êtes-vous sûr de vouloir supprimer '" + publication.getTitre() + "' ?");
-
-            // Style personnalisé pour la boîte de dialogue
-            confirm.getDialogPane().setStyle("-fx-font-family: 'Segoe UI';");
-
-            confirm.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // Supprimer de la base de données
-                    publicationService.supprimer(publication.getId());
-
-                    // Rafraîchir l'affichage
-                    filterPublications(searchField.getText());
-
-                    // Message de succès
-                    Alert success = new Alert(Alert.AlertType.INFORMATION);
-                    success.setTitle("Succès");
-                    success.setHeaderText(null);
-                    success.setContentText("Publication supprimée avec succès !");
-                    success.showAndWait();
-                }
-            });
-        });
-
-        buttonsBox.getChildren().addAll(modifierBtn, supprimerBtn);
-        card.getChildren().addAll(titreLabel, descriptionLabel, buttonsBox);
-
-        return card;
+        addButton.setOnAction(e -> openAddDialog());
     }
 
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+    private void loadPublications() {
+        publicationsFlowPane.getChildren().clear();
+
+        String tri = sortComboBox.getValue();
+        List<Publication> publications = publicationService.getAll(tri);
+
+        System.out.println("📊 Nombre de publications: " + publications.size());
+
+        for (Publication p : publications) {
+            System.out.println(" - " + p.getTitre());
+            addPublicationCard(p);
+        }
+    }
+
+    private void addPublicationCard(Publication publication) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/PublicationCard.fxml"));
+            VBox card = loader.load();
+
+            PublicationCardController controller = loader.getController();
+            controller.setPublication(publication);
+            controller.setParentController(this);
+
+            // 🔥 Ajout du gestionnaire de clic pour ouvrir les commentaires
+            card.setOnMouseClicked(event -> openComments(publication));
+
+            publicationsFlowPane.getChildren().add(card);
+            System.out.println("✅ Carte ajoutée: " + publication.getTitre());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("❌ Erreur chargement carte FXML: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Ouvre la vue des commentaires pour la publication sélectionnée.
+     * @param publication la publication cliquée
+     */
+    private void openComments(Publication publication) {
+        try {
+            // Ajustez le chemin si votre fichier Commentaires.fxml est dans un autre dossier
+            // Exemple : "/views/Commentaires.fxml" ou "/Commentaires.fxml"
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Commentaires.fxml"));
+            Parent root = loader.load();
+
+            CommentairesController controller = loader.getController();
+            controller.setPublication(publication);
+
+            // Récupérer la scène actuelle et remplacer sa racine
+            Stage stage = (Stage) publicationsFlowPane.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur ouverture des commentaires : " + e.getMessage());
+        }
+    }
+
+    private void openAddDialog() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterPublication.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Nouvelle Publication");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            loadPublications();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void refresh() {
+        loadPublications();
     }
 }

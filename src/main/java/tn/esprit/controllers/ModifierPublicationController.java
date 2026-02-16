@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ResourceBundle;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class ModifierPublicationController implements Initializable {
 
@@ -36,10 +37,18 @@ public class ModifierPublicationController implements Initializable {
     private Publication publication;
     private File selectedImageFile;
     private static final String UPLOAD_DIR = "src/main/resources/images/";
+    private String ancienTitre; // Pour vérifier les doublons
+
+    // Constantes de validation
+    private static final int TITRE_MIN_LENGTH = 3;
+    private static final int TITRE_MAX_LENGTH = 100;
+    private static final int DESCRIPTION_MIN_LENGTH = 10;
+    private static final int DESCRIPTION_MAX_LENGTH = 1000;
+    private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final Pattern TITRE_PATTERN = Pattern.compile("^[a-zA-Z0-9À-ÿ\\s\\-'.,!?]+$");
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Récupérer la publication sélectionnée
         this.publication = Dashboard.getSelectedPublication();
 
         if (publication == null) {
@@ -48,20 +57,35 @@ public class ModifierPublicationController implements Initializable {
             return;
         }
 
-        // Remplir les champs avec les données actuelles
+        ancienTitre = publication.getTitre();
         remplirChamps();
+        addRealTimeValidation();
 
-        // Actions des boutons
         browseButton.setOnAction(e -> choisirImage());
         enregistrerButton.setOnAction(e -> enregistrer());
         annulerButton.setOnAction(e -> Dashboard.loadView("/Publications.fxml"));
+    }
+
+    private void addRealTimeValidation() {
+        titreField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > TITRE_MAX_LENGTH) {
+                titreField.setText(newVal.substring(0, TITRE_MAX_LENGTH));
+                showAlert("Information", "Le titre ne peut pas dépasser " + TITRE_MAX_LENGTH + " caractères.");
+            }
+        });
+
+        descriptionField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > DESCRIPTION_MAX_LENGTH) {
+                descriptionField.setText(newVal.substring(0, DESCRIPTION_MAX_LENGTH));
+                showAlert("Information", "La description ne peut pas dépasser " + DESCRIPTION_MAX_LENGTH + " caractères.");
+            }
+        });
     }
 
     private void remplirChamps() {
         titreField.setText(publication.getTitre());
         descriptionField.setText(publication.getDescription());
 
-        // Afficher l'image actuelle
         if (publication.getImage() != null && !publication.getImage().isEmpty()) {
             try {
                 Image image = new Image(getClass().getResource(publication.getImage()).toExternalForm());
@@ -81,32 +105,62 @@ public class ModifierPublicationController implements Initializable {
 
         File file = fileChooser.showOpenDialog(browseButton.getScene().getWindow());
         if (file != null) {
+            if (file.length() > MAX_IMAGE_SIZE) {
+                showAlert("Erreur", "L'image ne doit pas dépasser 5 Mo !");
+                return;
+            }
+
             selectedImageFile = file;
             imageField.setText(file.getName());
 
-            // Afficher la prévisualisation
             Image image = new Image(file.toURI().toString());
             previewImage.setImage(image);
         }
     }
 
+    private boolean validerChamps() {
+        StringBuilder erreurs = new StringBuilder();
+
+        String titre = titreField.getText().trim();
+        if (titre.isEmpty()) {
+            erreurs.append("• Le titre est obligatoire.\n");
+        } else if (titre.length() < TITRE_MIN_LENGTH) {
+            erreurs.append("• Le titre doit contenir au moins ").append(TITRE_MIN_LENGTH).append(" caractères.\n");
+        } else if (!TITRE_PATTERN.matcher(titre).matches()) {
+            erreurs.append("• Le titre contient des caractères invalides.\n");
+        }
+
+        String description = descriptionField.getText().trim();
+        if (description.isEmpty()) {
+            erreurs.append("• La description est obligatoire.\n");
+        } else if (description.length() < DESCRIPTION_MIN_LENGTH) {
+            erreurs.append("• La description doit contenir au moins ").append(DESCRIPTION_MIN_LENGTH).append(" caractères.\n");
+        }
+
+        if (erreurs.length() > 0) {
+            showAlert("Erreurs de validation", erreurs.toString());
+            return false;
+        }
+
+        return true;
+    }
+
     private void enregistrer() {
-        // Validation
-        if (titreField.getText().trim().isEmpty()) {
-            showAlert("Erreur", "Le titre est obligatoire !");
+        if (!validerChamps()) {
             return;
         }
 
-        if (descriptionField.getText().trim().isEmpty()) {
-            showAlert("Erreur", "La description est obligatoire !");
+        String nouveauTitre = titreField.getText().trim();
+
+        // Vérifier si le titre a changé et s'il existe déjà
+        if (!nouveauTitre.equalsIgnoreCase(ancienTitre) && publicationExiste(nouveauTitre)) {
+            showAlert("Erreur", "Une publication avec ce titre existe déjà !");
             return;
         }
 
-        // Mettre à jour les données
-        publication.setTitre(titreField.getText().trim());
+        publication.setTitre(nouveauTitre);
         publication.setDescription(descriptionField.getText().trim());
 
-        // Nouvelle image sélectionnée ?
         if (selectedImageFile != null) {
             String imagePath = saveImage();
             if (imagePath != null) {
@@ -114,33 +168,27 @@ public class ModifierPublicationController implements Initializable {
             }
         }
 
-        // Sauvegarder dans la base
         publicationService.modifier(publication);
 
-        // Message de succès
-        Alert success = new Alert(Alert.AlertType.INFORMATION);
-        success.setTitle("Succès");
-        success.setHeaderText(null);
-        success.setContentText("Publication modifiée avec succès !");
-        success.showAndWait();
-
-        // Retour à la liste
+        showAlert("Succès", "Publication modifiée avec succès !");
         Dashboard.loadView("/Publications.fxml");
+    }
+
+    private boolean publicationExiste(String titre) {
+        return publicationService.getAll().stream()
+                .anyMatch(p -> p.getTitre().equalsIgnoreCase(titre) && p.getId() != publication.getId());
     }
 
     private String saveImage() {
         try {
-            // Créer le dossier s'il n'existe pas
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Nom unique pour l'image
             String fileName = UUID.randomUUID().toString() + "_" + selectedImageFile.getName();
             Path targetPath = uploadPath.resolve(fileName);
 
-            // Copier le fichier
             Files.copy(selectedImageFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
             return "/images/" + fileName;
@@ -152,7 +200,9 @@ public class ModifierPublicationController implements Initializable {
     }
 
     private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Alert.AlertType type = title.equals("Succès") ? Alert.AlertType.INFORMATION :
+                title.equals("Information") ? Alert.AlertType.WARNING : Alert.AlertType.ERROR;
+        Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

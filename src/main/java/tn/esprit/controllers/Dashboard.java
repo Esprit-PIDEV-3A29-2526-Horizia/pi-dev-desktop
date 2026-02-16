@@ -27,7 +27,6 @@ public class Dashboard {
         try {
             URL url = Dashboard.class.getResource(fxmlPath);
 
-            // Debug
             System.out.println("🔍 Chargement: " + fxmlPath);
             System.out.println("📍 URL: " + url);
 
@@ -48,27 +47,27 @@ public class Dashboard {
 
     @FXML
     private void showDashboard() {
-        loadView("/Dashboard.fxml");
+        loadView("/views/Dashboard.fxml");  // ou ta vue par défaut
     }
 
     @FXML
     private void showVoyages() {
-        loadView("/Voyages.fxml");
+        loadView("/views/Voyages.fxml");
     }
 
     @FXML
     private void showReservations() {
-        loadView("/Reservations.fxml");
+        loadView("/views/Reservations.fxml");
     }
 
     @FXML
     private void showlogement(ActionEvent event) {
-        loadView("/Logements.fxml");
+        loadView("/views/Logements.fxml");
     }
 
     @FXML
     private void showpublications(ActionEvent event) {
-        loadView("/Publications.fxml"); // ← CORRIGÉ ICI
+        loadView("/Publications.fxml");  // ← CORRIGÉ ICI
     }
 
     // Getters/Setters
