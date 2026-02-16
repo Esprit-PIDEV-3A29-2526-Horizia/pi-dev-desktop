@@ -135,7 +135,7 @@
 
             <!-- Card Gestion Locations -->
             <HBox fx:id="cardGestionLocations" GridPane.columnIndex="0" spacing="15" alignment="CENTER_LEFT"
-                  style="-fx-background-color: linear-gradient(to right, #667eea, #764ba2); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
+                  style="-fx-background-color: linear-gradient(to right, #f49c11, #f49c00); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="📋" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
                     <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
@@ -146,7 +146,7 @@
 
             <!-- Card Gestion Véhicules -->
             <HBox fx:id="cardGestionVehicules" GridPane.columnIndex="1" spacing="15" alignment="CENTER_LEFT"
-                  style="-fx-background-color: linear-gradient(to right, #f093fb, #f5576c); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
+                  style="-fx-background-color: linear-gradient(to right, #0384b7, #0384b1); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="🚙" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
                     <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
@@ -157,7 +157,7 @@
 
             <!-- Card Gestion Marques -->
             <HBox fx:id="cardGestionMarques" GridPane.columnIndex="2" spacing="15" alignment="CENTER_LEFT"
-                  style="-fx-background-color: linear-gradient(to right, #4facfe, #00f2fe); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
+                  style="-fx-background-color: linear-gradient(to right, #ece9e5, #0384b7); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="🏷️" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
                     <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>

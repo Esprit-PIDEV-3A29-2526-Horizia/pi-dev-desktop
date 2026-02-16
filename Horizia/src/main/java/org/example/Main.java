@@ -83,30 +83,47 @@ public class Main extends Application {
         try {
             javafx.scene.layout.VBox root = new javafx.scene.layout.VBox(30);
             root.setAlignment(javafx.geometry.Pos.CENTER);
-            root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e); -fx-padding: 50;");
+            root.setStyle("-fx-background-color: linear-gradient(to bottom, #ece9e9, #ece9e5); -fx-padding: 50;");
 
-            // Titre
-            javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("HORIZIA");
-            titleLabel.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;");
+            // Logo (remplace le texte HORIZIA)
+            javafx.scene.image.ImageView logoView = new javafx.scene.image.ImageView();
+            try {
+                Image logo = new Image(getClass().getResourceAsStream("/images/logo.png"));
+                logoView.setImage(logo);
+                logoView.setFitWidth(300);  // Ajustez la largeur selon vos besoins
+                logoView.setPreserveRatio(true);
+                logoView.setSmooth(true);
+            } catch (Exception e) {
+                System.err.println("⚠ Impossible de charger le logo : " + e.getMessage());
+                // Fallback : afficher le texte si l'image n'est pas trouvée
+                javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("HORIZIA");
+                titleLabel.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;");
+                root.getChildren().add(titleLabel);
+            }
 
             javafx.scene.control.Label subtitleLabel = new javafx.scene.control.Label("Système de Gestion de Location");
-            subtitleLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #e94560;");
+            subtitleLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #0384b7;");
 
             // Conteneur des boutons
             javafx.scene.layout.HBox buttonContainer = new javafx.scene.layout.HBox(40);
             buttonContainer.setAlignment(javafx.geometry.Pos.CENTER);
 
             // Bouton Admin
-            javafx.scene.control.Button btnAdmin = createStyledButton("👤 ADMIN", "#e94560");
+            javafx.scene.control.Button btnAdmin = createStyledButton("👤 ADMIN", "#0384b7");
             btnAdmin.setOnAction(e -> openAdminPanel(stage, icon));
 
             // Bouton Client
-            javafx.scene.control.Button btnClient = createStyledButton("🚗 CLIENT", "#0f3460");
+            javafx.scene.control.Button btnClient = createStyledButton("🚗 CLIENT", "#f49c11");
             btnClient.setOnAction(e -> openClientPanel(stage, icon));
 
             buttonContainer.getChildren().addAll(btnAdmin, btnClient);
 
-            root.getChildren().addAll(titleLabel, subtitleLabel, buttonContainer);
+            // Ajouter le logo seulement si l'image a été chargée avec succès
+            if (logoView.getImage() != null) {
+                root.getChildren().addAll(logoView, subtitleLabel, buttonContainer);
+            } else {
+                root.getChildren().addAll(subtitleLabel, buttonContainer);
+            }
 
             Scene scene = new Scene(root, 800, 500);
             stage.setTitle("Horizia - Sélection du mode");
@@ -121,7 +138,6 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
-
     /**
      * Crée un bouton stylisé
      */
