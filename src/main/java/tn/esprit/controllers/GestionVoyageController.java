@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -29,7 +30,9 @@ public class GestionVoyageController implements Initializable {
     @FXML private Label lblPromo;
     @FXML private TextField tfRecherche;
     @FXML private FlowPane gridVoyages;
-
+    // On récupère le conteneur principal pour changer de vue (Catégories)
+    @FXML private VBox mainContainer;
+    @FXML private Button btnDeconnexion;
     private final VoyageService vs = new VoyageService();
 
     @Override
@@ -37,19 +40,62 @@ public class GestionVoyageController implements Initializable {
         refreshVoyages(vs.afficher());
     }
 
+    // --- NAVIGATION ---
+
     @FXML
     private void handleDeconnexion(ActionEvent event) {
         try {
-            // Charge la vue de connexion (Vérifiez si c'est Login.fxml ou Loqin.fxml dans vos dossiers)
+            // 1. Charger la page de connexion
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+
+            // 2. Récupérer la fenêtre (Stage) actuelle
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 3. Remplacer la scène par celle du Login
             stage.setScene(new Scene(root));
             stage.setTitle("Horizia - Connexion");
             stage.show();
+
+            System.out.println("Déconnexion réussie !");
         } catch (IOException e) {
+            System.err.println("Erreur lors de la déconnexion : " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void naviguerCategories() {
+        try {
+            // On remplace le contenu actuel par la gestion des catégories
+            Parent root = FXMLLoader.load(getClass().getResource("/GestionCategorie.fxml"));
+            // Utilise la scène actuelle pour changer de racine
+            gridVoyages.getScene().setRoot(root);
+        } catch (IOException e) {
+            System.err.println("Erreur navigation catégories: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void ouvrirFormulaireAjout() {
+        try {
+            // Ouvre le formulaire d'ajout dans une fenêtre surgissante (Pop-up)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Ajouter un nouveau voyage");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            // Rafraîchir la liste après la fermeture de la fenêtre d'ajout
+            refreshVoyages(vs.afficher());
+        } catch (IOException e) {
+            System.err.println("Erreur ouverture formulaire: " + e.getMessage());
+        }
+    }
+
+    // --- LOGIQUE VOYAGE (Inchangée mais stabilisée) ---
 
     @FXML
     private void handleRecherche(KeyEvent event) {
@@ -58,7 +104,7 @@ public class GestionVoyageController implements Initializable {
         refreshVoyages(result);
     }
 
-    private void refreshVoyages(List<Voyage> voyages) {
+    public void refreshVoyages(List<Voyage> voyages) {
         if (gridVoyages == null) return;
         gridVoyages.getChildren().clear();
         updateStats(voyages);
@@ -67,11 +113,9 @@ public class GestionVoyageController implements Initializable {
             for (Voyage v : voyages) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/VoyageCard.fxml"));
                 VBox card = loader.load();
-
                 VoyageCardController ctrl = loader.getController();
                 if (ctrl != null) {
                     ctrl.setData(v);
-                    // Résout l'erreur "Cannot resolve method setParentController"
                     ctrl.setParentController(this);
                     card.setOnMouseClicked(e -> ouvrirDetails(v));
                 }
@@ -86,20 +130,15 @@ public class GestionVoyageController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyage.fxml"));
             Parent root = loader.load();
-
             DetailsVoyageController controller = loader.getController();
             if (controller != null) {
                 controller.initData(v);
-                // Résout l'erreur visible sur votre capture image_15f574.jpg
                 controller.setParentController(this);
             }
-
             Stage stage = new Stage();
-            stage.setTitle("Détails du voyage - " + v.getDestination());
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
             refreshVoyages(vs.afficher());
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,7 +152,4 @@ public class GestionVoyageController implements Initializable {
             lblPlacesTotales.setText(String.valueOf(total));
         }
     }
-
-    @FXML private void ouvrirFormulaireAjout() { /* Votre code d'ajout existant */ }
-    @FXML private void naviguerCategories() { /* Votre code de navigation existant */ }
 }

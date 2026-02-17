@@ -154,4 +154,10 @@ public class GestionCategorieController {
         taDescription.clear();
         listCategories.getSelectionModel().clearSelection();
     }
+
+    @FXML
+    private void handleDeconnexion(ActionEvent event) {
+        changerScene("/Login.fxml", event);
+    }
+
 }

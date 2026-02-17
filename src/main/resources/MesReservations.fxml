@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<VBox prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #F9FAFB;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.MesReservationsController">
+    <children>
+        <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="20.0" style="-fx-background-color: #105D5E; -fx-padding: 0 30;">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" preserveRatio="true">
+                            <image>
+                                <Image url="@/images/logo.png" />
+                            </image>
+                        </ImageView>
+                    </children>
+                </HBox>
+
+                <Region prefWidth="20.0" />
+
+                <HBox alignment="CENTER_LEFT" spacing="15.0">
+                    <children>
+                        <Button onAction="#allerAuCatalogue" style="-fx-background-color: transparent; -fx-text-fill: #A0A0A0; -fx-font-size: 14; -fx-cursor: hand;" text="Catalogue" />
+                        <Button style="-fx-background-color: #ffffff22; -fx-text-fill: white; -fx-font-size: 14; -fx-background-radius: 5;" text="Mes Réservations" />
+                        <Button style="-fx-background-color: transparent; -fx-text-fill: #A0A0A0; -fx-font-size: 14; -fx-cursor: hand;" text="Profil" />
+                    </children>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <Button onAction="#deconnexion" style="-fx-background-color: #FDBA74; -fx-text-fill: #92400E; -fx-font-weight: bold; -fx-background-radius: 20; -fx-padding: 8 20;" text="Déconnexion" />
+            </children>
+        </HBox>
+
+        <VBox spacing="20.0" VBox.vgrow="ALWAYS">
+            <padding><Insets bottom="30.0" left="50.0" right="50.0" top="30.0" /></padding>
+            <children>
+                <Label style="-fx-font-size: 28; -fx-font-weight: bold;" text="Mes Voyages &amp; Réservations" />
+
+                <HBox spacing="10.0">
+                    <children>
+                        <Button style="-fx-background-color: #2563EB; -fx-text-fill: white; -fx-background-radius: 20;" text="Toutes" />
+                        <Button style="-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 20; -fx-background-radius: 20;" text="Confirmées" />
+                    </children>
+                </HBox>
+
+                <GridPane style="-fx-padding: 10 20;">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="40.0" />
+                        <ColumnConstraints percentWidth="20.0" halignment="CENTER" />
+                        <ColumnConstraints percentWidth="20.0" halignment="CENTER" />
+                        <ColumnConstraints percentWidth="20.0" halignment="CENTER" />
+                    </columnConstraints>
+                    <children>
+                        <Label style="-fx-text-fill: #6B7280; -fx-font-weight: bold;" text="Voyage" />
+                        <Label style="-fx-text-fill: #6B7280; -fx-font-weight: bold;" text="Personnes" GridPane.columnIndex="1" />
+                        <Label style="-fx-text-fill: #6B7280; -fx-font-weight: bold;" text="Statut" GridPane.columnIndex="2" />
+                        <Label style="-fx-text-fill: #6B7280; -fx-font-weight: bold;" text="Actions" GridPane.columnIndex="3" />
+                    </children>
+                </GridPane>
+
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                    <content>
+                        <VBox fx:id="containerReservations" spacing="15.0" />
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</VBox>

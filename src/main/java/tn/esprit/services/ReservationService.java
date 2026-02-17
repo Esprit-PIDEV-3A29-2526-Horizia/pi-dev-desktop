@@ -17,9 +17,9 @@ public class ReservationService implements IService<Reservation> {
     @Override
     public void ajouter(Reservation r) {
         // La date_reservation est mise à CURRENT_TIMESTAMP par défaut dans MySQL
-        String qry = "INSERT INTO reservation (nb_personnes, statut, id_voyage, id_utilisateur) VALUES (?, ?, ?, ?)";
+        String qry = "INSERT INTO reservation (nb_places, statut, id_voyage, id_utilisateur) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setInt(1, r.getNbPersonnes());
+            pstm.setInt(1, r.getNb_places());
             pstm.setString(2, r.getStatut());
             pstm.setInt(3, r.getIdVoyage());
             pstm.setInt(4, r.getIdUtilisateur());
@@ -33,9 +33,9 @@ public class ReservationService implements IService<Reservation> {
 
     @Override
     public void modifier(Reservation r) {
-        String qry = "UPDATE reservation SET nb_personnes = ?, statut = ?, id_voyage = ?, id_utilisateur = ? WHERE id = ?";
+        String qry = "UPDATE reservation SET nb_places = ?, statut = ?, id_voyage = ?, id_utilisateur = ? WHERE id = ?";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setInt(1, r.getNbPersonnes());
+            pstm.setInt(1, r.getNb_places());
             pstm.setString(2, r.getStatut());
             pstm.setInt(3, r.getIdVoyage());
             pstm.setInt(4, r.getIdUtilisateur());
@@ -69,7 +69,7 @@ public class ReservationService implements IService<Reservation> {
                 reservations.add(new Reservation(
                         rs.getInt("id"),
                         rs.getTimestamp("date_reservation"),
-                        rs.getInt("nb_personnes"),
+                        rs.getInt("nb_places"),
                         rs.getString("statut"),
                         rs.getInt("id_voyage"),
                         rs.getInt("id_utilisateur")
@@ -83,7 +83,7 @@ public class ReservationService implements IService<Reservation> {
     // Dans ReservationService.java
     public void effectuerReservation(int idVoyage, int idUser, int nbPlaces) {
         // Requête pour insérer la réservation
-        String sqlRes = "INSERT INTO reservation (id_voyage, id_user, nbr_personnes) VALUES (?, ?, ?)";
+        String sqlRes = "INSERT INTO reservation (id_voyage, id_user, nb_places) VALUES (?, ?, ?)";
         // Requête pour mettre à jour les places restantes du voyage
         String sqlVoyage = "UPDATE voyage SET places_restantes = places_restantes - ? WHERE id = ?";
 
@@ -100,7 +100,40 @@ public class ReservationService implements IService<Reservation> {
             psVoy.setInt(2, idVoyage);
             psVoy.executeUpdate();
 
-            System.out.println("✅ Réservation réussie et places mises à jour !");
+            System.out.println("Réservation réussie et places mises à jour !");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    // Dans tn.esprit.services.ReservationService
+    public List<Reservation> getReservationsParUtilisateur(int idUser) {
+        List<Reservation> reservations = new ArrayList<>();
+        // On joint la table voyage pour avoir le nom de la destination
+        String sql = "SELECT r.*, v.destination FROM reservation r " +
+                "JOIN voyage v ON r.id_voyage = v.id WHERE r.id_user = ?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setInt(1, idUser);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reservation r = new Reservation();
+                r.setId(rs.getInt("id"));
+                r.setNb_places(rs.getInt("nb_places")); // Utilisez le nom exact de votre colonne !
+                r.setDestination(rs.getString("destination")); // Vient de la table voyage
+                reservations.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur SQL: " + e.getMessage());
+        }
+        return reservations;
+    }
+
+    public void annulerReservation(int id) {
+        String sql = "DELETE FROM reservation WHERE id = ?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setInt(1, id);
+            ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefWidth="550.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 25;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsVoyageUserController">
+    <children>
+        <HBox alignment="CENTER_LEFT">
+            <children>
+                <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold;" text="VOYAGE" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="badgeStatus" text="STATUT" />
+            </children>
+        </HBox>
+
+        <ImageView fx:id="imgVoyage" fitHeight="250.0" fitWidth="500.0" preserveRatio="true" />
+
+        <Text fx:id="txtDescription" wrappingWidth="480.0" />
+
+        <GridPane hgap="20.0" vgap="10.0">
+            <children>
+                <Label text="Dates :" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <Label fx:id="lblDates" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Prix :" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Label fx:id="lblPrix" style="-fx-font-weight: bold; -fx-text-fill: #2D7A7B;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Places :" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <Label fx:id="lblPlaces" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            </children>
+        </GridPane>
+
+
+                <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                    <children>
+                        <Button onAction="#fermer" style="-fx-background-color: #F1F5F9; -fx-text-fill: #475569;" text="Fermer" />
+                        <Button fx:id="btnReserver" onAction="#handleReservation" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="Réserver" />
+                    </children>
+                </HBox>
+    </children>
+</VBox>

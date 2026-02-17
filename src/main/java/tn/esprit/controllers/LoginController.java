@@ -6,60 +6,39 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.URL;
 
 public class LoginController {
 
-    @FXML private Button btnAdmin; // Doit correspondre au fx:id dans Scene Builder
-    @FXML private Button btnUser;  // Doit correspondre au fx:id dans Scene Builder
+    @FXML
+    private void handleAdminAccess(ActionEvent event) {
+        changerScene(event, "/GestionVoyage.fxml", "Horizia - Dashboard Admin");
+    }
 
     @FXML
-    void handleAdminAccess(ActionEvent event) { // Ajoutez 'ActionEvent event' en paramètre
+    private void handleUserAccess(ActionEvent event) {
+        // Le nom du fichier doit correspondre EXACTEMENT (Majuscules incluses)
+        changerScene(event, "/CatalogueUser.fxml", "Horizia - Catalogue Client");
+    }
+
+    private void changerScene(ActionEvent event, String fxmlPath, String title) {
         try {
-            System.out.println("Accès Admin : Chargement du catalogue voyage...");
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("ERREUR : Le fichier FXML est introuvable au chemin : " + fxmlPath);
+                return;
+            }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionVoyage.fxml"));
-            Parent root = loader.load();
-
-            // On récupère la fenêtre (Stage) directement via l'événement du clic
-            // Cela fonctionne même si fx:id="btnAdmin" est mal configuré
+            Parent root = FXMLLoader.load(resource);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
             stage.setScene(new Scene(root));
-            stage.setTitle("Horizia - Dashboard Administration");
-            stage.centerOnScreen();
+            stage.setTitle(title);
             stage.show();
-
         } catch (IOException e) {
-            System.err.println("Erreur de chargement du catalogue : " + e.getMessage());
+            System.err.println("Erreur de chargement de la scène : " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    @FXML
-    void handleUserAccess() {
-        changerScene("/CatalogueUser.fxml", "Horizia - Catalogue Client");
-    }
-
-    private void changerScene(String fxmlPath, String titre) {
-        try {
-            // Utilisation de getClass().getResource() avec le chemin correct
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            // On utilise n'importe quel bouton injecté pour récupérer la fenêtre
-            Stage stage = (Stage) btnAdmin.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle(titre);
-            stage.centerOnScreen();
-
-        } catch (IOException e) {
-            System.err.println("Erreur : Impossible de trouver le fichier " + fxmlPath);
-            e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.err.println("Erreur : btnAdmin n'est pas lié au FXML !");
         }
     }
 }

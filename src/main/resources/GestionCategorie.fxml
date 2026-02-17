@@ -33,19 +33,22 @@
                   <Cursor fx:constant="SE_RESIZE" />
                </cursor>
                 </ImageView>
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="📂  Catégories" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="Catégories" />
 
                 <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
                         onAction="#naviguerVoyages"
                         prefHeight="45.0"
                         style="-fx-background-color: transparent; -fx-text-fill: #DACEB6;"
-                        text="✈  Voyages" />
+                        text="Voyages" />
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;" text="📑  Réservations" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;" text="Réservations" />
 
                 <Region VBox.vgrow="ALWAYS" />
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10;" text="🚪  Déconnexion" />
+                <Button prefHeight="45.0" prefWidth="210.0"
+                        style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10;"
+                        text="Déconnexion"
+                        onAction="#handleDeconnexion"/>
             </children>
         </VBox>
     </left>

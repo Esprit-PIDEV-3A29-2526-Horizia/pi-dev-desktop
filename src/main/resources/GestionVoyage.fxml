@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
@@ -13,61 +14,162 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700.0" prefWidth="1200.0" style="-fx-background-color: #F5F1E9;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionVoyageController">
+<BorderPane prefHeight="700.0" prefWidth="1200.0"
+            style="-fx-background-color: #F5F1E9;"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.GestionVoyageController">
+
+    <!-- ================= LEFT SIDEBAR (même style que GestionCategorie) ================= -->
     <left>
-        <VBox prefWidth="250.0" spacing="20" style="-fx-background-color: #1a1d33;">
-            <padding><Insets bottom="20" left="20" right="20" top="40" /></padding>
+        <VBox prefWidth="250.0" spacing="10.0"
+              style="-fx-background-color: #000328;"
+              alignment="CENTER">
+            <padding>
+                <Insets bottom="20.0" left="15.0" right="15.0" top="40.0"/>
+            </padding>
+
             <children>
-                <ImageView fitHeight="60.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
-                    <Image url="@/images/logo.png" />
+                <ImageView fx:id="logoApp" fitHeight="60.0" fitWidth="180.0"
+                           pickOnBounds="true" preserveRatio="true">
+                    <VBox.margin>
+                        <Insets bottom="40.0" left="10.0"/>
+                    </VBox.margin>
+                    <image>
+                        <Image url="@images/logo.png"/>
+                    </image>
+                    <cursor>
+                        <Cursor fx:constant="SE_RESIZE"/>
+                    </cursor>
                 </ImageView>
 
-                <VBox spacing="10" style="-fx-padding: 20 0 0 0;">
-                    <Button alignment="BASELINE_LEFT" onAction="#naviguerCategories" prefHeight="45.0" prefWidth="210.0" style="-fx-background-color: transparent; -fx-text-fill: #a0a2ba; -fx-font-size: 14;" text="  Catégories" />
-                    <Button alignment="BASELINE_LEFT" prefHeight="45.0" prefWidth="210.0" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-size: 14;" text="  Voyages" />
-                    <Button alignment="BASELINE_LEFT" prefHeight="45.0" prefWidth="210.0" style="-fx-background-color: transparent; -fx-text-fill: #a0a2ba; -fx-font-size: 14;" text="  Réservations" />
-                </VBox>
+                <!-- Boutons menu -->
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
+                        onAction="#naviguerCategories"
+                        prefHeight="45.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;"
+                        text="Catégories"/>
 
-                <Region VBox.vgrow="ALWAYS" />
-                <Button prefHeight="45.0" prefWidth="210.0" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10;" text="Déconnexion" />
+                <!-- actif -->
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
+                        prefHeight="45.0"
+                        style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        text="Voyages"/>
+
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
+                        prefHeight="45.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;"
+                        text="Réservations"/>
+
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <!-- Déconnexion -->
+                <Button prefHeight="45.0" prefWidth="210.0"
+                        style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10;"
+                        text="Déconnexion"
+                        onAction="#handleDeconnexion"/>
             </children>
         </VBox>
     </left>
 
+    <!-- ================= CENTER CONTENT ================= -->
     <center>
         <VBox spacing="20.0">
-            <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
-            <children>
-                <HBox spacing="20">
-                    <VBox prefWidth="180.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15;">
-                        <Label style="-fx-text-fill: #777;" text="Destinations actives" />
-                        <Label fx:id="lblDestActive" style="-fx-font-size: 22; -fx-font-weight: bold;" text="0" />
-                    </VBox>
-                    <VBox prefWidth="180.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15;">
-                        <Label style="-fx-text-fill: #777;" text="Places totales" />
-                        <Label fx:id="lblPlacesTotales" style="-fx-font-size: 22; -fx-font-weight: bold;" text="0" />
-                    </VBox>
-                    <VBox prefWidth="180.0" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 15;">
-                        <Label style="-fx-text-fill: #777;" text="En promotion" />
-                        <Label fx:id="lblPromo" style="-fx-font-size: 22; -fx-font-weight: bold;" text="0" />
-                    </VBox>
-                </HBox>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+            </padding>
 
-                <HBox alignment="CENTER_LEFT" spacing="20.0">
+            <children>
+
+                <!-- ====== TOP STATS (cards blanches + ombre comme categorie) ====== -->
+                <HBox spacing="20.0">
                     <children>
-                        <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Catalogue des Voyages" />
-                        <TextField fx:id="tfRecherche" onKeyReleased="#handleRecherche" prefWidth="300.0" promptText="Rechercher une destination..." style="-fx-background-radius: 15;" />
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button onAction="#ouvrirFormulaireAjout" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 10;" text="+ Ajouter un voyage" />
+
+                        <VBox prefWidth="210.0" spacing="6.0"
+                              style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                            <children>
+                                <Label style="-fx-text-fill: #777;" text="Destinations actives"/>
+                                <Label fx:id="lblDestActive"
+                                       style="-fx-font-size: 22; -fx-font-weight: bold;"
+                                       text="0"/>
+                            </children>
+                        </VBox>
+
+                        <VBox prefWidth="210.0" spacing="6.0"
+                              style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                            <children>
+                                <Label style="-fx-text-fill: #777;" text="Places totales"/>
+                                <Label fx:id="lblPlacesTotales"
+                                       style="-fx-font-size: 22; -fx-font-weight: bold;"
+                                       text="0"/>
+                            </children>
+                        </VBox>
+
+                        <VBox prefWidth="210.0" spacing="6.0"
+                              style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                            <children>
+                                <Label style="-fx-text-fill: #777;" text="En promotion"/>
+                                <Label fx:id="lblPromo"
+                                       style="-fx-font-size: 22; -fx-font-weight: bold;"
+                                       text="0"/>
+                            </children>
+                        </VBox>
+
                     </children>
                 </HBox>
 
-                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;" VBox.vgrow="ALWAYS">
-                    <content>
-                        <FlowPane fx:id="gridVoyages" hgap="20.0" style="-fx-padding: 10;" vgap="20.0" />
-                    </content>
-                </ScrollPane>
+                <!-- ====== HEADER + SEARCH + BTN (même style que categorie) ====== -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                    <padding>
+                        <Insets top="16" right="16" bottom="16" left="16"/>
+                    </padding>
+                    <children>
+
+                        <Label style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #23779C;"
+                               text="CATALOGUE DES VOYAGES"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <TextField fx:id="tfRecherche"
+                                   onKeyReleased="#handleRecherche"
+                                   prefWidth="280.0"
+                                   promptText="Rechercher une destination..."
+                                   style="-fx-background-radius: 15; -fx-border-color: #DACEB6; -fx-border-radius: 15; -fx-background-insets: 0;"/>
+
+                        <Button onAction="#ouvrirFormulaireAjout"
+                                style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 8;"
+                                text="+ Ajouter un voyage"/>
+                    </children>
+                </HBox>
+
+                <!-- ====== LIST / GRID (comme listCategories mais en ScrollPane) ====== -->
+                <VBox spacing="10.0"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);"
+                      VBox.vgrow="ALWAYS">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+
+                    <children>
+                        <ScrollPane fitToWidth="true"
+                                    style="-fx-background-color: transparent; -fx-background-insets: 0;"
+                                    VBox.vgrow="ALWAYS">
+                            <content>
+                                <FlowPane fx:id="gridVoyages"
+                                          hgap="20.0"
+                                          vgap="20.0"
+                                          style="-fx-padding: 10;"/>
+                            </content>
+                        </ScrollPane>
+                    </children>
+                </VBox>
+
             </children>
         </VBox>
     </center>
+
 </BorderPane>
