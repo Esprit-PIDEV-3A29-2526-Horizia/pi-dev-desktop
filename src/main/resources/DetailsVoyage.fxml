@@ -14,7 +14,7 @@
     </padding>
     <children>
         <HBox alignment="CENTER_LEFT" spacing="10.0">
-            <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="DESTINATION" />
+            <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="Titre" />
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="lblStatut" style="-fx-background-color: #E3D9C6; -fx-text-fill: #7A6B4B; -fx-padding: 5 15; -fx-background-radius: 10; -fx-font-weight: bold;" text="DISPONIBLE" />
         </HBox>
@@ -39,7 +39,7 @@
                 <Label fx:id="lblPrix" style="-fx-text-fill: #333;" text="0 DT" />
             </HBox>
             <HBox spacing="50.0">
-                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Places" />
+                <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Places restantes" />
                 <Label fx:id="lblPlaces" style="-fx-text-fill: #333;" text="0/0" />
             </HBox>
         </VBox>

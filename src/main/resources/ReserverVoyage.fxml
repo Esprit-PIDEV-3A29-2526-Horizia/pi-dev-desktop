@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.ReserverVoyageController">
+    <padding>
+        <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+    </padding>
+    <children>
+        <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Réserver votre voyage" />
+
+        <VBox spacing="5.0">
+            <Label text="Nombre de personnes" style="-fx-font-weight: bold;" />
+            <TextField fx:id="tfNbrPersonnes" promptText="Ex: 2" style="-fx-background-radius: 8;" />
+        </VBox>
+
+        <HBox spacing="15.0">
+            <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                <Label text="Date de départ souhaitée" style="-fx-font-weight: bold;" />
+                <DatePicker fx:id="dpDepart" maxWidth="Infinity" />
+            </VBox>
+            <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                <Label text="Date de retour souhaitée" style="-fx-font-weight: bold;" />
+                <DatePicker fx:id="dpRetour" maxWidth="Infinity" />
+            </VBox>
+        </HBox>
+
+        <Separator />
+
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <Button onAction="#handleAnnuler" style="-fx-background-color: #E2E8F0;" text="Annuler" />
+            <Button onAction="#handleConfirmer" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" text="Confirmer la réservation" />
+        </HBox>
+    </children>
+</VBox>

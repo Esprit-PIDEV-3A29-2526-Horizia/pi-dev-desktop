@@ -23,7 +23,7 @@ public class Main {
             System.out.println("0. Quitter");
             System.out.print("Choix : ");
 
-            if (!sc.hasNextInt()) { sc.next(); continue; } // Sécurité saisie
+            if (!sc.hasNextInt()) { sc.next(); continue; }
             int choix = sc.nextInt();
             sc.nextLine();
 
@@ -40,17 +40,25 @@ public class Main {
                     System.out.println("--- Liste des catégories disponibles ---");
                     cs.afficher().forEach(c -> System.out.println("ID: " + c.getId() + " | Nom: " + c.getNom()));
 
+                    // --- AJOUT DE LA SAISIE DU TITRE ---
+                    System.out.print("Titre du voyage (ex: Séjour de rêve) : ");
+                    String titre = sc.nextLine();
+
                     System.out.print("Destination : ");
                     String dest = sc.nextLine();
+
+                    System.out.print("Description du voyage : ");
+                    String descVoyage = sc.nextLine();
+
                     System.out.print("Prix : ");
                     double prix = sc.nextDouble();
                     sc.nextLine();
+
                     System.out.print("Date départ (YYYY-MM-DD) : ");
                     Date d1 = Date.valueOf(sc.nextLine());
                     System.out.print("Date retour (YYYY-MM-DD) : ");
                     Date d2 = Date.valueOf(sc.nextLine());
 
-                    // --- AJOUT DES SAISIES POUR LES PLACES ---
                     System.out.print("Nombre de places totales : ");
                     int pTotal = sc.nextInt();
                     System.out.print("Nombre de places restantes : ");
@@ -58,21 +66,20 @@ public class Main {
 
                     System.out.print("ID de la catégorie choisie : ");
                     int idCat = sc.nextInt();
-                    sc.nextLine(); // Nettoyer après le nextInt
+                    sc.nextLine();
 
-                    // Vérification de la contrainte avant l'envoi
                     if (pRestantes > pTotal) {
                         System.out.println("Erreur : Les places restantes ne peuvent pas dépasser le total !");
                     } else {
-                        // APPEL AU CONSTRUCTEUR MIS À JOUR (9 ARGUMENTS)
-                        vs.ajouter(new Voyage(dest, "Description voyage", prix, d1, d2, "http://image.url", idCat, pTotal, pRestantes));
+                        // APPEL AU CONSTRUCTEUR MIS À JOUR (10 ARGUMENTS)
+                        vs.ajouter(new Voyage(titre, dest, descVoyage, prix, d1, d2, "http://image.url", idCat, pTotal, pRestantes));
                         System.out.println("Voyage ajouté avec succès !");
                     }
                     break;
 
                 case 3:
                     System.out.println("--- Liste des voyages ---");
-                    vs.afficher().forEach(v -> System.out.println("ID: " + v.getId() + " | Destination: " + v.getDestination() + " (" + v.getPlaces_restantes() + " places libres)"));
+                    vs.afficher().forEach(v -> System.out.println("ID: " + v.getId() + " | Titre: " + v.getTitre() + " | Destination: " + v.getDestination()));
 
                     System.out.print("ID du voyage : ");
                     int idV = sc.nextInt();

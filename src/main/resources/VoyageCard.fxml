@@ -8,31 +8,61 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 
-<VBox prefWidth="320.0" spacing="12.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 8);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
-    <children>
-        <Label fx:id="lblTitre" alignment="CENTER" maxWidth="Infinity" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #23779C;" text="Voyage France" />
+<VBox prefWidth="320.0"
+      minWidth="320.0"
+      maxWidth="320.0"
+      prefHeight="430.0"
+      minHeight="430.0"
+      maxHeight="430.0"
+      spacing="12.0"
+      style="-fx-background-color: white;
+             -fx-background-radius: 20;
+             -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.10), 15, 0, 0, 8);"
+      xmlns="http://javafx.com/javafx/22"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.VoyageCardController">
 
-        <ImageView fx:id="imgVoyage" fitHeight="160.0" fitWidth="280.0" pickOnBounds="true" preserveRatio="false" style="-fx-background-radius: 15;" />
+    <padding>
+        <Insets bottom="18.0" left="18.0" right="18.0" top="18.0" />
+    </padding>
+
+    <children>
+        <Label fx:id="lblTitre"
+               alignment="CENTER"
+               maxWidth="Infinity"
+               wrapText="true"
+               style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #23779C;"
+               text="Voyage France" />
+
+        <!-- ✅ Taille fixe + pas de déformation -->
+        <ImageView fx:id="imgVoyage"
+                   fitWidth="280.0"
+                   fitHeight="160.0"
+                   preserveRatio="false"
+                   smooth="true"
+                   cache="true" />
 
         <VBox spacing="4.0">
-            <Label fx:id="lblDestination" style="-fx-text-fill: #777; -fx-font-size: 13;" text="Destination : Paris" />
-            <Label fx:id="lblDate" style="-fx-text-fill: #aaa; -fx-font-size: 12;" text="Du 2026-02-01 au 2026-02-11" />
+            <Label fx:id="lblDestination"
+                   style="-fx-text-fill: #777; -fx-font-size: 13;"
+                   text="Destination : Paris" />
+            <Label fx:id="lblDate"
+                   style="-fx-text-fill: #aaa; -fx-font-size: 12;"
+                   text="Du 2026-02-01 au 2026-02-11" />
         </VBox>
 
-        <Label fx:id="lblPrix" style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #E8B156;" text="900 DT" />
+        <Label fx:id="lblPrix"
+               style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #E8B156;"
+               text="900 DT" />
 
-        <VBox spacing="8.0">
-            <HBox alignment="CENTER_LEFT">
-                <Label fx:id="lblPlaces" style="-fx-text-fill: #555; -fx-font-size: 12;" text="30/40 places" />
-                <padding><Insets bottom="2"/></padding>
-            </HBox>
-            <ProgressBar fx:id="progressPlaces" maxWidth="Infinity" prefHeight="12.0" progress="0.75" style="-fx-accent: #E8B156;" />
-        </VBox>
-        <Button fx:id="btnDetails" alignment="CENTER" prefHeight="35.0" prefWidth="90.0"
+    <Label fx:id="lblPlaces" style="-fx-text-fill: #555; -fx-font-size: 12;" text="30/40 places" />
+        <Button fx:id="btnDetails"
+                onAction="#handleDetails"
+                alignment="CENTER"
+                prefHeight="35.0"
+                prefWidth="90.0"
                 style="-fx-background-color: transparent; -fx-border-color: #3D94CA; -fx-border-radius: 10; -fx-text-fill: #3D94CA; -fx-font-weight: bold;"
                 text="Détails" />
-        </children>
+
+    </children>
 </VBox>

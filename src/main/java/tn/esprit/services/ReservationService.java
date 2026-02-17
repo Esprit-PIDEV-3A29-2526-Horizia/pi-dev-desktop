@@ -80,4 +80,29 @@ public class ReservationService implements IService<Reservation> {
         }
         return reservations;
     }
+    // Dans ReservationService.java
+    public void effectuerReservation(int idVoyage, int idUser, int nbPlaces) {
+        // Requête pour insérer la réservation
+        String sqlRes = "INSERT INTO reservation (id_voyage, id_user, nbr_personnes) VALUES (?, ?, ?)";
+        // Requête pour mettre à jour les places restantes du voyage
+        String sqlVoyage = "UPDATE voyage SET places_restantes = places_restantes - ? WHERE id = ?";
+
+        try {
+            // Il est préférable d'utiliser une transaction ici
+            PreparedStatement psRes = cnx.prepareStatement(sqlRes);
+            psRes.setInt(1, idVoyage);
+            psRes.setInt(2, idUser);
+            psRes.setInt(3, nbPlaces);
+            psRes.executeUpdate();
+
+            PreparedStatement psVoy = cnx.prepareStatement(sqlVoyage);
+            psVoy.setInt(1, nbPlaces);
+            psVoy.setInt(2, idVoyage);
+            psVoy.executeUpdate();
+
+            System.out.println("✅ Réservation réussie et places mises à jour !");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

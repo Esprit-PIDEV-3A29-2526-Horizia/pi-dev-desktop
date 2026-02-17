@@ -16,7 +16,7 @@ public class MainFx extends Application {
     public void start(Stage primaryStage) {
         try {
             // Chargement du fichier FXML depuis la racine de resources
-            Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("/GestionCategorie.fxml")));
+            Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
 
             // Création de la scène
             Scene scene = new Scene(root);

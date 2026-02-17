@@ -19,50 +19,65 @@ import java.util.List;
 
 public class AjouterVoyageController {
 
-    @FXML private TextField tfDestination,tfTitre, tfPrix, tfPlacesTotal, tfPlacesRestantes;
-    @FXML private DatePicker dpDepart, dpRetour;
+    @FXML private TextField tfTitre;
+    @FXML private TextField tfDestination;
+    @FXML private TextField tfPrix;
+    @FXML private TextField tfPlacesTotal;
+    @FXML private TextField tfPlacesRestantes;
+
+    @FXML private DatePicker dpDepart;
+    @FXML private DatePicker dpRetour;
+
     @FXML private ImageView imgPreview;
     @FXML private TextArea taDescription;
     @FXML private ComboBox<Categorie> cbCategorie;
-    @FXML private Button btnEnregistrer; // Pour changer le texte (Ajouter/Modifier)
+    @FXML private Button btnEnregistrer;
 
     private final VoyageService vs = new VoyageService();
     private final CategorieService cs = new CategorieService();
-    private String imagePath = "";
 
-    // --- VARIABLE POUR LA MODIFICATION ---
-    private int idVoyageAModifier = -1; // -1 = Ajout, sinon = Modification
+    private String imagePath = "";
+    private int idVoyageAModifier = -1;
 
     @FXML
     public void initialize() {
         chargerCategories();
+
+        dpDepart.valueProperty().addListener((obs, oldV, newV) -> {
+            if (newV != null && dpRetour.getValue() != null && dpRetour.getValue().isBefore(newV)) {
+                dpRetour.setValue(null);
+            }
+        });
     }
 
-    /**
-     * Cette méthode remplit les champs lors d'une modification
-     * Elle corrige l'erreur "Cannot resolve method prepareModif"
-     */
+    // ==========================
+    // MODE MODIFICATION
+    // ==========================
     public void prepareModif(Voyage v) {
-        this.idVoyageAModifier = v.getId(); // On stocke l'ID original
-        tfTitre.setText(v.getDestination());
-        tfDestination.setText(v.getDestination());
-        tfPrix.setText(String.valueOf(v.getPrix()));
-        taDescription.setText(v.getDescription());
+        if (v == null) return;
 
-        // Conversion des dates SQL en LocalDate pour le DatePicker
-        dpDepart.setValue(v.getDate_depart().toLocalDate());
-        dpRetour.setValue(v.getDate_retour().toLocalDate());
+        idVoyageAModifier = v.getId();
+
+        tfTitre.setText(nvl(v.getTitre()));
+        tfDestination.setText(nvl(v.getDestination()));
+        tfPrix.setText(String.valueOf(v.getPrix()));
+        taDescription.setText(nvl(v.getDescription()));
+
+        if (v.getDate_depart() != null) dpDepart.setValue(v.getDate_depart().toLocalDate());
+        if (v.getDate_retour() != null) dpRetour.setValue(v.getDate_retour().toLocalDate());
 
         tfPlacesTotal.setText(String.valueOf(v.getPlaces_total()));
         tfPlacesRestantes.setText(String.valueOf(v.getPlaces_restantes()));
 
-        // Prévisualisation de l'image
-        if (v.getImage_url() != null && !v.getImage_url().isEmpty()) {
+        if (v.getImage_url() != null && !v.getImage_url().isBlank()) {
             imagePath = v.getImage_url();
-            imgPreview.setImage(new Image(imagePath));
+            try { imgPreview.setImage(new Image(imagePath, true)); }
+            catch (Exception e) { imgPreview.setImage(null); }
+        } else {
+            imagePath = "";
+            imgPreview.setImage(null);
         }
 
-        // Sélectionner la bonne catégorie dans le ComboBox
         for (Categorie c : cbCategorie.getItems()) {
             if (c.getId() == v.getId_categorie()) {
                 cbCategorie.setValue(c);
@@ -70,114 +85,182 @@ public class AjouterVoyageController {
             }
         }
 
-        if(btnEnregistrer != null) btnEnregistrer.setText("Mettre à jour");
+        if (btnEnregistrer != null) btnEnregistrer.setText("Mettre à jour");
     }
 
-    @FXML
-    void handleVider() {
-        // Vérifiez que tous ces fx:id correspondent bien à vos déclarations @FXML en haut de la classe
-        if (tfDestination != null) tfDestination.clear();
-        if (tfPrix != null) tfPrix.clear();
-        if (tfPlacesTotal != null) tfPlacesTotal.clear();
-        if (tfPlacesRestantes != null) tfPlacesRestantes.clear();
-        if (dpDepart != null) dpDepart.setValue(null);
-        if (dpRetour != null) dpRetour.setValue(null);
-        if (cbCategorie != null) cbCategorie.setValue(null);
-        if (imgPreview != null) imgPreview.setImage(null);
-        if (taDescription != null) taDescription.setText("");
-    }
-    private void chargerCategories() {
-        List<Categorie> liste = cs.afficher();
-        cbCategorie.setItems(FXCollections.observableArrayList(liste));
-        cbCategorie.setConverter(new StringConverter<Categorie>() {
-            @Override
-            public String toString(Categorie object) { return (object != null) ? object.getNom() : ""; }
-            @Override
-            public Categorie fromString(String string) { return null; }
-        });
-    }
-
+    // ==========================
+    // AJOUT / UPDATE
+    // ==========================
     @FXML
     void enregistrer() {
         try {
-            // Validations de base
-            Categorie selectedCat = cbCategorie.getValue();
-            if (selectedCat == null || dpDepart.getValue() == null || dpRetour.getValue() == null) {
-                afficherAlerte("Champs Manquants", "Veuillez remplir tous les champs obligatoires.");
+            // Obligatoires (sans places restantes)
+            if (isBlank(tfTitre) || isBlank(tfDestination) || isBlank(tfPrix)
+                    || isBlank(tfPlacesTotal)
+                    || cbCategorie.getValue() == null
+                    || dpDepart.getValue() == null || dpRetour.getValue() == null) {
+                afficherAlerte("Champs manquants", "Veuillez remplir tous les champs obligatoires.");
+                return;
+            }
+
+            if (dpRetour.getValue().isBefore(dpDepart.getValue())) {
+                afficherAlerte("Dates invalides", "La date retour doit être après la date départ.");
+                return;
+            }
+
+            double prix = Double.parseDouble(tfPrix.getText().trim());
+            int pTotal = Integer.parseInt(tfPlacesTotal.getText().trim());
+
+            if (prix <= 0) {
+                afficherAlerte("Prix invalide", "Le prix doit être > 0.");
+                return;
+            }
+            if (pTotal < 0) {
+                afficherAlerte("Places invalides", "Le total doit être positif.");
+                return;
+            }
+
+            // ✅ places restantes :
+            // - en AJOUT: si vide => total (voyage dispo)
+            // - en MODIF: obligatoire
+            int pRest;
+            if (idVoyageAModifier == -1) {
+                if (tfPlacesRestantes == null || tfPlacesRestantes.getText() == null || tfPlacesRestantes.getText().trim().isEmpty()) {
+                    pRest = pTotal; // ✅ default à l'ajout
+                } else {
+                    pRest = Integer.parseInt(tfPlacesRestantes.getText().trim());
+                }
+            } else {
+                if (isBlank(tfPlacesRestantes)) {
+                    afficherAlerte("Champs manquants", "Veuillez saisir les places restantes (mode modification).");
+                    return;
+                }
+                pRest = Integer.parseInt(tfPlacesRestantes.getText().trim());
+            }
+
+            if (pRest < 0) {
+                afficherAlerte("Places invalides", "Les places restantes doivent être positives.");
+                return;
+            }
+            if (pRest > pTotal) {
+                afficherAlerte("Incohérence", "Les places restantes ne peuvent pas dépasser le total.");
                 return;
             }
 
             Date dateD = Date.valueOf(dpDepart.getValue());
             Date dateR = Date.valueOf(dpRetour.getValue());
-            double prix = Double.parseDouble(tfPrix.getText());
-            int pTotal = Integer.parseInt(tfPlacesTotal.getText());
-            int pRestantes = Integer.parseInt(tfPlacesRestantes.getText());
 
-            // Validation de la cohérence des places
-            if (pRestantes > pTotal) {
-                afficherAlerte("Incohérence", "Les places restantes ne peuvent pas dépasser le total.");
-                return;
-            }
+            Voyage v = new Voyage();
+            v.setTitre(tfTitre.getText().trim());
+            v.setDestination(tfDestination.getText().trim());
+            v.setDescription(taDescription.getText() == null ? "" : taDescription.getText().trim());
+            v.setPrix(prix);
+            v.setDate_depart(dateD);
+            v.setDate_retour(dateR);
+            v.setImage_url(imagePath);
+            v.setId_categorie(cbCategorie.getValue().getId());
+            v.setPlaces_total(pTotal);
+            v.setPlaces_restantes(pRest);
 
-            // Création de l'objet Voyage
-            Voyage v = new Voyage(
-                    tfDestination.getText(),
-                    taDescription.getText(),
-                    prix,
-                    dateD,
-                    dateR,
-                    imagePath,
-                    selectedCat.getId(),
-                    pTotal,
-                    pRestantes
-            );
-
-            // --- LOGIQUE AJOUT vs MODIFICATION ---
             if (idVoyageAModifier == -1) {
                 vs.ajouter(v);
                 afficherAlerteSucces("Succès", "Voyage ajouté avec succès !");
             } else {
-                v.setId(idVoyageAModifier); // On garde l'ID existant pour le UPDATE
-                vs.modifier(v); // Appelle ta méthode UPDATE SQL
+                v.setId(idVoyageAModifier);
+                vs.modifier(v);
                 afficherAlerteSucces("Succès", "Voyage mis à jour !");
             }
 
             annuler();
 
         } catch (NumberFormatException e) {
-            afficherAlerte("Erreur", "Le prix et les places doivent être des nombres.");
+            afficherAlerte("Erreur", "Prix / places doivent être des nombres valides.");
         } catch (Exception e) {
             e.printStackTrace();
+            afficherAlerte("Erreur", "Une erreur est survenue : " + e.getMessage());
         }
     }
 
-    private void afficherAlerteSucces(String titre, String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, msg);
-        a.setTitle(titre);
-        a.showAndWait();
-    }
-
-    private void afficherAlerte(String titre, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(titre);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
+    // ==========================
+    // UPLOAD IMAGE
+    // ==========================
     @FXML
     void handleUpload() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg"));
-        File selectedFile = fileChooser.showOpenDialog(new Stage());
-        if (selectedFile != null) {
-            imagePath = selectedFile.toURI().toString();
-            imgPreview.setImage(new Image(imagePath));
+        FileChooser fc = new FileChooser();
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp")
+        );
+
+        Stage stage = (Stage) tfDestination.getScene().getWindow();
+        File selected = fc.showOpenDialog(stage);
+
+        if (selected != null) {
+            imagePath = selected.toURI().toString();
+            try { imgPreview.setImage(new Image(imagePath, true)); }
+            catch (Exception e) {
+                imgPreview.setImage(null);
+                afficherAlerte("Image", "Impossible de charger cette image.");
+            }
         }
+    }
+
+    // ==========================
+    // VIDER (sans casser le mode)
+    // ==========================
+    @FXML
+    void handleVider() {
+        tfTitre.clear();
+        tfDestination.clear();
+        tfPrix.clear();
+        tfPlacesTotal.clear();
+        tfPlacesRestantes.clear();
+        dpDepart.setValue(null);
+        dpRetour.setValue(null);
+        cbCategorie.setValue(null);
+        taDescription.clear();
+        imgPreview.setImage(null);
+        imagePath = "";
+
+        // ✅ ne touche pas à idVoyageAModifier ici
+        // sinon tu casses le mode modification
     }
 
     @FXML
     void annuler() {
         Stage stage = (Stage) tfDestination.getScene().getWindow();
         stage.close();
+    }
+
+    private void chargerCategories() {
+        List<Categorie> liste = cs.afficher();
+        cbCategorie.setItems(FXCollections.observableArrayList(liste));
+        cbCategorie.setConverter(new StringConverter<>() {
+            @Override public String toString(Categorie c) { return (c == null) ? "" : c.getNom(); }
+            @Override public Categorie fromString(String s) { return null; }
+        });
+    }
+
+    private void afficherAlerteSucces(String titre, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(titre);
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
+    }
+
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titre);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean isBlank(TextField tf) {
+        return tf == null || tf.getText() == null || tf.getText().trim().isEmpty();
+    }
+
+    private String nvl(String s) {
+        return (s == null) ? "" : s;
     }
 }

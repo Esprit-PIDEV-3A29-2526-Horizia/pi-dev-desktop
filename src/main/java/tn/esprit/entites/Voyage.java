@@ -4,6 +4,7 @@ import java.sql.Date;
 
 public class Voyage {
     private int id;
+    private String titre;
     private String destination;
     private String description;
     private double prix;
@@ -14,13 +15,12 @@ public class Voyage {
     private int places_total;
     private int places_restantes;
 
-    // 1. Constructeur vide (nécessaire pour certains frameworks)
+    // 1. Constructeur vide
     public Voyage() {}
 
-    // 2. Constructeur pour l'ajout (SANS ID) - Utilisé dans ton formulaire
-    // Ce constructeur possède 8 ou 9 paramètres selon tes besoins,
-    // voici la version complète pour ton interface actuelle :
-    public Voyage(String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
+    // 2. Constructeur pour l'ajout (SANS ID)
+    public Voyage(String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
+        this.titre = titre;
         this.destination = destination;
         this.description = description;
         this.prix = prix;
@@ -32,9 +32,10 @@ public class Voyage {
         this.places_restantes = places_restantes;
     }
 
-    // 3. Constructeur complet (AVEC ID) - Utilisé pour l'affichage (Read) et la modification (Update)
-    public Voyage(int id, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
+    // 3. Constructeur complet (AVEC ID)
+    public Voyage(int id, String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.id = id;
+        this.titre = titre; // Corrigé : ajout du "=" manquant
         this.destination = destination;
         this.description = description;
         this.prix = prix;
@@ -49,6 +50,9 @@ public class Voyage {
     // --- GETTERS ET SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public String getTitre() { return titre; }
+    public void setTitre(String titre) { this.titre = titre; }
 
     public String getDestination() { return destination; }
     public void setDestination(String destination) { this.destination = destination; }
@@ -77,12 +81,11 @@ public class Voyage {
     public int getPlaces_restantes() { return places_restantes; }
     public void setPlaces_restantes(int places_restantes) { this.places_restantes = places_restantes; }
 
-
-
     @Override
     public String toString() {
         return "Voyage{" +
                 "id=" + id +
+                ", titre='" + titre + '\'' +
                 ", destination='" + destination + '\'' +
                 ", description='" + description + '\'' +
                 ", prix=" + prix +
