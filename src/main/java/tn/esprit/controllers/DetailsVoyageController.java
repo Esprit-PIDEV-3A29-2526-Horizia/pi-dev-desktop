@@ -30,7 +30,6 @@ public class DetailsVoyageController {
     private final VoyageService vs = new VoyageService();
     private GestionVoyageController parentController;
 
-    // ✅ mode user : cacher actions admin
     public void setModeUser() {
         if (btnModifier != null) btnModifier.setVisible(false);
         if (btnSupprimer != null) btnSupprimer.setVisible(false);
@@ -45,24 +44,17 @@ public class DetailsVoyageController {
     public void initData(Voyage v) {
         if (v == null) return;
         this.currentVoyage = v;
-
         String titre = (v.getTitre() != null && !v.getTitre().isBlank())
                 ? v.getTitre()
                 : v.getDestination();
-
         lblTitre.setText(titre == null ? "" : titre.toUpperCase());
         lblDest.setText(nvl(v.getDestination()));
         lblDescription.setText(nvl(v.getDescription()));
-
-        // dates safe
         String d1 = (v.getDate_depart() != null) ? v.getDate_depart().toString() : "--";
         String d2 = (v.getDate_retour() != null) ? v.getDate_retour().toString() : "--";
         lblDates.setText("Du " + d1 + " au " + d2);
-
         lblPrix.setText(v.getPrix() + " DT");
         lblPlaces.setText(v.getPlaces_restantes() + "/" + v.getPlaces_total());
-
-        // badge statut
         if (v.getPlaces_restantes() <= 0) {
             lblStatut.setText("COMPLET");
             lblStatut.setStyle("-fx-background-color: #FED7D7; -fx-text-fill: #C5302E;");
@@ -70,21 +62,16 @@ public class DetailsVoyageController {
             lblStatut.setText("DISPONIBLE");
             lblStatut.setStyle("-fx-background-color: #C6F6D5; -fx-text-fill: #2F855A;");
         }
-
-        // ✅ image (resources + file + http + windows path)
         loadImage(v.getImage_url());
     }
 
     private void loadImage(String path) {
         try {
             if (imgVoyage == null) return;
-
             if (path == null || path.isBlank()) {
                 imgVoyage.setImage(null);
                 return;
             }
-
-            // ✅ CAS 1: resources/images (ex: "Paris.jpg" ou "/images/Paris.jpg")
             String name = path;
             if (name.startsWith("/images/")) name = name.substring("/images/".length());
             InputStream is = getClass().getResourceAsStream("/images/" + name);
@@ -92,38 +79,31 @@ public class DetailsVoyageController {
                 imgVoyage.setImage(new Image(is));
                 return;
             }
-
-            // ✅ CAS 2: URL/URI
             if (path.startsWith("file:") || path.startsWith("http")) {
                 imgVoyage.setImage(new Image(path, true));
                 return;
             }
 
-            // ✅ CAS 3: chemin Windows C:\...
             File f = new File(path);
             if (f.exists()) {
                 imgVoyage.setImage(new Image(f.toURI().toString(), true));
                 return;
             }
-
             imgVoyage.setImage(null);
-            System.out.println("❌ Image introuvable: " + path);
-
+            System.out.println("Image introuvable: " + path);
         } catch (Exception e) {
             imgVoyage.setImage(null);
-            System.out.println("❌ Erreur chargement image: " + path + " | " + e.getMessage());
+            System.out.println("Erreur chargement image: " + path + " | " + e.getMessage());
         }
     }
 
     @FXML
     void handleSupprimer() {
         if (currentVoyage == null) return;
-
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation");
         alert.setHeaderText("Supprimer ce voyage ?");
         alert.setContentText("Voyage : " + nvl(currentVoyage.getDestination()) + "\nID : " + currentVoyage.getId());
-
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             vs.supprimer(currentVoyage.getId());
@@ -134,22 +114,17 @@ public class DetailsVoyageController {
     @FXML
     void handleModifier() {
         if (currentVoyage == null) return;
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
             Parent root = loader.load();
-
             AjouterVoyageController controller = loader.getController();
             if (controller != null) controller.prepareModif(currentVoyage);
-
             Stage stage = new Stage();
             stage.setTitle("Modifier le Voyage - ID: " + currentVoyage.getId());
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
             handleFermer();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -32,44 +32,49 @@ public class CatalogueUserController implements Initializable {
     }
 
     public void chargerVoyages(List<Voyage> voyages) {
-        if (voyageGrid == null) return;
+        if (voyageGrid == null) {
+            System.err.println("voyageGrid est null !");
+            return;
+        }
         voyageGrid.getChildren().clear();
-
         int column = 0;
-        int row = 1;
-
-        try {
-            for (Voyage v : voyages) {
-                // ON CHARGE LE FXML USER ICI
-                URL cardResource = getClass().getResource("/VoyageCardUser.fxml");
-                if (cardResource == null) {
-                    System.err.println("ERREUR : VoyageCardUser.fxml introuvable dans resources !");
-                    return;
-                }
-
-                FXMLLoader loader = new FXMLLoader(cardResource);
+        int row = 0;
+        for (Voyage v : voyages) {
+            try {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/VoyageCardUser.fxml")
+                );
                 VBox card = loader.load();
-
-                // ON UTILISE LE CONTROLEUR USER
-                VoyageCardUserController ctrl = loader.getController();
-                if (ctrl != null) {
-                    ctrl.setData(v);
+                VoyageCardUserController controller = loader.getController();
+                if (controller != null) {
+                    controller.setData(v);
                 }
-
+                voyageGrid.add(card, column, row);
+                column++;
                 if (column == 3) {
                     column = 0;
                     row++;
                 }
-                voyageGrid.add(card, column++, row);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     @FXML
+    private void handleRecherche() {
+        String keyword = searchField.getText();
+        chargerVoyages(vs.rechercher(keyword));
+    }
+
+    @FXML
+    private void afficherCatalogue() {
+        chargerVoyages(vs.afficher());
+    }
+
+    @FXML
     private void afficherHistorique(ActionEvent event) {
-        changerScene(event, "/HistoriqueReservations.fxml", "Mes Réservations");
+        changerScene(event, "/MesReservations.fxml", "Mes Réservations");
     }
 
     @FXML
@@ -87,15 +92,5 @@ public class CatalogueUserController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-
-    @FXML private void handleRecherche() {
-        String keyword = searchField.getText();
-        chargerVoyages(vs.rechercher(keyword));
-    }
-
-    @FXML private void afficherCatalogue() {
-        chargerVoyages(vs.afficher());
     }
 }

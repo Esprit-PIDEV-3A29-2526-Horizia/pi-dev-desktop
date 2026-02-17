@@ -22,13 +22,9 @@ public class ReserverVoyageController {
     public void initData(Voyage v) {
         if (v == null) return;
         this.selectedVoyage = v;
-
-        // Mise à jour des textes
         lblTitre.setText("Voyage à " + v.getDestination().toUpperCase());
         lblDescription.setText(v.getDescription());
         lblPrixUnitaire.setText(v.getPrix() + " DT");
-
-        // Chargement de l'image
         if (v.getImage_url() != null && !v.getImage_url().isEmpty()) {
             try {
                 imgVoyage.setImage(new Image(v.getImage_url(), true));
@@ -36,16 +32,12 @@ public class ReserverVoyageController {
                 System.err.println("Erreur image : " + e.getMessage());
             }
         }
-
-        // Configuration du Spinner
         int max = v.getPlaces_restantes();
         if (max > 0) {
             spinnerPlaces.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, max, 1));
         } else {
             spinnerPlaces.setDisable(true);
         }
-
-        // Calcul du prix initial
         mettreAJourPrix(1);
         spinnerPlaces.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) mettreAJourPrix(newVal);
@@ -61,14 +53,10 @@ public class ReserverVoyageController {
 
     @FXML
     void confirmerReservation() {
-        System.out.println("Clic sur Confirmer détecté !"); //
+        System.out.println("Clic sur Confirmer détecté !");
         try {
             int nbr = spinnerPlaces.getValue();
-
-            // ATTENTION : Vérifiez que la colonne 'id_user' existe dans votre table SQL !
-            // L'erreur "Unknown column 'id_user'" vient de là.
             rs.effectuerReservation(selectedVoyage.getId(), 1, nbr);
-
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Réservation réussie !");
             alert.showAndWait();
             retour();

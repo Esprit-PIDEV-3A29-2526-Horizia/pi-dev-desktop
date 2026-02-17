@@ -21,7 +21,7 @@ public class VoyageCardController {
     @FXML private ImageView imgVoyage;
     @FXML private Button btnDetails;
 
-    private Voyage voyage; // ✅ on garde le voyage de cette carte
+    private Voyage voyage;
     private GestionVoyageController parentController;
 
     @FXML
@@ -38,14 +38,11 @@ public class VoyageCardController {
     }
     public void setData(Voyage v) {
         this.voyage = v;
-
-        // ✅ titre fallback si vide
+        //titre fallback si vide
         String titre = (v.getTitre() != null && !v.getTitre().isBlank()) ? v.getTitre() : v.getDestination();
         lblTitre.setText(titre == null ? "" : titre);
-
         lblDestination.setText(v.getDestination() == null ? "" : v.getDestination());
         lblPrix.setText(v.getPrix() + " DT");
-
         if (lblDate != null && v.getDate_depart() != null && v.getDate_retour() != null) {
             lblDate.setText("Du " + v.getDate_depart() + " au " + v.getDate_retour());
         }
@@ -56,32 +53,24 @@ public class VoyageCardController {
         loadImage(v.getImage_url());
     }
 
-    // ✅ appelé par onAction du bouton
+
     @FXML
     private void handleDetails() {
         if (voyage == null) return;
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyage.fxml"));
             Parent root = loader.load();
-
             DetailsVoyageController controller = loader.getController();
             if (controller != null) {
                 controller.initData(voyage);
-                // si c'est un user : controller.setModeUser();
             }
-
             Stage stage = new Stage();
             stage.setTitle("Détails - " + (voyage.getDestination() == null ? "" : voyage.getDestination()));
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
-
-            // ✅ important : owner (optionnel mais propre)
             Stage owner = (Stage) btnDetails.getScene().getWindow();
             stage.initOwner(owner);
-
             stage.showAndWait();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,13 +79,10 @@ public class VoyageCardController {
     private void loadImage(String path) {
         try {
             if (imgVoyage == null) return;
-
             if (path == null || path.isBlank()) {
                 imgVoyage.setImage(null);
                 return;
             }
-
-            // ✅ resources/images
             String name = path;
             if (name.startsWith("/images/")) name = name.substring("/images/".length());
             InputStream is = getClass().getResourceAsStream("/images/" + name);
@@ -104,22 +90,16 @@ public class VoyageCardController {
                 imgVoyage.setImage(new Image(is));
                 return;
             }
-
-            // ✅ URL/URI
             if (path.startsWith("file:") || path.startsWith("http")) {
                 imgVoyage.setImage(new Image(path, true));
                 return;
             }
-
-            // ✅ Windows path
             File f = new File(path);
             if (f.exists()) {
                 imgVoyage.setImage(new Image(f.toURI().toString(), true));
                 return;
             }
-
             imgVoyage.setImage(null);
-
         } catch (Exception e) {
             imgVoyage.setImage(null);
         }

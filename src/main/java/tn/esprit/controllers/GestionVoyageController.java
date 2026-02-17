@@ -30,7 +30,7 @@ public class GestionVoyageController implements Initializable {
     @FXML private Label lblPromo;
     @FXML private TextField tfRecherche;
     @FXML private FlowPane gridVoyages;
-    // On récupère le conteneur principal pour changer de vue (Catégories)
+
     @FXML private VBox mainContainer;
     @FXML private Button btnDeconnexion;
     private final VoyageService vs = new VoyageService();
@@ -40,22 +40,16 @@ public class GestionVoyageController implements Initializable {
         refreshVoyages(vs.afficher());
     }
 
-    // --- NAVIGATION ---
+
 
     @FXML
     private void handleDeconnexion(ActionEvent event) {
         try {
-            // 1. Charger la page de connexion
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
-
-            // 2. Récupérer la fenêtre (Stage) actuelle
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // 3. Remplacer la scène par celle du Login
             stage.setScene(new Scene(root));
             stage.setTitle("Horizia - Connexion");
             stage.show();
-
             System.out.println("Déconnexion réussie !");
         } catch (IOException e) {
             System.err.println("Erreur lors de la déconnexion : " + e.getMessage());
@@ -66,9 +60,7 @@ public class GestionVoyageController implements Initializable {
     @FXML
     private void naviguerCategories() {
         try {
-            // On remplace le contenu actuel par la gestion des catégories
             Parent root = FXMLLoader.load(getClass().getResource("/GestionCategorie.fxml"));
-            // Utilise la scène actuelle pour changer de racine
             gridVoyages.getScene().setRoot(root);
         } catch (IOException e) {
             System.err.println("Erreur navigation catégories: " + e.getMessage());
@@ -78,24 +70,19 @@ public class GestionVoyageController implements Initializable {
     @FXML
     private void ouvrirFormulaireAjout() {
         try {
-            // Ouvre le formulaire d'ajout dans une fenêtre surgissante (Pop-up)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
             Parent root = loader.load();
-
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setTitle("Ajouter un nouveau voyage");
             stage.setScene(new Scene(root));
             stage.showAndWait();
-
-            // Rafraîchir la liste après la fermeture de la fenêtre d'ajout
             refreshVoyages(vs.afficher());
         } catch (IOException e) {
             System.err.println("Erreur ouverture formulaire: " + e.getMessage());
         }
     }
 
-    // --- LOGIQUE VOYAGE (Inchangée mais stabilisée) ---
 
     @FXML
     private void handleRecherche(KeyEvent event) {

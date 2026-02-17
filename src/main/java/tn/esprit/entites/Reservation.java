@@ -3,60 +3,73 @@ package tn.esprit.entites;
 import java.sql.Timestamp;
 
 public class Reservation {
+
     private int id;
-    private Timestamp dateReservation; // Utilisation de Timestamp pour avoir date + heure
-    private int nb_places;
-    private String statut; // "En attente", "Confirmée", "Annulée"
-    private int idVoyage; // Clé étrangère vers Voyage
-    private int idUtilisateur;
-    private String destination;// Clé étrangère vers Utilisateur
+    private Timestamp date_reservation;
+    private int nbr_personnes;
+    private String statut;
+    private int idVoyage;
+    private int idUser;
+    private String imageUrl;
+
+    // champ pour affichage (join avec voyage)
+    private String destination;
 
     // Constructeurs
     public Reservation() {}
 
-    // Constructeur pour l'ajout (sans ID ni date, car gérés par la BDD)
-    public Reservation(int nb_places, String statut, int idVoyage, int idUtilisateur) {
-        this.nb_places = nb_places;
+    // Pour ajout (sans id ni date)
+    public Reservation(int nbr_personnes, String statut, int idVoyage, int idUser) {
+        this.nbr_personnes = nbr_personnes;
         this.statut = statut;
         this.idVoyage = idVoyage;
-        this.idUtilisateur = idUtilisateur;
+        this.idUser = idUser;
     }
 
-    // Constructeur complet
-    public Reservation(int id, Timestamp dateReservation, int nb_places, String statut, int idVoyage, int idUtilisateur) {
+    // Complet
+    public Reservation(int id, Timestamp date_reservation, int nbr_personnes, String statut, int idVoyage, int idUser) {
         this.id = id;
-        this.dateReservation = dateReservation;
-        this.nb_places = nb_places;
+        this.date_reservation = date_reservation;
+        this.nbr_personnes = nbr_personnes;
         this.statut = statut;
         this.idVoyage = idVoyage;
-        this.idUtilisateur = idUtilisateur;
+        this.idUser = idUser;
     }
 
-    // Getters et Setters
+    // Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-    public Timestamp getDateReservation() { return dateReservation; }
-    public void setDateReservation(Timestamp dateReservation) { this.dateReservation = dateReservation; }
-    public int getNb_places() { return nb_places; }
-    public void setNb_places(int nb_places) { this.nb_places = nb_places; }
+
+    public Timestamp getDate_reservation() { return date_reservation; }
+    public void setDate_reservation(Timestamp date_reservation) { this.date_reservation = date_reservation; }
+
+    public int getNbr_personnes() { return nbr_personnes; }
+    public void setNbr_personnes(int nbr_personnes) { this.nbr_personnes = nbr_personnes; }
+
     public String getStatut() { return statut; }
     public void setStatut(String statut) { this.statut = statut; }
+
     public int getIdVoyage() { return idVoyage; }
     public void setIdVoyage(int idVoyage) { this.idVoyage = idVoyage; }
-    public int getIdUtilisateur() { return idUtilisateur; }
-    public void setIdUtilisateur(int idUtilisateur) { this.idUtilisateur = idUtilisateur; }
+
+    public int getIdUser() { return idUser; }
+    public void setIdUser(int idUser) { this.idUser = idUser; }
+
     public String getDestination() { return destination; }
     public void setDestination(String destination) { this.destination = destination; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     @Override
     public String toString() {
         return "Reservation{" +
                 "id=" + id +
-                ", dateReservation=" + dateReservation +
-                ", nb_places=" + nb_places +
+                ", date_reservation=" + date_reservation +
+                ", nbr_personnes=" + nbr_personnes +
                 ", statut='" + statut + '\'' +
                 ", idVoyage=" + idVoyage +
-                ", idUtilisateur=" + idUtilisateur +
+                ", idUser=" + idUser +
+                ", destination='" + destination + '\'' +
                 '}';
     }
 }

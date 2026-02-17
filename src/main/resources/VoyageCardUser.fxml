@@ -5,7 +5,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Rectangle?>
 
-<VBox prefWidth="300.0" spacing="0.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.VoyageCardUserController">
+<VBox fx:id="cardContainer" prefWidth="300.0" spacing="0.0"
+      style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.VoyageCardUserController">
+
     <children>
         <ImageView fx:id="imgVoyage" fitHeight="180.0" fitWidth="300.0" pickOnBounds="true">
             <clip>
@@ -23,7 +27,6 @@
                 <Label fx:id="badgeStatus" style="-fx-background-color: #DCFCE7; -fx-text-fill: #16A34A; -fx-padding: 4 12; -fx-background-radius: 10; -fx-font-size: 11; -fx-font-weight: bold;" text="DISPONIBLE" />
 
                 <VBox spacing="5.0">
-                    <ProgressBar fx:id="progressPlaces" prefWidth="270.0" progress="0.0" style="-fx-accent: #10B981;" />
                     <Label fx:id="lblPlacesInfo" style="-fx-font-size: 11; -fx-text-fill: #94A3B8;" text="Places restantes : 0 / 0" />
                 </VBox>
 

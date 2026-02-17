@@ -15,10 +15,10 @@ public class Voyage {
     private int places_total;
     private int places_restantes;
 
-    // 1. Constructeur vide
+    //Constructeur vide
     public Voyage() {}
 
-    // 2. Constructeur pour l'ajout (SANS ID)
+    //Constructeur pour l'ajout
     public Voyage(String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.titre = titre;
         this.destination = destination;
@@ -32,10 +32,10 @@ public class Voyage {
         this.places_restantes = places_restantes;
     }
 
-    // 3. Constructeur complet (AVEC ID)
+    //Constructeur complet
     public Voyage(int id, String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.id = id;
-        this.titre = titre; // Corrigé : ajout du "=" manquant
+        this.titre = titre;
         this.destination = destination;
         this.description = description;
         this.prix = prix;
@@ -47,7 +47,6 @@ public class Voyage {
         this.places_restantes = places_restantes;
     }
 
-    // --- GETTERS ET SETTERS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

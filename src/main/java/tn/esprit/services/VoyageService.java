@@ -12,16 +12,14 @@ public class VoyageService implements IService<Voyage> {
     private final Connection cnx;
 
     public VoyageService() {
-        cnx = MyDataBase.getInstance().getCnx(); // ou getMyConnection selon ton util
+        cnx = MyDataBase.getInstance().getCnx();
     }
 
-    // =========================
-    // CREATE
-    // =========================
+
     @Override
     public void ajouter(Voyage v) {
         String sql = "INSERT INTO voyage (titre, destination, description, prix, date_depart, date_retour, image_url, id_categorie, places_total, places_restantes) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; // ✅ 10 placeholders
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setString(1, v.getTitre());
@@ -36,15 +34,12 @@ public class VoyageService implements IService<Voyage> {
             ps.setInt(10, v.getPlaces_restantes());
 
             ps.executeUpdate();
-            System.out.println("✅ Voyage ajouté avec succès !");
+            System.out.println("Voyage ajouté avec succès !");
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de l'ajout voyage : " + e.getMessage());
+            System.err.println("Erreur lors de l'ajout voyage : " + e.getMessage());
         }
     }
 
-    // =========================
-    // UPDATE
-    // =========================
     @Override
     public void modifier(Voyage v) {
         String sql = "UPDATE voyage SET titre=?, destination=?, description=?, prix=?, date_depart=?, date_retour=?, image_url=?, id_categorie=?, places_total=?, places_restantes=? " +
@@ -64,15 +59,13 @@ public class VoyageService implements IService<Voyage> {
             ps.setInt(11, v.getId());
 
             ps.executeUpdate();
-            System.out.println("✅ Voyage modifié avec succès !");
+            System.out.println("Voyage modifié avec succès !");
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la modification voyage : " + e.getMessage());
+            System.err.println("Erreur lors de la modification voyage : " + e.getMessage());
         }
     }
 
-    // =========================
-    // DELETE
-    // =========================
+
     @Override
     public void supprimer(int id) {
         String sql = "DELETE FROM voyage WHERE id=?";
@@ -80,15 +73,13 @@ public class VoyageService implements IService<Voyage> {
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
-            System.out.println("✅ Voyage supprimé avec succès !");
+            System.out.println("Voyage supprimé avec succès !");
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la suppression voyage : " + e.getMessage());
+            System.err.println("Erreur lors de la suppression voyage : " + e.getMessage());
         }
     }
 
-    // =========================
-    // READ ALL
-    // =========================
+
     @Override
     public List<Voyage> afficher() {
         List<Voyage> voyages = new ArrayList<>();
@@ -107,9 +98,6 @@ public class VoyageService implements IService<Voyage> {
         return voyages;
     }
 
-    // =========================
-    // READ BY ID (utile pour modif)
-    // =========================
     public Voyage getById(int id) {
         String sql = "SELECT * FROM voyage WHERE id=?";
 
@@ -128,9 +116,7 @@ public class VoyageService implements IService<Voyage> {
         return null;
     }
 
-    // =========================
-    // SEARCH (par titre ou destination)
-    // =========================
+
     public List<Voyage> rechercher(String keyword) {
         List<Voyage> voyages = new ArrayList<>();
         String sql = "SELECT * FROM voyage WHERE titre LIKE ? OR destination LIKE ?";
@@ -152,9 +138,6 @@ public class VoyageService implements IService<Voyage> {
         return voyages;
     }
 
-    // =========================
-    // TRI (par prix croissant)
-    // =========================
     public List<Voyage> trierParPrixAsc() {
         List<Voyage> voyages = new ArrayList<>();
         String sql = "SELECT * FROM voyage ORDER BY prix ASC";
@@ -172,9 +155,7 @@ public class VoyageService implements IService<Voyage> {
         return voyages;
     }
 
-    // =========================
-    // MAPPER (évite duplication)
-    // =========================
+
     private Voyage mapperVoyage(ResultSet rs) throws SQLException {
         Voyage v = new Voyage();
         v.setId(rs.getInt("id"));

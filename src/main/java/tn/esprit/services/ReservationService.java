@@ -2,13 +2,14 @@ package tn.esprit.services;
 
 import tn.esprit.entites.Reservation;
 import tn.esprit.utils.MyDataBase;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReservationService implements IService<Reservation> {
 
-    private Connection cnx;
+    private final Connection cnx;
 
     public ReservationService() {
         cnx = MyDataBase.getInstance().getCnx();
@@ -16,14 +17,12 @@ public class ReservationService implements IService<Reservation> {
 
     @Override
     public void ajouter(Reservation r) {
-        // La date_reservation est mise à CURRENT_TIMESTAMP par défaut dans MySQL
-        String qry = "INSERT INTO reservation (nb_places, statut, id_voyage, id_utilisateur) VALUES (?, ?, ?, ?)";
+        String qry = "INSERT INTO reservation (nbr_personnes, statut, id_voyage, id_user) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setInt(1, r.getNb_places());
+            pstm.setInt(1, r.getNbr_personnes());
             pstm.setString(2, r.getStatut());
             pstm.setInt(3, r.getIdVoyage());
-            pstm.setInt(4, r.getIdUtilisateur());
-
+            pstm.setInt(4, r.getIdUser());
             pstm.executeUpdate();
             System.out.println("Réservation effectuée !");
         } catch (SQLException ex) {
@@ -33,14 +32,13 @@ public class ReservationService implements IService<Reservation> {
 
     @Override
     public void modifier(Reservation r) {
-        String qry = "UPDATE reservation SET nb_places = ?, statut = ?, id_voyage = ?, id_utilisateur = ? WHERE id = ?";
+        String qry = "UPDATE reservation SET nbr_personnes = ?, statut = ?, id_voyage = ?, id_user = ? WHERE id = ?";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
-            pstm.setInt(1, r.getNb_places());
+            pstm.setInt(1, r.getNbr_personnes());
             pstm.setString(2, r.getStatut());
             pstm.setInt(3, r.getIdVoyage());
-            pstm.setInt(4, r.getIdUtilisateur());
+            pstm.setInt(4, r.getIdUser());
             pstm.setInt(5, r.getId());
-
             pstm.executeUpdate();
             System.out.println("Réservation mise à jour !");
         } catch (SQLException ex) {
@@ -50,11 +48,12 @@ public class ReservationService implements IService<Reservation> {
 
     @Override
     public void supprimer(int id) {
+        //Supprimer brut : ne remet pas les places
         String qry = "DELETE FROM reservation WHERE id = ?";
         try (PreparedStatement pstm = cnx.prepareStatement(qry)) {
             pstm.setInt(1, id);
             pstm.executeUpdate();
-            System.out.println("Réservation annulée/supprimée !");
+            System.out.println("Réservation supprimée !");
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
@@ -64,76 +63,147 @@ public class ReservationService implements IService<Reservation> {
     public List<Reservation> afficher() {
         List<Reservation> reservations = new ArrayList<>();
         String qry = "SELECT * FROM reservation";
-        try (Statement stm = cnx.createStatement(); ResultSet rs = stm.executeQuery(qry)) {
+
+        try (Statement stm = cnx.createStatement();
+             ResultSet rs = stm.executeQuery(qry)) {
+
             while (rs.next()) {
-                reservations.add(new Reservation(
-                        rs.getInt("id"),
-                        rs.getTimestamp("date_reservation"),
-                        rs.getInt("nb_places"),
-                        rs.getString("statut"),
-                        rs.getInt("id_voyage"),
-                        rs.getInt("id_utilisateur")
-                ));
+                Reservation r = new Reservation();
+                r.setId(rs.getInt("id"));
+                r.setDate_reservation(rs.getTimestamp("date_reservation"));
+                r.setNbr_personnes(rs.getInt("nbr_personnes"));
+                r.setStatut(rs.getString("statut"));
+                r.setIdVoyage(rs.getInt("id_voyage"));
+                r.setIdUser(rs.getInt("id_user"));
+                reservations.add(r);
             }
+
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
         return reservations;
     }
-    // Dans ReservationService.java
-    public void effectuerReservation(int idVoyage, int idUser, int nbPlaces) {
-        // Requête pour insérer la réservation
-        String sqlRes = "INSERT INTO reservation (id_voyage, id_user, nb_places) VALUES (?, ?, ?)";
-        // Requête pour mettre à jour les places restantes du voyage
+
+    //Transaction : insert reservation + update places_restantes
+    public void effectuerReservation(int idVoyage, int idUser, int nbrPersonnes) {
+
+        String sqlRes = "INSERT INTO reservation (id_voyage, id_user, nbr_personnes, statut) VALUES (?, ?, ?, ?)";
         String sqlVoyage = "UPDATE voyage SET places_restantes = places_restantes - ? WHERE id = ?";
 
         try {
-            // Il est préférable d'utiliser une transaction ici
-            PreparedStatement psRes = cnx.prepareStatement(sqlRes);
-            psRes.setInt(1, idVoyage);
-            psRes.setInt(2, idUser);
-            psRes.setInt(3, nbPlaces);
-            psRes.executeUpdate();
+            cnx.setAutoCommit(false);
 
-            PreparedStatement psVoy = cnx.prepareStatement(sqlVoyage);
-            psVoy.setInt(1, nbPlaces);
-            psVoy.setInt(2, idVoyage);
-            psVoy.executeUpdate();
+            try (PreparedStatement psRes = cnx.prepareStatement(sqlRes);
+                 PreparedStatement psVoy = cnx.prepareStatement(sqlVoyage)) {
 
-            System.out.println("Réservation réussie et places mises à jour !");
+                psRes.setInt(1, idVoyage);
+                psRes.setInt(2, idUser);
+                psRes.setInt(3, nbrPersonnes);
+                psRes.setString(4, "En attente");
+                psRes.executeUpdate();
+
+                psVoy.setInt(1, nbrPersonnes);
+                psVoy.setInt(2, idVoyage);
+                psVoy.executeUpdate();
+
+                cnx.commit();
+                System.out.println("Réservation réussie et places mises à jour !");
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
+            } finally {
+                cnx.setAutoCommit(true);
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    // Dans tn.esprit.services.ReservationService
+
+    //Mes réservations (JOIN voyage + image_url)
     public List<Reservation> getReservationsParUtilisateur(int idUser) {
         List<Reservation> reservations = new ArrayList<>();
-        // On joint la table voyage pour avoir le nom de la destination
-        String sql = "SELECT r.*, v.destination FROM reservation r " +
-                "JOIN voyage v ON r.id_voyage = v.id WHERE r.id_user = ?";
-        try {
-            PreparedStatement ps = cnx.prepareStatement(sql);
+
+        String sql = """
+            SELECT r.id,
+                   r.nbr_personnes,
+                   r.statut,
+                   r.id_voyage,
+                   v.destination,
+                   v.image_url
+            FROM reservation r
+            JOIN voyage v ON r.id_voyage = v.id
+            WHERE r.id_user = ?
+            ORDER BY r.date_reservation DESC
+        """;
+
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, idUser);
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
                 Reservation r = new Reservation();
                 r.setId(rs.getInt("id"));
-                r.setNb_places(rs.getInt("nb_places")); // Utilisez le nom exact de votre colonne !
-                r.setDestination(rs.getString("destination")); // Vient de la table voyage
+                r.setNbr_personnes(rs.getInt("nbr_personnes"));
+                r.setStatut(rs.getString("statut"));
+                r.setIdVoyage(rs.getInt("id_voyage"));
+                r.setDestination(rs.getString("destination"));
+                r.setImageUrl(rs.getString("image_url")); // ✅ pour afficher image
                 reservations.add(r);
             }
+
         } catch (SQLException e) {
-            System.err.println("Erreur SQL: " + e.getMessage());
+            System.err.println("Erreur SQL Mes Réservations : " + e.getMessage());
         }
+
         return reservations;
     }
 
-    public void annulerReservation(int id) {
-        String sql = "DELETE FROM reservation WHERE id = ?";
+    //Annuler + remettre les places (Transaction)
+    public void annulerReservation(int reservationId) {
+
+        String sqlGet = "SELECT id_voyage, nbr_personnes FROM reservation WHERE id = ?";
+        String sqlDelete = "DELETE FROM reservation WHERE id = ?";
+        String sqlUpdateVoyage = "UPDATE voyage SET places_restantes = places_restantes + ? WHERE id = ?";
+
         try {
-            PreparedStatement ps = cnx.prepareStatement(sql);
-            ps.setInt(1, id);
-            ps.executeUpdate();
+            cnx.setAutoCommit(false);
+
+            int idVoyage = -1;
+            int nbr = 0;
+
+            try (PreparedStatement psGet = cnx.prepareStatement(sqlGet)) {
+                psGet.setInt(1, reservationId);
+                ResultSet rs = psGet.executeQuery();
+                if (rs.next()) {
+                    idVoyage = rs.getInt("id_voyage");
+                    nbr = rs.getInt("nbr_personnes");
+                } else {
+                    cnx.rollback();
+                    System.err.println("Réservation introuvable id=" + reservationId);
+                    return;
+                }
+            }
+
+            try (PreparedStatement psDel = cnx.prepareStatement(sqlDelete);
+                 PreparedStatement psUp = cnx.prepareStatement(sqlUpdateVoyage)) {
+
+                psDel.setInt(1, reservationId);
+                psDel.executeUpdate();
+
+                psUp.setInt(1, nbr);
+                psUp.setInt(2, idVoyage);
+                psUp.executeUpdate();
+
+                cnx.commit();
+                System.out.println("Réservation annulée + places restaurées !");
+            } catch (SQLException e) {
+                cnx.rollback();
+                throw e;
+            } finally {
+                cnx.setAutoCommit(true);
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

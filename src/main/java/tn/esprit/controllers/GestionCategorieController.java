@@ -98,7 +98,6 @@ public class GestionCategorieController {
         listCategories.setItems(filteredData);
     }
 
-    // --- NAVIGATION ---
     @FXML void naviguerVoyages(ActionEvent event) { changerScene("/GestionVoyage.fxml", event); }
     @FXML void naviguerCategories(ActionEvent event) { changerScene("/GestionCategorie.fxml", event); }
     @FXML void naviguerReservations(ActionEvent event) { changerScene("/GestionReservation.fxml", event); }
@@ -115,7 +114,6 @@ public class GestionCategorieController {
         }
     }
 
-    // --- CRUD ---
     @FXML
     void handleEnregistrer() {
         if (tfNom.getText().trim().isEmpty()) {
