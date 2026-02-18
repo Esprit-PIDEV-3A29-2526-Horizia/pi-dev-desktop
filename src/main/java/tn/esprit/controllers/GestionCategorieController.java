@@ -100,7 +100,11 @@ public class GestionCategorieController {
 
     @FXML void naviguerVoyages(ActionEvent event) { changerScene("/GestionVoyage.fxml", event); }
     @FXML void naviguerCategories(ActionEvent event) { changerScene("/GestionCategorie.fxml", event); }
-    @FXML void naviguerReservations(ActionEvent event) { changerScene("/GestionReservation.fxml", event); }
+    @FXML
+    void naviguerReservations(ActionEvent event) {
+        // Assurez-vous que le nom du fichier est exactement celui présent dans votre dossier resources
+        changerScene("/GestionReservationsAdmin.fxml", event);
+    }
 
     private void changerScene(String fxmlPath, ActionEvent event) {
         try {

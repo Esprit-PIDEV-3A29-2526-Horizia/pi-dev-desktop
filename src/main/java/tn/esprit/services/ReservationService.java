@@ -208,4 +208,34 @@ public class ReservationService implements IService<Reservation> {
             e.printStackTrace();
         }
     }
+    // Récupérer toutes les réservations pour l'admin
+    public List<Reservation> getAllReservations() {
+        List<Reservation> liste = new ArrayList<>();
+        // Jointure pour avoir le nom du voyage et potentiellement l'email de l'utilisateur
+        String sql = "SELECT r.*, v.destination FROM reservation r JOIN voyage v ON r.id_voyage = v.id";
+        try {
+            Statement st = cnx.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                Reservation r = new Reservation();
+                r.setId(rs.getInt("id"));
+                r.setNbr_personnes(rs.getInt("nbr_personnes"));
+                r.setDestination(rs.getString("destination"));
+                r.setStatut(rs.getString("statut"));
+                // Ajoutez ici le nom du client si vous avez une jointure avec la table user
+                liste.add(r);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return liste;
+    }
+
+    // Méthode pour confirmer une réservation
+    public void confirmerReservation(int id) {
+        String sql = "UPDATE reservation SET statut = 'Confirmée' WHERE id = ?";
+        try {
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) { e.printStackTrace(); }
+    }
 }

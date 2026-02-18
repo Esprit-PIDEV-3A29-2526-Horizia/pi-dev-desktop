@@ -2,13 +2,15 @@ package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import tn.esprit.entites.Reservation;
@@ -17,6 +19,7 @@ import tn.esprit.services.ReservationService;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 public class MesReservationsController {
 
@@ -36,6 +39,7 @@ public class MesReservationsController {
     private void chargerMesReservations() {
         containerReservations.getChildren().clear();
 
+        // Remarque : idUser devrait idéalement être récupéré depuis une session utilisateur
         int idUser = 1;
         List<Reservation> list = rs.getReservationsParUtilisateur(idUser);
 
@@ -53,42 +57,77 @@ public class MesReservationsController {
     }
 
     private HBox creerCardReservation(Reservation res) {
-        HBox card = new HBox(20);
+        HBox card = new HBox();
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(15));
+        card.setPadding(new Insets(10, 20, 10, 20));
         card.setStyle(
                 "-fx-background-color: white;" +
                         "-fx-background-radius: 12;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 2);"
         );
+
+        GridPane grid = new GridPane();
+        grid.setHgap(0);
+        grid.prefWidthProperty().bind(card.widthProperty().subtract(40));
+
+        ColumnConstraints col1 = new ColumnConstraints(); col1.setPercentWidth(40);
+        ColumnConstraints col2 = new ColumnConstraints(); col2.setPercentWidth(20); col2.setHalignment(HPos.CENTER);
+        ColumnConstraints col3 = new ColumnConstraints(); col3.setPercentWidth(20); col3.setHalignment(HPos.CENTER);
+        ColumnConstraints col4 = new ColumnConstraints(); col4.setPercentWidth(20); col4.setHalignment(HPos.CENTER);
+        grid.getColumnConstraints().addAll(col1, col2, col3, col4);
+
+        // --- Colonne 1 : Voyage ---
+        HBox voyageBox = new HBox(15);
+        voyageBox.setAlignment(Pos.CENTER_LEFT);
         ImageView img = new ImageView();
-        img.setFitHeight(55);
-        img.setFitWidth(80);
-        img.setPreserveRatio(true);
-        Image image = chargerImage(res.getImageUrl());
-        img.setImage(image);
-        String dest = (res.getDestination() != null) ? res.getDestination() : "Voyage";
-        Label lblDest = new Label(dest);
-        lblDest.setPrefWidth(320);
-        lblDest.setStyle("-fx-font-weight: bold; -fx-font-size: 15; -fx-text-fill: #0F172A;");
+        img.setFitHeight(50); img.setFitWidth(70); img.setPreserveRatio(true);
+        img.setImage(chargerImage(res.getImageUrl()));
+
+        Label lblDest = new Label(res.getDestination() != null ? res.getDestination() : "Voyage");
+        lblDest.setStyle("-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: #0F172A;");
+        voyageBox.getChildren().addAll(img, lblDest);
+        grid.add(voyageBox, 0, 0);
+
+        // --- Colonne 2 : Personnes ---
         Label lblPers = new Label(res.getNbr_personnes() + " personnes");
-        lblPers.setPrefWidth(140);
-        lblPers.setAlignment(Pos.CENTER);
         lblPers.setStyle("-fx-text-fill: #334155;");
+        grid.add(lblPers, 1, 0);
+
+        // --- Colonne 3 : Statut ---
         String statut = (res.getStatut() != null) ? res.getStatut() : "En attente";
         Label lblStatut = new Label(statut);
-        lblStatut.setPrefWidth(120);
-        lblStatut.setAlignment(Pos.CENTER);
-        lblStatut.setPadding(new Insets(6, 14, 6, 14));
         lblStatut.setStyle(styleStatut(statut));
-        Button btnAnnuler = new Button("Annuler");
-        btnAnnuler.setStyle("-fx-text-fill: #EF4444; -fx-background-color: transparent; -fx-cursor: hand; -fx-font-weight: bold;");
-        btnAnnuler.setOnAction(e -> {
-            rs.annulerReservation(res.getId());
-            chargerMesReservations();
-        });
-        card.getChildren().addAll(img, lblDest, lblPers, lblStatut, btnAnnuler);
+        lblStatut.setPadding(new Insets(5, 12, 5, 12));
+        grid.add(lblStatut, 2, 0);
+
+        // --- Colonne 4 : Actions (Logique de conditionnelle) ---
+        // Règle : Si confirmé, on ne peut plus annuler
+        if (statut.equalsIgnoreCase("Confirmée") || statut.equalsIgnoreCase("Confirmé")) {
+            Label lblValide = new Label("Validée");
+            lblValide.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
+            grid.add(lblValide, 3, 0);
+        } else {
+            Button btnAnnuler = new Button("Annuler");
+            btnAnnuler.setStyle("-fx-text-fill: #EF4444; -fx-background-color: transparent; -fx-cursor: hand; -fx-font-weight: bold;");
+            btnAnnuler.setOnAction(e -> handleAnnulation(res));
+            grid.add(btnAnnuler, 3, 0);
+        }
+
+        card.getChildren().add(grid);
         return card;
+    }
+
+    private void handleAnnulation(Reservation res) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation d'annulation");
+        alert.setHeaderText(null);
+        alert.setContentText("Êtes-vous sûr de vouloir annuler votre réservation pour " + res.getDestination() + " ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            rs.annulerReservation(res.getId());
+            chargerMesReservations(); // Rafraîchir la liste
+        }
     }
 
     private Image chargerImage(String url) {
@@ -101,7 +140,6 @@ public class MesReservationsController {
                 if (resUrl != null) {
                     return new Image(resUrl.toExternalForm(), true);
                 }
-                System.err.println("Image introuvable dans resources : " + url);
             }
         } catch (Exception e) {
             System.err.println("Erreur chargement image : " + url);

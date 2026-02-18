@@ -2,6 +2,7 @@ package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -223,6 +224,8 @@ public class AjouterVoyageController {
     private boolean isBlank(TextField tf) {
         return tf == null || tf.getText() == null || tf.getText().trim().isEmpty();
     }
+
+
 
     private String nvl(String s) {
         return (s == null) ? "" : s;

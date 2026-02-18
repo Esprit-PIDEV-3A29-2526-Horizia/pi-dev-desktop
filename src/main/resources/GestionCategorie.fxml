@@ -41,7 +41,11 @@
                         style="-fx-background-color: transparent; -fx-text-fill: #DACEB6;"
                         text="Voyages" />
 
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;" text="Réservations" />
+                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;"
+                        text="Réservations"
+                        onAction="#naviguerReservations"/>
+
 
                 <Region VBox.vgrow="ALWAYS" />
 

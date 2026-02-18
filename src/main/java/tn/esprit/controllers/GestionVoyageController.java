@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -20,8 +21,11 @@ import tn.esprit.services.VoyageService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class GestionVoyageController implements Initializable {
 
@@ -30,65 +34,54 @@ public class GestionVoyageController implements Initializable {
     @FXML private Label lblPromo;
     @FXML private TextField tfRecherche;
     @FXML private FlowPane gridVoyages;
+    @FXML private ComboBox<String> comboTri; // Nouveau : Menu de tri
 
-    @FXML private VBox mainContainer;
-    @FXML private Button btnDeconnexion;
     private final VoyageService vs = new VoyageService();
+    private List<Voyage> listeOriginale = new ArrayList<>(); // Stockage pour filtrage rapide
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        refreshVoyages(vs.afficher());
-    }
-
-
-
-    @FXML
-    private void handleDeconnexion(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Horizia - Connexion");
-            stage.show();
-            System.out.println("Déconnexion réussie !");
-        } catch (IOException e) {
-            System.err.println("Erreur lors de la déconnexion : " + e.getMessage());
-            e.printStackTrace();
+        // Initialisation du ComboBox de tri
+        if (comboTri != null) {
+            comboTri.getItems().addAll("Prix : Croissant", "Prix : Décroissant", "Date : Plus proche");
+            comboTri.setOnAction(e -> appliquerFiltresEtTris());
         }
+
+        chargerDonnees();
     }
 
-    @FXML
-    private void naviguerCategories() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/GestionCategorie.fxml"));
-            gridVoyages.getScene().setRoot(root);
-        } catch (IOException e) {
-            System.err.println("Erreur navigation catégories: " + e.getMessage());
-        }
+    private void chargerDonnees() {
+        listeOriginale = vs.afficher();
+        refreshVoyages(listeOriginale);
     }
-
-    @FXML
-    private void ouvrirFormulaireAjout() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Ajouter un nouveau voyage");
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-            refreshVoyages(vs.afficher());
-        } catch (IOException e) {
-            System.err.println("Erreur ouverture formulaire: " + e.getMessage());
-        }
-    }
-
 
     @FXML
     private void handleRecherche(KeyEvent event) {
-        String keyword = tfRecherche.getText();
-        List<Voyage> result = (keyword == null || keyword.isBlank()) ? vs.afficher() : vs.rechercher(keyword);
-        refreshVoyages(result);
+        appliquerFiltresEtTris();
+    }
+
+    /**
+     * Centralise la logique de recherche et de tri pour éviter les conflits
+     */
+    private void appliquerFiltresEtTris() {
+        String keyword = tfRecherche.getText().toLowerCase();
+
+        // 1. Filtrage par texte (Destination)
+        List<Voyage> resultats = listeOriginale.stream()
+                .filter(v -> v.getDestination().toLowerCase().contains(keyword))
+                .collect(Collectors.toList());
+
+        // 2. Application du Tri si sélectionné
+        String tri = comboTri.getValue();
+        if (tri != null) {
+            switch (tri) {
+                case "Prix : Croissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix));
+                case "Prix : Décroissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix).reversed());
+                case "Date : Plus proche" -> resultats.sort(Comparator.comparing(Voyage::getDate_depart));
+            }
+        }
+
+        refreshVoyages(resultats);
     }
 
     public void refreshVoyages(List<Voyage> voyages) {
@@ -113,6 +106,56 @@ public class GestionVoyageController implements Initializable {
         }
     }
 
+    // --- Méthodes de Navigation et Stats (Inchangées mais nécessaires) ---
+
+    private void updateStats(List<Voyage> voyages) {
+        if (lblDestActive != null) lblDestActive.setText(String.valueOf(voyages.size()));
+        if (lblPlacesTotales != null) {
+            int total = voyages.stream().mapToInt(Voyage::getPlaces_total).sum();
+            lblPlacesTotales.setText(String.valueOf(total));
+        }
+    }
+
+    @FXML
+    private void handleDeconnexion(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Horizia - Connexion");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML private void naviguerCategories() { changerScene("/GestionCategorie.fxml"); }
+    @FXML private void naviguerReservations() { changerScene("/GestionReservationsAdmin.fxml"); }
+
+    private void changerScene(String fxml) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxml));
+            gridVoyages.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void ouvrirFormulaireAjout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+            chargerDonnees(); // Rafraîchir après ajout
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void ouvrirDetails(Voyage v) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyage.fxml"));
@@ -126,17 +169,9 @@ public class GestionVoyageController implements Initializable {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-            refreshVoyages(vs.afficher());
+            chargerDonnees();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void updateStats(List<Voyage> voyages) {
-        if (lblDestActive != null) lblDestActive.setText(String.valueOf(voyages.size()));
-        if (lblPlacesTotales != null) {
-            int total = voyages.stream().mapToInt(Voyage::getPlaces_total).sum();
-            lblPlacesTotales.setText(String.valueOf(total));
         }
     }
 }
