@@ -14,13 +14,11 @@
 <VBox prefHeight="700.0" prefWidth="900.0" spacing="0" style="-fx-background-color: #F0F2F5;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.ModifierLogementController">
 
     <HBox alignment="CENTER_LEFT" prefHeight="100.0" spacing="20" style="-fx-background-color: linear-gradient(to right, #2c3e50, #4ca1af); -fx-padding: 0 40;">
-        <ImageView fitHeight="45" fitWidth="45" preserveRatio="true">
+        <ImageView fitHeight="25" fitWidth="25" preserveRatio="true">
             <Image url="@image/log.png" />
         </ImageView>
         <VBox alignment="CENTER_LEFT">
-            <Label text="Gestion du Catalogue" textFill="WHITE" style="-fx-opacity: 0.8;">
-                <font><Font name="System Bold" size="14" /></font>
-            </Label>
+
             <Label text="Modifier un Logement" textFill="WHITE">
                 <font><Font name="System Bold" size="26" /></font>
             </Label>

@@ -8,7 +8,6 @@
 
 <VBox spacing="25" style="-fx-background-color: #F6F7FB; -fx-padding: 25;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DashboardContentController">
     <!-- Titre principal -->
-    <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Gestion du Catalogue" />
 
     <!-- Cartes statistiques -->
     <HBox spacing="20">
