@@ -1,52 +1,54 @@
 package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import tn.esprit.entites.Voyage;
 
 public class DetailsVoyageUserController {
 
-    @FXML private Label lblTitre, lblPrix, lblDates, lblPlaces, badgeStatus;
+    @FXML private Label lblTitre, lblDescription, lblDates, lblPrix, lblPlaces;
+    @FXML private Label lblPrixUnitaire, lblTotal, badgeStatus;
+    @FXML private Spinner<Integer> spNbPersonnes;
     @FXML private ImageView imgVoyage;
-    @FXML private Text txtDescription;
-    @FXML private Button btnReserver;
-
 
     private Voyage voyage;
 
     public void initData(Voyage v) {
         this.voyage = v;
-        lblTitre.setText(v.getDestination().toUpperCase());
-        lblPrix.setText(v.getPrix() + " DT");
-        lblDates.setText("Du " + v.getDate_depart() + " au " + v.getDate_retour());
-        lblPlaces.setText(v.getPlaces_restantes() + " / " + v.getPlaces_total());
-        txtDescription.setText(v.getDescription());
-        if (v.getPlaces_restantes() <= 0) {
-            badgeStatus.setText("COMPLET");
-            badgeStatus.setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #EF4444; -fx-padding: 5 12; -fx-background-radius: 10;");
-            btnReserver.setDisable(true);
-            btnReserver.setText("Plus de places");
-        } else {
-            badgeStatus.setText("DISPONIBLE");
-            badgeStatus.setStyle("-fx-background-color: #DCFCE7; -fx-text-fill: #16A34A; -fx-padding: 5 12; -fx-background-radius: 10;");
-        }
-        if (v.getImage_url() != null && !v.getImage_url().isEmpty()) {
-            imgVoyage.setImage(new Image(v.getImage_url(), true));
-        }
+
+        lblTitre.setText("Voyage à " + v.getDestination());
+        lblDescription.setText(v.getDescription());
+        lblDates.setText("📅 " + v.getDate_depart() + " → " + v.getDate_retour());
+        lblPrix.setText("💰 " + v.getPrix() + " DT / pers");
+        lblPlaces.setText("👥 " + v.getPlaces_restantes() + " places restantes");
+
+        lblPrixUnitaire.setText(v.getPrix() + " DT");
+        lblTotal.setText(v.getPrix() + " DT");
+
+        imgVoyage.setImage(new Image(v.getImage_url(), true));
+
+        spNbPersonnes.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                        1, v.getPlaces_restantes(), 1
+                )
+        );
+
+        spNbPersonnes.valueProperty().addListener((obs, o, n) ->
+                lblTotal.setText((n * v.getPrix()) + " DT")
+        );
     }
 
     @FXML
-    private void handleReservation() {
-        System.out.println("Bouton Réserver cliqué pour : " + voyage.getDestination());
+    private void confirmerReservation() {
+        System.out.println("Réservation confirmée !");
     }
 
     @FXML
-    private void fermer() {
-        ((Stage) lblTitre.getScene().getWindow()).close();
+    private void retourCatalogue() {
+        // navigation back
     }
 }

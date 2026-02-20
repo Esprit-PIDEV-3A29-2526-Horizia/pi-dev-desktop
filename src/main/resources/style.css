@@ -1,38 +1,121 @@
-/* Fond général : une nuance très claire du beige DACEB6 */
-.root {
-    -fx-background-color: #F5F1E9; /* Beige très clair pour le fond */
+/* ================== BASE PAGE ================== */
+.page {
+    -fx-background-color: #F9FAFB;
     -fx-font-family: "Segoe UI", sans-serif;
 }
 
-/* Conteneur des Cartes (ListView) */
-.list-cell {
+.page-title {
+    -fx-font-size: 30;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0F172A;
+}
+
+/* ================== NAVBAR ================== */
+.navbar {
+    -fx-background-color: #163A56;
+    -fx-padding: 0 28;
+}
+
+/* bouton normal navbar */
+.nav-btn {
     -fx-background-color: transparent;
-    -fx-padding: 8;
+    -fx-text-fill: #E5E7EB;
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
 }
 
-/* Style de la carte individuelle */
-.card-container {
+/* bouton actif navbar (jaune) */
+.nav-active {
+    -fx-background-color: #F2B45B;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 8 18;
+}
+
+/* utilisateur */
+.user-btn {
+    -fx-background-color: #3D94CA;
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-background-radius: 18;
+    -fx-padding: 14 20;
+    -fx-cursor: hand;
+}
+.user-icon {
+    -fx-text-fill: white;
+    -fx-font-size: 15;
+}
+
+/* déconnexion */
+.logout-btn {
+    -fx-background-color: #F2B45B;
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-background-radius: 18;
+    -fx-padding: 12 18;
+    -fx-cursor: hand;
+}
+
+/* ================== PILLS FILTERS ================== */
+.pill, .pill-active {
+    -fx-padding: 8 18;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+
+    -fx-font-size: 13;          /* ✅ pas de px */
+    -fx-font-weight: 600;
+
+    -fx-cursor: hand;
+
+    /* ✅ évite le style par défaut des boutons */
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* chip normal */
+.pill {
     -fx-background-color: white;
-    -fx-background-radius: 12;
-    -fx-border-color: #DACEB6; /* Ton beige de référence */
-    -fx-border-radius: 12;
-    -fx-border-width: 1.5;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 8, 0, 0, 4);
+    -fx-border-color: #DADADA;
+    -fx-border-width: 1;
+    -fx-text-fill: #2D2D2D;
 }
 
-/* État sélectionné : On utilise le bleu clair 3D94CA */
-.list-cell:filled:selected .card-container {
-    -fx-background-color: #F5F1E9;
-    -fx-border-color: #23779C;
+/* hover chip normal */
+.pill:hover {
+    -fx-background-color: #F5F7FA;
 }
 
-/* Texte dans la carte quand elle est sélectionnée */
-.list-cell:filled:selected .label {
+/* chip actif */
+.pill-active {
+    -fx-background-color: #2F6BFF;
+    -fx-border-color: #2F6BFF;
+    -fx-border-width: 1;
     -fx-text-fill: white;
 }
 
-/* Titres de section (Bleu foncé Horizia) */
-.section-title {
-    -fx-text-fill: #23779C;
+/* hover actif (optionnel) */
+.pill-active:hover {
+    -fx-background-color: #245BFF;
+    -fx-border-color: #245BFF;
+}
+
+/* ================== TABLE HEADER ================== */
+.table-header {
+    -fx-padding: 10 20;
+}
+
+.th {
+    -fx-text-fill: #64748B;
     -fx-font-weight: bold;
+}
+
+/* ================== SCROLL ================== */
+.transparent-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
 }

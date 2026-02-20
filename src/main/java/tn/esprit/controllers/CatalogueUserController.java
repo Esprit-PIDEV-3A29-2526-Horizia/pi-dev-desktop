@@ -7,6 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -17,68 +18,219 @@ import tn.esprit.services.VoyageService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CatalogueUserController implements Initializable {
 
     @FXML private GridPane voyageGrid;
     @FXML private TextField searchField;
-    @FXML private ComboBox<String> comboTri; // Nouveau : Menu de tri
+    @FXML private ComboBox<String> comboTri;
+
+    // chips
+    @FXML private Button btnTous;
+    @FXML private Button btnTunisie;
+    @FXML private Button btnEurope;
+    @FXML private Button btnPromos;
 
     private final VoyageService vs = new VoyageService();
-    private List<Voyage> listeOriginale = new ArrayList<>(); // Cache pour éviter les appels DB constants
+    private List<Voyage> listeOriginale = new ArrayList<>();
+
+    private static final int NB_COLONNES = 3; // mets 4 si tu veux 4 cartes / ligne
+
+    // filtre actif
+    private enum Filtre { TOUS, TUNISIE, EUROPE, PROMOS }
+    private Filtre filtreActif = Filtre.TOUS;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Initialisation du menu de tri
+
+        listeOriginale = vs.afficher();
+        if (listeOriginale == null) listeOriginale = new ArrayList<>();
+
         if (comboTri != null) {
-            comboTri.getItems().addAll("Prix : Croissant", "Prix : Décroissant", "Date : Plus proche");
-            comboTri.setOnAction(e -> appliquerFiltresEtTris());
+            comboTri.getItems().setAll(
+                    "Prix : Croissant",
+                    "Prix : Décroissant",
+                    "Date : Plus proche",
+                    "Destination : A-Z",
+                    "Places restantes : Desc"
+            );
+            comboTri.setValue("Prix : Croissant");
+            comboTri.setOnAction(e -> appliquerTout());
         }
 
-        // Recherche en temps réel lors de la saisie
-        searchField.textProperty().addListener((obs, old, newValue) -> appliquerFiltresEtTris());
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, o, n) -> appliquerTout());
+        }
 
-        chargerDonnees();
+        setChipActive(btnTous);
+        appliquerTout();
     }
 
-    private void chargerDonnees() {
-        listeOriginale = vs.afficher();
-        chargerVoyages(listeOriginale);
+    // ======= FILTRES (buttons) =======
+
+    @FXML
+    private void filtrerTous() {
+        filtreActif = Filtre.TOUS;
+        setChipActive(btnTous);
+        appliquerTout();
     }
 
-    /**
-     * Combine la recherche par texte et le tri sélectionné
-     */
-    private void appliquerFiltresEtTris() {
-        String keyword = searchField.getText().toLowerCase();
+    @FXML
+    private void filtrerTunisie() {
+        filtreActif = Filtre.TUNISIE;
+        setChipActive(btnTunisie);
+        appliquerTout();
+    }
 
-        // 1. Filtrage par destination
+    @FXML
+    private void filtrerEurope() {
+        filtreActif = Filtre.EUROPE;
+        setChipActive(btnEurope);
+        appliquerTout();
+    }
+
+    @FXML
+    private void filtrerPromos() {
+        filtreActif = Filtre.PROMOS;
+        setChipActive(btnPromos);
+        appliquerTout();
+    }
+
+    private void setChipActive(Button active) {
+        // style actif/inactif (simple)
+        Button[] all = {btnTous, btnTunisie, btnEurope, btnPromos};
+        for (Button b : all) {
+            if (b == null) continue;
+            if (b == active) {
+                b.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
+            } else {
+                b.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;" +
+                        "-fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
+            }
+        }
+    }
+
+    // ======= APPLIQUER filtres + recherche + tri =======
+
+    private void appliquerTout() {
+        String keyword = safeLower(searchField != null ? searchField.getText() : "");
+
         List<Voyage> resultats = listeOriginale.stream()
-                .filter(v -> v.getDestination().toLowerCase().contains(keyword))
+
+                // 1) filtre chips
+                .filter(this::matchFiltreActif)
+
+                // 2) recherche text (titre ou destination)
+                .filter(v -> keyword.isBlank()
+                        || safeLower(v.getDestination()).contains(keyword)
+                        || safeLower(v.getTitre()).contains(keyword))
+
                 .collect(Collectors.toList());
 
-        // 2. Application du tri
-        String tri = (comboTri != null) ? comboTri.getValue() : null;
+        // 3) tri
+        String tri = comboTri != null ? comboTri.getValue() : null;
         if (tri != null) {
-            switch (tri) {
-                case "Prix : Croissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix));
-                case "Prix : Décroissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix).reversed());
-                case "Date : Plus proche" -> resultats.sort(Comparator.comparing(Voyage::getDate_depart));
-            }
+            resultats = trierStreams(resultats, tri);
         }
 
         chargerVoyages(resultats);
     }
 
+    private boolean matchFiltreActif(Voyage v) {
+        if (v == null) return false;
+
+        String dest = safeLower(v.getDestination());
+
+        return switch (filtreActif) {
+            case TOUS -> true;
+
+            case TUNISIE -> containsAny(dest,
+                    "tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte");
+
+            case EUROPE -> containsAny(dest,
+                    // Espagne
+                    "barcelone", "madrid", "valence", "seville", "séville",
+                    // France
+                    "paris", "lyon", "marseille", "nice",
+                    // Italie
+                    "rome", "milan", "venise", "florence",
+                    // Royaume-Uni
+                    "londres", "london", "manchester",
+                    // Allemagne
+                    "berlin", "munich", "munchen",
+                    // Portugal
+                    "lisbonne", "lisbon", "porto",
+                    // Pays-Bas
+                    "amsterdam", "rotterdam",
+                    // Suisse
+                    "geneve", "genève", "zurich", "suisse",
+                    // Belgique
+                    "bruxelles", "brussels",
+                    // Autres
+                    "vienna", "vienne", "prague", "budapest", "athenes", "athènes"
+            );
+
+            //exemple promo: prix <= 2000 (modifie selon ton besoin)
+            case PROMOS -> v.getPrix() <= 2000;
+        };
+    }
+
+    private boolean containsAny(String text, String... keys) {
+        if (text == null) return false;
+        for (String k : keys) {
+            if (k != null && !k.isBlank() && text.contains(k)) return true;
+        }
+        return false;
+    }
+
+    private List<Voyage> trierStreams(List<Voyage> base, String tri) {
+        return switch (tri) {
+            case "Prix : Croissant" -> base.stream()
+                    .sorted(Comparator.comparingDouble(Voyage::getPrix))
+                    .collect(Collectors.toList());
+
+            case "Prix : Décroissant" -> base.stream()
+                    .sorted(Comparator.comparingDouble(Voyage::getPrix).reversed())
+                    .collect(Collectors.toList());
+
+            case "Date : Plus proche" -> base.stream()
+                    .sorted(Comparator.comparing(this::dateDepartAsLocalDate))
+                    .collect(Collectors.toList());
+
+            case "Destination : A-Z" -> base.stream()
+                    .sorted(Comparator.comparing(v -> safeLower(v.getDestination())))
+                    .collect(Collectors.toList());
+
+            case "Places restantes : Desc" -> base.stream()
+                    .sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed())
+                    .collect(Collectors.toList());
+
+            default -> base;
+        };
+    }
+
+    private LocalDate dateDepartAsLocalDate(Voyage v) {
+        Date d = (v == null) ? null : v.getDate_depart();
+        return (d == null) ? LocalDate.MAX : d.toLocalDate();
+    }
+
+    private String safeLower(String s) {
+        return (s == null) ? "" : s.trim().toLowerCase();
+    }
+
+    // ======= AFFICHAGE grid =======
+
     public void chargerVoyages(List<Voyage> voyages) {
         if (voyageGrid == null) return;
 
         voyageGrid.getChildren().clear();
+        if (voyages == null) voyages = List.of();
+
         int column = 0;
         int row = 0;
 
@@ -88,14 +240,12 @@ public class CatalogueUserController implements Initializable {
                 VBox card = loader.load();
 
                 VoyageCardUserController controller = loader.getController();
-                if (controller != null) {
-                    controller.setData(v); // Applique le texte en gras et les styles
-                }
+                if (controller != null) controller.setData(v);
 
-                // Affichage en 3 colonnes comme sur votre capture
                 voyageGrid.add(card, column, row);
+
                 column++;
-                if (column == 3) {
+                if (column == NB_COLONNES) {
                     column = 0;
                     row++;
                 }
@@ -105,16 +255,18 @@ public class CatalogueUserController implements Initializable {
         }
     }
 
+    // ======= NAVIGATION =======
+
     @FXML
     private void handleRecherche() {
-        appliquerFiltresEtTris();
+        appliquerTout();
     }
 
     @FXML
     private void afficherCatalogue() {
-        searchField.clear();
-        if(comboTri != null) comboTri.setValue(null);
-        chargerDonnees();
+        if (searchField != null) searchField.clear();
+        if (comboTri != null) comboTri.setValue("Prix : Croissant");
+        filtrerTous();
     }
 
     @FXML
@@ -134,6 +286,7 @@ public class CatalogueUserController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setTitle(title);
             stage.centerOnScreen();
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }

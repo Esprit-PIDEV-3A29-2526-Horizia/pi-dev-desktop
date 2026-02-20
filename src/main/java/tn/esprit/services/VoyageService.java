@@ -5,6 +5,7 @@ import tn.esprit.utils.MyDataBase;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class VoyageService implements IService<Voyage> {
@@ -92,7 +93,7 @@ public class VoyageService implements IService<Voyage> {
                 voyages.add(mapperVoyage(rs));
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de l'affichage voyages : " + e.getMessage());
+            System.err.println("Erreur lors de l'affichage voyages : " + e.getMessage());
         }
 
         return voyages;
@@ -110,51 +111,67 @@ public class VoyageService implements IService<Voyage> {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur getById : " + e.getMessage());
+            System.err.println("Erreur getById : " + e.getMessage());
         }
 
         return null;
     }
 
+//strem recherche+tri
+    public List<Voyage> rechercherStream(String keyword) {
+        String k = (keyword == null) ? "" : keyword.trim().toLowerCase();
 
-    public List<Voyage> rechercher(String keyword) {
-        List<Voyage> voyages = new ArrayList<>();
-        String sql = "SELECT * FROM voyage WHERE titre LIKE ? OR destination LIKE ?";
-
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            String k = "%" + (keyword == null ? "" : keyword.trim()) + "%";
-            ps.setString(1, k);
-            ps.setString(2, k);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    voyages.add(mapperVoyage(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur recherche : " + e.getMessage());
-        }
-
-        return voyages;
+        return afficher().stream()
+                .filter(v -> containsIgnoreCase(v.getTitre(), k) || containsIgnoreCase(v.getDestination(), k))
+                .toList();
+    }
+    //Tri prix ASC
+    public List<Voyage> trierParPrixAscStream(List<Voyage> base) {
+        return safeList(base).stream()
+                .sorted(Comparator.comparingDouble(Voyage::getPrix))
+                .toList();
+    }
+    //Tri prix DESC
+    public List<Voyage> trierParPrixDescStream(List<Voyage> base) {
+        return safeList(base).stream()
+                .sorted(Comparator.comparingDouble(Voyage::getPrix).reversed())
+                .toList();
     }
 
-    public List<Voyage> trierParPrixAsc() {
-        List<Voyage> voyages = new ArrayList<>();
-        String sql = "SELECT * FROM voyage ORDER BY prix ASC";
-
-        try (Statement st = cnx.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-
-            while (rs.next()) {
-                voyages.add(mapperVoyage(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur tri prix : " + e.getMessage());
-        }
-
-        return voyages;
+    //Tri destination A-Z
+    public List<Voyage> trierParDestinationAZStream(List<Voyage> base) {
+        return safeList(base).stream()
+                .sorted(Comparator.comparing(v -> safeStr(v.getDestination()).toLowerCase()))
+                .toList();
     }
 
+    //Tri places restantes DESC
+    public List<Voyage> trierParPlacesRestantesDescStream(List<Voyage> base) {
+        return safeList(base).stream()
+                .sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed())
+                .toList();
+    }
+
+    //Filtre par catégorie(id)
+    public List<Voyage> filtrerParCategorieStream(List<Voyage> base, int idCategorie) {
+        return safeList(base).stream()
+                .filter(v -> v.getId_categorie() == idCategorie)
+                .toList();
+    }
+
+
+    private boolean containsIgnoreCase(String text, String keywordLower) {
+        if (keywordLower == null || keywordLower.isBlank()) return true;
+        return safeStr(text).toLowerCase().contains(keywordLower);
+    }
+
+    private String safeStr(String s) {
+        return (s == null) ? "" : s;
+    }
+
+    private List<Voyage> safeList(List<Voyage> list) {
+        return (list == null) ? List.of() : list;
+    }
 
     private Voyage mapperVoyage(ResultSet rs) throws SQLException {
         Voyage v = new Voyage();

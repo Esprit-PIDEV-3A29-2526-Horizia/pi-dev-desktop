@@ -1,63 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1100.0" style="-fx-background-color: #F8FAFC;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.CatalogueUserController">
+<AnchorPane prefHeight="720.0" prefWidth="1180.0"
+            style="-fx-background-color: #F3F6FA;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.CatalogueUserController"
+            stylesheets="@style.css"
+            styleClass="page">
+
     <children>
-        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-            <children>
-                <HBox alignment="CENTER_LEFT" prefHeight="70.0" spacing="30.0" style="-fx-background-color: #105D5E;">
-                    <padding><Insets left="30.0" right="30.0" /></padding>
-                    <children>
-                        <ImageView fitHeight="45.0" pickOnBounds="true" preserveRatio="true">
-                            <image>
-                                <Image url="@/images/logo.png" />
-                            </image>
-                        </ImageView>
+        <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
 
-                        <HBox alignment="CENTER_LEFT" spacing="15.0">
-                            <children>
-                                <Button onAction="#afficherCatalogue" style="-fx-background-color: #2D7A7B; -fx-text-fill: white; -fx-font-size: 15; -fx-cursor: hand; -fx-background-radius: 10;" text="Catalogue" />
-                                <Button onAction="#afficherHistorique" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 15; -fx-cursor: hand;" text="Mes Réservations" />
-                                <Button style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 15; -fx-cursor: hand;" text="Profil" />
-                            </children>
-                        </HBox>
+            <!-- TOP NAV -->
+            <HBox prefHeight="80.0"
+                  alignment="CENTER_LEFT"
+                  spacing="18"
+                  styleClass="navbar">
+                <padding>
+                    <Insets left="26" right="26"/>
+                </padding>
 
-                        <Region HBox.hgrow="ALWAYS" />
+                <ImageView fitHeight="70" fitWidth="70" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png"/>
+                    </image>
+                </ImageView>
 
-                        <Button onAction="#handleDeconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10; -fx-font-weight: bold; -fx-padding: 8 20;" text="Déconnexion" />
-                    </children>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Menu (centre) -->
+                <HBox spacing="35" alignment="CENTER">
+                    <Button text="Accueil"
+                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button text="Nos Voyages"
+                            style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;"/>
+                    <Button text="Mes Réservations" onAction="#afficherHistorique"
+                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"/>
+                    <Button text="Contact"
+                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 </HBox>
 
-                <VBox spacing="20.0" VBox.vgrow="ALWAYS">
-                    <padding><Insets bottom="20.0" left="30.0" right="30.0" top="20.0" /></padding>
-                    <children>
-                        <HBox alignment="CENTER_LEFT">
-                            <children>
-                                <VBox>
-                                    <children>
-                                        <Label style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1E293B;" text="Bienvenue chez Horizia" />
-                                        <Label style="-fx-text-fill: #64748B;" text="Trouvez votre prochaine destination de rêve" />
-                                    </children>
-                                </VBox>
-                                <Region HBox.hgrow="ALWAYS" />
-                                <TextField fx:id="searchField" onKeyReleased="#handleRecherche" prefHeight="40.0" prefWidth="350.0" promptText="Où voulez-vous aller ?" style="-fx-background-radius: 20; -fx-border-color: #E2E8F0; -fx-border-radius: 20; -fx-background-insets: 0;" />
-                                <ComboBox fx:id="comboTri" promptText="Trier par..." style="-fx-background-radius: 20;"/>
-                            </children>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- User chip (droite) -->
+                <Button text="Utilisateur"
+                        styleClass="user-btn">
+                    <graphic>
+                        <Label text="👤" styleClass="user-icon"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Déconnexion" onAction="#handleDeconnexion"
+                        style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- CONTENT -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                    <VBox spacing="18" style="-fx-padding: 26;">
+
+                        <!-- HERO centré -->
+                        <StackPane>
+                            <AnchorPane maxWidth="950" prefHeight="170"
+                                        style="-fx-background-color: #2F7EA8; -fx-background-radius: 18;
+                                               -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                                <children>
+                                    <VBox spacing="8"
+                                          AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30"
+                                          AnchorPane.topAnchor="26" AnchorPane.bottomAnchor="26"
+                                          alignment="CENTER">
+                                        <Label text="Trouvez votre voyage idéal"
+                                               style="-fx-text-fill: white; -fx-font-size: 26; -fx-font-weight: bold;"/>
+                                        <Label text="Circuits, séjours et expériences sur mesure"
+                                               style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12;"/>
+
+                                        <Region prefHeight="10"/>
+
+                                        <HBox spacing="12" alignment="CENTER">
+                                            <TextField fx:id="searchField"
+                                                       onKeyReleased="#handleRecherche"
+                                                       promptText="Où voulez-vous aller ?"
+                                                       prefHeight="36" prefWidth="340"
+                                                       style="-fx-background-color: white; -fx-background-radius: 18;
+                                                              -fx-border-radius: 18; -fx-border-color: transparent; -fx-padding: 0 14;"/>
+
+                                            <ComboBox fx:id="comboTri"
+                                                      promptText="Prix : décroissant"
+                                                      prefHeight="36" prefWidth="190"
+                                                      style="-fx-background-radius: 18; -fx-border-radius: 18;"/>
+                                        </HBox>
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </StackPane>
+
+                        <!-- CHIPS filtres (centrés) -->
+                        <HBox spacing="12" alignment="CENTER">
+                            <Button fx:id="btnTous" text="Tous" onAction="#filtrerTous"
+                                    style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-weight: bold;
+                   -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+
+                            <Button fx:id="btnTunisie" text="Tunisie" onAction="#filtrerTunisie"
+                                    style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                   -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+
+                            <Button fx:id="btnEurope" text="Europe" onAction="#filtrerEurope"
+                                    style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                   -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+
+                            <Button fx:id="btnPromos" text="Promos" onAction="#filtrerPromos"
+                                    style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                   -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
                         </HBox>
 
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background-insets: 0;" VBox.vgrow="ALWAYS">
-                            <content>
-                                <GridPane fx:id="voyageGrid" hgap="25.0" vgap="25.0">
-                                    <padding><Insets bottom="10.0" left="10.0" right="10.0" top="10.0" /></padding>
-                                </GridPane>
-                            </content>
-                        </ScrollPane>
-                    </children>
-                </VBox>
-            </children>
+                        <!-- GRID cartes (centré, 4 colonnes via controller) -->
+                        <GridPane fx:id="voyageGrid" hgap="18" vgap="18" alignment="TOP_CENTER">
+                            <padding><Insets top="6" right="6" bottom="16" left="6"/></padding>
+                        </GridPane>
+
+                    </VBox>
+                </content>
+            </ScrollPane>
+
         </VBox>
     </children>
 </AnchorPane>

@@ -3,59 +3,166 @@ package tn.esprit.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import tn.esprit.entites.Reservation;
 import tn.esprit.services.ReservationService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MesReservationsController {
 
+    // ====== CONTENT ======
     @FXML private VBox containerReservations;
 
+    // ====== NAVBAR ======
+    @FXML private Button btnAccueil;
+    @FXML private Button btnNosVoyages;
+    @FXML private Button btnMesReservations;
+    @FXML private Button btnContact;
+
+    // ====== FILTER BUTTONS ======
+    @FXML private Button btnFiltreToutes;
+    @FXML private Button btnFiltreConfirmees;
+    @FXML private Button btnFiltreAttente;
+
     private final ReservationService rs = new ReservationService();
+
+    // Cache
+    private List<Reservation> listeOriginale = new ArrayList<>();
+
+    private enum FiltreStatut { TOUTES, CONFIRMEES, EN_ATTENTE }
+    private FiltreStatut filtreActuel = FiltreStatut.TOUTES;
 
     @FXML
     public void initialize() {
         if (containerReservations == null) {
-            System.err.println("ContainerReservations est null : vérifie fx:id dans MesReservations.fxml");
+            System.err.println("⚠ containerReservations est null : vérifie fx:id dans MesReservations.fxml");
             return;
         }
-        chargerMesReservations();
+
+        // Active navbar
+        activerBouton(btnMesReservations);
+
+        // Active filtre par défaut
+        filtreActuel = FiltreStatut.TOUTES;
+        activerFiltre(btnFiltreToutes);
+
+        // Charger DB une seule fois
+        chargerDonnees();
+        appliquerFiltreEtAfficher();
     }
 
-    private void chargerMesReservations() {
+    // =========================
+    //        DATA LOADING
+    // =========================
+    private void chargerDonnees() {
+        int idUser = 1; // TODO: session user
+        List<Reservation> list = rs.getReservationsParUtilisateur(idUser);
+        listeOriginale = (list == null) ? new ArrayList<>() : list;
+    }
+
+    private void appliquerFiltreEtAfficher() {
         containerReservations.getChildren().clear();
 
-        // Remarque : idUser devrait idéalement être récupéré depuis une session utilisateur
-        int idUser = 1;
-        List<Reservation> list = rs.getReservationsParUtilisateur(idUser);
+        List<Reservation> resultats = listeOriginale;
 
-        if (list == null || list.isEmpty()) {
-            Label empty = new Label("Aucune réservation pour le moment.");
+        switch (filtreActuel) {
+            case CONFIRMEES -> resultats = listeOriginale.stream()
+                    .filter(r -> {
+                        String s = (r.getStatut() == null) ? "" : r.getStatut().toLowerCase();
+                        return s.contains("confirm");
+                    })
+                    .collect(Collectors.toList());
+
+            case EN_ATTENTE -> resultats = listeOriginale.stream()
+                    .filter(r -> {
+                        String s = (r.getStatut() == null) ? "" : r.getStatut().toLowerCase();
+                        return s.contains("attente") || s.isBlank();
+                    })
+                    .collect(Collectors.toList());
+
+            default -> { /* TOUTES */ }
+        }
+
+        if (resultats.isEmpty()) {
+            Label empty = new Label("Aucune réservation pour ce filtre.");
             empty.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14;");
             empty.setPadding(new Insets(20));
             containerReservations.getChildren().add(empty);
             return;
         }
 
-        for (Reservation r : list) {
+        for (Reservation r : resultats) {
             containerReservations.getChildren().add(creerCardReservation(r));
         }
     }
 
+    // =========================
+    //          FILTERS
+    // =========================
+    @FXML
+    private void filtrerToutes() {
+        filtreActuel = FiltreStatut.TOUTES;
+        activerFiltre(btnFiltreToutes);
+        appliquerFiltreEtAfficher();
+    }
+
+    @FXML
+    private void filtrerConfirmees() {
+        filtreActuel = FiltreStatut.CONFIRMEES;
+        activerFiltre(btnFiltreConfirmees);
+        appliquerFiltreEtAfficher();
+    }
+
+    @FXML
+    private void filtrerAttente() {
+        filtreActuel = FiltreStatut.EN_ATTENTE;
+        activerFiltre(btnFiltreAttente);
+        appliquerFiltreEtAfficher();
+    }
+
+    private void activerFiltre(Button actif) {
+        Button[] buttons = {btnFiltreToutes, btnFiltreConfirmees, btnFiltreAttente};
+
+        for (Button b : buttons) {
+            if (b == null) continue;
+            b.getStyleClass().removeAll("pill-active");
+            if (!b.getStyleClass().contains("pill")) b.getStyleClass().add("pill");
+        }
+
+        if (actif != null) {
+            actif.getStyleClass().removeAll("pill");
+            if (!actif.getStyleClass().contains("pill-active")) actif.getStyleClass().add("pill-active");
+        }
+    }
+
+    // =========================
+    //          NAVBAR
+    // =========================
+    private void activerBouton(Button actif) {
+        Button[] buttons = {btnAccueil, btnNosVoyages, btnMesReservations, btnContact};
+        for (Button b : buttons) {
+            if (b != null) b.getStyleClass().remove("nav-active");
+        }
+        if (actif != null && !actif.getStyleClass().contains("nav-active")) {
+            actif.getStyleClass().add("nav-active");
+        }
+    }
+
+    // =========================
+    //     RESERVATION CARD
+    // =========================
     private HBox creerCardReservation(Reservation res) {
         HBox card = new HBox();
         card.setAlignment(Pos.CENTER_LEFT);
@@ -67,7 +174,6 @@ public class MesReservationsController {
         );
 
         GridPane grid = new GridPane();
-        grid.setHgap(0);
         grid.prefWidthProperty().bind(card.widthProperty().subtract(40));
 
         ColumnConstraints col1 = new ColumnConstraints(); col1.setPercentWidth(40);
@@ -79,8 +185,11 @@ public class MesReservationsController {
         // --- Colonne 1 : Voyage ---
         HBox voyageBox = new HBox(15);
         voyageBox.setAlignment(Pos.CENTER_LEFT);
+
         ImageView img = new ImageView();
-        img.setFitHeight(50); img.setFitWidth(70); img.setPreserveRatio(true);
+        img.setFitHeight(50);
+        img.setFitWidth(70);
+        img.setPreserveRatio(true);
         img.setImage(chargerImage(res.getImageUrl()));
 
         Label lblDest = new Label(res.getDestination() != null ? res.getDestination() : "Voyage");
@@ -94,15 +203,14 @@ public class MesReservationsController {
         grid.add(lblPers, 1, 0);
 
         // --- Colonne 3 : Statut ---
-        String statut = (res.getStatut() != null) ? res.getStatut() : "En attente";
+        String statut = (res.getStatut() != null && !res.getStatut().isBlank()) ? res.getStatut() : "En attente";
         Label lblStatut = new Label(statut);
         lblStatut.setStyle(styleStatut(statut));
         lblStatut.setPadding(new Insets(5, 12, 5, 12));
         grid.add(lblStatut, 2, 0);
 
-        // --- Colonne 4 : Actions (Logique de conditionnelle) ---
-        // Règle : Si confirmé, on ne peut plus annuler
-        if (statut.equalsIgnoreCase("Confirmée") || statut.equalsIgnoreCase("Confirmé")) {
+        // --- Colonne 4 : Actions ---
+        if (statut.toLowerCase().contains("confirm")) {
             Label lblValide = new Label("Validée");
             lblValide.setStyle("-fx-text-fill: #94A3B8; -fx-font-style: italic;");
             grid.add(lblValide, 3, 0);
@@ -126,20 +234,19 @@ public class MesReservationsController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             rs.annulerReservation(res.getId());
-            chargerMesReservations(); // Rafraîchir la liste
+
+            chargerDonnees();
+            appliquerFiltreEtAfficher();
         }
     }
 
     private Image chargerImage(String url) {
         try {
             if (url != null && !url.isBlank()) {
-                if (url.startsWith("http")) {
-                    return new Image(url, true);
-                }
+                if (url.startsWith("http")) return new Image(url, true);
+
                 URL resUrl = getClass().getResource(url.startsWith("/") ? url : "/" + url);
-                if (resUrl != null) {
-                    return new Image(resUrl.toExternalForm(), true);
-                }
+                if (resUrl != null) return new Image(resUrl.toExternalForm(), true);
             }
         } catch (Exception e) {
             System.err.println("Erreur chargement image : " + url);
@@ -151,7 +258,7 @@ public class MesReservationsController {
         if (statut == null) statut = "";
         String s = statut.toLowerCase();
 
-        if (s.contains("attente")) {
+        if (s.contains("attente") || s.isBlank()) {
             return "-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-background-radius: 20; -fx-font-weight: bold;";
         }
         if (s.contains("confirm")) {
@@ -163,6 +270,9 @@ public class MesReservationsController {
         return "-fx-background-color: #E2E8F0; -fx-text-fill: #334155; -fx-background-radius: 20; -fx-font-weight: bold;";
     }
 
+    // =========================
+    //        NAV ACTIONS
+    // =========================
     @FXML
     private void allerAuCatalogue() {
         changerRoot("/CatalogueUser.fxml");
@@ -181,6 +291,7 @@ public class MesReservationsController {
                 return;
             }
             Parent root = FXMLLoader.load(loc);
+            // mieux que containerReservations parfois:
             containerReservations.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();

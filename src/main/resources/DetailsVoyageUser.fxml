@@ -1,40 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
 
-<VBox prefWidth="550.0" spacing="20.0" style="-fx-background-color: white; -fx-padding: 25;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsVoyageUserController">
-    <children>
-        <HBox alignment="CENTER_LEFT">
-            <children>
-                <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold;" text="VOYAGE" />
-                <Region HBox.hgrow="ALWAYS" />
-                <Label fx:id="badgeStatus" text="STATUT" />
-            </children>
+<BorderPane prefWidth="1200" prefHeight="720"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.DetailsVoyageUserController"
+            stylesheets="@details.css"
+            styleClass="page">
+
+    <!-- TOP -->
+    <top>
+        <HBox styleClass="topbar">
+            <padding><Insets left="24" right="24" top="14" bottom="14"/></padding>
+            <Button text="← Retour au catalogue"
+                    onAction="#retourCatalogue"
+                    styleClass="linkBtn"/>
         </HBox>
+    </top>
 
-        <ImageView fx:id="imgVoyage" fitHeight="250.0" fitWidth="500.0" preserveRatio="true" />
+    <!-- CENTER -->
+    <center>
+        <HBox spacing="28" styleClass="content">
+            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
 
-        <Text fx:id="txtDescription" wrappingWidth="480.0" />
+            <!-- LEFT CARD -->
+            <VBox spacing="18" HBox.hgrow="ALWAYS" styleClass="card">
+                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
 
-        <GridPane hgap="20.0" vgap="10.0">
-            <children>
-                <Label text="Dates :" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <Label fx:id="lblDates" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <Label text="Prix :" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                <Label fx:id="lblPrix" style="-fx-font-weight: bold; -fx-text-fill: #2D7A7B;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label text="Places :" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                <Label fx:id="lblPlaces" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            </children>
-        </GridPane>
-
-
-                <HBox alignment="CENTER_RIGHT" spacing="15.0">
-                    <children>
-                        <Button onAction="#fermer" style="-fx-background-color: #F1F5F9; -fx-text-fill: #475569;" text="Fermer" />
-                        <Button fx:id="btnReserver" onAction="#handleReservation" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="Réserver" />
-                    </children>
+                <HBox alignment="CENTER_LEFT">
+                    <Label fx:id="lblTitre" text="Voyage à SYDNEY" styleClass="title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="badgeStatus" text="DISPONIBLE" styleClass="badgeGreen"/>
                 </HBox>
-    </children>
-</VBox>
+
+                <!-- IMAGE -->
+                <StackPane styleClass="imageContainer">
+                    <ImageView fx:id="imgVoyage"
+                               fitHeight="300"
+                               preserveRatio="true"/>
+                    <Label fx:id="imageBadge"
+                           text="SYDNEY"
+                           styleClass="imageBadge"/>
+                </StackPane>
+
+                <!-- INFOS -->
+                <HBox spacing="14">
+                    <Label fx:id="lblDates" styleClass="chip infoChip"/>
+                    <Label fx:id="lblPrix" styleClass="chip priceChip"/>
+                    <Label fx:id="lblPlaces" styleClass="chip placesChip"/>
+                </HBox>
+
+                <Separator/>
+
+                <Label text="Découvre ta destination" styleClass="subtitle"/>
+                <Label fx:id="lblDescription"
+                       wrapText="true"
+                       styleClass="paragraph"/>
+            </VBox>
+
+            <!-- RIGHT CARD -->
+            <VBox spacing="18" prefWidth="360" styleClass="card">
+                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+
+                <Label text="Finaliser ma réservation" styleClass="titleSmall"/>
+
+                <VBox spacing="8">
+                    <Label text="Combien de personnes ?" styleClass="label"/>
+                    <Spinner fx:id="spNbPersonnes" prefHeight="40"/>
+                </VBox>
+
+                <Separator/>
+
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="ALWAYS"/>
+                        <ColumnConstraints halignment="RIGHT"/>
+                    </columnConstraints>
+
+                    <VBox spacing="14" styleClass="summaryBox">
+
+                        <HBox>
+                            <Label text="Prix unitaire" styleClass="muted"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblPrixUnitaire" styleClass="value"/>
+                        </HBox>
+
+                        <Separator/>
+
+                        <HBox>
+                            <Label text="Total à payer" styleClass="totalLabel"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblTotal" styleClass="totalValue"/>
+                        </HBox>
+
+                    </VBox>
+                </GridPane>
+
+                <Button text="Confirmer la réservation"
+                        onAction="#confirmerReservation"
+                        prefHeight="46"
+                        maxWidth="9999"
+                        styleClass="primaryBtn"/>
+
+                <Label text="Paiement sécurisé • Annulation selon conditions"
+                       styleClass="hint"/>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
