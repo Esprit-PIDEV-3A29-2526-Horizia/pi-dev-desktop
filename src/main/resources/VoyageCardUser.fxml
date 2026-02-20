@@ -12,19 +12,52 @@
       style="-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 12;
              -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.10), 14, 0, 0, 6);">
 
-    <!-- image + badge -->
-    <StackPane>
-        <ImageView fx:id="imgVoyage" fitWidth="206" fitHeight="110" preserveRatio="false"
+    <!-- ================= IMAGE + BADGES ================= -->
+    <StackPane fx:id="imageZone">
+
+        <ImageView fx:id="imgVoyage"
+                   fitWidth="206" fitHeight="110"
+                   preserveRatio="false"
                    style="-fx-background-radius: 14; -fx-border-radius: 14;"/>
+
+        <!-- Badge statut (DISPONIBLE / COMPLET) -->
         <Label fx:id="badgeStatus" text="DISPONIBLE"
                StackPane.alignment="TOP_LEFT"
                style="-fx-background-color: #DCFCE7; -fx-text-fill: #059669;
-                      -fx-background-radius: 14; -fx-padding: 3 10; -fx-font-weight: bold; -fx-font-size: 11;"/>
-        <StackPane.margin>
-            <Insets top="8" left="8" right="0" bottom="0"/>
-        </StackPane.margin>
+                      -fx-background-radius: 14; -fx-padding: 3 10;
+                      -fx-font-weight: bold; -fx-font-size: 11;">
+            <StackPane.margin>
+                <Insets top="8" left="8" right="0" bottom="0"/>
+            </StackPane.margin>
+        </Label>
+
+        <!-- Chip météo (glass) -->
+        <HBox fx:id="meteoChip"
+              spacing="6"
+              alignment="CENTER_LEFT"
+              StackPane.alignment="BOTTOM_LEFT"
+              visible="false"
+              managed="false"
+              style="-fx-background-color: rgba(15,23,42,0.65);
+                     -fx-background-radius: 14;
+                     -fx-padding: 6 10;
+                     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 8, 0, 0, 2);">
+            <StackPane.margin>
+                <Insets bottom="8" left="8"/>
+            </StackPane.margin>
+
+            <ImageView fx:id="imgMeteo"
+                       fitWidth="18" fitHeight="18"
+                       preserveRatio="true"/>
+
+            <Label fx:id="lblMeteo"
+                   text="Météo..."
+                   style="-fx-text-fill: white; -fx-font-size: 11; -fx-font-weight: bold;"/>
+        </HBox>
+
     </StackPane>
 
+    <!-- ================= INFOS ================= -->
     <Label fx:id="lblDestination" text="Tokyo"
            style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
 
@@ -39,7 +72,7 @@
                style="-fx-text-fill: #64748B; -fx-font-size: 11;"/>
     </HBox>
 
-    <!-- bouton (orange comme capture) -->
+    <!-- ================= ACTION ================= -->
     <Button fx:id="btnReserver" text="Réserver" onAction="#handleReserver"
             prefHeight="30" maxWidth="9999"
             style="-fx-background-color: #E8B156; -fx-text-fill: white;

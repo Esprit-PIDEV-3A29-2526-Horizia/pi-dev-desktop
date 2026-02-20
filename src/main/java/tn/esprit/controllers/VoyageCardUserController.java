@@ -10,6 +10,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import tn.esprit.api.weather.OpenWeatherService;
+import tn.esprit.api.weather.WeatherInfo;
 import tn.esprit.entites.Voyage;
 
 import java.io.IOException;
@@ -19,6 +21,13 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 
 public class VoyageCardUserController {
 
@@ -26,11 +35,16 @@ public class VoyageCardUserController {
     @FXML private ImageView imgVoyage;
     @FXML private Label lblDestination, lblPrix, lblDates, lblPlacesInfo, badgeStatus;
     @FXML private Button btnReserver;
+    @FXML private StackPane imageZone;
+
 
     private Voyage voyage;
 
     private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRANCE);
+    private OpenWeatherService meteoService;
+    private ConcurrentHashMap<String, WeatherInfo> cacheMeteo;
+    private ExecutorService executor;
 
     public void setData(Voyage v) {
         this.voyage = v;
@@ -50,10 +64,70 @@ public class VoyageCardUserController {
         if (lblPlacesInfo != null) lblPlacesInfo.setText("Places restantes : " + restantes);
 
         loadImage(v.getImage_url());
+        ajouterChipMeteoSurImage(v.getDestination());
         applyStyles(restantes);
         setupHoverEffects();
     }
+    private void ajouterChipMeteoSurImage(String destination) {
+        if (imageZone == null) return;
+        if (meteoService == null || cacheMeteo == null || executor == null) return; // sécurité
 
+        // éviter de dupliquer à chaque refresh
+        imageZone.getChildren().removeIf(n -> "meteo-chip".equals(n.getId()));
+
+        HBox chip = creerChipMeteo(destination);
+        chip.setId("meteo-chip");
+
+        StackPane.setAlignment(chip, Pos.TOP_RIGHT);
+        StackPane.setMargin(chip, new Insets(8, 8, 0, 0));
+
+        imageZone.getChildren().add(chip);
+    }
+
+    private HBox creerChipMeteo(String destination) {
+        HBox chip = new HBox(6);
+        chip.setAlignment(Pos.CENTER_LEFT);
+        chip.setPadding(new Insets(4, 8, 4, 8));
+        chip.setStyle("-fx-background-color: rgba(15,23,42,0.65); -fx-background-radius: 14;");
+
+        ImageView icon = new ImageView();
+        icon.setFitWidth(18);
+        icon.setFitHeight(18);
+        icon.setPreserveRatio(true);
+
+        Label lbl = new Label("Météo...");
+        lbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10;");
+
+        chip.getChildren().addAll(icon, lbl);
+
+        String key = (destination == null) ? "" : destination.trim().toLowerCase();
+
+        // Cache
+        WeatherInfo cached = cacheMeteo.get(key);
+        if (cached != null) {
+            lbl.setText(Math.round(cached.getTemp()) + "°C • " + cached.getDescription());
+            icon.setImage(new Image(cached.getIconUrl(), true));
+            return chip;
+        }
+
+        // Appel API en background
+        executor.submit(() -> {
+            try {
+                WeatherInfo w = meteoService.getWeatherByCity(destination);
+                cacheMeteo.put(key, w);
+
+                Platform.runLater(() -> {
+                    lbl.setText(Math.round(w.getTemp()) + "°C • " + w.getDescription());
+                    icon.setImage(new Image(w.getIconUrl(), true));
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> lbl.setText("Météo indisponible"));
+            }
+        });
+
+        return chip;
+    }
     private void loadImage(String url) {
         if (imgVoyage == null) return;
 
@@ -152,4 +226,12 @@ public class VoyageCardUserController {
         return (d == null) ? null : d.toLocalDate();
     }
     private String safe(String s) { return (s == null) ? "" : s; }
+
+    public void setMeteo(OpenWeatherService meteoService,
+                         ConcurrentHashMap<String, WeatherInfo> cacheMeteo,
+                         ExecutorService executor) {
+        this.meteoService = meteoService;
+        this.cacheMeteo = cacheMeteo;
+        this.executor = executor;
+    }
 }

@@ -1,26 +1,37 @@
 package tn.esprit.controllers;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import tn.esprit.api.weather.OpenWeatherService;
+import tn.esprit.api.weather.WeatherInfo;
 import tn.esprit.entites.Voyage;
 import tn.esprit.services.VoyageService;
+import tn.esprit.utils.Config;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class CatalogueUserController implements Initializable {
@@ -29,7 +40,6 @@ public class CatalogueUserController implements Initializable {
     @FXML private TextField searchField;
     @FXML private ComboBox<String> comboTri;
 
-    // chips
     @FXML private Button btnTous;
     @FXML private Button btnTunisie;
     @FXML private Button btnEurope;
@@ -37,16 +47,19 @@ public class CatalogueUserController implements Initializable {
 
     private final VoyageService vs = new VoyageService();
     private List<Voyage> listeOriginale = new ArrayList<>();
+    private static final int NB_COLONNES = 3;
 
-    private static final int NB_COLONNES = 3; // mets 4 si tu veux 4 cartes / ligne
-
-    // filtre actif
     private enum Filtre { TOUS, TUNISIE, EUROPE, PROMOS }
     private Filtre filtreActif = Filtre.TOUS;
 
+    private final OpenWeatherService meteoService =
+            new OpenWeatherService(Config.get("openweather.apiKey"));
+
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ConcurrentHashMap<String, WeatherInfo> cacheMeteo = new ConcurrentHashMap<>();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
         listeOriginale = vs.afficher();
         if (listeOriginale == null) listeOriginale = new ArrayList<>();
 
@@ -70,38 +83,13 @@ public class CatalogueUserController implements Initializable {
         appliquerTout();
     }
 
-    // ======= FILTRES (buttons) =======
-
-    @FXML
-    private void filtrerTous() {
-        filtreActif = Filtre.TOUS;
-        setChipActive(btnTous);
-        appliquerTout();
-    }
-
-    @FXML
-    private void filtrerTunisie() {
-        filtreActif = Filtre.TUNISIE;
-        setChipActive(btnTunisie);
-        appliquerTout();
-    }
-
-    @FXML
-    private void filtrerEurope() {
-        filtreActif = Filtre.EUROPE;
-        setChipActive(btnEurope);
-        appliquerTout();
-    }
-
-    @FXML
-    private void filtrerPromos() {
-        filtreActif = Filtre.PROMOS;
-        setChipActive(btnPromos);
-        appliquerTout();
-    }
+    // ======= FILTRES =======
+    @FXML private void filtrerTous()   { filtreActif = Filtre.TOUS;   setChipActive(btnTous);   appliquerTout(); }
+    @FXML private void filtrerTunisie(){ filtreActif = Filtre.TUNISIE;setChipActive(btnTunisie);appliquerTout(); }
+    @FXML private void filtrerEurope() { filtreActif = Filtre.EUROPE; setChipActive(btnEurope); appliquerTout(); }
+    @FXML private void filtrerPromos() { filtreActif = Filtre.PROMOS; setChipActive(btnPromos); appliquerTout(); }
 
     private void setChipActive(Button active) {
-        // style actif/inactif (simple)
         Button[] all = {btnTous, btnTunisie, btnEurope, btnPromos};
         for (Button b : all) {
             if (b == null) continue;
@@ -115,67 +103,49 @@ public class CatalogueUserController implements Initializable {
         }
     }
 
-    // ======= APPLIQUER filtres + recherche + tri =======
-
+    // ======= APPLIQUER =======
     private void appliquerTout() {
         String keyword = safeLower(searchField != null ? searchField.getText() : "");
 
         List<Voyage> resultats = listeOriginale.stream()
-
-                // 1) filtre chips
+                .filter(Objects::nonNull)
                 .filter(this::matchFiltreActif)
-
-                // 2) recherche text (titre ou destination)
                 .filter(v -> keyword.isBlank()
                         || safeLower(v.getDestination()).contains(keyword)
                         || safeLower(v.getTitre()).contains(keyword))
-
                 .collect(Collectors.toList());
 
-        // 3) tri
         String tri = comboTri != null ? comboTri.getValue() : null;
-        if (tri != null) {
-            resultats = trierStreams(resultats, tri);
-        }
+        if (tri != null) resultats = trierStreams(resultats, tri);
 
         chargerVoyages(resultats);
     }
 
     private boolean matchFiltreActif(Voyage v) {
-        if (v == null) return false;
-
         String dest = safeLower(v.getDestination());
+        String titre = safeLower(v.getTitre()); // ✅ ajout
 
         return switch (filtreActif) {
             case TOUS -> true;
 
-            case TUNISIE -> containsAny(dest,
-                    "tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte");
+            case TUNISIE -> containsAny(dest, "tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte")
+                    || containsAny(titre,"tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte");
 
             case EUROPE -> containsAny(dest,
-                    // Espagne
-                    "barcelone", "madrid", "valence", "seville", "séville",
-                    // France
-                    "paris", "lyon", "marseille", "nice",
-                    // Italie
-                    "rome", "milan", "venise", "florence",
-                    // Royaume-Uni
-                    "londres", "london", "manchester",
-                    // Allemagne
-                    "berlin", "munich", "munchen",
-                    // Portugal
-                    "lisbonne", "lisbon", "porto",
-                    // Pays-Bas
-                    "amsterdam", "rotterdam",
-                    // Suisse
-                    "geneve", "genève", "zurich", "suisse",
-                    // Belgique
-                    "bruxelles", "brussels",
-                    // Autres
-                    "vienna", "vienne", "prague", "budapest", "athenes", "athènes"
-            );
+                    "barcelone","madrid","valence","seville","séville",
+                    "paris","lyon","marseille","nice",
+                    "rome","milan","venise","florence",
+                    "londres","london","manchester",
+                    "berlin","munich","munchen",
+                    "lisbonne","lisbon","porto",
+                    "amsterdam","rotterdam",
+                    "geneve","genève","zurich","suisse",
+                    "bruxelles","brussels",
+                    "vienna","vienne","prague","budapest","athenes","athènes"
+            )
+                    // ✅ ajout : si “Europe” est dans le titre
+                    || titre.contains("europe");
 
-            //exemple promo: prix <= 2000 (modifie selon ton besoin)
             case PROMOS -> v.getPrix() <= 2000;
         };
     }
@@ -183,33 +153,18 @@ public class CatalogueUserController implements Initializable {
     private boolean containsAny(String text, String... keys) {
         if (text == null) return false;
         for (String k : keys) {
-            if (k != null && !k.isBlank() && text.contains(k)) return true;
+            if (k != null && !k.isBlank() && text.contains(k.toLowerCase())) return true;
         }
         return false;
     }
 
     private List<Voyage> trierStreams(List<Voyage> base, String tri) {
         return switch (tri) {
-            case "Prix : Croissant" -> base.stream()
-                    .sorted(Comparator.comparingDouble(Voyage::getPrix))
-                    .collect(Collectors.toList());
-
-            case "Prix : Décroissant" -> base.stream()
-                    .sorted(Comparator.comparingDouble(Voyage::getPrix).reversed())
-                    .collect(Collectors.toList());
-
-            case "Date : Plus proche" -> base.stream()
-                    .sorted(Comparator.comparing(this::dateDepartAsLocalDate))
-                    .collect(Collectors.toList());
-
-            case "Destination : A-Z" -> base.stream()
-                    .sorted(Comparator.comparing(v -> safeLower(v.getDestination())))
-                    .collect(Collectors.toList());
-
-            case "Places restantes : Desc" -> base.stream()
-                    .sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed())
-                    .collect(Collectors.toList());
-
+            case "Prix : Croissant" -> base.stream().sorted(Comparator.comparingDouble(Voyage::getPrix)).collect(Collectors.toList());
+            case "Prix : Décroissant" -> base.stream().sorted(Comparator.comparingDouble(Voyage::getPrix).reversed()).collect(Collectors.toList());
+            case "Date : Plus proche" -> base.stream().sorted(Comparator.comparing(this::dateDepartAsLocalDate)).collect(Collectors.toList());
+            case "Destination : A-Z" -> base.stream().sorted(Comparator.comparing(v -> safeLower(v.getDestination()))).collect(Collectors.toList());
+            case "Places restantes : Desc" -> base.stream().sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed()).collect(Collectors.toList());
             default -> base;
         };
     }
@@ -223,8 +178,7 @@ public class CatalogueUserController implements Initializable {
         return (s == null) ? "" : s.trim().toLowerCase();
     }
 
-    // ======= AFFICHAGE grid =======
-
+    // ======= GRID =======
     public void chargerVoyages(List<Voyage> voyages) {
         if (voyageGrid == null) return;
 
@@ -240,7 +194,11 @@ public class CatalogueUserController implements Initializable {
                 VBox card = loader.load();
 
                 VoyageCardUserController controller = loader.getController();
-                if (controller != null) controller.setData(v);
+                if (controller != null) {
+                    // ✅ passe aussi les services météo + cache + executor
+                    controller.setMeteo(meteoService, cacheMeteo, executor);
+                    controller.setData(v);
+                }
 
                 voyageGrid.add(card, column, row);
 
@@ -255,12 +213,8 @@ public class CatalogueUserController implements Initializable {
         }
     }
 
-    // ======= NAVIGATION =======
-
-    @FXML
-    private void handleRecherche() {
-        appliquerTout();
-    }
+    // ======= NAV =======
+    @FXML private void handleRecherche() { appliquerTout(); }
 
     @FXML
     private void afficherCatalogue() {
@@ -276,6 +230,8 @@ public class CatalogueUserController implements Initializable {
 
     @FXML
     private void handleDeconnexion(ActionEvent event) {
+        // ✅ important : stop executor
+        executor.shutdownNow();
         changerScene(event, "/Login.fxml", "Connexion");
     }
 
