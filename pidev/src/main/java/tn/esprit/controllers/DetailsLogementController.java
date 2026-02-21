@@ -37,7 +37,7 @@ public class DetailsLogementController implements Initializable {
     private ImageView mainImage;
 
     @FXML
-    private Label descriptionLabel; // Correspond à equipement dans l'entité
+    private Label descriptionLabel;
 
     @FXML
     private Label typeLabel;
@@ -55,8 +55,12 @@ public class DetailsLogementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Récupérer le logement sélectionné depuis Dashboard
-        logement selectedLogement = Dashboard.getSelectedLogement();
+        // CORRECTION: Utiliser AdminDashboardController au lieu de Dashboard
+        logement selectedLogement = AdminDashboardController.getSelectedLogement();
+
+        System.out.println("=== Initialisation DetailsLogementController ===");
+        System.out.println("Logement sélectionné: " + (selectedLogement != null ? selectedLogement.getNom() : "null"));
+
         if (selectedLogement != null) {
             // Remplir les labels avec les données du logement
             nomLabel.setText(selectedLogement.getNom());
@@ -70,7 +74,7 @@ public class DetailsLogementController implements Initializable {
             adresseLabel.setText("📍 Adresse : " + selectedLogement.getAdresse());
             capaciteLabel.setText("👥 Capacité : " + selectedLogement.getCapacite());
             equipementLabel.setText("✨ Équipements : " + selectedLogement.getEquipement());
-            descriptionLabel.setText(selectedLogement.getEquipement()); // Utilise equipement comme description
+            descriptionLabel.setText(selectedLogement.getEquipement());
 
             // Charger l'image
             String imagePath = selectedLogement.getImage();
@@ -83,33 +87,36 @@ public class DetailsLogementController implements Initializable {
                     }
                 } catch (Exception e) {
                     System.err.println("Erreur chargement image : " + e.getMessage());
-                    // Optionnel : définir une image par défaut
                 }
             }
+
+            System.out.println("✅ Détails du logement chargés: " + selectedLogement.getNom());
         } else {
             // Gérer le cas où aucun logement n'est sélectionné
             nomLabel.setText("Aucun logement sélectionné");
             showAlert("Erreur", "Aucun logement sélectionné.");
+            System.err.println("❌ Erreur: Aucun logement sélectionné");
         }
     }
 
     @FXML
     private void retourListe() {
-        // Revenir à la vue des logements
-        Dashboard.loadView("/fxml/Logements.fxml");
+        // CORRECTION: Utiliser AdminDashboardController.loadPage() au lieu de Dashboard.loadView()
+        AdminDashboardController.loadPage("/fxml/Logements.fxml");
     }
 
     @FXML
     private void modifierLogement() {
         // Charger la vue de modification
-        Dashboard.loadView("/fxml/modifierLogement.fxml");
+        AdminDashboardController.loadPage("/fxml/modifierLogement.fxml");
     }
 
     @FXML
     private void supprimerLogement() {
-        logement selectedLogement = Dashboard.getSelectedLogement();
+        // CORRECTION: Utiliser AdminDashboardController.getSelectedLogement()
+        logement selectedLogement = AdminDashboardController.getSelectedLogement();
+
         if (selectedLogement != null) {
-            // Confirmation avant suppression
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             confirmation.setTitle("Confirmation de suppression");
             confirmation.setHeaderText("Supprimer le logement : " + selectedLogement.getNom());
@@ -120,12 +127,14 @@ public class DetailsLogementController implements Initializable {
                         servicelogement.supprimer(selectedLogement.getId());
                         showAlert("Succès", "Logement supprimé avec succès.");
                         // Recharger la liste des logements
-                        Dashboard.loadView("/fxml/Logements.fxml");
+                        AdminDashboardController.loadPage("/fxml/Logements.fxml");
                     } catch (SQLException e) {
                         showAlert("Erreur", "Erreur lors de la suppression : " + e.getMessage());
                     }
                 }
             });
+        } else {
+            showAlert("Erreur", "Aucun logement sélectionné.");
         }
     }
 

@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -24,7 +25,7 @@ public class AdminDashboardController {
     @FXML private Label lblAdminEmail;
     @FXML private AnchorPane contentArea;
     @FXML private StackPane contentPane;
-
+    @FXML private ScrollPane mainScrollPane;
     // Labels pour les statistiques
     @FXML private Label totalMembresLabel;
     @FXML private Label totalAdminsLabel;
@@ -36,7 +37,9 @@ public class AdminDashboardController {
     @FXML private Button btnProfils;
     @FXML private Button btnStats;
     @FXML private Button btnSettings;
-
+    @FXML private Button btnVoyages;
+    @FXML private Button btnReservations;
+    @FXML private Button btnLogements;
     private User currentUser;
     private Serviceuser serviceUser = new Serviceuser();
     private static logement selectedLogement;
@@ -116,7 +119,7 @@ public class AdminDashboardController {
 
     private void animatePageTransition(String fxmlPath) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(AdminDashboardController.class.getResource(fxmlPath));
             Parent newContent = loader.load();
 
             Object controller = loader.getController();
@@ -147,10 +150,10 @@ public class AdminDashboardController {
         setActiveButton(btnSettings);
     }
 
-    void loadPage(String fxmlFile) {
+    static void loadPage(String fxmlFile) {
         try {
             System.out.println("loadPage: " + fxmlFile);
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
+            FXMLLoader loader = new FXMLLoader(AdminDashboardController.class.getResource(fxmlFile));
 
             if (loader.getLocation() == null) {
                 System.err.println("❌ Fichier introuvable: " + fxmlFile);
@@ -163,40 +166,71 @@ public class AdminDashboardController {
 
             // Membres
             if (controller instanceof MemberListController) {
-                ((MemberListController) controller).setDashboardController(this);
+                ((MemberListController) controller).setDashboardController(null);
                 System.out.println("✅ DashboardController passé à MemberListController");
             }
             if (controller instanceof AddMemberController) {
-                ((AddMemberController) controller).setDashboardController(this);
+                ((AddMemberController) controller).setDashboardController(null);
                 System.out.println("✅ DashboardController passé à AddMemberController");
             }
             if (controller instanceof EditMemberController) {
-                ((EditMemberController) controller).setDashboardController(this);
+                ((EditMemberController) controller).setDashboardController(null);
                 System.out.println("✅ DashboardController passé à EditMemberController");
             }
 
             // Profils
             if (controller instanceof ProfilListController) {
-                ((ProfilListController) controller).setDashboardController(this);
+                ((ProfilListController) controller).setDashboardController(null);
                 System.out.println("✅ DashboardController passé à ProfilListController");
             }
             if (controller instanceof AddProfilController) {
-                ((AddProfilController) controller).setDashboardController(this);
+                ((AddProfilController) controller).setDashboardController(null);
                 System.out.println("✅ DashboardController passé à AddProfilController");
             }
 
-            contentArea.getChildren().setAll(page);
-            AnchorPane.setTopAnchor(page, 0.0);
-            AnchorPane.setBottomAnchor(page, 0.0);
-            AnchorPane.setLeftAnchor(page, 0.0);
-            AnchorPane.setRightAnchor(page, 0.0);
+            // Logements
+            if (controller instanceof LogementsController) {
+                System.out.println("✅ DashboardController passé à LogementsController");
+            }
+            if (controller instanceof DetailsLogementController) {
+                System.out.println("✅ DashboardController passé à DetailsLogementController");
+            }
+            if (controller instanceof AjoutLogementController) {
+                System.out.println("✅ DashboardController passé à AjoutLogementController");
+            }
+            if (controller instanceof ModifierLogementController) {
+                System.out.println("✅ DashboardController passé à ModifierLogementController");
+            }
 
-            System.out.println("✅ Page affichée dans contentArea");
+            // Trouver le contentArea du AdminDashboardController
+            // Comme loadPage est static, on doit accéder à l'instance via une méthode statique
+            AdminDashboardController instance = getInstance();
+            if (instance != null && instance.contentArea != null) {
+                instance.contentArea.getChildren().setAll(page);
+                AnchorPane.setTopAnchor(page, 0.0);
+                AnchorPane.setBottomAnchor(page, 0.0);
+                AnchorPane.setLeftAnchor(page, 0.0);
+                AnchorPane.setRightAnchor(page, 0.0);
+                System.out.println("✅ Page affichée dans contentArea");
+            } else {
+                System.err.println("❌ Erreur: contentArea est null");
+            }
 
         } catch (IOException e) {
             System.err.println("❌ Erreur loadPage pour " + fxmlFile);
             e.printStackTrace();
         }
+    }
+
+    // Instance unique du controller
+    private static AdminDashboardController instance;
+
+    public AdminDashboardController() {
+        instance = this;
+    }
+
+    public static AdminDashboardController getInstance() {
+        return instance;
     }
 
     public void setContent(Parent content) {
@@ -213,6 +247,9 @@ public class AdminDashboardController {
         if (btnProfils != null) btnProfils.getStyleClass().remove("active");
         if (btnStats != null) btnStats.getStyleClass().remove("active");
         if (btnSettings != null) btnSettings.getStyleClass().remove("active");
+        if (btnVoyages != null) btnVoyages.getStyleClass().remove("active");
+        if (btnReservations != null) btnReservations.getStyleClass().remove("active");
+        if (btnLogements != null) btnLogements.getStyleClass().remove("active");
 
         if (activeButton != null) {
             activeButton.getStyleClass().add("active");
@@ -231,7 +268,7 @@ public class AdminDashboardController {
     @FXML
     private void handleLogout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(AdminDashboardController.class.getResource("/fxml/Login.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) lblWelcome.getScene().getWindow();
@@ -245,26 +282,22 @@ public class AdminDashboardController {
         }
     }
 
-    // ✅ MÉTHODES CORRIGÉES POUR VOYAGES, RÉSERVATIONS ET LOGEMENTS
     @FXML
     private void showVoyages() {
         System.out.println("=== Chargement de la gestion des voyages ===");
         loadPage("/fxml/Voyages.fxml");
-        setActiveButton(null);
     }
 
     @FXML
     private void showReservations() {
         System.out.println("=== Chargement de la gestion des réservations ===");
         loadPage("/fxml/Reservations.fxml");
-        setActiveButton(null);
     }
 
     @FXML
     private void showlogement(ActionEvent event) {
         System.out.println("=== Chargement de la gestion des logements ===");
         loadPage("/fxml/Logements.fxml");
-        setActiveButton(null);
     }
 
     public static void setSelectedLogement(logement log) {
@@ -274,4 +307,5 @@ public class AdminDashboardController {
     public static logement getSelectedLogement() {
         return selectedLogement;
     }
+
 }

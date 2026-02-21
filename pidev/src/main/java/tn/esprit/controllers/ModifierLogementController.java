@@ -60,7 +60,7 @@ public class ModifierLogementController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Récupérer le logement sélectionné
-        selectedLogement = Dashboard.getSelectedLogement();
+        selectedLogement = AdminDashboardController.getSelectedLogement();
         if (selectedLogement != null) {
             // Pré-remplir les champs avec les données existantes
             typeComboBox.setValue(selectedLogement.getType());
@@ -78,7 +78,7 @@ public class ModifierLogementController implements Initializable {
 
         // Actions des boutons
         modifierBtn.setOnAction(e -> modifierLogement());
-        annulerBtn.setOnAction(e -> Dashboard.loadView("/fxml/Logements.fxml"));
+        annulerBtn.setOnAction(e ->AdminDashboardController.loadPage("/fxml/Logements.fxml"));
     }
 
     @FXML
@@ -125,7 +125,7 @@ public class ModifierLogementController implements Initializable {
         try {
             servicelogement.modifier(selectedLogement);
             showAlert("Succès", "Logement modifié avec succès.");
-            Dashboard.loadView("/fxml/Logements.fxml"); // Revenir à la liste
+            AdminDashboardController.loadPage("/fxml/Logements.fxml"); // Revenir à la liste
         } catch (SQLException e) {
             showAlert("Erreur", "Erreur lors de la modification : " + e.getMessage());
         }
