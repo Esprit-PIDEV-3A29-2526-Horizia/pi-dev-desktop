@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-
 public class DetailsLogementController implements Initializable {
 
     @FXML
@@ -53,61 +52,80 @@ public class DetailsLogementController implements Initializable {
 
     private Servicelogement servicelogement = new Servicelogement();
 
+    private Dashboard dashboardInstance;
+
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Récupérer le logement sélectionné depuis Dashboard
-        logement selectedLogement = Dashboard.getSelectedLogement();
+        // Récupérer l'instance Dashboard via singleton
+        dashboardInstance = Dashboard.getInstance();
+
+        if (dashboardInstance == null) {
+            System.err.println("❌ Impossible de récupérer l'instance du Dashboard !");
+            showAlert("Erreur", "Problème d'accès au Dashboard.");
+            return;
+        }
+
+        // Récupérer le logement sélectionné
+        logement selectedLogement = dashboardInstance.getSelectedLogement();
+
         if (selectedLogement != null) {
-            // Remplir les labels avec les données du logement
-            nomLabel.setText(selectedLogement.getNom());
-            prixLabel.setText("Prix/Nuit : " + selectedLogement.getTarif_nuit() + " DT");
-            dispoBadge.setText(selectedLogement.isDisponibilite() ? "Disponible" : "Non disponible");
-            dispoBadge.setStyle(selectedLogement.isDisponibilite()
-                    ? "-fx-background-color: #28A745; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;"
-                    : "-fx-background-color: #DC3545; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;");
-
-            typeLabel.setText("🏠 Type : " + selectedLogement.getType());
-            adresseLabel.setText("📍 Adresse : " + selectedLogement.getAdresse());
-            capaciteLabel.setText("👥 Capacité : " + selectedLogement.getCapacite());
-            equipementLabel.setText("✨ Équipements : " + selectedLogement.getEquipement());
-            descriptionLabel.setText(selectedLogement.getEquipement()); // Utilise equipement comme description
-
-            // Charger l'image
-            String imagePath = selectedLogement.getImage();
-            if (imagePath != null && !imagePath.isEmpty()) {
-                try {
-                    if (imagePath.startsWith("http")) {
-                        mainImage.setImage(new Image(imagePath));
-                    } else {
-                        mainImage.setImage(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
-                    }
-                } catch (Exception e) {
-                    System.err.println("Erreur chargement image : " + e.getMessage());
-                    // Optionnel : définir une image par défaut
-                }
-            }
+            remplirDetails(selectedLogement);
         } else {
-            // Gérer le cas où aucun logement n'est sélectionné
             nomLabel.setText("Aucun logement sélectionné");
             showAlert("Erreur", "Aucun logement sélectionné.");
+        }
+    }
+    private void remplirDetails(logement selectedLogement) {
+        // Remplir les labels avec les données du logement
+        nomLabel.setText(selectedLogement.getNom());
+        prixLabel.setText("Prix/Nuit : " + selectedLogement.getTarif_nuit() + " DT");
+        dispoBadge.setText(selectedLogement.isDisponibilite() ? "Disponible" : "Non disponible");
+        dispoBadge.setStyle(selectedLogement.isDisponibilite()
+                ? "-fx-background-color: #28A745; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;"
+                : "-fx-background-color: #DC3545; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;");
+
+        typeLabel.setText("🏠 Type : " + selectedLogement.getType());
+        adresseLabel.setText("📍 Adresse : " + selectedLogement.getAdresse());
+        capaciteLabel.setText("👥 Capacité : " + selectedLogement.getCapacite());
+        equipementLabel.setText("✨ Équipements : " + selectedLogement.getEquipement());
+        descriptionLabel.setText(selectedLogement.getEquipement()); // Utilise equipement comme description
+
+        // Charger l'image
+        String imagePath = selectedLogement.getImage();
+        if (imagePath != null && !imagePath.isEmpty()) {
+            try {
+                if (imagePath.startsWith("http")) {
+                    mainImage.setImage(new Image(imagePath));
+                } else {
+                    mainImage.setImage(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
+                }
+            } catch (Exception e) {
+                System.err.println("Erreur chargement image : " + e.getMessage());
+                // Optionnel : définir une image par défaut
+            }
         }
     }
 
     @FXML
     private void retourListe() {
-        // Revenir à la vue des logements
-        Dashboard.loadView("/fxml/Logements.fxml");
+        if (dashboardInstance != null) {
+            dashboardInstance.loadView("/fxml/Logements.fxml");
+        }
     }
 
     @FXML
     private void modifierLogement() {
-        // Charger la vue de modification
-        Dashboard.loadView("/fxml/modifierLogement.fxml");
+        if (dashboardInstance != null) {
+            dashboardInstance.loadView("/fxml/modifierLogement.fxml");
+        }
     }
 
     @FXML
     private void supprimerLogement() {
-        logement selectedLogement = Dashboard.getSelectedLogement();
+        if (dashboardInstance == null) return;
+
+        logement selectedLogement = dashboardInstance.getSelectedLogement();
         if (selectedLogement != null) {
             // Confirmation avant suppression
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
@@ -120,7 +138,7 @@ public class DetailsLogementController implements Initializable {
                         servicelogement.supprimer(selectedLogement.getId());
                         showAlert("Succès", "Logement supprimé avec succès.");
                         // Recharger la liste des logements
-                        Dashboard.loadView("/fxml/Logements.fxml");
+                        dashboardInstance.loadView("/fxml/Logements.fxml");
                     } catch (SQLException e) {
                         showAlert("Erreur", "Erreur lors de la suppression : " + e.getMessage());
                     }
@@ -132,6 +150,7 @@ public class DetailsLogementController implements Initializable {
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

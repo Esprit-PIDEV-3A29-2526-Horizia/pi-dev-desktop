@@ -243,9 +243,14 @@ public class AjoutLogementController {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'ajout : " + e.getMessage());
         }
     }
-
     private void retourListe() {
-        Dashboard.loadView("/fxml/Logements.fxml");
+        // Récupérer l'instance du Dashboard
+        Dashboard dashboard = (Dashboard) ajouterBtn.getScene().getRoot().getUserData();
+        if (dashboard != null) {
+            dashboard.loadView("/fxml/Logements.fxml");
+        } else {
+            System.err.println("❌ Impossible de récupérer l'instance du Dashboard !");
+        }
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

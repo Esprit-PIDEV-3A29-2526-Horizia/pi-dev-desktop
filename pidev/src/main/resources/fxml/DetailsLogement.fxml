@@ -8,7 +8,7 @@
 <?import javafx.scene.text.Font?>
 
 <VBox prefHeight="700.0" prefWidth="950.0" spacing="0" style="-fx-background-color: #F8F9FA;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsLogementController">
-
+    <Label text="TEST DETAILS PAGE" />
     <!-- Header -->
     <HBox alignment="CENTER_LEFT" prefHeight="120.0" spacing="20" style="-fx-background-color: linear-gradient(to right, #4A90A4, #5BA3B7); -fx-padding: 0 40;">
         <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">

@@ -55,14 +55,35 @@ public class ModifierLogementController implements Initializable {
     private Button annulerBtn;
 
     private Servicelogement servicelogement = new Servicelogement();
+
+    // ⚠️ On utilise maintenant l'instance de Dashboard
+    private Dashboard dashboardInstance;
     private logement selectedLogement;
+
+    public void setDashboardInstance(Dashboard dashboard) {
+        this.dashboardInstance = dashboard;
+        this.selectedLogement = dashboard.getSelectedLogement();
+        remplirChamps();
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Récupérer le logement sélectionné
-        selectedLogement = Dashboard.getSelectedLogement();
+        // Les boutons et switch
+        modifierBtn.setOnAction(e -> modifierLogement());
+        annulerBtn.setOnAction(e -> {
+            if (dashboardInstance != null) {
+                dashboardInstance.loadView("/fxml/Logements.fxml");
+            }
+        });
+
+        switchBackground.setOnMouseClicked(e -> {
+            disponibiliteToggle.setSelected(!disponibiliteToggle.isSelected());
+            updateSwitchUI();
+        });
+    }
+
+    private void remplirChamps() {
         if (selectedLogement != null) {
-            // Pré-remplir les champs avec les données existantes
             typeComboBox.setValue(selectedLogement.getType());
             nomField.setText(selectedLogement.getNom());
             adresseField.setText(selectedLogement.getAdresse());
@@ -71,33 +92,22 @@ public class ModifierLogementController implements Initializable {
             equipementField.setText(selectedLogement.getEquipement());
             imageField.setText(selectedLogement.getImage());
             disponibiliteToggle.setSelected(selectedLogement.isDisponibilite());
-            updateSwitchUI(); // Mettre à jour l'UI du switch
+            updateSwitchUI();
         } else {
             showAlert("Erreur", "Aucun logement sélectionné pour la modification.");
         }
-
-        // Actions des boutons
-        modifierBtn.setOnAction(e -> modifierLogement());
-        annulerBtn.setOnAction(e -> Dashboard.loadView("/fxml/Logements.fxml"));
-    }
-
-    @FXML
-    private void handleSwitchClick() {
-        // Inverser l'état du toggle
-        disponibiliteToggle.setSelected(!disponibiliteToggle.isSelected());
-        updateSwitchUI();
     }
 
     private void updateSwitchUI() {
         boolean isSelected = disponibiliteToggle.isSelected();
         if (isSelected) {
             switchBackground.setStyle("-fx-background-color: #2ecc71; -fx-background-radius: 13; -fx-padding: 2;");
-            switchCircle.setTranslateX(24); // Déplacer le cercle à droite
+            switchCircle.setTranslateX(24);
             disponibiliteLabel.setText("Disponible");
             disponibiliteLabel.setTextFill(Color.web("#2ecc71"));
         } else {
             switchBackground.setStyle("-fx-background-color: #e74c3c; -fx-background-radius: 13; -fx-padding: 2;");
-            switchCircle.setTranslateX(0); // Remettre à gauche
+            switchCircle.setTranslateX(0);
             disponibiliteLabel.setText("Non disponible");
             disponibiliteLabel.setTextFill(Color.web("#e74c3c"));
         }
@@ -112,7 +122,7 @@ public class ModifierLogementController implements Initializable {
             return;
         }
 
-        // Mettre à jour l'objet logement avec les nouvelles valeurs
+        // Mise à jour des données
         selectedLogement.setType(typeComboBox.getValue());
         selectedLogement.setNom(nomField.getText());
         selectedLogement.setAdresse(adresseField.getText());
@@ -125,7 +135,9 @@ public class ModifierLogementController implements Initializable {
         try {
             servicelogement.modifier(selectedLogement);
             showAlert("Succès", "Logement modifié avec succès.");
-            Dashboard.loadView("/fxml/Logements.fxml"); // Revenir à la liste
+            if (dashboardInstance != null) {
+                dashboardInstance.loadView("/fxml/Logements.fxml");
+            }
         } catch (SQLException e) {
             showAlert("Erreur", "Erreur lors de la modification : " + e.getMessage());
         }
@@ -134,6 +146,7 @@ public class ModifierLogementController implements Initializable {
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
     }

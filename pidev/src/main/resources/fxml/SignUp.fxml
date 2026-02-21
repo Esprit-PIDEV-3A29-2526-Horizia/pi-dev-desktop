@@ -17,10 +17,10 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: linear-gradient(to bottom right, #1e3c72, #2a5298);" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.SignUpController">
+<AnchorPane prefHeight="700.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom right, #1e3c72, #2a5298);" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.SignUpController">
     <children>
         <!-- Carte d'inscription centrale (plus grande) -->
-        <AnchorPane layoutX="250.0" layoutY="50.0" prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 20;">
+        <AnchorPane layoutX="250.0" layoutY="30.0" prefHeight="610.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 20;">
             <effect>
                 <DropShadow blurType="GAUSSIAN" height="30.0" radius="15.0" width="30.0">
                     <color>
@@ -157,7 +157,7 @@
                 </VBox>
 
                 <!-- Bouton S'inscrire -->
-                <Button fx:id="btnSignUp" layoutX="40.0" layoutY="520.0" mnemonicParsing="false" onAction="#handleSignUp" prefHeight="40.0" prefWidth="320.0" style="-fx-background-color: #10B981; -fx-background-radius: 25;" text="S'inscrire" textFill="white">
+                <Button fx:id="btnSignUp" layoutX="40.0" layoutY="580.0" mnemonicParsing="false" onAction="#handleSignUp" prefHeight="40.0" prefWidth="320.0" style="-fx-background-color: #10B981; -fx-background-radius: 25;" text="S'inscrire" textFill="white">
                     <cursor>
                         <Cursor fx:constant="HAND" />
                     </cursor>
@@ -167,7 +167,7 @@
                 </Button>
 
                 <!-- Lien vers connexion -->
-                <HBox alignment="CENTER" layoutX="40.0" layoutY="570.0" prefWidth="320.0" spacing="5.0">
+                <HBox alignment="CENTER" layoutX="40.0" layoutY="625.0" prefWidth="320.0" spacing="5.0">
                     <children>
                         <Label text="Déjà un compte ?" textFill="#666666" />
                         <Hyperlink onAction="#goToLogin" text="Se connecter" textFill="#2a5298" underline="true" />
