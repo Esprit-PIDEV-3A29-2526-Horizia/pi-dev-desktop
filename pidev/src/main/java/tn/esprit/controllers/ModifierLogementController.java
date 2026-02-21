@@ -78,7 +78,7 @@ public class ModifierLogementController implements Initializable {
 
         // Actions des boutons
         modifierBtn.setOnAction(e -> modifierLogement());
-        annulerBtn.setOnAction(e -> Dashboard.loadView("/Logements.fxml"));
+        annulerBtn.setOnAction(e -> Dashboard.loadView("/fxml/Logements.fxml"));
     }
 
     @FXML
@@ -125,7 +125,7 @@ public class ModifierLogementController implements Initializable {
         try {
             servicelogement.modifier(selectedLogement);
             showAlert("Succès", "Logement modifié avec succès.");
-            Dashboard.loadView("/Logements.fxml"); // Revenir à la liste
+            Dashboard.loadView("/fxml/Logements.fxml"); // Revenir à la liste
         } catch (SQLException e) {
             showAlert("Erreur", "Erreur lors de la modification : " + e.getMessage());
         }

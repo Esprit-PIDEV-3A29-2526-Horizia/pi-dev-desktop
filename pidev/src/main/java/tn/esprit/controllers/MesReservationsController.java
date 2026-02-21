@@ -174,7 +174,7 @@ public class MesReservationsController {
 
     private void modifierReservation(reservationlog r) {
         SessionManager.setEditingReservation(r);
-        NavigationManager.loadView("/ReservationForm.fxml");
+        NavigationManager.loadView("/fxml/ReservationForm.fxml");
     }
 
     private void supprimerReservation(reservationlog r) {
@@ -195,7 +195,7 @@ public class MesReservationsController {
 
     @FXML
     private void retourAccueil() {
-        NavigationManager.loadView("/accueil.fxml");
+        NavigationManager.loadView("/fxml/accueil.fxml");
     }
 
     private void showAlert(String title, String message) {

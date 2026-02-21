@@ -58,7 +58,7 @@ public class LogementsController implements Initializable {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterLogements(newValue));
 
         // Action du bouton Ajouter : charger la vue ajoutLogement dans le dashboard
-        addButton.setOnAction(event -> Dashboard.loadView("/ajoutLogement.fxml"));
+        addButton.setOnAction(event -> Dashboard.loadView("/fxml/ajoutLogement.fxml"));
     }
 
     private void displayLogements(List<logement> logements) {
@@ -166,7 +166,7 @@ public class LogementsController implements Initializable {
         detailsBtn.setMaxWidth(Double.MAX_VALUE);
         detailsBtn.setOnAction(e -> {
             Dashboard.setSelectedLogement(logement);  // Définir le logement sélectionné
-            Dashboard.loadView("/DetailsLogement.fxml");  // Charger la vue des détails
+            Dashboard.loadView("/fxml/DetailsLogement.fxml");  // Charger la vue des détails
         });
 
         card.getChildren().addAll(nomLabel, adresseLabel, dispoLabel, detailsBtn);

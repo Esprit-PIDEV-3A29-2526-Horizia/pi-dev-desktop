@@ -127,7 +127,7 @@ public class Servicelogement implements IService<logement> {
         return logements;
     }
 
-    @Override
+
     public List<logement> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException {
         List<logement> touteslogements = afficher();
 
@@ -173,7 +173,6 @@ public class Servicelogement implements IService<logement> {
                 .collect(Collectors.toList());
     }
 
-    @Override
     public List<logement> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException {
         List<logement> logements = new ArrayList<>();
 

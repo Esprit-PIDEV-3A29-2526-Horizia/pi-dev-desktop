@@ -9,7 +9,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.logement;
-import tn.esprit.entities.user;
+import tn.esprit.entities.User;
 import tn.esprit.entities.Status;  // Import de l'enum Status
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
@@ -173,7 +173,7 @@ public class DashboardContentController implements Initializable {
         String clientName = "Inconnu";
         String logementName = "Inconnu";
         try {
-            user client = serviceUser.rechercherParId(r.getIdc());
+            User client = serviceUser.rechercherParId(r.getIdc());
             if (client != null) {
                 clientName = client.getNom() + " " + client.getPrenom();
             }

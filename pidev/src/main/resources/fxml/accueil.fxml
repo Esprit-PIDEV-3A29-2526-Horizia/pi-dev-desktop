@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.effect.DropShadow?>
 
-<BorderPane prefHeight="800" prefWidth="1250" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AccueilController" stylesheets="@style.css">
+<BorderPane prefHeight="800" prefWidth="1250" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AccueilController" stylesheets="@../style.css">
 
     <!-- Barre de navigation supérieure -->
     <top>

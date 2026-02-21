@@ -96,13 +96,13 @@ public class DetailsLogementController implements Initializable {
     @FXML
     private void retourListe() {
         // Revenir à la vue des logements
-        Dashboard.loadView("/Logements.fxml");
+        Dashboard.loadView("/fxml/Logements.fxml");
     }
 
     @FXML
     private void modifierLogement() {
         // Charger la vue de modification
-        Dashboard.loadView("/modifierLogement.fxml");
+        Dashboard.loadView("/fxml/modifierLogement.fxml");
     }
 
     @FXML
@@ -120,7 +120,7 @@ public class DetailsLogementController implements Initializable {
                         servicelogement.supprimer(selectedLogement.getId());
                         showAlert("Succès", "Logement supprimé avec succès.");
                         // Recharger la liste des logements
-                        Dashboard.loadView("/Logements.fxml");
+                        Dashboard.loadView("/fxml/Logements.fxml");
                     } catch (SQLException e) {
                         showAlert("Erreur", "Erreur lors de la suppression : " + e.getMessage());
                     }

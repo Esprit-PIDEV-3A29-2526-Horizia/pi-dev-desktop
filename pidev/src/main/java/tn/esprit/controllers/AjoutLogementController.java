@@ -3,20 +3,14 @@ package tn.esprit.controllers;
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 import tn.esprit.entities.logement;
 import tn.esprit.services.Servicelogement;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 public class AjoutLogementController {
@@ -251,7 +245,7 @@ public class AjoutLogementController {
     }
 
     private void retourListe() {
-        Dashboard.loadView("/Logements.fxml");
+        Dashboard.loadView("/fxml/Logements.fxml");
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

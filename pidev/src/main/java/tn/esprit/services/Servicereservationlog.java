@@ -80,7 +80,7 @@ public class Servicereservationlog implements IService<reservationlog> {
         return reservations;
     }
 
-    @Override
+
     public List<reservationlog> rechercherParAttribut(String nomAttribut, Object valeur) throws SQLException {
         List<reservationlog> toutesReservations = afficher();
 
@@ -104,7 +104,7 @@ public class Servicereservationlog implements IService<reservationlog> {
                 .collect(Collectors.toList());
     }
 
-    @Override
+
     public List<reservationlog> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException {
         List<reservationlog> reservations = new ArrayList<>();
 

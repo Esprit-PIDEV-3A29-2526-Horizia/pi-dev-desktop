@@ -61,12 +61,12 @@ public class ReservationFormController {
                 selectedLogement = serviceLogement.rechercherParId(reservationToEdit.getId_l());
                 if (selectedLogement == null) {
                     showAlert("Erreur", "Logement introuvable pour cette réservation.");
-                    NavigationManager.loadView("/mesreservations.fxml");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml");
                     return;
                 }
             } catch (SQLException e) {
                 showAlert("Erreur", "Impossible de charger le logement : " + e.getMessage());
-                NavigationManager.loadView("/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
                 return;
             }
         } else {
@@ -74,7 +74,7 @@ public class ReservationFormController {
             selectedLogement = SessionManager.getSelectedLogement();
             if (selectedLogement == null) {
                 showAlert("Erreur", "Aucun logement sélectionné.");
-                NavigationManager.loadView("/accueil.fxml");
+                NavigationManager.loadView("/fxml/accueil.fxml");
                 return;
             }
         }
@@ -112,13 +112,13 @@ public class ReservationFormController {
         dateDepartPicker.valueProperty().addListener((obs, oldVal, newVal) -> calculerDuree());
 
         confirmerBtn.setOnAction(e -> confirmerReservation());
-        accueilBtn.setOnAction(e -> NavigationManager.loadView("/accueil.fxml"));
+        accueilBtn.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
 
         // Bouton Annuler : retour à la liste des réservations
         if (annulerBtn != null) {
             annulerBtn.setOnAction(e -> {
                 SessionManager.clearEditingReservation();
-                NavigationManager.loadView("/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
             });
         }
     }
@@ -206,7 +206,7 @@ public class ReservationFormController {
                 serviceReservation.ajouter(reservation);
                 showAlert("Succès", "Réservation confirmée pour " + selectedLogement.getNom() + " !");
                 SessionManager.clearEditingReservation();
-                NavigationManager.loadView("/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
             } catch (SQLException e) {
                 showAlert("Erreur", "Impossible de sauvegarder la réservation : " + e.getMessage());
             }
@@ -223,7 +223,7 @@ public class ReservationFormController {
                 serviceReservation.modifier(reservationToEdit);
                 showAlert("Succès", "Réservation modifiée avec succès !");
                 SessionManager.clearEditingReservation();
-                NavigationManager.loadView("/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
             } catch (SQLException e) {
                 showAlert("Erreur", "Impossible de modifier la réservation : " + e.getMessage());
             }

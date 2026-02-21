@@ -62,7 +62,7 @@ public class AccueilController {
         // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
             btnMesReservations.setVisible(true);
-            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/mesreservations.fxml"));
+            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml"));
             // Optionnel : afficher le nom de l'utilisateur
             // userNameLabel.setText(SessionManager.getCurrentUser().getNom());
         } else {
@@ -252,7 +252,7 @@ public class AccueilController {
             if (SessionManager.isLoggedIn()) {
                 // Utilisateur connecté : aller au formulaire de réservation
                 SessionManager.setSelectedLogement(l);  // Passer le logement sélectionné
-                NavigationManager.loadView("/ReservationForm.fxml");  // Utilise NavigationManager
+                NavigationManager.loadView("/fxml/ReservationForm.fxml");  // Utilise NavigationManager
             } else {
                 // Utilisateur non connecté : aller à la page de login
                 NavigationManager.loadView("/Login.fxml");  // Utilise NavigationManager
