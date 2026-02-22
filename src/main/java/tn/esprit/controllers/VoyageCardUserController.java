@@ -39,7 +39,6 @@ public class VoyageCardUserController {
 
 
     private Voyage voyage;
-
     private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRANCE);
     private OpenWeatherService meteoService;
@@ -49,20 +48,16 @@ public class VoyageCardUserController {
     public void setData(Voyage v) {
         this.voyage = v;
         if (v == null) return;
-
         if (lblDestination != null) lblDestination.setText(safe(v.getDestination()));
         if (lblPrix != null) lblPrix.setText(nf.format(v.getPrix()) + " DT");
-
         LocalDate d1 = toLocalDate(v.getDate_depart());
         LocalDate d2 = toLocalDate(v.getDate_retour());
         if (lblDates != null) {
             lblDates.setText("Du " + (d1 != null ? df.format(d1) : "--/--/----")
                     + " au " + (d2 != null ? df.format(d2) : "--/--/----"));
         }
-
         int restantes = v.getPlaces_restantes();
         if (lblPlacesInfo != null) lblPlacesInfo.setText("Places restantes : " + restantes);
-
         loadImage(v.getImage_url());
         ajouterChipMeteoSurImage(v.getDestination());
         applyStyles(restantes);
@@ -71,16 +66,12 @@ public class VoyageCardUserController {
     private void ajouterChipMeteoSurImage(String destination) {
         if (imageZone == null) return;
         if (meteoService == null || cacheMeteo == null || executor == null) return; // sécurité
-
         // éviter de dupliquer à chaque refresh
         imageZone.getChildren().removeIf(n -> "meteo-chip".equals(n.getId()));
-
         HBox chip = creerChipMeteo(destination);
         chip.setId("meteo-chip");
-
         StackPane.setAlignment(chip, Pos.TOP_RIGHT);
         StackPane.setMargin(chip, new Insets(8, 8, 0, 0));
-
         imageZone.getChildren().add(chip);
     }
 
@@ -89,17 +80,13 @@ public class VoyageCardUserController {
         chip.setAlignment(Pos.CENTER_LEFT);
         chip.setPadding(new Insets(4, 8, 4, 8));
         chip.setStyle("-fx-background-color: rgba(15,23,42,0.65); -fx-background-radius: 14;");
-
         ImageView icon = new ImageView();
         icon.setFitWidth(18);
         icon.setFitHeight(18);
         icon.setPreserveRatio(true);
-
         Label lbl = new Label("Météo...");
         lbl.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 10;");
-
         chip.getChildren().addAll(icon, lbl);
-
         String key = (destination == null) ? "" : destination.trim().toLowerCase();
 
         // Cache
@@ -109,35 +96,29 @@ public class VoyageCardUserController {
             icon.setImage(new Image(cached.getIconUrl(), true));
             return chip;
         }
-
         // Appel API en background
         executor.submit(() -> {
             try {
                 WeatherInfo w = meteoService.getWeatherByCity(destination);
                 cacheMeteo.put(key, w);
-
                 Platform.runLater(() -> {
                     lbl.setText(Math.round(w.getTemp()) + "°C • " + w.getDescription());
                     icon.setImage(new Image(w.getIconUrl(), true));
                 });
-
             } catch (Exception e) {
                 Platform.runLater(() -> lbl.setText("Météo indisponible"));
             }
         });
-
         return chip;
     }
     private void loadImage(String url) {
         if (imgVoyage == null) return;
-
         try {
             if (url != null && !url.isBlank()) {
                 imgVoyage.setImage(new Image(url, true));
                 return;
             }
         } catch (Exception ignored) {}
-
         URL fallback = getClass().getResource("/images/default_trip.jpg");
         if (fallback != null) imgVoyage.setImage(new Image(fallback.toExternalForm()));
     }
@@ -168,16 +149,13 @@ public class VoyageCardUserController {
 
     private void setupHoverEffects() {
         if (cardContainer == null) return;
-
         String normal =
                 "-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 12;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.10), 14, 0, 0, 6);";
-
         String hover =
                 "-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 12;" +
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 10);" +
                         "-fx-translate-y: -3; -fx-cursor: hand;";
-
         cardContainer.setStyle(normal);
         cardContainer.setOnMouseEntered(e -> cardContainer.setStyle(hover));
         cardContainer.setOnMouseExited(e -> cardContainer.setStyle(normal));
@@ -186,23 +164,19 @@ public class VoyageCardUserController {
     @FXML
     private void handleReserver() {
         if (voyage == null) return;
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ReserverVoyage.fxml"));
             Parent root = loader.load();
-
             ReserverVoyageController ctrl = loader.getController();
             if (ctrl != null) ctrl.initData(voyage);
-
             Scene scene = btnReserver.getScene();
             scene.setRoot(root);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // (Optionnel) si tu veux garder Details, tu peux le remettre
+    //garder Details
     @FXML
     private void handleDetails() {
         if (voyage == null) return;

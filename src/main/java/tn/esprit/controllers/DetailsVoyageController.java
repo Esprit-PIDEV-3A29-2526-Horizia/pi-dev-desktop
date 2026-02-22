@@ -22,10 +22,8 @@ public class DetailsVoyageController {
     @FXML private Label lblTitre, lblStatut, lblDest, lblDates, lblPrix, lblPlaces;
     @FXML private ImageView imgVoyage;
     @FXML private Label lblDescription;
-
     @FXML private Button btnModifier;
     @FXML private Button btnSupprimer;
-
     private Voyage currentVoyage;
     private final VoyageService vs = new VoyageService();
     private GestionVoyageController parentController;
@@ -33,7 +31,6 @@ public class DetailsVoyageController {
     public void setModeUser() {
         if (btnModifier != null) btnModifier.setVisible(false);
         if (btnSupprimer != null) btnSupprimer.setVisible(false);
-        // optionnel : retire l'espace
         if (btnModifier != null) btnModifier.setManaged(false);
         if (btnSupprimer != null) btnSupprimer.setManaged(false);
     }
@@ -83,7 +80,6 @@ public class DetailsVoyageController {
                 imgVoyage.setImage(new Image(path, true));
                 return;
             }
-
             File f = new File(path);
             if (f.exists()) {
                 imgVoyage.setImage(new Image(f.toURI().toString(), true));

@@ -20,7 +20,6 @@ public class VoyageCardController {
     @FXML private Label lblTitre, lblDestination, lblDate, lblPrix, lblPlaces;
     @FXML private ImageView imgVoyage;
     @FXML private Button btnDetails;
-
     private Voyage voyage;
     private GestionVoyageController parentController;
 
@@ -49,7 +48,6 @@ public class VoyageCardController {
         if (lblPlaces != null) {
             lblPlaces.setText(v.getPlaces_restantes() + "/" + v.getPlaces_total() + " places");
         }
-
         loadImage(v.getImage_url());
     }
 

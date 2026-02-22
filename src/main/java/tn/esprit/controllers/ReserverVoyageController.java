@@ -11,6 +11,7 @@ import tn.esprit.api.exchange.ExchangeRateService;
 import tn.esprit.entites.Voyage;
 import tn.esprit.services.ReservationService;
 import tn.esprit.utils.Config;
+import tn.esprit.services.ai.TravelAssistantService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -20,56 +21,54 @@ import java.util.concurrent.Executors;
 
 public class ReserverVoyageController {
 
-    // ===== UI (DT) =====
+
     @FXML private Label lblTitre;
     @FXML private Label lblDescription;
+    @FXML private ImageView imgVoyage;
+    //DT
     @FXML private Label lblPrixUnitaire;
     @FXML private Label lblPrixTotal;
-
-    @FXML private ImageView imgVoyage;
     @FXML private Spinner<Integer> spinnerPlaces;
+    //EUR
+    @FXML private Label lblPrixUnitaireEur;
+    @FXML private Label lblPrixTotalEur;
+    @FXML private Label lblRateInfo;
+    //assistant ai
+    @FXML private TextArea taChat;
+    @FXML private TextField tfMessage;
+    @FXML private Label lblAIStatus;
 
-    // ===== ✅ UI (EUR) =====
-    @FXML private Label lblPrixUnitaireEur; // fx:id à ajouter dans FXML
-    @FXML private Label lblPrixTotalEur;    // fx:id à ajouter dans FXML
-    @FXML private Label lblRateInfo;        // fx:id à ajouter dans FXML
-
+    private final TravelAssistantService aiService = new TravelAssistantService();
     private Voyage selectedVoyage;
     private final ReservationService rs = new ReservationService();
 
-    // ===== ✅ Exchange API =====
+    //Exchange API
     private final ExchangeRateService exchangeService =
             new ExchangeRateService(Config.get("exchange.apiKey"));
 
     private final ExecutorService exec = Executors.newSingleThreadExecutor();
-    private double eurToTndRate = -1; // cache
+    private double eurToTndRate = -1;
 
     public void initData(Voyage v) {
         if (v == null) return;
         this.selectedVoyage = v;
-
-        // --- Texte
         if (lblTitre != null) {
             lblTitre.setText("Voyage à " + safe(v.getDestination()).toUpperCase());
         }
         if (lblDescription != null) {
             lblDescription.setText(safe(v.getDescription()));
         }
-
-        // --- Prix unit DT
+        //Prix unit DT
         if (lblPrixUnitaire != null) {
             lblPrixUnitaire.setText(String.format(Locale.US, "%.1f DT", v.getPrix()));
         }
-
-        // --- Image
+        //Image
         if (imgVoyage != null) {
             loadImage(v.getImage_url());
         }
-
-        // --- Spinner
+        //Spinner
         int max = Math.max(0, v.getPlaces_restantes());
         int maxSafe = Math.max(1, max);
-
         if (spinnerPlaces != null) {
             if (max > 0) {
                 spinnerPlaces.setDisable(false);
@@ -83,11 +82,9 @@ public class ReserverVoyageController {
                 );
             }
         }
-
-        // --- Initial totals
+        //Initial totals
         mettreAJourPrixDT(1);
-
-        // listener spinner (DT + EUR)
+        //listener spinner (DT + EUR)
         if (spinnerPlaces != null) {
             spinnerPlaces.valueProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
@@ -96,10 +93,50 @@ public class ReserverVoyageController {
                 }
             });
         }
-
-        // --- placeholders EUR + lancer API
+        //placeholders EUR + lancer API
         initEurPlaceholders();
         loadRateAsync();
+    }
+
+    @FXML
+    private void sendToAI() {
+        String userText = tfMessage.getText();
+
+        if (userText == null || userText.isBlank()) return;
+
+        taChat.appendText("👤 Vous : " + userText + "\n\n");
+        tfMessage.clear();
+        lblAIStatus.setText("🤖 L'assistant réfléchit...");
+
+        String context = """
+    Tu es un assistant de voyage intelligent.
+    Voyage sélectionné :
+    Destination : %s
+    Prix : %.1f DT
+    Description : %s
+    Réponds de façon claire, utile et professionnelle.
+    """.formatted(
+                selectedVoyage.getDestination(),
+                selectedVoyage.getPrix(),
+                selectedVoyage.getDescription()
+        );
+
+        new Thread(() -> {
+            try {
+                String answer = aiService.askAssistant(context, userText);
+
+                Platform.runLater(() -> {
+                    taChat.appendText("🤖 Assistant : " + answer + "\n\n");
+                    lblAIStatus.setText("Réponse reçue");
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    lblAIStatus.setText("Erreur IA");
+                    taChat.appendText("Impossible de contacter l'assistant.\n\n");
+                });
+            }
+        }).start();
     }
 
     private void mettreAJourPrixDT(int nb) {
@@ -139,7 +176,6 @@ public class ReserverVoyageController {
             mettreAJourPrixEUR(nb);
             return;
         }
-
         exec.submit(() -> {
             try {
                 double rate = exchangeService.getEurToTndRate(); // 1€ = X DT
@@ -174,8 +210,7 @@ public class ReserverVoyageController {
                 return;
             }
         } catch (Exception ignored) {}
-
-        // fallback local (si tu l'as)
+        //fallback local
         URL fallback = getClass().getResource("/images/default_trip.jpg");
         if (fallback != null) imgVoyage.setImage(new Image(fallback.toExternalForm()));
         else imgVoyage.setImage(null);
@@ -197,12 +232,8 @@ public class ReserverVoyageController {
                 new Alert(Alert.AlertType.ERROR, "Nombre de personnes invalide.").showAndWait();
                 return;
             }
-
             int nbr = spinnerPlaces.getValue();
-
-            // ⚠️ tu utilises 1 comme idUser pour le moment
             rs.effectuerReservation(selectedVoyage.getId(), 1, nbr);
-
             Alert alert = new Alert(Alert.AlertType.INFORMATION, "Réservation réussie !");
             alert.showAndWait();
             retour();

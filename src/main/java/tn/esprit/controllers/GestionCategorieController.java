@@ -41,17 +41,13 @@ public class GestionCategorieController {
                     VBox card = new VBox(5);
                     card.setPadding(new javafx.geometry.Insets(15));
                     card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #DACEB6; -fx-border-radius: 10;");
-
                     Label nameLabel = new Label(item.getNom());
                     nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #23779C;");
-
                     Label descLabel = new Label(item.getDescription());
                     descLabel.setStyle("-fx-text-fill: #555;");
                     descLabel.setWrapText(true);
-
                     card.getChildren().addAll(nameLabel, descLabel);
                     setGraphic(card);
-
                     selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
                         if (isNowSelected) {
                             card.setStyle("-fx-background-color: #3D94CA; -fx-background-radius: 10;");
@@ -66,9 +62,7 @@ public class GestionCategorieController {
                 }
             }
         });
-
         chargerDonnees();
-
         listCategories.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 categorieSelectionnee = newSelection;
@@ -76,7 +70,6 @@ public class GestionCategorieController {
                 taDescription.setText(newSelection.getDescription());
             }
         });
-
         setupRecherche();
     }
 
@@ -102,8 +95,7 @@ public class GestionCategorieController {
     @FXML void naviguerCategories(ActionEvent event) { changerScene("/GestionCategorie.fxml", event); }
     @FXML
     void naviguerReservations(ActionEvent event) {
-        // Assurez-vous que le nom du fichier est exactement celui présent dans votre dossier resources
-        changerScene("/GestionReservationsAdmin.fxml", event);
+       changerScene("/GestionReservationsAdmin.fxml", event);
     }
 
     private void changerScene(String fxmlPath, ActionEvent event) {
@@ -113,7 +105,7 @@ public class GestionCategorieController {
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            System.err.println("❌ Erreur de chargement FXML : " + e.getMessage());
+            System.err.println("Erreur de chargement FXML : " + e.getMessage());
             e.printStackTrace();
         }
     }

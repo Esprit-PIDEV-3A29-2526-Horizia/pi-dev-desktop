@@ -105,6 +105,7 @@
                         prefHeight="46"
                         maxWidth="9999"
                         styleClass="primaryBtn"/>
+                <Separator/>
 
                 <Label text="Paiement sécurisé • Annulation selon conditions"
                        styleClass="hint"/>

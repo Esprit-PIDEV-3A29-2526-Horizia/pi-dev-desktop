@@ -62,7 +62,6 @@ public class CatalogueUserController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         listeOriginale = vs.afficher();
         if (listeOriginale == null) listeOriginale = new ArrayList<>();
-
         if (comboTri != null) {
             comboTri.getItems().setAll(
                     "Prix : Croissant",
@@ -74,16 +73,13 @@ public class CatalogueUserController implements Initializable {
             comboTri.setValue("Prix : Croissant");
             comboTri.setOnAction(e -> appliquerTout());
         }
-
         if (searchField != null) {
             searchField.textProperty().addListener((obs, o, n) -> appliquerTout());
         }
-
         setChipActive(btnTous);
         appliquerTout();
     }
 
-    // ======= FILTRES =======
     @FXML private void filtrerTous()   { filtreActif = Filtre.TOUS;   setChipActive(btnTous);   appliquerTout(); }
     @FXML private void filtrerTunisie(){ filtreActif = Filtre.TUNISIE;setChipActive(btnTunisie);appliquerTout(); }
     @FXML private void filtrerEurope() { filtreActif = Filtre.EUROPE; setChipActive(btnEurope); appliquerTout(); }
@@ -103,10 +99,8 @@ public class CatalogueUserController implements Initializable {
         }
     }
 
-    // ======= APPLIQUER =======
     private void appliquerTout() {
         String keyword = safeLower(searchField != null ? searchField.getText() : "");
-
         List<Voyage> resultats = listeOriginale.stream()
                 .filter(Objects::nonNull)
                 .filter(this::matchFiltreActif)
@@ -114,23 +108,18 @@ public class CatalogueUserController implements Initializable {
                         || safeLower(v.getDestination()).contains(keyword)
                         || safeLower(v.getTitre()).contains(keyword))
                 .collect(Collectors.toList());
-
         String tri = comboTri != null ? comboTri.getValue() : null;
         if (tri != null) resultats = trierStreams(resultats, tri);
-
         chargerVoyages(resultats);
     }
 
     private boolean matchFiltreActif(Voyage v) {
         String dest = safeLower(v.getDestination());
-        String titre = safeLower(v.getTitre()); // ✅ ajout
-
+        String titre = safeLower(v.getTitre());
         return switch (filtreActif) {
             case TOUS -> true;
-
             case TUNISIE -> containsAny(dest, "tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte")
                     || containsAny(titre,"tozeur", "tunis", "sousse", "sfax", "djerba", "hammamet", "monastir", "bizerte");
-
             case EUROPE -> containsAny(dest,
                     "barcelone","madrid","valence","seville","séville",
                     "paris","lyon","marseille","nice",
@@ -143,7 +132,6 @@ public class CatalogueUserController implements Initializable {
                     "bruxelles","brussels",
                     "vienna","vienne","prague","budapest","athenes","athènes"
             )
-                    // ✅ ajout : si “Europe” est dans le titre
                     || titre.contains("europe");
 
             case PROMOS -> v.getPrix() <= 2000;
@@ -178,30 +166,22 @@ public class CatalogueUserController implements Initializable {
         return (s == null) ? "" : s.trim().toLowerCase();
     }
 
-    // ======= GRID =======
     public void chargerVoyages(List<Voyage> voyages) {
         if (voyageGrid == null) return;
-
         voyageGrid.getChildren().clear();
         if (voyages == null) voyages = List.of();
-
         int column = 0;
         int row = 0;
-
         for (Voyage v : voyages) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/VoyageCardUser.fxml"));
                 VBox card = loader.load();
-
                 VoyageCardUserController controller = loader.getController();
                 if (controller != null) {
-                    // ✅ passe aussi les services météo + cache + executor
                     controller.setMeteo(meteoService, cacheMeteo, executor);
                     controller.setData(v);
                 }
-
                 voyageGrid.add(card, column, row);
-
                 column++;
                 if (column == NB_COLONNES) {
                     column = 0;
@@ -213,9 +193,8 @@ public class CatalogueUserController implements Initializable {
         }
     }
 
-    // ======= NAV =======
-    @FXML private void handleRecherche() { appliquerTout(); }
 
+    @FXML private void handleRecherche() { appliquerTout(); }
     @FXML
     private void afficherCatalogue() {
         if (searchField != null) searchField.clear();
@@ -230,7 +209,6 @@ public class CatalogueUserController implements Initializable {
 
     @FXML
     private void handleDeconnexion(ActionEvent event) {
-        // ✅ important : stop executor
         executor.shutdownNow();
         changerScene(event, "/Login.fxml", "Connexion");
     }

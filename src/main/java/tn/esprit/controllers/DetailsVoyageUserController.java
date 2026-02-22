@@ -19,24 +19,19 @@ public class DetailsVoyageUserController {
 
     public void initData(Voyage v) {
         this.voyage = v;
-
         lblTitre.setText("Voyage à " + v.getDestination());
         lblDescription.setText(v.getDescription());
         lblDates.setText("📅 " + v.getDate_depart() + " → " + v.getDate_retour());
         lblPrix.setText("💰 " + v.getPrix() + " DT / pers");
         lblPlaces.setText("👥 " + v.getPlaces_restantes() + " places restantes");
-
         lblPrixUnitaire.setText(v.getPrix() + " DT");
         lblTotal.setText(v.getPrix() + " DT");
-
         imgVoyage.setImage(new Image(v.getImage_url(), true));
-
         spNbPersonnes.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(
                         1, v.getPlaces_restantes(), 1
                 )
         );
-
         spNbPersonnes.valueProperty().addListener((obs, o, n) ->
                 lblTotal.setText((n * v.getPrix()) + " DT")
         );
@@ -48,7 +43,5 @@ public class DetailsVoyageUserController {
     }
 
     @FXML
-    private void retourCatalogue() {
-        // navigation back
-    }
+    private void retourCatalogue() {}
 }

@@ -108,7 +108,14 @@
                         prefHeight="46"
                         maxWidth="9999"
                         styleClass="primaryBtn"/>
+                <Label text="Assistant IA" styleClass="titleSmall"/>
 
+                <TextArea fx:id="taChat" prefHeight="180" wrapText="true" editable="false"/>
+                <HBox spacing="8">
+                    <TextField fx:id="tfMessage" HBox.hgrow="ALWAYS" promptText="Pose une question (budget, itinéraire, hôtels...)"/>
+                    <Button text="Envoyer" onAction="#sendToAI" styleClass="primaryBtn"/>
+                </HBox>
+                <Label fx:id="lblAIStatus" text="" styleClass="hint"/>
                 <Label text="Paiement sécurisé • Annulation selon conditions"
                        styleClass="hint"/>
 

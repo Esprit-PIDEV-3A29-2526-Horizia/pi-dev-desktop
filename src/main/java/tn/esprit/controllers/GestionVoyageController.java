@@ -34,19 +34,17 @@ public class GestionVoyageController implements Initializable {
     @FXML private Label lblPromo;
     @FXML private TextField tfRecherche;
     @FXML private FlowPane gridVoyages;
-    @FXML private ComboBox<String> comboTri; // Nouveau : Menu de tri
+    @FXML private ComboBox<String> comboTri;
 
     private final VoyageService vs = new VoyageService();
-    private List<Voyage> listeOriginale = new ArrayList<>(); // Stockage pour filtrage rapide
+    private List<Voyage> listeOriginale = new ArrayList<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Initialisation du ComboBox de tri
         if (comboTri != null) {
             comboTri.getItems().addAll("Prix : Croissant", "Prix : Décroissant", "Date : Plus proche");
             comboTri.setOnAction(e -> appliquerFiltresEtTris());
         }
-
         chargerDonnees();
     }
 
@@ -60,18 +58,12 @@ public class GestionVoyageController implements Initializable {
         appliquerFiltresEtTris();
     }
 
-    /**
-     * Centralise la logique de recherche et de tri pour éviter les conflits
-     */
+
     private void appliquerFiltresEtTris() {
         String keyword = tfRecherche.getText().toLowerCase();
-
-        // 1. Filtrage par texte (Destination)
         List<Voyage> resultats = listeOriginale.stream()
                 .filter(v -> v.getDestination().toLowerCase().contains(keyword))
                 .collect(Collectors.toList());
-
-        // 2. Application du Tri si sélectionné
         String tri = comboTri.getValue();
         if (tri != null) {
             switch (tri) {
@@ -106,7 +98,6 @@ public class GestionVoyageController implements Initializable {
         }
     }
 
-    // --- Méthodes de Navigation et Stats (Inchangées mais nécessaires) ---
 
     private void updateStats(List<Voyage> voyages) {
         if (lblDestActive != null) lblDestActive.setText(String.valueOf(voyages.size()));
@@ -150,7 +141,6 @@ public class GestionVoyageController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.showAndWait();
-            chargerDonnees(); // Rafraîchir après ajout
         } catch (IOException e) {
             e.printStackTrace();
         }
