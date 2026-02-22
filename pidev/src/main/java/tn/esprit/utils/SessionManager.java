@@ -1,72 +1,57 @@
 package tn.esprit.utils;
 
 import tn.esprit.entities.reservationlog;
-import tn.esprit.entities.User;  // Import de l'entité user
-import tn.esprit.entities.logement;  // Import de l'entité logement
+import tn.esprit.entities.User;
+import tn.esprit.entities.logement;
 
 public class SessionManager {
-    private static User currentUser = null;  // Utilisateur connecté
-    private static logement selectedLogement = null;  // Logement sélectionné pour réservation
+    private static User currentUser = null;
+    private static logement selectedLogement = null;
+    private static reservationlog editingReservation = null;
 
-    // Méthode pour définir l'utilisateur connecté (appelée après login réussi)
+    // ===== GESTION UTILISATEUR =====
+
     public static void setCurrentUser(User user) {
         currentUser = user;
+        System.out.println("Utilisateur connecté: " + (user != null ? user.getEmail() : "null"));
     }
 
-    // Méthode pour récupérer l'utilisateur connecté
     public static User getCurrentUser() {
         return currentUser;
     }
 
-    // Méthode pour déconnecter l'utilisateur
-    public static void logout() {
-        currentUser = null;
-        selectedLogement = null;  // Optionnel : réinitialiser le logement sélectionné
-    }
-
-    // Méthode pour vérifier si un utilisateur est connecté
     public static boolean isLoggedIn() {
         return currentUser != null;
     }
 
-    // Méthode pour vérifier si l'utilisateur connecté est un admin (profil_id = 1, ajustez si nécessaire)
-    public static boolean isAdmin() {
-        User currentUser = getCurrentUser();
-        return currentUser != null && currentUser.getProfil_id() == 1;  // Assumant que 1 = admin
+    public static void logout() {
+        System.out.println("Déconnexion de: " + (currentUser != null ? currentUser.getEmail() : "personne"));
+        currentUser = null;
+        selectedLogement = null;
+        editingReservation = null;
     }
 
-    // Méthode pour définir le logement sélectionné (pour réservation)
+    public static boolean isAdmin() {
+        return currentUser != null && currentUser.getProfil_id() == 1;
+    }
+
+    // ===== GESTION LOGEMENT SÉLECTIONNÉ =====
+
     public static void setSelectedLogement(logement logement) {
         selectedLogement = logement;
+        System.out.println("Logement sélectionné: " + (logement != null ? logement.getNom() : "null"));
     }
 
-    // Méthode pour récupérer le logement sélectionné
     public static logement getSelectedLogement() {
         return selectedLogement;
     }
 
-    // Pour les tests : définir un utilisateur fictif (à supprimer après intégration)
-    public static void setTestUser() {
-        User testUser = new User();
-        testUser.setId(1);
-        testUser.setNom("Test");
-        testUser.setPrenom("User");
-        testUser.setEmail("test@example.com");
-        testUser.setProfil_id(2);  // Profil non-admin
-        setCurrentUser(testUser);
+    public static void clearSelectedLogement() {
+        selectedLogement = null;
+        System.out.println("Logement sélectionné effacé");
     }
 
-    // Pour les tests : définir un utilisateur admin fictif (à supprimer après intégration)
-    public static void setTestAdminUser() {
-        User adminUser = new User();
-        adminUser.setId(1);
-        adminUser.setNom("Admin");
-        adminUser.setPrenom("Test");
-        adminUser.setEmail("admin@example.com");
-        adminUser.setProfil_id(1);  // Profil admin
-        setCurrentUser(adminUser);
-    }
-    private static reservationlog editingReservation;
+    // ===== GESTION RÉSERVATION EN COURS D'ÉDITION =====
 
     public static reservationlog getEditingReservation() {
         return editingReservation;
@@ -74,9 +59,54 @@ public class SessionManager {
 
     public static void setEditingReservation(reservationlog reservation) {
         editingReservation = reservation;
+        System.out.println("Réservation en édition: " + (reservation != null ? reservation.getId() : "null"));
     }
 
     public static void clearEditingReservation() {
         editingReservation = null;
+        System.out.println("Réservation en édition effacée");
+    }
+
+    // ===== NETTOYAGE COMPLET =====
+
+    public static void clearAll() {
+        currentUser = null;
+        selectedLogement = null;
+        editingReservation = null;
+        System.out.println("Session complètement effacée");
+    }
+
+    // ===== MÉTHODES DE TEST =====
+
+    public static void setTestUser() {
+        User testUser = new User();
+        testUser.setId(1);
+        testUser.setNom("Test");
+        testUser.setPrenom("User");
+        testUser.setEmail("test@example.com");
+        testUser.setProfil_id(2);
+        setCurrentUser(testUser);
+        System.out.println("🧪 Utilisateur de test connecté: " + testUser.getEmail());
+    }
+
+    public static void setTestAdminUser() {
+        User adminUser = new User();
+        adminUser.setId(1);
+        adminUser.setNom("Admin");
+        adminUser.setPrenom("Test");
+        adminUser.setEmail("admin@example.com");
+        adminUser.setProfil_id(1);
+        setCurrentUser(adminUser);
+        System.out.println("🧪 Admin de test connecté: " + adminUser.getEmail());
+    }
+
+    // ===== MÉTHODES UTILITAIRES =====
+
+    public static void printSessionStatus() {
+        System.out.println("\n=== ÉTAT DE LA SESSION ===");
+        System.out.println("Utilisateur connecté: " + (currentUser != null ? currentUser.getEmail() : "non connecté"));
+        System.out.println("Logement sélectionné: " + (selectedLogement != null ? selectedLogement.getNom() : "aucun"));
+        System.out.println("Réservation en édition: " + (editingReservation != null ? editingReservation.getId() : "aucune"));
+        System.out.println("==========================\n");
     }
 }

@@ -57,21 +57,20 @@ public class AccueilController {
     public void initialize() {
         serviceLogement = new Servicelogement();
 
+        // Récupérer l'utilisateur connecté
+        currentUser = SessionManager.getCurrentUser();
+
         btnNosLogements.getStyleClass().add("nav-button-active");
+
+        // Configuration du userBox (profil utilisateur)
+        setupUserBox();
 
         // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
             btnMesReservations.setVisible(true);
             btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml"));
-            // Mettre à jour le nom si disponible
-            if (SessionManager.getCurrentUser() != null) {
-                userNameLabel.setText(SessionManager.getCurrentUser().getPrenom() + " " +
-                        SessionManager.getCurrentUser().getNom());
-            }
         } else {
             btnMesReservations.setVisible(false);
-            userNameLabel.setText("Connexion");
-            userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
         }
 
         sortCombo.getItems().addAll("Prix croissant", "Prix décroissant");
@@ -92,14 +91,17 @@ public class AccueilController {
             logementsFiltres = new ArrayList<>(tousLesLogements);
             appliquerRechercheEtTri();
         });
+
         villaFilterBtn.setOnAction(e -> {
             setActiveFilter(villaFilterBtn);
             filtrerParType("Villa");
         });
+
         hotelFilterBtn.setOnAction(e -> {
             setActiveFilter(hotelFilterBtn);
             filtrerParType("Hôtel");
         });
+
         appartFilterBtn.setOnAction(e -> {
             setActiveFilter(appartFilterBtn);
             filtrerParType("Appartement");
@@ -110,13 +112,41 @@ public class AccueilController {
     }
 
     /**
-     * NOUVELLE MÉTHODE: Reçoit l'utilisateur depuis LoginController
+     * Configure la boîte utilisateur (affichage du nom et clic vers profil)
+     */
+    private void setupUserBox() {
+        if (SessionManager.isLoggedIn() && currentUser != null) {
+            // Afficher le nom de l'utilisateur
+            if (userNameLabel != null) {
+                userNameLabel.setText(currentUser.getPrenom() + " " + currentUser.getNom());
+            }
+
+            // Configurer le clic pour ouvrir le profil
+            if (userBox != null) {
+                userBox.setCursor(javafx.scene.Cursor.HAND);
+                userBox.setOnMouseClicked(e -> showUserProfile());
+            }
+        } else {
+            // Utilisateur non connecté
+            if (userNameLabel != null) {
+                userNameLabel.setText("Connexion");
+            }
+            if (userBox != null) {
+                userBox.setCursor(javafx.scene.Cursor.HAND);
+                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
+            }
+        }
+    }
+
+
+    /**
+     * Reçoit l'utilisateur depuis LoginController
      */
     public void setCurrentUser(User user) {
         this.currentUser = user;
         SessionManager.setCurrentUser(user);
 
-        // Mettre à jour l'affichage du nom
+        // Mettre à jour l'affichage
         if (user != null && userNameLabel != null) {
             userNameLabel.setText(user.getPrenom() + " " + user.getNom());
         }
@@ -129,6 +159,9 @@ public class AccueilController {
                 NavigationManager.loadView("/fxml/mesreservations.fxml");
             });
         }
+
+        // Reconfigurer le userBox
+        setupUserBox();
 
         System.out.println("Utilisateur connecté dans AccueilController: " + (user != null ? user.getEmail() : "null"));
     }
@@ -348,10 +381,11 @@ public class AccueilController {
             System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
             NavigationManager.loadView("/fxml/UserProfil.fxml");
         } else {
-            System.out.println("vous n'etes pas connécter ! ");
+            System.out.println("Vous n'êtes pas connecté !");
             NavigationManager.loadView("/fxml/Login.fxml");
         }
     }
+
 
 
 }
