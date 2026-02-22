@@ -35,7 +35,7 @@ public class ReservationFormController {
     @FXML private Label disponibiliteLabel;
     @FXML private DatePicker dateArriveePicker;
     @FXML private DatePicker dateDepartPicker;
-    @FXML private Spinner<Integer> adultesSpinner;go
+    @FXML private Spinner<Integer> adultesSpinner;
     @FXML private Spinner<Integer> enfantsSpinner;
     @FXML private RadioButton enLigneRadio;
     @FXML private RadioButton surPlaceRadio;
