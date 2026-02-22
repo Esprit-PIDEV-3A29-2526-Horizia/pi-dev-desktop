@@ -11,7 +11,10 @@ public class reservationlog {
     private float montant;
     private Status status;  // Changed from Enum to Status
     private String modalite;
+    private Date dateLimitePaiement;
 
+    public Date getDateLimitePaiement() { return dateLimitePaiement; }
+    public void setDateLimitePaiement(Date dateLimitePaiement) { this.dateLimitePaiement = dateLimitePaiement; }
     // Constructor
     public reservationlog(int id_l, int idc, Date date_debut, Date date_fin, float montant, Status status, String modalite) {
         this.id_l = id_l;

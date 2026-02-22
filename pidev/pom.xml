@@ -40,6 +40,14 @@
             <artifactId>javafx-controls</artifactId>
             <version>20.0.2</version>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/com.alphacephei/vosk -->
+        <!-- Source: https://mvnrepository.com/artifact/com.alphacephei/vosk -->
+        <dependency>
+            <groupId>com.alphacephei</groupId>
+            <artifactId>vosk</artifactId>
+            <version>0.3.45</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
     <build>
@@ -51,8 +59,7 @@
                 <configuration>
                     <mainClass>tn.esprit.tests.MainFX</mainClass>
                     <options>
-                        <option>-Xms512m</option>
-                        <option>-Xmx1024m</option>
+                        <option>-Djava.library.path=natives</option>
                     </options>
                 </configuration>
             </plugin>

@@ -2,6 +2,7 @@ package tn.esprit.controllers;
 
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -11,7 +12,11 @@ import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 import tn.esprit.entities.logement;
 import tn.esprit.services.Servicelogement;
+import tn.esprit.utils.AudioRecorder;
+import tn.esprit.utils.VoskService;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
@@ -85,29 +90,40 @@ public class AjoutLogementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Initialiser le ComboBox avec les types de logements
-
         typeComboBox.setPromptText("Sélectionner un type");
 
-        // Initialiser le Spinner de capacité
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 2);
         capaciteSpinner.setValueFactory(valueFactory);
 
-        // Initialiser les écouteurs pour les boutons micro
         nomMicroBtn.setOnAction(e -> handleMicro(nomField, nomMicroBtn));
         imageMicroBtn.setOnAction(e -> handleMicro(imageField, imageMicroBtn));
         adresseMicroBtn.setOnAction(e -> handleMicro(adresseField, adresseMicroBtn));
         equipementMicroBtn.setOnAction(e -> handleMicro(equipementField, equipementMicroBtn));
         tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn));
 
-        // Initialiser les boutons principaux
         ajouterBtn.setOnAction(e -> ajouterLogement());
         annulerBtn.setOnAction(e -> retourListe());
 
-        // Initialiser le switch de disponibilité
         initialiserSwitch();
-    }
 
+        // Initialisation de Vosk (thread séparé)
+        new Thread(() -> {
+            try {
+                String userDir = System.getProperty("user.dir");
+                String modelPath = userDir + File.separator + "models" + File.separator + "vosk-model-fr-0.6-linto-2.2.0";
+                File modelDir = new File(modelPath);
+                if (!modelDir.exists() || !modelDir.isDirectory()) {
+                    throw new IOException("Dossier modèle introuvable : " + modelPath);
+                }
+
+                VoskService.initModel(modelPath);
+                System.out.println("✅ Modèle Vosk initialisé avec succès");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> showAlert(Alert.AlertType.ERROR, "Erreur Vosk", e.getMessage()));
+            }
+        }).start();
+    }
     private void initialiserSwitch() {
         disponibiliteToggle.setSelected(false);
         mettreAJourSwitchUI();
@@ -162,26 +178,40 @@ public class AjoutLogementController implements Initializable {
     }
 
     private void handleMicro(TextField field, Button microBtn) {
+        if (!VoskService.isInitialized()) {
+            showAlert(Alert.AlertType.WARNING, "Modèle non prêt",
+                    "Le modèle de reconnaissance vocale est en cours de chargement. Veuillez réessayer dans quelques instants.");
+            return;
+        }
+
         RotateTransition rotate = new RotateTransition(Duration.seconds(2), microBtn);
         rotate.setByAngle(360);
         rotate.setCycleCount(RotateTransition.INDEFINITE);
         rotate.play();
+        microBtn.setDisable(true);
 
         new Thread(() -> {
             try {
-                Thread.sleep(3000);
-                String recognizedText = "Texte reconnu depuis la voix";
-                javafx.application.Platform.runLater(() -> {
-                    field.setText(recognizedText.toUpperCase());
+                byte[] audioData = AudioRecorder.recordAudio(5); // 5 secondes
+                String recognizedText = VoskService.recognize(audioData, 16000);
+
+                Platform.runLater(() -> {
+                    String formatted = formatFirstLetterCapital(recognizedText);
+                    field.setText(formatted);
                     rotate.stop();
                     microBtn.setRotate(0);
+                    microBtn.setDisable(false);
                 });
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Platform.runLater(() -> {
+                    showAlert(Alert.AlertType.ERROR, "Erreur", "Reconnaissance échouée : " + e.getMessage());
+                    rotate.stop();
+                    microBtn.setDisable(false);
+                });
             }
         }).start();
     }
-
     private void ajouterLogement() {
         StringBuilder erreurs = new StringBuilder();
 
@@ -263,7 +293,10 @@ public class AjoutLogementController implements Initializable {
         // CORRECTION: Utiliser AdminDashboardController au lieu de Dashboard
         AdminDashboardController.loadPage("/fxml/Logements.fxml");
     }
-
+    private String formatFirstLetterCapital(String text) {
+        if (text == null || text.isEmpty()) return "";
+        return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
+    }
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
