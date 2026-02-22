@@ -10,6 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import tn.esprit.entities.logement;
+import tn.esprit.entities.User;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
@@ -40,9 +41,7 @@ public class AccueilController {
     @FXML
     private Button btnNosLogements;
     @FXML
-    private Button btnMesReservations; // Nouveau
-
-    // Optionnel : pour personnaliser le bloc utilisateur
+    private Button btnMesReservations;
     @FXML
     private HBox userBox;
     @FXML
@@ -52,6 +51,7 @@ public class AccueilController {
     private List<logement> tousLesLogements;
     private List<logement> logementsFiltres;
     private Button activeFilterBtn;
+    private User currentUser;  // <-- AJOUT: Variable pour stocker l'utilisateur courant
 
     @FXML
     public void initialize() {
@@ -63,13 +63,15 @@ public class AccueilController {
         if (SessionManager.isLoggedIn()) {
             btnMesReservations.setVisible(true);
             btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml"));
-            // Optionnel : afficher le nom de l'utilisateur
-            // userNameLabel.setText(SessionManager.getCurrentUser().getNom());
+            // Mettre à jour le nom si disponible
+            if (SessionManager.getCurrentUser() != null) {
+                userNameLabel.setText(SessionManager.getCurrentUser().getPrenom() + " " +
+                        SessionManager.getCurrentUser().getNom());
+            }
         } else {
             btnMesReservations.setVisible(false);
-            // Optionnel : transformer le bloc utilisateur en bouton de connexion
-            // userNameLabel.setText("Connexion");
-            // userBox.setOnMouseClicked(e -> NavigationManager.loadView("/login.fxml"));
+            userNameLabel.setText("Connexion");
+            userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
         }
 
         sortCombo.getItems().addAll("Prix croissant", "Prix décroissant");
@@ -107,9 +109,29 @@ public class AccueilController {
         sortCombo.setOnAction(e -> trier());
     }
 
-    // ... le reste des méthodes inchangées ...
+    /**
+     * NOUVELLE MÉTHODE: Reçoit l'utilisateur depuis LoginController
+     */
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        SessionManager.setCurrentUser(user);
 
+        // Mettre à jour l'affichage du nom
+        if (user != null && userNameLabel != null) {
+            userNameLabel.setText(user.getPrenom() + " " + user.getNom());
+        }
 
+        // Configurer le bouton Mes Réservations
+        if (btnMesReservations != null) {
+            btnMesReservations.setVisible(true);
+            btnMesReservations.setOnAction(e -> {
+                System.out.println("Navigation vers Mes Réservations");
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
+            });
+        }
+
+        System.out.println("Utilisateur connecté dans AccueilController: " + (user != null ? user.getEmail() : "null"));
+    }
     private void setActiveFilter(Button newActiveBtn) {
         if (activeFilterBtn != null) {
             activeFilterBtn.getStyleClass().remove("filter-button-active");
@@ -195,71 +217,103 @@ public class AccueilController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);");
         card.setPrefWidth(250);
 
-        // Image du logement (pleine largeur disponible, en tenant compte du padding)
+        // Image du logement
         ImageView imageView = new ImageView();
+        imageView.setFitWidth(210);
+        imageView.setFitHeight(150);
+        imageView.setPreserveRatio(true);
+
         try {
             String imagePath = l.getImage();
             if (imagePath != null && !imagePath.isEmpty()) {
                 if (imagePath.startsWith("http")) {
                     imageView.setImage(new Image(imagePath));
                 } else {
-                    imageView.setImage(new Image(Objects.requireNonNull(getClass().getResource(imagePath)).toExternalForm()));
+                    // Essayer de charger depuis les resources
+                    try {
+                        Image img = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
+                        imageView.setImage(img);
+                    } catch (Exception e) {
+                        // Image par défaut
+                        Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
+                        imageView.setImage(defaultImg);
+                    }
                 }
             } else {
-                Region placeholder = new Region();
-                placeholder.setStyle("-fx-background-color: #e0e0e0;");
-                placeholder.setPrefSize(210, 150);
-                imageView.setImage(null);
+                // Image par défaut
+                Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
+                imageView.setImage(defaultImg);
             }
         } catch (Exception e) {
             System.err.println("Erreur chargement image pour " + l.getNom() + " : " + e.getMessage());
-            Region placeholder = new Region();
-            placeholder.setStyle("-fx-background-color: #e0e0e0;");
-            placeholder.setPrefSize(210, 150);
         }
-        imageView.setFitWidth(210);
-        imageView.setFitHeight(150);
-        imageView.setPreserveRatio(true);
 
         Label title = new Label(l.getNom());
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
 
-        Label location = new Label(l.getAdresse());
-        location.setStyle("-fx-font-size: 14px; -fx-text-fill: #81AE8D;");
+        Label location = new Label("📍 " + l.getAdresse());
+        location.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
 
-        // Badge Disponible
-        HBox infoBox = new HBox(10);
-        infoBox.setAlignment(Pos.CENTER_LEFT);
+        // Badge Disponible et type
+        HBox badgeBox = new HBox(10);
+        badgeBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label typeBadge = new Label(l.getType());
+        typeBadge.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 12; " +
+                "-fx-padding: 3 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+
+        badgeBox.getChildren().add(typeBadge);
+
         if (l.isDisponibilite()) {
             Label dispo = new Label("Disponible");
-            dispo.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 8; -fx-font-size: 12px; -fx-font-weight: bold;");
-            infoBox.getChildren().add(dispo);
+            dispo.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 12; " +
+                    "-fx-padding: 3 10; -fx-font-size: 11px; -fx-font-weight: bold;");
+            badgeBox.getChildren().add(dispo);
         }
-        infoBox.getChildren().add(location);
 
-        Label price = new Label(l.getTarif_nuit() + " DT / nuit");
-        price.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        // Prix
+        HBox priceBox = new HBox(5);
+        priceBox.setAlignment(Pos.CENTER_LEFT);
 
-        // Équipement sous le tarif
-        Label equipementLabel = new Label("Équipement: " + l.getEquipement());
+        Label price = new Label(String.format("%.2f", l.getTarif_nuit()) + " DT");
+        price.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+
+        Label nuitLabel = new Label("/nuit");
+        nuitLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
+
+        priceBox.getChildren().addAll(price, nuitLabel);
+
+        // Équipement
+        Label equipementLabel = new Label("⚙️ " + l.getEquipement());
         equipementLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f8c8d;");
 
+        // Bouton Réserver
         Button btn = new Button("Réserver");
-        btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; -fx-background-radius: 20; -fx-padding: 10 0; -fx-font-weight: bold; -fx-cursor: hand;");
+        btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 25; " +
+                "-fx-padding: 10 0; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;");
         btn.setMaxWidth(Double.MAX_VALUE);
+
+        btn.setOnMouseEntered(e ->
+                btn.setStyle("-fx-background-color: #D49B3D; -fx-text-fill: white; -fx-background-radius: 25; " +
+                        "-fx-padding: 10 0; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;")
+        );
+
+        btn.setOnMouseExited(e ->
+                btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 25; " +
+                        "-fx-padding: 10 0; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;")
+        );
+
         btn.setOnAction(e -> {
             // Vérifier si l'utilisateur est connecté
             if (SessionManager.isLoggedIn()) {
-                // Utilisateur connecté : aller au formulaire de réservation
-                SessionManager.setSelectedLogement(l);  // Passer le logement sélectionné
-                NavigationManager.loadView("/fxml/ReservationForm.fxml");  // Utilise NavigationManager
+                SessionManager.setSelectedLogement(l);
+                NavigationManager.loadView("/fxml/ReservationForm.fxml");
             } else {
-                // Utilisateur non connecté : aller à la page de login
-                NavigationManager.loadView("/Login.fxml");  // Utilise NavigationManager
+                NavigationManager.loadView("/fxml/Login.fxml");
             }
         });
 
-        card.getChildren().addAll(imageView, title, infoBox, price, equipementLabel, btn);
+        card.getChildren().addAll(imageView, title, location, badgeBox, priceBox, equipementLabel, btn);
         return card;
     }
 
@@ -270,4 +324,34 @@ public class AccueilController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    // AJOUTER ces méthodes dans AccueilController.java
+
+    @FXML
+    private void onUserBoxHover() {
+        if (userBox != null) {
+            userBox.setStyle("-fx-background-color: #2C7AA0; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
+                    "-fx-scale-x: 1.05; -fx-scale-y: 1.05; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
+        }
+    }
+
+    @FXML
+    private void onUserBoxExit() {
+        if (userBox != null) {
+            userBox.setStyle("-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
+                    "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
+        }
+    }
+
+    @FXML
+    private void showUserProfile() {
+        if (SessionManager.isLoggedIn() && currentUser != null) {
+            System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
+            NavigationManager.loadView("/fxml/UserProfil.fxml");
+        } else {
+            System.out.println("vous n'etes pas connécter ! ");
+            NavigationManager.loadView("/fxml/Login.fxml");
+        }
+    }
+
+
 }

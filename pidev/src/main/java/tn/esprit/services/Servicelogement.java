@@ -211,4 +211,26 @@ public class Servicelogement implements IService<logement> {
                 .findFirst()  // Retourne le premier (ou null si aucun)
                 .orElse(null);
     }
+    // Ajouter cette méthode dans Servicelogement.java
+    public logement getOneById(int id) throws SQLException {
+        String req = "SELECT * FROM logement WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(req)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new logement(
+                        rs.getInt("id"),
+                        rs.getString("type"),
+                        rs.getString("nom"),
+                        rs.getString("image"),
+                        rs.getString("adresse"),
+                        rs.getInt("capacite"),
+                        rs.getString("equipement"),
+                        rs.getFloat("tarif_nuit"),
+                        rs.getBoolean("disponibilite")
+                );
+            }
+        }
+        return null;
+    }
 }

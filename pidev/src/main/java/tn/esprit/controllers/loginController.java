@@ -25,10 +25,6 @@ public class loginController {
         // Permettre la connexion avec la touche Entrée
         txtPassword.setOnAction(event -> handleLogin());
         btnLogin.setDefaultButton(true);
-
-        // Valeurs de test pour le développement (à retirer en production)
-        // txtEmail.setText("admin@admin.com");
-        // txtPassword.setText("admin123");
     }
 
     @FXML
@@ -36,37 +32,37 @@ public class loginController {
         String email = txtEmail.getText().trim();
         String password = txtPassword.getText().trim();
 
-        // Validation des champs
         if (email.isEmpty() || password.isEmpty()) {
             showMessage("Veuillez remplir tous les champs", "error");
             return;
         }
 
-        // Désactiver le bouton pendant la tentative
         btnLogin.setDisable(true);
         btnLogin.setText("Connexion en cours...");
 
         try {
-            // Tentative de connexion
             User user = authService.login(email, password);
 
             if (user != null) {
-                // Vérifier si c'est bien un administrateur
                 if ("ADMIN".equals(user.getType())) {
                     showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
-
-                    // Rediriger vers le dashboard admin
                     redirectToAdminDashboard(user);
 
+                } else if ("CLIENT".equals(user.getType())) {
+                    showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
+                    // MODIFICATION ICI : Rediriger vers accueil.fxml au lieu de UserFrontEnd.fxml
+                    redirectToAccueilClient(user);
+
                 } else {
-                    showMessage("Accès réservé aux administrateurs", "error");
+                    showMessage("Type d'utilisateur inconnu", "error");
                     btnLogin.setDisable(false);
                     btnLogin.setText("Se connecter");
                 }
+
             } else {
-                showMessage("Email ou mot de passe incorrect", "error");
-                btnLogin.setDisable(false);
-                btnLogin.setText("Se connecter");
+                // Si l'utilisateur n'existe pas → rediriger vers SignUp
+                showMessage("Utilisateur inexistant. Création de compte...", "info");
+                goToSignUp();
             }
 
         } catch (Exception e) {
@@ -77,20 +73,84 @@ public class loginController {
         }
     }
 
+    /**
+     * NOUVELLE MÉTHODE : Redirige vers le nouvel accueil client moderne
+     */
+    private void redirectToAccueilClient(User user) {
+        try {
+            System.out.println("Redirection vers l'accueil client moderne pour: " + user.getEmail());
+
+            // Charger le nouveau fichier accueil.fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
+            Parent root = loader.load();
+
+            // Passer l'utilisateur au contrôleur de l'accueil
+            AccueilController accueilController = loader.getController();
+            if (accueilController != null) {
+                accueilController.setCurrentUser(user);
+            }
+
+            // Changer la scène
+            Stage stage = (Stage) txtEmail.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Accueil - Trouvez votre logement idéal");
+            stage.setMaximized(true);
+            stage.centerOnScreen();
+            stage.show();
+
+            System.out.println("Redirection réussie vers l'accueil client");
+
+        } catch (IOException e) {
+            showMessage("Erreur de redirection vers l'accueil: " + e.getMessage(), "error");
+            e.printStackTrace();
+
+            // Fallback : essayer l'ancien UserFrontEnd si le nouveau n'existe pas
+            tryFallbackToUserFrontEnd(user);
+        }
+    }
+
+    /**
+     * Méthode de secours si accueil.fxml n'existe pas
+     */
+    private void tryFallbackToUserFrontEnd(User user) {
+        try {
+            System.out.println("Fallback vers UserFrontEnd.fxml");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserFrontEnd.fxml"));
+            Parent root = loader.load();
+
+            UserFrontEndController controller = loader.getController();
+            controller.setCurrentUser(user);
+
+            Stage stage = (Stage) txtEmail.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Interface Utilisateur");
+            stage.setMaximized(true);
+            stage.centerOnScreen();
+
+        } catch (IOException ex) {
+            showMessage("Erreur critique: impossible de charger l'interface", "error");
+            ex.printStackTrace();
+            btnLogin.setDisable(false);
+            btnLogin.setText("Se connecter");
+        }
+    }
+
+    /**
+     * Méthode existante pour le dashboard admin
+     */
     private void redirectToAdminDashboard(User user) {
         try {
-            // Charger le dashboard admin
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AdminDashboard.fxml"));
             Parent root = loader.load();
 
-            // Passer l'utilisateur connecté au contrôleur du dashboard
             AdminDashboardController controller = loader.getController();
             controller.setCurrentUser(user);
 
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Tableau de bord Administrateur");
-            stage.setMaximized(true);  // Ouvrir en plein écran
+            stage.setMaximized(true);
             stage.centerOnScreen();
 
         } catch (IOException e) {
@@ -98,6 +158,10 @@ public class loginController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Méthode existante pour l'inscription
+     */
     @FXML
     private void goToSignUp() {
         try {
@@ -111,15 +175,36 @@ public class loginController {
 
         } catch (IOException e) {
             e.printStackTrace();
+            showMessage("Erreur lors du chargement de la page d'inscription", "error");
         }
     }
 
+    /**
+     * Affiche les messages à l'utilisateur
+     */
     private void showMessage(String message, String type) {
         lblMessage.setText(message);
-        if ("error".equals(type)) {
-            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
-        } else {
-            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold;");
+        switch (type) {
+            case "error":
+                lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+                break;
+            case "success":
+                lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold;");
+                break;
+            default:
+                lblMessage.setStyle("-fx-text-fill: #3D94CA; -fx-font-weight: bold;");
+                break;
         }
+        lblMessage.setVisible(true);
+
+        // Faire disparaître le message après 5 secondes
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+                javafx.application.Platform.runLater(() -> lblMessage.setVisible(false));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }

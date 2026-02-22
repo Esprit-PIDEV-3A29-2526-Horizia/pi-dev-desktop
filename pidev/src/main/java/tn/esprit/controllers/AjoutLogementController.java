@@ -3,6 +3,7 @@ package tn.esprit.controllers;
 import javafx.animation.RotateTransition;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -11,9 +12,11 @@ import javafx.util.Duration;
 import tn.esprit.entities.logement;
 import tn.esprit.services.Servicelogement;
 
+import java.net.URL;
 import java.sql.SQLException;
+import java.util.ResourceBundle;
 
-public class AjoutLogementController {
+public class AjoutLogementController implements Initializable {
 
     @FXML
     private ComboBox<String> typeComboBox;
@@ -73,28 +76,40 @@ public class AjoutLogementController {
 
     // CONSTANTES AJUSTÉES pour switch 50x26
     private static final double CIRCLE_TRANSLATE_OFF = 0;
-    private static final double CIRCLE_TRANSLATE_ON = 24; // 50 - (2*padding) - (2*radius) = 50 - 4 - 20 = 26, mais 24 pour centrer
+    private static final double CIRCLE_TRANSLATE_ON = 24;
     private static final String COLOR_OFF = "#e74c3c";
     private static final String COLOR_ON = "#2ecc71";
 
     public AjoutLogementController() {
     }
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Initialiser le ComboBox avec les types de logements
+
+        typeComboBox.setPromptText("Sélectionner un type");
+
+        // Initialiser le Spinner de capacité
+        SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 2);
+        capaciteSpinner.setValueFactory(valueFactory);
+
+        // Initialiser les écouteurs pour les boutons micro
         nomMicroBtn.setOnAction(e -> handleMicro(nomField, nomMicroBtn));
         imageMicroBtn.setOnAction(e -> handleMicro(imageField, imageMicroBtn));
         adresseMicroBtn.setOnAction(e -> handleMicro(adresseField, adresseMicroBtn));
         equipementMicroBtn.setOnAction(e -> handleMicro(equipementField, equipementMicroBtn));
         tarifMicroBtn.setOnAction(e -> handleMicro(tarifField, tarifMicroBtn));
 
+        // Initialiser les boutons principaux
         ajouterBtn.setOnAction(e -> ajouterLogement());
         annulerBtn.setOnAction(e -> retourListe());
 
+        // Initialiser le switch de disponibilité
         initialiserSwitch();
     }
 
     private void initialiserSwitch() {
+        disponibiliteToggle.setSelected(false);
         mettreAJourSwitchUI();
     }
 
@@ -243,14 +258,10 @@ public class AjoutLogementController {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'ajout : " + e.getMessage());
         }
     }
+
     private void retourListe() {
-        // Récupérer l'instance du Dashboard
-        Dashboard dashboard = (Dashboard) ajouterBtn.getScene().getRoot().getUserData();
-        if (dashboard != null) {
-            dashboard.loadView("/fxml/Logements.fxml");
-        } else {
-            System.err.println("❌ Impossible de récupérer l'instance du Dashboard !");
-        }
+        // CORRECTION: Utiliser AdminDashboardController au lieu de Dashboard
+        AdminDashboardController.loadPage("/fxml/Logements.fxml");
     }
 
     private void showAlert(Alert.AlertType type, String title, String content) {

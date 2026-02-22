@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="tn.esprit.controllers.UserFrontEndController">
+
+    <!-- Barre de navigation en haut -->
+    <top>
+        <HBox spacing="20" style="-fx-background-color: #0d6efd;" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10" />
+            </padding>
+            <Label text="Accueil" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+            <Label text="Mes Voyages" style="-fx-text-fill: white;" />
+            <Label text="Mes Réservations" style="-fx-text-fill: white;" />
+            <Label text="Contact" style="-fx-text-fill: white;" />
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Utilisateur" />
+            <Button text="Déconnexion" onAction="#handleLogout"/>
+        </HBox>
+    </top>
+
+    <!-- Contenu principal -->
+    <center>
+        <VBox spacing="20" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+
+            <!-- Encadré de recherche -->
+            <VBox spacing="10" alignment="CENTER">
+                <Label text="Trouvez votre voyage idéal" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <HBox spacing="10" alignment="CENTER">
+                    <TextField promptText="Où voulez-vous aller ?" prefWidth="200"/>
+                    <Button text="Rechercher" style="-fx-background-color: #0d6efd; -fx-text-fill: white;"/>
+                </HBox>
+            </VBox>
+
+            <!-- Grid de voyages -->
+            <GridPane fx:id="gridDestinations" hgap="20" vgap="20" alignment="CENTER">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10" />
+                </padding>
+            </GridPane>
+
+        </VBox>
+    </center>
+
+</BorderPane>

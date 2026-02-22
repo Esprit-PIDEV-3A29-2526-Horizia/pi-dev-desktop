@@ -11,6 +11,7 @@ import javafx.scene.text.FontWeight;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.Status;
+import tn.esprit.entities.User;
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
@@ -36,35 +37,132 @@ public class MesReservationsController {
     @FXML
     private Label emptyMessage;
 
+    // Éléments pour l'affichage du nom utilisateur (ajoutés pour correspondre à l'accueil)
+    @FXML
+    private HBox userBox;
+    @FXML
+    private Label userNameLabel;
+    @FXML
+    private Button btnAccueil;
+    @FXML
+    private Button btnNosLogements;
+    @FXML
+    private Button btnMesReservationsNav; // Bouton de navigation "Mes Réservations" dans la barre
+
     private Servicereservationlog serviceReservation = new Servicereservationlog();
     private Servicelogement serviceLogement = new Servicelogement();
 
     private ObservableList<reservationlog> reservationsList = FXCollections.observableArrayList();
+    private User currentUser;
 
     @FXML
     public void initialize() {
+        // Récupérer l'utilisateur connecté
+        currentUser = SessionManager.getCurrentUser();
+
+        // Configuration de la navigation et de l'affichage utilisateur (comme dans l'accueil)
+        setupNavigationAndUser();
+
+        // Configuration du combo de statuts
         filterStatusCombo.getItems().addAll(Status.values());
         filterStatusCombo.setPromptText("Tous les statuts");
 
+        // Charger les réservations
         chargerReservations();
 
+        // Configuration des boutons de filtre
         btnRechercher.setOnAction(e -> filtrerReservations());
         btnReset.setOnAction(e -> resetFiltres());
 
-        // Recherche en temps réel
+        // Recherche et filtres en temps réel
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filtrerReservations());
         filterStatusCombo.valueProperty().addListener((obs, oldVal, newVal) -> filtrerReservations());
+
+        System.out.println("MesReservationsController initialisé pour l'utilisateur: " +
+                (currentUser != null ? currentUser.getEmail() : "non connecté"));
+    }
+
+    private void setupNavigationAndUser() {
+        // Style du bouton actif (Mes Réservations est actif sur cette page)
+        if (btnMesReservationsNav != null) {
+            btnMesReservationsNav.getStyleClass().add("nav-button-active");
+        }
+
+        // Configuration des boutons de navigation
+        if (btnNosLogements != null) {
+            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+        }
+
+        if (btnAccueil != null) {
+            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+        }
+
+        // Gestion de l'affichage utilisateur
+        if (SessionManager.isLoggedIn() && currentUser != null) {
+            // Afficher le nom de l'utilisateur
+            if (userNameLabel != null) {
+                userNameLabel.setText(currentUser.getPrenom() + " " + currentUser.getNom());
+            }
+
+            // Rendre userBox cliquable pour accéder au profil (pas déconnexion)
+            if (userBox != null) {
+                userBox.setCursor(javafx.scene.Cursor.HAND);
+                // SUPPRIMER showLogoutConfirmation() et METTRE showUserProfile()
+                userBox.setOnMouseClicked(e -> showUserProfile());
+            }
+
+        } else {
+            // Utilisateur non connecté - rediriger vers login
+            if (userNameLabel != null) {
+                userNameLabel.setText("Connexion");
+            }
+            if (userBox != null) {
+                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
+            }
+        }
+    }
+
+    /**
+     * Affiche une confirmation de déconnexion
+     */
+    private void showLogoutConfirmation() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Déconnexion");
+        alert.setHeaderText(null);
+        alert.setContentText("Voulez-vous vraiment vous déconnecter ?");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                SessionManager.logout();
+                NavigationManager.loadView("/fxml/Login.fxml");
+            }
+        });
     }
 
     private void chargerReservations() {
         try {
             List<reservationlog> toutes = serviceReservation.afficher();
-            // Filtrer par client statique (ID 14) – à remplacer par l'ID dynamique plus tard
+
+            // Récupérer l'ID du client connecté depuis SessionManager
+            int clientId;
+            if (SessionManager.isLoggedIn() && currentUser != null) {
+                clientId = currentUser.getId(); // Adaptez selon votre méthode
+            } else {
+                // Fallback pour le développement
+                clientId = 14;
+                System.out.println("Aucun utilisateur connecté, utilisation de l'ID par défaut: 14");
+            }
+
+            int finalClientId = clientId;
             List<reservationlog> duClient = toutes.stream()
-                    .filter(r -> r.getIdc() == 14)
+                    .filter(r -> r.getIdc() == finalClientId)
                     .collect(Collectors.toList());
+
             reservationsList.setAll(duClient);
             afficherReservations(reservationsList);
+
+            System.out.println("Réservations chargées: " + duClient.size() + " pour le client ID " + clientId);
+
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible de charger les réservations : " + e.getMessage());
@@ -108,11 +206,22 @@ public class MesReservationsController {
         card.setPrefWidth(300);
         card.setMaxWidth(300);
 
+        // Effet au survol
+        card.setOnMouseEntered(e ->
+                card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);")
+        );
+
+        card.setOnMouseExited(e ->
+                card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15; " +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);")
+        );
+
         Label lblNom = new Label(nomLogement);
         lblNom.setFont(Font.font("System", FontWeight.BOLD, 18));
         lblNom.setStyle("-fx-text-fill: #23779C;");
 
-        Label lblAdresse = new Label(adresseLogement);
+        Label lblAdresse = new Label("📍 " + adresseLogement);
         lblAdresse.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 14;");
 
         Label lblDates = new Label("📅 " + dateArrivee + " → " + dateDepart);
@@ -121,23 +230,49 @@ public class MesReservationsController {
         Label lblMontant = new Label("💰 " + r.getMontant() + " DT");
         lblMontant.setStyle("-fx-text-fill: #E8B156; -fx-font-size: 16; -fx-font-weight: bold;");
 
-        Label lblStatut = new Label("Statut : " + r.getStatus().toString());
-        lblStatut.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 14;");
+        // Badge de statut
+        Label lblStatut = new Label(r.getStatus().toString());
+        String statusColor;
+        switch (r.getStatus()) {
+            case confirmée:
+                statusColor = "#81AE8D";
+                break;
+            case en_attente:
+                statusColor = "#E8B156";
+                break;
+            case terminée:
+                statusColor = "#e74c3c";
+                break;
+            default:
+                statusColor = "#7f8c8d";
+        }
+        lblStatut.setStyle("-fx-background-color: " + statusColor + "; -fx-text-fill: white; " +
+                "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 12px; -fx-font-weight: bold;");
 
         // Boutons d'action
         HBox actions = new HBox(15);
         actions.setAlignment(Pos.CENTER);
 
         Button btnModifier = new Button("Modifier");
-        btnModifier.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 15; -fx-cursor: hand;");
+        btnModifier.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
         btnModifier.setOnAction(e -> modifierReservation(r));
 
         Button btnSupprimer = new Button("Supprimer");
-        btnSupprimer.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 5 15; -fx-cursor: hand;");
+        btnSupprimer.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
         btnSupprimer.setOnAction(e -> supprimerReservation(r));
 
+        // Condition : cacher les boutons si le statut est "terminée"
+        if (r.getStatus() == Status.terminée) {
+            btnModifier.setVisible(false);
+            btnSupprimer.setVisible(false);
+        }
+
         actions.getChildren().addAll(btnModifier, btnSupprimer);
-        card.getChildren().addAll(lblNom, lblAdresse, lblDates, lblMontant, lblStatut, actions);
+
+        VBox infoBox = new VBox(5);
+        infoBox.getChildren().addAll(lblNom, lblAdresse, lblDates, lblMontant, lblStatut);
+
+        card.getChildren().addAll(infoBox, actions);
 
         return card;
     }
@@ -148,17 +283,22 @@ public class MesReservationsController {
 
         List<reservationlog> filtered = reservationsList.stream()
                 .filter(r -> {
+                    // Filtre par statut
                     if (selectedStatus != null && r.getStatus() != selectedStatus) {
                         return false;
                     }
-                    try {
-                        logement log = serviceLogement.rechercherParId(r.getId_l());
-                        if (log != null && !log.getNom().toLowerCase().contains(searchText)) {
+
+                    // Filtre par recherche textuelle
+                    if (!searchText.isEmpty()) {
+                        try {
+                            logement log = serviceLogement.rechercherParId(r.getId_l());
+                            if (log == null || !log.getNom().toLowerCase().contains(searchText)) {
+                                return false;
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
                             return false;
                         }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        return false;
                     }
                     return true;
                 })
@@ -182,6 +322,7 @@ public class MesReservationsController {
         confirm.setTitle("Confirmation");
         confirm.setHeaderText("Supprimer la réservation");
         confirm.setContentText("Voulez-vous vraiment supprimer cette réservation ?");
+
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
                 serviceReservation.supprimer(r.getId());
@@ -201,7 +342,34 @@ public class MesReservationsController {
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+    @FXML
+    private void onUserBoxHover() {
+        if (userBox != null) {
+            // Animation de transition
+            userBox.setStyle("-fx-background-color: #2C7AA0; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
+                    "-fx-scale-x: 1.05; -fx-scale-y: 1.05; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
+        }
+    }
+
+    @FXML
+    private void onUserBoxExit() {
+        if (userBox != null) {
+            userBox.setStyle("-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
+                    "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
+        }
+    }
+    @FXML
+    private void showUserProfile() {
+        if (SessionManager.isLoggedIn() && currentUser != null) {
+            System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
+            NavigationManager.loadView("/fxml/UserProfil.fxml");
+        } else {
+            System.out.println("vous n'etes pas connécter ! ");
+            NavigationManager.loadView("/fxml/Login.fxml");
+        }
     }
 }
