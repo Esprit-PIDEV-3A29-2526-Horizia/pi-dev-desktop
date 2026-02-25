@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.lang.String?>
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="tn.esprit.controllers.ProfilListController">
+
+    <stylesheets>
+        <String fx:value="/css/global.css" />
+        <String fx:value="/css/profil-list.css" />
+    </stylesheets>
+
+    <children>
+        <VBox spacing="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+
+            <!-- Header avec titre et bouton ajouter -->
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="📋 Gestion des Profils" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnAdd" onAction="#handleAddProfil"
+                        style="-fx-background-color: #10B981; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"
+                        text="+ Nouveau Profil" textFill="white" />
+            </HBox>
+
+            <!-- Barre de recherche et filtres -->
+            <VBox spacing="15">
+                <!-- Recherche -->
+                <HBox spacing="10">
+                    <TextField fx:id="searchField" promptText="Rechercher par type ou statut..."
+                               style="-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 5; -fx-padding: 8 12; -fx-font-size: 14px; -fx-pref-width: 300;" />
+                    <Label text="🔍" style="-fx-font-size: 18px;" />
+                </HBox>
+
+                <!-- Filtres -->
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <Label text="Filtres:" style="-fx-font-weight: bold;" />
+
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="Type:" style="-fx-font-size: 12px;" />
+                        <ComboBox fx:id="filterTypeCombo" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 5;" />
+                    </HBox>
+
+                    <HBox spacing="5" alignment="CENTER_LEFT">
+                        <Label text="Statut:" style="-fx-font-size: 12px;" />
+                        <ComboBox fx:id="filterStatutCombo" prefWidth="120" style="-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 5;" />
+                    </HBox>
+
+                    <!-- Options de tri -->
+                    <Separator orientation="VERTICAL" />
+
+                    <Label text="Trier par:" style="-fx-font-weight: bold;" />
+
+                    <ComboBox fx:id="sortByCombo" prefWidth="100" style="-fx-background-color: white; -fx-border-color: #E5E7EB; -fx-border-radius: 5;" />
+
+                    <HBox spacing="5">
+                        <RadioButton fx:id="rbAscending" text="↑" selected="true">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="sortOrderGroup" />
+                            </toggleGroup>
+                            <tooltip>
+                                <Tooltip text="Ordre croissant" />
+                            </tooltip>
+                        </RadioButton>
+                        <RadioButton fx:id="rbDescending" text="↓" toggleGroup="$sortOrderGroup">
+                            <tooltip>
+                                <Tooltip text="Ordre décroissant" />
+                            </tooltip>
+                        </RadioButton>
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <!-- Total -->
+                    <HBox spacing="10" style="-fx-background-color: #F3F4F6; -fx-padding: 8 15; -fx-background-radius: 20;">
+                        <Label text="Total:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="totalProfilsLabel" text="0" style="-fx-font-weight: bold; -fx-text-fill: #2a5298;" />
+                    </HBox>
+                </HBox>
+            </VBox>
+
+            <!-- Tableau des profils - SANS la colonne ID -->
+            <TableView fx:id="tableProfils" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colType" text="Type" prefWidth="200" />
+                    <TableColumn fx:id="colStatut" text="Statut" prefWidth="200" />
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="150" />
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+
+            <!-- Message -->
+            <Label fx:id="lblMessage" style="-fx-text-fill: #10B981; -fx-font-weight: bold;" alignment="CENTER" />
+        </VBox>
+    </children>
+</AnchorPane>
