@@ -6,31 +6,30 @@ public class Commentaire {
     private int id;
     private int publicationId;
     private int utilisateurId;
-    private String auteur;
-    private String nomUtilisateur;
+    private String auteur;        // Nom affiché
     private String contenu;
     private LocalDateTime dateCreation;
     private boolean modifie;
 
-    // Constructeurs
+    // Constructeur par défaut
     public Commentaire() {
-        this.modifie = false;
-    }
-
-    // Four‑argument constructor (existing)
-    public Commentaire(int publicationId, int utilisateurId, String auteur, String contenu) {
-        this.publicationId = publicationId;
-        this.utilisateurId = utilisateurId;
-        this.auteur = auteur;
-        this.nomUtilisateur = auteur;  // Par défaut, nom = auteur
-        this.contenu = contenu;
         this.dateCreation = LocalDateTime.now();
         this.modifie = false;
+        this.utilisateurId = 0;
     }
 
-    // NEW three‑argument constructor that delegates to the four‑arg one
+    // Constructeur rapide (avec nom d'auteur)
     public Commentaire(int publicationId, String auteur, String contenu) {
-        this(publicationId, 0, auteur, contenu); // utilisateurId mis à 0 par défaut
+        this();
+        this.publicationId = publicationId;
+        this.auteur = auteur;
+        this.contenu = contenu;
+    }
+
+    // Constructeur complet (utilisateur connecté)
+    public Commentaire(int publicationId, int utilisateurId, String auteur, String contenu) {
+        this(publicationId, auteur, contenu);
+        this.utilisateurId = utilisateurId;
     }
 
     // Getters et Setters
@@ -46,13 +45,15 @@ public class Commentaire {
     public String getAuteur() { return auteur; }
     public void setAuteur(String auteur) { this.auteur = auteur; }
 
-    public String getNomUtilisateur() { return nomUtilisateur; }
-    public void setNomUtilisateur(String nomUtilisateur) { this.nomUtilisateur = nomUtilisateur; }
+    // Retourne le nom d'utilisateur (auteur par défaut)
+    public String getNomUtilisateur() {
+        return auteur != null ? auteur : "Anonyme";
+    }
 
     public String getContenu() { return contenu; }
     public void setContenu(String contenu) {
         this.contenu = contenu;
-        this.modifie = true;  // Marquer comme modifié
+        this.modifie = true;
     }
 
     public LocalDateTime getDateCreation() { return dateCreation; }
@@ -63,11 +64,7 @@ public class Commentaire {
 
     @Override
     public String toString() {
-        return "Commentaire{" +
-                "id=" + id +
-                ", auteur='" + auteur + '\'' +
-                ", contenu='" + contenu.substring(0, Math.min(30, contenu.length())) + "...'" +
-                ", modifie=" + modifie +
-                '}';
+        return "Commentaire{id=" + id + ", auteur='" + auteur + "', contenu='" +
+                (contenu != null ? contenu.substring(0, Math.min(20, contenu.length())) + "..." : "null") + "'}";
     }
 }

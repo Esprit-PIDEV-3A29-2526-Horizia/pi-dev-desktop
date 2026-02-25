@@ -1,30 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 
-<VBox spacing="10" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AjouterPublicationController">
-    <children>
-        <Label text="Titre *" />
-        <TextField fx:id="titreField" promptText="Titre de la publication" />
+<ScrollPane fitToWidth="true" style="-fx-background-color: #f5f7fa;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AjouterPublicationController">
+    <VBox spacing="25" style="-fx-background-color: #f5f7fa; -fx-padding: 40;" maxWidth="800">
 
-        <Label text="Description *" />
-        <TextArea fx:id="descriptionArea" promptText="Description" prefRowCount="5" wrapText="true" />
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <Button fx:id="retourBtn" text="←" style="-fx-background-color: transparent; -fx-font-size: 24; -fx-text-fill: #2c3e50; -fx-cursor: hand;" />
+            <Label text="Nouvelle Publication" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+        </HBox>
 
-        <Label text="Image" />
-        <TextField fx:id="imageField" promptText="Chemin de l'image" />
+        <!-- Formulaire -->
+        <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 20, 0, 0, 5);">
 
-        <!-- Bouton Parcourir avec onAction -->
-        <Button text="Parcourir" onAction="#parcourirImage" />
+            <!-- Titre -->
+            <VBox spacing="8">
+                <Label text="Titre *" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+                <TextField fx:id="titreField" promptText="Donnez un titre accrocheur..."
+                           style="-fx-padding: 15; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-font-size: 14;" />
+                <Label fx:id="titreError" text="Le titre doit contenir au moins 3 caractères"
+                       visible="false" style="-fx-text-fill: #e74c3c; -fx-font-size: 12;" />
+            </VBox>
 
-        <Button fx:id="enregistrerBtn" text="Enregistrer" />
-        <Button fx:id="annulerBtn" text="Annuler" />
-    </children>
-    <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
-    </padding>
-</VBox>
+            <!-- Catégorie -->
+            <VBox spacing="8">
+                <Label text="Catégorie *" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+                <ComboBox fx:id="categorieCombo" promptText="Sélectionnez une catégorie"
+                          style="-fx-padding: 5; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;" maxWidth="Infinity" />
+            </VBox>
+
+            <!-- Localisation -->
+            <VBox spacing="8">
+                <Label text="Localisation" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+                <HBox spacing="10">
+                    <TextField fx:id="villeField" promptText="Ville" HBox.hgrow="ALWAYS"
+                               style="-fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;" />
+                    <TextField fx:id="paysField" promptText="Pays" HBox.hgrow="ALWAYS"
+                               style="-fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;" />
+                </HBox>
+            </VBox>
+
+            <!-- Description -->
+            <VBox spacing="8">
+                <Label text="Description *" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+                <TextArea fx:id="descriptionArea" promptText="Décrivez votre expérience, vos recommandations..."
+                          wrapText="true" prefRowCount="5"
+                          style="-fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-padding: 10; -fx-font-size: 14;" />
+                <HBox alignment="CENTER_RIGHT">
+                    <Label fx:id="descCount" text="0 / 1000" style="-fx-text-fill: #95a5a6; -fx-font-size: 12;" />
+                </HBox>
+            </VBox>
+
+            <!-- Tags -->
+            <VBox spacing="8">
+                <Label text="Tags (séparés par des virgules)" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+                <TextField fx:id="tagsField" promptText="plage, soleil, famille, budget..."
+                           style="-fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #e0e0e0; -fx-border-radius: 10;" />
+            </VBox>
+
+            <!-- Image -->
+            <VBox spacing="8">
+                <Label text="Photo" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-font-size: 14;" />
+
+                <StackPane fx:id="imagePreviewContainer" style="-fx-background-color: #ecf0f1; -fx-background-radius: 10; -fx-min-height: 200; -fx-border-color: #ddd; -fx-border-radius: 10; -fx-border-style: dashed;">
+                    <VBox alignment="CENTER" spacing="10">
+                        <Label text="🖼️" style="-fx-font-size: 48;" />
+                        <Label text="Glissez une photo ou cliquez pour parcourir" style="-fx-text-fill: #7f8c8d;" />
+                        <Button fx:id="parcourirBtn" text="📁 Parcourir"
+                                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-cursor: hand;" />
+                    </VBox>
+                    <ImageView fx:id="imagePreview" fitWidth="400" fitHeight="250" preserveRatio="true" visible="false" />
+                </StackPane>
+
+                <Label fx:id="imagePathLabel" style="-fx-text-fill: #95a5a6; -fx-font-size: 12;" />
+            </VBox>
+
+            <!-- Options avancées -->
+            <TitledPane text="Options avancées" expanded="false" style="-fx-text-fill: #7f8c8d;">
+                <VBox spacing="10" style="-fx-padding: 10 0;">
+                    <CheckBox fx:id="publierMaintenantCheck" text="Publier immédiatement" selected="true" />
+                    <CheckBox fx:id="autoriserCommentairesCheck" text="Autoriser les commentaires" selected="true" />
+                    <CheckBox fx:id="visiblePubliqueCheck" text="Visible publiquement" selected="true" />
+                </VBox>
+            </TitledPane>
+
+            <!-- Boutons -->
+            <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+                <Button fx:id="annulerBtn" text="Annuler"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-padding: 12 30; -fx-background-radius: 25; -fx-font-size: 14; -fx-cursor: hand;" />
+                <Button fx:id="enregistrerBtn" text="✓ Publier"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 12 40; -fx-background-radius: 25; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" />
+            </HBox>
+
+        </VBox>
+    </VBox>
+</ScrollPane>

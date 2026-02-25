@@ -3,41 +3,51 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/22"
-      xmlns:fx="http://javafx.com/fxml/1"
+<VBox xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="tn.esprit.controllers.PublicationCardController"
       spacing="10"
       style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);"
-      prefWidth="280">
+      prefWidth="400">
 
-    <!-- Image -->
-    <StackPane fx:id="imageContainer"
-               style="-fx-background-color: #ecf0f1; -fx-background-radius: 8;">
-        <ImageView fx:id="imageView" fitWidth="250" fitHeight="150" preserveRatio="true" />
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <StackPane style="-fx-background-color: #3498db; -fx-background-radius: 50%;" minWidth="40" minHeight="40">
+            <Label text="U" style="-fx-font-size: 18; -fx-text-fill: white;" />
+        </StackPane>
+        <VBox spacing="2">
+            <Label fx:id="auteurLabel" text="Auteur" style="-fx-font-weight: bold; -fx-font-size: 14;" />
+            <Label fx:id="dateLabel" style="-fx-font-size: 11; -fx-text-fill: gray;" />
+        </VBox>
+    </HBox>
+
+    <StackPane fx:id="imageContainer" style="-fx-background-color: #ecf0f1; -fx-background-radius: 8; -fx-min-height: 150;">
+        <ImageView fx:id="imageView" fitWidth="370" fitHeight="150" preserveRatio="true" />
     </StackPane>
 
-    <!-- Date -->
-    <Label fx:id="dateLabel" style="-fx-font-size: 11; -fx-text-fill: #7f8c8d;" />
+    <Label fx:id="titreLabel" wrapText="true" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+    <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 13; -fx-text-fill: #555;" />
 
-    <!-- Titre -->
-    <Label fx:id="titreLabel" wrapText="true"
-           style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-
-    <!-- Description -->
-    <Label fx:id="descriptionLabel" wrapText="true"
-           style="-fx-font-size: 13; -fx-text-fill: #7f8c8d;" />
-
-    <!-- Boutons -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-       
-        <Button fx:id="modifierBtn" text="Modif"
-                style="-fx-background-color: #f39c12; -fx-text-fill: white;" />
-        <Button fx:id="supprimerBtn" text="Suppr"
-                style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+    <HBox spacing="15">
+        <Button fx:id="likeBtn" text="❤️ Like" style="-fx-background-color: transparent; -fx-text-fill: #e74c3c;" />
+        <Button fx:id="commentToggleBtn" text="💬 Commentaires" style="-fx-background-color: transparent; -fx-text-fill: #3498db;" />
     </HBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="modifierBtn" text="✏️ Modifier" style="-fx-background-color: #f39c12; -fx-text-fill: white;" />
+        <Button fx:id="supprimerBtn" text="🗑️ Supprimer" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+    </HBox>
+
+    <VBox fx:id="commentairesSection" visible="false" managed="false" spacing="10" style="-fx-background-color: #f8f9fa; -fx-padding: 10; -fx-background-radius: 8;">
+        <VBox fx:id="listeCommentaires" spacing="5" />
+        <HBox spacing="10">
+            <TextField fx:id="nouveauCommentaireField" promptText="Votre commentaire..." HBox.hgrow="ALWAYS" />
+            <Button fx:id="publierCommentaireBtn" text="➤" style="-fx-background-color: #3498db; -fx-text-fill: white;" />
+        </HBox>
+    </VBox>
+
 </VBox>

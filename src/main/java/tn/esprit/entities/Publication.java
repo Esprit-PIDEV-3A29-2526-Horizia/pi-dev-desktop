@@ -8,20 +8,29 @@ public class Publication {
     private String description;
     private LocalDateTime datePublication;
     private String image;
+    private int likes;  // Ajouté pour résoudre l'erreur getLikes()
+    private int utilisateurId;  // Optionnel : pour savoir qui a créé la publication
+
+    // ============================================
+    // CONSTRUCTEURS
+    // ============================================
 
     // Constructeur par défaut
     public Publication() {
-        // La date sera définie automatiquement lors de la création
         this.datePublication = LocalDateTime.now();
+        this.likes = 0;
+        this.utilisateurId = 0;
     }
 
-    // Constructeur avec paramètres (sans date - elle se met auto)
+    // Constructeur avec paramètres essentiels (sans date - elle se met auto)
     public Publication(int id, String titre, String description, String image) {
         this.id = id;
         this.titre = titre;
         this.description = description;
         this.image = image;
         this.datePublication = LocalDateTime.now();
+        this.likes = 0;
+        this.utilisateurId = 0;
     }
 
     // Constructeur complet (si tu veux définir la date manuellement)
@@ -31,9 +40,26 @@ public class Publication {
         this.description = description;
         this.datePublication = datePublication;
         this.image = image;
+        this.likes = 0;
+        this.utilisateurId = 0;
     }
 
-    // Getters et Setters
+    // Constructeur complet avec tous les champs
+    public Publication(int id, String titre, String description, LocalDateTime datePublication,
+                       String image, int likes, int utilisateurId) {
+        this.id = id;
+        this.titre = titre;
+        this.description = description;
+        this.datePublication = datePublication;
+        this.image = image;
+        this.likes = likes;
+        this.utilisateurId = utilisateurId;
+    }
+
+    // ============================================
+    // GETTERS ET SETTERS
+    // ============================================
+
     public int getId() {
         return id;
     }
@@ -74,14 +100,59 @@ public class Publication {
         this.image = image;
     }
 
+    // NOUVEAU : Gestion des likes
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    // NOUVEAU : ID de l'utilisateur créateur
+    public int getUtilisateurId() {
+        return utilisateurId;
+    }
+
+    public void setUtilisateurId(int utilisateurId) {
+        this.utilisateurId = utilisateurId;
+    }
+
+    // ============================================
+    // MÉTHODES UTILITAIRES
+    // ============================================
+
     @Override
     public String toString() {
         return "Publication{" +
                 "id=" + id +
                 ", titre='" + titre + '\'' +
-                ", description='" + description + '\'' +
+                ", description='" + (description != null ? description.substring(0, Math.min(30, description.length())) + "..." : "null") + '\'' +
                 ", datePublication=" + datePublication +
                 ", image='" + image + '\'' +
+                ", likes=" + likes +
+                ", utilisateurId=" + utilisateurId +
                 '}';
+    }
+
+    // Pour affichage dans les listes (titre tronqué si trop long)
+    public String getTitreAbrege(int maxLength) {
+        if (titre == null) return "";
+        return titre.length() > maxLength ? titre.substring(0, maxLength) + "..." : titre;
+    }
+
+    // Vérifier si la publication a une image
+    public boolean hasImage() {
+        return image != null && !image.trim().isEmpty();
     }
 }

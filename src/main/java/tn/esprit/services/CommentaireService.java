@@ -6,67 +6,56 @@ import tn.esprit.utils.Database;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CommentaireService {
 
-    private Connection conn;
+    private static final Logger LOGGER = Logger.getLogger(CommentaireService.class.getName());
+    private final Connection conn;
 
     public CommentaireService() {
         conn = Database.getInstance().getCnx();
     }
 
+    /**
+     * 🔥 AJOUTER UN COMMENTAIRE - Méthode principale
+     */
     public void ajouter(Commentaire c) {
-        String sql = "INSERT INTO commentaire (publication_id, auteur, contenu, date_creation) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO commentaire (publication_id, utilisateur_id, auteur, contenu, date_creation, modifie) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Remplir les paramètres
             pst.setInt(1, c.getPublicationId());
-            pst.setString(2, c.getAuteur());
-            pst.setString(3, c.getContenu());
-            pst.setTimestamp(4, Timestamp.valueOf(c.getDateCreation()));
+            pst.setInt(2, c.getUtilisateurId());
+            pst.setString(3, c.getAuteur());
+            pst.setString(4, c.getContenu());
+            pst.setTimestamp(5, Timestamp.valueOf(c.getDateCreation()));
+            pst.setBoolean(6, c.isModifie());
 
-            pst.executeUpdate();
+            // Exécuter l'insertion
+            int affectedRows = pst.executeUpdate();
 
-            ResultSet rs = pst.getGeneratedKeys();
-            if (rs.next()) {
-                c.setId(rs.getInt(1));
+            // Récupérer l'ID généré
+            if (affectedRows > 0) {
+                ResultSet rs = pst.getGeneratedKeys();
+                if (rs.next()) {
+                    c.setId(rs.getInt(1));
+                    LOGGER.info("✅ Commentaire ajouté avec ID: " + c.getId());
+                }
             }
-            System.out.println("✅ Commentaire ajouté");
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur ajout commentaire: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "❌ Erreur ajout commentaire", e);
+            throw new RuntimeException("Erreur lors de l'ajout du commentaire: " + e.getMessage());
         }
     }
 
-    public void modifier(Commentaire c) {
-        String sql = "UPDATE commentaire SET auteur=?, contenu=? WHERE id=?";
-
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, c.getAuteur());
-            pst.setString(2, c.getContenu());
-            pst.setInt(3, c.getId());
-
-            pst.executeUpdate();
-            System.out.println("✅ Commentaire modifié");
-
-        } catch (SQLException e) {
-            System.out.println("❌ Erreur modification: " + e.getMessage());
-        }
-    }
-
-    public void supprimer(int id) {
-        String sql = "DELETE FROM commentaire WHERE id=?";
-
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, id);
-            pst.executeUpdate();
-            System.out.println("✅ Commentaire supprimé");
-
-        } catch (SQLException e) {
-            System.out.println("❌ Erreur suppression: " + e.getMessage());
-        }
-    }
-
-    // Récupérer les commentaires d'une publication
+    /**
+     * Récupérer les commentaires d'une publication
+     */
     public List<Commentaire> getByPublication(int publicationId) {
         List<Commentaire> list = new ArrayList<>();
         String sql = "SELECT * FROM commentaire WHERE publication_id = ? ORDER BY date_creation DESC";
@@ -76,39 +65,65 @@ public class CommentaireService {
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
-                list.add(mapCommentaire(rs));
+                list.add(mapResultSet(rs));
             }
+            LOGGER.info("📋 " + list.size() + " commentaires chargés pour publication " + publicationId);
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "❌ Erreur chargement commentaires", e);
         }
         return list;
     }
 
-    public Commentaire getById(int id) {
-        String sql = "SELECT * FROM commentaire WHERE id=?";
+    /**
+     * Modifier un commentaire
+     */
+    public void modifier(Commentaire c) {
+        String sql = "UPDATE commentaire SET contenu = ?, modifie = true WHERE id = ?";
+
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, c.getContenu());
+            pst.setInt(2, c.getId());
+
+            pst.executeUpdate();
+            LOGGER.info("✏️ Commentaire " + c.getId() + " modifié");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "❌ Erreur modification commentaire", e);
+        }
+    }
+
+    /**
+     * Supprimer un commentaire
+     */
+    public void supprimer(int id) {
+        String sql = "DELETE FROM commentaire WHERE id = ?";
 
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, id);
-            ResultSet rs = pst.executeQuery();
+            int affected = pst.executeUpdate();
 
-            if (rs.next()) {
-                return mapCommentaire(rs);
+            if (affected > 0) {
+                LOGGER.info("🗑️ Commentaire " + id + " supprimé");
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Erreur: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "❌ Erreur suppression commentaire", e);
         }
-        return null;
     }
 
-    private Commentaire mapCommentaire(ResultSet rs) throws SQLException {
+    /**
+     * Mapper ResultSet vers Entité
+     */
+    private Commentaire mapResultSet(ResultSet rs) throws SQLException {
         Commentaire c = new Commentaire();
         c.setId(rs.getInt("id"));
         c.setPublicationId(rs.getInt("publication_id"));
+        c.setUtilisateurId(rs.getInt("utilisateur_id"));
         c.setAuteur(rs.getString("auteur"));
         c.setContenu(rs.getString("contenu"));
         c.setDateCreation(rs.getTimestamp("date_creation").toLocalDateTime());
+        c.setModifie(rs.getBoolean("modifie"));
         return c;
     }
 }

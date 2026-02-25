@@ -14,25 +14,25 @@ public class Dashboard {
 
     @FXML
     private StackPane contentPane;
+
     private static Publication selectedPublication;
     private static StackPane staticContentPane;
 
     @FXML
     public void initialize() {
         staticContentPane = contentPane;
+        // Publications.fxml est à la racine → SANS /views/
+        loadView("/Publications.fxml");
     }
 
-    // Méthode statique pour charger les vues
     public static void loadView(String fxmlPath) {
         try {
             URL url = Dashboard.class.getResource(fxmlPath);
-
             System.out.println("🔍 Chargement: " + fxmlPath);
             System.out.println("📍 URL: " + url);
 
             if (url == null) {
                 System.err.println("❌ ERREUR: " + fxmlPath + " introuvable!");
-                System.err.println("Vérifie que le fichier existe dans src/main/resources/");
                 return;
             }
 
@@ -41,36 +41,36 @@ public class Dashboard {
             staticContentPane.getChildren().add(view);
 
         } catch (IOException e) {
+            System.err.println("❌ Erreur chargement: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     @FXML
     private void showDashboard() {
-        loadView("/views/Dashboard.fxml");  // ou ta vue par défaut
+        loadView("/dashboard.fxml");  // À la racine
     }
 
     @FXML
     private void showVoyages() {
-        loadView("/views/Voyages.fxml");
+        loadView("/Voyages.fxml");  // À la racine
     }
 
     @FXML
     private void showReservations() {
-        loadView("/views/Reservations.fxml");
+        loadView("/Reservations.fxml");  // À la racine
     }
 
     @FXML
     private void showlogement(ActionEvent event) {
-        loadView("/views/Logements.fxml");
+        loadView("/Logements.fxml");  // À la racine
     }
 
     @FXML
     private void showpublications(ActionEvent event) {
-        loadView("/Publications.fxml");  // ← CORRIGÉ ICI
+        loadView("/Publications.fxml");  // À la racine
     }
 
-    // Getters/Setters
     public static Publication getSelectedPublication() {
         return selectedPublication;
     }

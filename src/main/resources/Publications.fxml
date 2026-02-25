@@ -10,26 +10,33 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="15" style="-fx-background-color: #F6F7FB; -fx-padding: 20;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.PublicationsController">
-    <children>
-        <!-- Titre -->
-        <Label text="Gestion des Publications" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+<VBox xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.PublicationsController"
+      spacing="15"
+      style="-fx-background-color: #f5f5f5; -fx-padding: 20;">
 
-        <!-- Barre de tri, recherche et ajout -->
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <children>
-                <Label text="Trier par :" style="-fx-font-weight: bold; -fx-font-size: 14px;" />
-                <ComboBox fx:id="sortComboBox" promptText="Choisir..." style="-fx-pref-width: 180px; -fx-background-radius: 5;" />
-                <TextField fx:id="searchField" promptText="Rechercher par titre..." HBox.hgrow="ALWAYS" style="-fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #ddd; -fx-border-radius: 5;" />
-                <Button fx:id="addButton" mnemonicParsing="false" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 10 20; -fx-background-radius: 5; -fx-font-weight: bold;" text="+ Nouvelle Publication" />
-            </children>
-        </HBox>
+    <!-- Titre -->
+    <Label text="📰 Gestion des Publications"
+           style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
 
-        <!-- Zone des cartes -->
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
-            <content>
-                <FlowPane fx:id="publicationsFlowPane" hgap="20" vgap="20" style="-fx-background-color: #F6F7FB; -fx-padding: 5;" />
-            </content>
-        </ScrollPane>
-    </children>
+    <!-- Barre d'outils -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button fx:id="ajouterBtn" text="➕ Nouvelle Publication"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 10 20; -fx-background-radius: 5;" />
+
+        <TextField fx:id="rechercheField" promptText="🔍 Rechercher..."
+                   HBox.hgrow="ALWAYS"
+                   style="-fx-padding: 10; -fx-background-radius: 5;" />
+
+        <ComboBox fx:id="triComboBox" promptText="Trier par"
+                  style="-fx-background-radius: 5;" />
+    </HBox>
+
+    <!-- Liste des publications -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <FlowPane fx:id="publicationsContainer"
+                  hgap="15" vgap="15"
+                  style="-fx-padding: 10;" />
+    </ScrollPane>
+
 </VBox>
