@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controllers.FaceRegisterController"
+      prefHeight="500.0" prefWidth="700.0"
+      style="-fx-background-color: #1e3c72;"
+      alignment="CENTER" spacing="15">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Enregistrement facial"
+           style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+    <Label text="Pour activer la connexion rapide, enregistrez votre visage"
+           style="-fx-text-fill: #cccccc; -fx-font-size: 12px;"/>
+
+    <VBox fx:id="webcamContainer" prefHeight="300" prefWidth="600"
+          style="-fx-background-color: black; -fx-background-radius: 10;"
+          alignment="CENTER"/>
+
+    <Label fx:id="statusLabel" text="Regardez la caméra"
+           style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="btnSave" text="📸 Enregistrer mon visage"  onAction="#handleSaveFace"
+        style="-fx-background-color: #4CAF50; -fx-text-fill: white;
+        -fx-padding: 10 20; -fx-background-radius: 5;"/>
+        <Button fx:id="btnSkip" text="⏭ Passer"
+        onAction="#handleSkip"
+        style="-fx-background-color: #9e9e9e; -fx-text-fill: white;
+        -fx-padding: 10 20; -fx-background-radius: 5;"/>
+    </HBox>
+</VBox>

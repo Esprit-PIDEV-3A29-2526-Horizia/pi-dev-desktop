@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controllers.FaceLoginController"
+      prefHeight="500.0" prefWidth="700.0"
+      style="-fx-background-color: #1e3c72;"
+      alignment="CENTER" spacing="15">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Connexion par reconnaissance faciale"
+           style="-fx-font-size: 20px; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+    <VBox fx:id="webcamContainer" prefHeight="300" prefWidth="600"
+          style="-fx-background-color: black; -fx-background-radius: 10;"
+          alignment="CENTER"/>
+
+    <Label fx:id="statusLabel" text="Initialisation..."
+           style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+    <HBox spacing="20" alignment="CENTER">
+        <Button fx:id="btnBack" text="← Annuler"
+                onAction="#goBack"
+                style="-fx-background-color: #f44336; -fx-text-fill: white;
+                       -fx-padding: 10 30;"/>
+    </HBox>
+</VBox>

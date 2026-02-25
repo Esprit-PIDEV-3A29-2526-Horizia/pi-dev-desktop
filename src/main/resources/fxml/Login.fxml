@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom right, #1e3c72, #2a5298);" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.loginController">
+    <children>
+        <!-- Carte de login centrale -->
+        <AnchorPane layoutX="250.0" layoutY="100.0" prefHeight="550.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 20;">
+            <effect>
+                <DropShadow blurType="GAUSSIAN" height="30.0" radius="15.0" width="30.0">
+                    <color>
+                        <Color opacity="0.3" />
+                    </color>
+                </DropShadow>
+            </effect>
+
+            <children>
+                <!-- Logo / Icône admin -->
+                <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="160.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="/images/admin-avatar.jpg" />
+                    </image>
+                </ImageView>
+
+                <!-- Titre -->
+                <Label layoutX="165.0" layoutY="120.0" text="Login" textFill="#333333">
+                    <font>
+                        <Font name="System Bold" size="22.0" />
+                    </font>
+                </Label>
+
+                <!-- Sous-titre -->
+                <Label alignment="CENTER" layoutX="100.0" layoutY="150.0" prefWidth="200.0" text="Connectez-vous pour gérer votre plateforme" textAlignment="CENTER" textFill="#666666" wrapText="true">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Label>
+
+                <!-- Formulaire -->
+                <VBox layoutX="50.0" layoutY="200.0" prefHeight="150.0" prefWidth="300.0" spacing="20.0">
+                    <children>
+                        <!-- Champ Email -->
+                        <VBox spacing="5.0">
+                            <Label text="Email administrateur" textFill="#333333">
+                                <font>
+                                    <Font name="System Bold" size="12.0" />
+                                </font>
+                            </Label>
+                            <TextField fx:id="txtEmail" promptText="admin@exemple.com" style="-fx-background-color: #f5f5f5; -fx-background-radius: 10; -fx-padding: 10;">
+                                <font>
+                                    <Font size="14.0" />
+                                </font>
+                            </TextField>
+                        </VBox>
+
+                        <!-- Champ Mot de passe -->
+                        <VBox spacing="5.0">
+                            <Label text="Mot de passe" textFill="#333333">
+                                <font>
+                                    <Font name="System Bold" size="12.0" />
+                                </font>
+                            </Label>
+                            <PasswordField fx:id="txtPassword" promptText="••••••••" style="-fx-background-color: #f5f5f5; -fx-background-radius: 10; -fx-padding: 10;">
+                                <font>
+                                    <Font size="14.0" />
+                                </font>
+                            </PasswordField>
+                        </VBox>
+                    </children>
+                </VBox>
+
+                <!-- Bouton Connexion standard -->
+                <Button fx:id="btnLogin" layoutX="50.0" layoutY="330.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="45.0" prefWidth="300.0" style="-fx-background-color: #2a5298; -fx-background-radius: 25;" text="Se connecter" textFill="white">
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Button>
+
+                <!-- NOUVEAU : Bouton Face ID (avec un ID unique) -->
+                <Button fx:id="btnFaceLogin" layoutX="50.0" layoutY="385.0"
+                        mnemonicParsing="false" onAction="#handleFaceLogin"
+                        prefHeight="40.0" prefWidth="300.0"
+                        style="-fx-background-color: #4CAF50; -fx-background-radius: 25;"
+                        text="📷 Se connecter avec Face ID" textFill="white">
+                    <cursor>
+                        <Cursor fx:constant="HAND" />
+                    </cursor>
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Button>
+
+                <!-- Liens combinés : Inscription + Mot de passe oublié -->
+                <HBox alignment="CENTER" layoutX="50.0" layoutY="440.0" prefWidth="300.0" spacing="15.0">
+                    <children>
+                        <!-- Lien Inscription -->
+                        <HBox spacing="5.0" alignment="CENTER">
+                            <Label text="Pas encore de compte ?" textFill="#666666" />
+                            <Hyperlink onAction="#goToSignUp" text="S'inscrire" textFill="#2a5298" underline="true">
+                                <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                </cursor>
+                            </Hyperlink>
+                        </HBox>
+
+                        <!-- Séparateur vertical -->
+                        <Label text="|" textFill="#cccccc" />
+
+                        <!-- Lien Mot de passe oublié -->
+                        <Hyperlink fx:id="forgotPasswordLink"
+                                   text="Mot de passe oublié ?"
+                                   onAction="#handleForgotPassword"
+                                   textFill="#2a5298"
+                                   underline="true">
+                            <font>
+                                <Font size="12.0" />
+                            </font>
+                            <cursor>
+                                <Cursor fx:constant="HAND" />
+                            </cursor>
+                        </Hyperlink>
+                    </children>
+                </HBox>
+
+                <!-- Message d'erreur -->
+                <Label fx:id="lblMessage" alignment="CENTER" layoutX="50.0" layoutY="480.0" prefWidth="300.0" textFill="RED" wrapText="true" />
+            </children>
+        </AnchorPane>
+
+        <!-- Partie droite avec logo -->
+        <AnchorPane layoutX="650.0" layoutY="100.0" prefHeight="400.0" prefWidth="200.0">
+            <children>
+                <!-- Rectangle décoratif -->
+                <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ffffff20" height="150.0" layoutX="25.0" layoutY="100.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="2.0" width="150.0" />
+
+                <!-- Logo centré -->
+                <ImageView fitHeight="350.0" fitWidth="200.0" layoutX="0.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <!-- Texte sous le logo -->
+                <Label alignment="CENTER" layoutX="20.0" layoutY="260.0" prefWidth="160.0"
+                       text="Gérez vos membres et profils en toute simplicité"
+                       textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Label>
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>

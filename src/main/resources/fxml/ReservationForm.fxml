@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.effect.DropShadow?>
+
+<BorderPane prefHeight="800" prefWidth="1300" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.ReservationFormController" stylesheets="@../style.css">
+
+    <!-- Barre de navigation supérieure (identique à Accueil) -->
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1A3C5A; -fx-padding: 15 40;">
+                <!-- Logo -->
+                <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/image/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Liens de navigation avec style class -->
+                <HBox spacing="30" alignment="CENTER">
+                    <Button styleClass="nav-button" text="Accueil" />
+                    <Button fx:id="accueilBtn" styleClass="nav-button" text="Nos Logements" />
+                    <Button styleClass="nav-button" text="Mes Réservations" />
+                    <Button styleClass="nav-button" text="Voyager" />
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- Profil utilisateur et Déconnexion -->
+                <HBox spacing="15" alignment="CENTER">
+                    <!-- Bloc utilisateur (cliquable pour profil) -->
+                    <HBox fx:id="userBox" spacing="12" alignment="CENTER"
+                          style="-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;"
+                          onMouseEntered="#onUserBoxHover"
+                          onMouseExited="#onUserBoxExit"
+                          onMouseClicked="#showUserProfile">
+                        <Label fx:id="userIconLabel" text="👤" style="-fx-text-fill: white; -fx-font-size: 16;" />
+                        <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                    </HBox>
+
+                    <!-- 🔴 NOUVEAU : Bouton Déconnexion -->
+                    <Button fx:id="logoutBtn"
+                            text="Déconnexion"
+                            onAction="#handleLogout"
+                            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;">
+                        <graphic>
+                            <Label text="🚪" style="-fx-text-fill: white; -fx-font-size: 14px;" />
+                        </graphic>
+                    </Button>
+                </HBox>
+            </HBox>
+            <!-- Ligne décorative verte -->
+            <Region prefHeight="4" style="-fx-background-color: #2ECC71;" />
+        </VBox>
+    </top>
+
+    <!-- Contenu principal avec ScrollPane pour garantir l'accès à tout le formulaire -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;">
+            <VBox spacing="25" style="-fx-padding: 30;" alignment="CENTER">
+
+                <!-- Section Héro (gradient et ombre comme Accueil) -->
+                <VBox alignment="CENTER" spacing="15" style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 40;">
+                    <effect>
+                        <DropShadow color="#00000022" radius="15" offsetY="5"/>
+                    </effect>
+                    <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="Réservez votre séjour" />
+                    <Label style="-fx-text-fill: #DACEB6; -fx-font-size: 18px;" text="Remplissez les détails pour confirmer votre réservation" />
+                </VBox>
+
+                <!-- Formulaire de réservation (blanc, ombre douce) -->
+                <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);" maxWidth="700">
+
+                    <!-- Détails du logement -->
+                    <Label text="Détails du logement" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                    <VBox spacing="10">
+                        <Label fx:id="nomLabel" text="Nom du logement" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #3D94CA;" />
+                        <Label fx:id="adresseLabel" text="Adresse" style="-fx-font-size: 14px; -fx-text-fill: #81AE8D;" />
+                        <Label fx:id="prixLabel" text="Prix / nuit" style="-fx-font-size: 14px; -fx-text-fill: #E8B156;" />
+                        <Label fx:id="equipementLabel" text="Équipement" style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d;" />
+                        <Label fx:id="disponibiliteLabel" text="Disponibilité" style="-fx-font-size: 12px; -fx-text-fill: #81AE8D;" />
+                    </VBox>
+
+                    <Separator style="-fx-background-color: #DACEB6;" />
+
+                    <!-- Champs du formulaire -->
+                    <VBox spacing="15">
+                        <!-- Date d'arrivée -->
+                        <VBox spacing="5">
+                            <Label text="Date d'arrivée" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <DatePicker fx:id="dateArriveePicker" style="-fx-background-radius: 10; -fx-pref-width: 450; -fx-background-color: #F6F7FB;" />
+                        </VBox>
+
+                        <!-- Date de départ -->
+                        <VBox spacing="5">
+                            <Label text="Date de départ" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <DatePicker fx:id="dateDepartPicker" style="-fx-background-radius: 10; -fx-pref-width: 450; -fx-background-color: #F6F7FB;" />
+                        </VBox>
+
+                        <!-- Durée (nuits) -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Durée (nuits) :" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <Spinner fx:id="dureeSpinner" initialValue="1" min="1" max="30" editable="true" style="-fx-pref-width: 80;" />
+                        </HBox>
+
+                        <!-- Statut -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Statut :" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <ComboBox fx:id="statusCombo" style="-fx-pref-width: 200;" />
+                        </HBox>
+
+                        <!-- Modalité -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Modalité :" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <TextField fx:id="modaliteField" promptText="e.g., En ligne" style="-fx-pref-width: 200;" />
+                        </HBox>
+
+                        <Separator style="-fx-background-color: #DACEB6;" />
+
+                        <!-- Total -->
+                        <HBox alignment="CENTER_RIGHT" spacing="10">
+                            <Label text="Total :" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                            <Label fx:id="totalLabel" text="0 DT" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #E8B156;" />
+                        </HBox>
+
+                        <!-- Bouton Confirmer et Annuler -->
+                        <HBox spacing="10" alignment="CENTER">
+                            <Button fx:id="confirmerBtn" text="Confirmer" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                            <Button fx:id="annulerBtn" text="Annuler" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 0; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" HBox.hgrow="ALWAYS" />
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
