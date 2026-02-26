@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.scene.image.Image;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
 import tn.esprit.services.ServiceEvent;
@@ -53,6 +54,8 @@ public class AdminController implements Initializable {
         serviceParticipation = new ServiceParticipation();
 
         setupNavigation();
+        btnCalendar.setOnAction(e -> openCalendarView());
+
         setupSortCombo();
         loadData();
 
@@ -447,4 +450,27 @@ public class AdminController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    // Ajoute ce champ avec les autres @FXML
+    @FXML private Button btnCalendar;
+
+
+    // Ajoute cette méthode
+    private void openCalendarView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CalendarView.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Calendrier des événements - EventHub");
+            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/LOGO.png")));
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le calendrier");
+        }
+    }
+
 }

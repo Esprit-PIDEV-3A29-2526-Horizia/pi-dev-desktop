@@ -36,6 +36,9 @@
             <Button fx:id="btnDashboard" maxWidth="1.7976931348623157E308" style="-fx-background-color:#2d9cdb; -fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand;" text="📊  Dashboard" />
             <Button fx:id="btnEvents" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📅  Gestion Événements" />
             <Button fx:id="btnParticipations" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📋  Participations" />
+            <Button fx:id="btnCalendar" maxWidth="1.7976931348623157E308"
+                    style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;"
+                    text="📅  Calendrier" />
 
             <Region VBox.vgrow="ALWAYS" />
 

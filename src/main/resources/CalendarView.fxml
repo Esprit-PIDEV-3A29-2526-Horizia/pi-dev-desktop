@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.CalendarViewController">
+
+    <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📅 Calendrier des Événements" />
+
+    <StackPane fx:id="calendarContainer" VBox.vgrow="ALWAYS" />
+
+</VBox>
