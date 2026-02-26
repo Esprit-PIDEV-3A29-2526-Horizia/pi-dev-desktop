@@ -236,4 +236,25 @@ public class Servicereservationlog implements IService<reservationlog> {
             }
         }
     }
+    public reservationlog rechercherParId(int id) throws SQLException {
+        String sql = "SELECT * FROM `reservationlog` WHERE `idreslog` = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    reservationlog rl = new reservationlog();
+                    rl.setId(rs.getInt("idreslog"));
+                    rl.setId_l(rs.getInt("idlog"));
+                    rl.setIdc(rs.getInt("idc"));
+                    rl.setDate_debut(rs.getTimestamp("date_debut"));
+                    rl.setDate_fin(rs.getTimestamp("date_fin"));
+                    rl.setMontant(rs.getFloat("montant"));
+                    rl.setStatus(Status.valueOf(rs.getString("status")));
+                    rl.setModalite(rs.getString("modalites"));
+                    return rl;
+                }
+            }
+        }
+        return null;
+    }
 }

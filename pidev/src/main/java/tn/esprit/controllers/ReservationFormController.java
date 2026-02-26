@@ -19,11 +19,7 @@ import tn.esprit.entities.Status;
 import tn.esprit.entities.User;
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
-import tn.esprit.utils.NavigationManager;
-import tn.esprit.utils.SessionManager;
-import tn.esprit.utils.StripeService;
-import tn.esprit.utils.EmailService;
-import tn.esprit.utils.QRCodeGenerator;
+import tn.esprit.utils.*;
 
 import javax.mail.MessagingException;
 import java.io.InputStream;
@@ -461,16 +457,55 @@ public class ReservationFormController {
                     showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Impossible de lancer le paiement : " + e.getMessage());
                 }
 
-            } else if (result.get() == payerPlusTard) {
+            }else if (result.get() == payerPlusTard) {
                 Date dateLimite = Date.from(LocalDateTime.now().plusHours(24).atZone(ZoneId.systemDefault()).toInstant());
                 try {
                     int reservationId = enregistrerReservation(Status.en_attente, modalite, dateLimite);
+
+                    // Créer une session Stripe pour ce montant (valable 24h)
+                    double montant = currentNuits * selectedLogement.getTarif_nuit();
+                    long montantCentimes = Math.round(montant * 100);
+                    String currency = "eur"; // ou autre devise supportée
+                    String successUrl = "https://example.com/success"; // À remplacer par une vraie URL de retour
+                    String cancelUrl = "https://example.com/cancel";
+                    String checkoutUrl = StripeService.createCheckoutSession(montantCentimes, currency, successUrl, cancelUrl);
+
+                    // Préparer les infos pour l'email
+                    String dates = dateArriveePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            + " au " + dateDepartPicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+                    // Envoyer l'email avec le lien de paiement
+                    try {
+                        EmailService.sendPaymentDeferredEmail(
+                                currentUser.getEmail(),
+                                currentUser.getPrenom(),
+                                selectedLogement.getNom(),
+
+                                dates,
+                                montant,
+                                checkoutUrl
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // Ne pas bloquer
+                    }
+
+                    // Planifier les rappels (2h, 1h, 30min)
+                    PaymentReminderService.scheduleReminders(
+                            reservationId,
+                            dateLimite,
+                            currentUser.getEmail(),
+                            currentUser.getPrenom(),
+                            selectedLogement.getNom(),
+                            currentUser.getNom()
+                    );
+
                     showStyledAlert(Alert.AlertType.INFORMATION, "Paiement différé", null,
-                            "⏳ Vous avez 24h pour finaliser votre paiement. Passé ce délai, la réservation sera automatiquement annulée.");
+                            "⏳ Vous avez 24h pour finaliser votre paiement. \n Un email avec un lien de paiement vous a été envoyé.");
                     NavigationManager.loadView("/fxml/mesreservations.fxml");
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
-                    showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Erreur lors de l'enregistrement.");
+                    showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Erreur lors du traitement.");
                 }
             }
         }
@@ -550,12 +585,12 @@ public class ReservationFormController {
                     "💳 Modalité: " + modalite + "\n" +
                     (modalite.equals("En ligne") ? "✅ Paiement: Effectué" : "🏧 Paiement: À régler sur place");
 
-            String subject = "Confirmation de réservation #" + reservationId;
+            String subject = "Confirmation de réservation";
 
             String logementAdresse = selectedLogement.getAdresse(); // si votre entité logement a une adresse
             EmailService.sendReservationEmailWithPDF(
                     currentUser.getEmail(),
-                    "Confirmation de réservation #" + reservationId,
+                    "Confirmation de réservation " ,
                     currentUser.getNom(),
                     currentUser.getPrenom(),
                     selectedLogement.getNom(),
@@ -566,7 +601,7 @@ public class ReservationFormController {
                     modalite,
                     statut.toString(),
                     qrContent,
-                    "reservation_" + reservationId + ".pdf"
+                    "reservation_logement.pdf"
             );
         } catch (Exception e) {
             e.printStackTrace();

@@ -179,8 +179,7 @@ public class AjoutLogementController implements Initializable {
 
     private void handleMicro(TextField field, Button microBtn) {
         if (!VoskService.isInitialized()) {
-            showAlert(Alert.AlertType.WARNING, "Modèle non prêt",
-                    "Le modèle de reconnaissance vocale est en cours de chargement. Veuillez réessayer dans quelques instants.");
+            showAlert(Alert.AlertType.WARNING, "Modèle non prêt", "Veuillez réessayer dans quelques instants.");
             return;
         }
 
@@ -192,12 +191,23 @@ public class AjoutLogementController implements Initializable {
 
         new Thread(() -> {
             try {
-                byte[] audioData = AudioRecorder.recordAudio(5); // 5 secondes
+                byte[] audioData = AudioRecorder.recordAudio(5);
                 String recognizedText = VoskService.recognize(audioData, 16000);
 
                 Platform.runLater(() -> {
-                    String formatted = formatFirstLetterCapital(recognizedText);
-                    field.setText(formatted);
+                    String resultat;
+                    // Si c'est le champ tarif, on essaie de convertir en nombre
+                    if (field == tarifField) {
+                        Integer nombre = convertirMotsEnNombre(recognizedText);
+                        if (nombre != null) {
+                            resultat = nombre.toString();
+                        } else {
+                            resultat = recognizedText; // fallback au texte brut
+                        }
+                    } else {
+                        resultat = formatFirstLetterCapital(recognizedText);
+                    }
+                    field.setText(resultat);
                     rotate.stop();
                     microBtn.setRotate(0);
                     microBtn.setDisable(false);
@@ -211,6 +221,49 @@ public class AjoutLogementController implements Initializable {
                 });
             }
         }).start();
+    }
+    private Integer convertirMotsEnNombre(String mots) {
+        if (mots == null || mots.trim().isEmpty()) return null;
+
+        // Dictionnaire simple pour les nombres de 0 à 19
+        java.util.Map<String, Integer> nombres = new java.util.HashMap<>();
+        nombres.put("zéro", 0);
+        nombres.put("un", 1); nombres.put("deux", 2); nombres.put("trois", 3);
+        nombres.put("quatre", 4); nombres.put("cinq", 5); nombres.put("six", 6);
+        nombres.put("sept", 7); nombres.put("huit", 8); nombres.put("neuf", 9);
+        nombres.put("dix", 10); nombres.put("onze", 11); nombres.put("douze", 12);
+        nombres.put("treize", 13); nombres.put("quatorze", 14); nombres.put("quinze", 15);
+        nombres.put("seize", 16); nombres.put("dix-sept", 17); nombres.put("dix-huit", 18);
+        nombres.put("dix-neuf", 19);
+
+        // Dizaines
+        java.util.Map<String, Integer> dizaines = new java.util.HashMap<>();
+        dizaines.put("vingt", 20); dizaines.put("trente", 30); dizaines.put("quarante", 40);
+        dizaines.put("cinquante", 50); dizaines.put("soixante", 60); dizaines.put("soixante-dix", 70);
+        dizaines.put("quatre-vingt", 80); dizaines.put("quatre-vingt-dix", 90);
+
+        String[] motsArray = mots.toLowerCase().trim().split("\\s+");
+        int total = 0;
+        int current = 0;
+
+        for (String mot : motsArray) {
+            if (mot.equals("cent")) {
+                current = (current == 0) ? 100 : current * 100;
+            } else if (mot.equals("mille")) {
+                current = (current == 0) ? 1000 : current * 1000;
+                total += current;
+                current = 0;
+            } else if (nombres.containsKey(mot)) {
+                current += nombres.get(mot);
+            } else if (dizaines.containsKey(mot)) {
+                current += dizaines.get(mot);
+            } else if (mot.matches("\\d+")) { // si l'utilisateur dit directement "150"
+                current += Integer.parseInt(mot);
+            }
+            // Gérer les cas comme "vingt et un" (simplifié)
+        }
+        total += current;
+        return total;
     }
     private void ajouterLogement() {
         StringBuilder erreurs = new StringBuilder();
@@ -272,11 +325,11 @@ public class AjoutLogementController implements Initializable {
         try {
             logement l = new logement();
             l.setType(typeComboBox.getValue());
-            l.setNom(nom.toUpperCase());
+            l.setNom(nom);
             l.setImage(imageField.getText().trim());
-            l.setAdresse(adresse.toUpperCase());
+            l.setAdresse(adresse);
             l.setCapacite(capacite);
-            l.setEquipement(equipement.toUpperCase());
+            l.setEquipement(equipement);
             l.setTarif_nuit(tarif);
             l.setDisponibilite(disponibiliteToggle.isSelected());
 

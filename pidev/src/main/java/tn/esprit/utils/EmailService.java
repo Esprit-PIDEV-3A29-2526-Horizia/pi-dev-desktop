@@ -147,7 +147,7 @@ public class EmailService {
         Color primaryColor = new DeviceRgb(26, 60, 90);   // #1A3C5A
         Color secondaryColor = new DeviceRgb(46, 204, 113); // #2ECC71
 
-        // Logo (à placer dans src/main/resources/images/logo.png)
+        // Logo (optionnel)
         try {
             InputStream logoStream = EmailService.class.getResourceAsStream("/images/logo.png");
             if (logoStream != null) {
@@ -158,43 +158,42 @@ public class EmailService {
                 document.add(logo);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // si logo absent, on continue
+            e.printStackTrace();
         }
 
+        // Titre
         Paragraph title = new Paragraph("Confirmation de réservation")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontSize(20)
                 .setBold()
                 .setFontColor(primaryColor)
-                .setMarginTop(10)
-                .setMarginBottom(5);
+                .setMarginBottom(20);
         document.add(title);
 
-        Paragraph appName = new Paragraph(APP_NAME)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(14)
-                .setFontColor(secondaryColor)
-                .setMarginBottom(20);
-        document.add(appName);
-
+        // Message de bienvenue
         document.add(new Paragraph("Bonjour " + clientPrenom + " " + clientNom + ",")
                 .setFontSize(12).setMarginBottom(5));
-        document.add(new Paragraph("Nous vous confirmons votre réservation chez " + APP_NAME + ".")
+        document.add(new Paragraph("Nous vous confirmons votre réservation chez Horizia.")
                 .setFontSize(12).setMarginBottom(20));
 
+        // Tableau des détails
         Table table = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();
         table.setMarginBottom(20);
+
+        // Ajout des lignes
         addRow(table, "Logement", logementNom, primaryColor);
         if (logementAdresse != null && !logementAdresse.isEmpty()) {
             addRow(table, "Adresse", logementAdresse, primaryColor);
         }
-        addRow(table, "Date d'arrivée", dateArrivee.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), primaryColor);
-        addRow(table, "Date de départ", dateDepart.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), primaryColor);
-        addRow(table, "Prix total", String.format("%.3f DT", montant), primaryColor);
+        addRow(table, "Arrivée", dateArrivee.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), primaryColor);
+        addRow(table, "Départ", dateDepart.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), primaryColor);
+        addRow(table, "Montant total", String.format("%.3f DT", montant), primaryColor);
         addRow(table, "Modalité", modalite, primaryColor);
         addRow(table, "Statut", status, primaryColor);
+
         document.add(table);
 
+        // Note selon modalité
         if ("Sur place".equals(modalite)) {
             document.add(new Paragraph("Veuillez régler le montant sur place.")
                     .setFontSize(12).setItalic().setFontColor(secondaryColor).setMarginBottom(20));
@@ -203,6 +202,7 @@ public class EmailService {
                     .setFontSize(12).setItalic().setFontColor(secondaryColor).setMarginBottom(20));
         }
 
+        // QR Code
         Paragraph qrTitle = new Paragraph("Votre QR Code")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setBold()
@@ -220,6 +220,7 @@ public class EmailService {
         qrImage.setHeight(150);
         document.add(qrImage);
 
+        // Pied de page
         document.add(new Paragraph("Merci de votre confiance !")
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontColor(secondaryColor)
@@ -260,5 +261,134 @@ public class EmailService {
         message.setSubject(subject);
         message.setText(body);
         Transport.send(message);
+    }
+    public static void sendCancellationEmail(String to, String clientNom, String clientPrenom,
+                                             String logementNom, String dates, double montant) throws MessagingException, UnsupportedEncodingException {
+        String subject = "Annulation de votre réservation";
+        String body = "<!DOCTYPE html>" +
+                "<html><head><meta charset='UTF-8'><style>" +
+                "body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }" +
+                ".container { max-width: 600px; margin: auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }" +
+                ".header { background-color: #e74c3c; color: white; padding: 20px; text-align: center; }" +
+                ".header h2 { margin: 0; font-size: 24px; }" +
+                ".content { padding: 30px; }" +
+                ".footer { background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777; }" +
+                "table { width: 100%; border-collapse: collapse; margin-top: 20px; }" +
+                "td { padding: 10px; border-bottom: 1px solid #eee; }" +
+                ".label { font-weight: bold; color: #e74c3c; width: 40%; }" +
+                "</style></head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h2>Annulation de réservation</h2></div>" +
+                "<div class='content'>" +
+                "<p>Bonjour " + clientPrenom + " " + clientNom + ",</p>" +
+                "<p>Votre réservation pour <strong>" + logementNom + "</strong> a été annulée.</p>" +
+                "<table>" +
+                "<tr><td class='label'>Période</td><td>" + dates + "</td></tr>" +
+                "<tr><td class='label'>Montant</td><td>" + String.format("%.3f DT", montant) + "</td></tr>" +
+                "</table>" +
+                "<p>Nous restons à votre disposition pour toute question.</p>" +
+                "<p>Cordialement,<br>L'équipe " + APP_NAME + "</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "Tunis, Tunisie | 📞 +216 5 861 445 | 📧 info@horizia.com" +
+                "</div></div></body></html>";
+
+        sendStyledEmail(to, subject, body);
+    }
+
+    public static void sendReminderEmail(String to, String clientPrenom, String logementNom,
+                                         long heuresRestantes, long minutesRestantes) throws MessagingException, UnsupportedEncodingException {
+        String tempsRestant;
+        if (heuresRestantes > 0) {
+            tempsRestant = heuresRestantes + " heure" + (heuresRestantes > 1 ? "s" : "");
+        } else {
+            tempsRestant = minutesRestantes + " minute" + (minutesRestantes > 1 ? "s" : "");
+        }
+
+        String subject = "Rappel : Finalisez votre paiement";
+        String body = "<!DOCTYPE html>" +
+                "<html><head><meta charset='UTF-8'><style>" +
+                "body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }" +
+                ".container { max-width: 600px; margin: auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }" +
+                ".header { background-color: #E8B156; color: white; padding: 20px; text-align: center; }" +
+                ".header h2 { margin: 0; font-size: 24px; }" +
+                ".content { padding: 30px; }" +
+                ".footer { background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777; }" +
+                ".timer { font-size: 24px; font-weight: bold; color: #e74c3c; text-align: center; margin: 20px 0; }" +
+                "</style></head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h2>Rappel de paiement</h2></div>" +
+                "<div class='content'>" +
+                "<p>Bonjour " + clientPrenom + ",</p>" +
+                "<p>Vous avez réservé <strong>" + logementNom + "</strong> et choisi de payer plus tard.</p>" +
+                "<p>Il vous reste <span class='timer'>" + tempsRestant + "</span> pour finaliser votre paiement, sinon votre réservation sera automatiquement annulée.</p>" +
+                "<p>Connectez-vous à votre espace pour effectuer le paiement.</p>" +
+                "<p>Merci de votre confiance.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "Tunis, Tunisie | 📞 +216 5 861 445 | 📧 info@horizia.com" +
+                "</div></div></body></html>";
+
+        sendStyledEmail(to, subject, body);
+    }
+
+    // Méthode utilitaire pour envoyer un email HTML avec le bon expéditeur
+    private static void sendStyledEmail(String to, String subject, String htmlBody) throws MessagingException, UnsupportedEncodingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", SMTP_HOST);
+        props.put("mail.smtp.port", SMTP_PORT);
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(USERNAME, PASSWORD);
+            }
+        });
+
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(USERNAME, MimeUtility.encodeText(APP_NAME, "utf-8", null)));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+        message.setSubject(subject);
+        message.setContent(htmlBody, "text/html; charset=utf-8");
+        Transport.send(message);
+    }
+    public static void sendPaymentDeferredEmail(String to, String clientPrenom, String logementNom,
+                                                 String dates, double montant,
+                                                String paymentUrl) throws MessagingException, UnsupportedEncodingException {
+        String subject = "Confirmation de votre demande de paiement différé";
+        String body = "<!DOCTYPE html>" +
+                "<html><head><meta charset='UTF-8'><style>" +
+                "body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }" +
+                ".container { max-width: 600px; margin: auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 10px rgba(0,0,0,0.1); }" +
+                ".header { background-color: #1A3C5A; color: white; padding: 20px; text-align: center; }" +
+                ".header h2 { margin: 0; font-size: 24px; }" +
+                ".content { padding: 30px; text-align: center; }" +
+                ".timer { font-size: 48px; font-weight: bold; color: #e74c3c; margin: 20px 0; }" +
+                ".details { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: left; }" +
+                ".details p { margin: 5px 0; }" +
+                ".button { background-color: #2ECC71; color: white; padding: 15px 40px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 18px; display: inline-block; margin-top: 20px; border: none; cursor: pointer; }" +
+                ".button:hover { background-color: #27ae60; }" +
+                ".footer { background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777; }" +
+                "</style></head><body>" +
+                "<div class='container'>" +
+                "<div class='header'><h2>Horiza</h2></div>" +
+                "<div class='content'>" +
+                "<p>Bonjour " + clientPrenom + ",</p>" +
+                "<p>Vous avez choisi de payer plus tard pour votre réservation <strong>" + logementNom + "</strong>.</p>" +
+                "<div class='timer'>24:00:00</div>" +
+                "<p>Il vous reste ce temps pour finaliser votre paiement.</p>" +
+                "<div class='details'>" +
+                "<p><strong>Dates :</strong> " + dates + "</p>" +
+                "<p><strong>Montant à régler :</strong> " + String.format("%.3f DT", montant) + "</p>" +
+                "</div>" +
+                "<a href='" + paymentUrl + "' class='button'>PAYER MAINTENANT</a>" +
+                "<p style='margin-top:20px; font-size:12px; color:#777;'>Ce lien expire dans 24h.</p>" +
+                "</div>" +
+                "<div class='footer'>" +
+                "Tunis, Tunisie | 📞 +216 5 861 445 | 📧 info@horizia.com" +
+                "</div></div></body></html>";
+
+        sendStyledEmail(to, subject, body);
     }
 }

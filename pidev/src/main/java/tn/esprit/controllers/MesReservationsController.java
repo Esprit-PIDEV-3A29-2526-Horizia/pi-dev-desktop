@@ -262,7 +262,22 @@ public class MesReservationsController {
             lblInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #1A3C5A; -fx-font-weight: bold;");
 
             Button btnEmailPDF = new Button("📧 Envoyer par email (PDF)");
-            btnEmailPDF.setOnAction(e -> {
+            btnEmailPDF.setStyle(
+                    "-fx-background-color: #1A3C5A; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-background-radius: 25; " +
+                            "-fx-padding: 12 25; " +
+                            "-fx-cursor: hand; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-font-size: 14px; " +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"
+            );
+            btnEmailPDF.setOnMouseEntered(e ->
+                    btnEmailPDF.setStyle(btnEmailPDF.getStyle() + "-fx-background-color: #2C7AA0;")
+            );
+            btnEmailPDF.setOnMouseExited(e ->
+                    btnEmailPDF.setStyle(btnEmailPDF.getStyle().replace("-fx-background-color: #2C7AA0;", "-fx-background-color: #1A3C5A;"))
+            );            btnEmailPDF.setOnAction(e -> {
                 try {
                     String adresse = getAdresseLogement(r.getId_l());
                     EmailService.sendReservationEmailWithPDF(
@@ -278,7 +293,7 @@ public class MesReservationsController {
                             r.getModalite(),
                             r.getStatus().toString(),
                             qrContent.toString(),
-                            "reservation_" + r.getId() + ".pdf"
+                            "reservation_logement.pdf"
                     );
                     showAlert("Succès", "Email envoyé à " + currentUser.getEmail());
                 } catch (Exception ex) {
@@ -349,7 +364,6 @@ public class MesReservationsController {
         confirm.setContentText("Voulez-vous vraiment supprimer cette réservation ?");
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
-                // Récupérer les infos avant suppression
                 String nomLogement = getNomLogement(r.getId_l());
                 double montant = r.getMontant();
                 String dates = new SimpleDateFormat("dd/MM/yyyy").format(r.getDate_debut()) + " au " +
@@ -357,18 +371,20 @@ public class MesReservationsController {
 
                 serviceReservation.supprimer(r.getId());
 
-                // Envoyer email d'annulation
+                // Envoyer email d'annulation stylisé
                 try {
-                    String to = currentUser.getEmail();
-                    String subject = "Annulation de réservation";
-                    String body = "Bonjour " + currentUser.getPrenom() + ",\n\n" +
-                            "Votre réservation pour " + nomLogement + " a été annulée.\n" +
-                            "Détails : " + dates + " - Montant : " + montant + " DT\n\n" +
-                            "Nous restons à votre disposition.";
-                    EmailService.sendSimpleEmail(to, subject, body);
+                    EmailService.sendCancellationEmail(
+                            currentUser.getEmail(),
+                            currentUser.getNom(),
+                            currentUser.getPrenom(),
+                            nomLogement,
+                            dates,
+                            montant
+                    );
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 chargerReservations();
                 showAlert("Succès", "Réservation supprimée.");
             } catch (SQLException e) {
