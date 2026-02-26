@@ -59,6 +59,7 @@
                         <HBox alignment="CENTER_LEFT" spacing="10" prefWidth="450" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 10 20;">
                             <Label text="🔍" style="-fx-font-size: 18;"/>
                             <TextField fx:id="searchField" promptText="Où voulez-vous aller ?" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
+                            <Button fx:id="btnRecommendations" text="Recommandations pour vous" styleClass="filter-button" />
                         </HBox>
 
                         <ComboBox fx:id="sortCombo" prefWidth="180" promptText="Trier par Prix" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 5;"/>

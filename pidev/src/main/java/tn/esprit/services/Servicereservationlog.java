@@ -225,4 +225,15 @@ public class Servicereservationlog implements IService<reservationlog> {
 
         return reservations;
     }
+    public void updateStatusById(int id, Status newStatus) throws SQLException {
+        String sql = "UPDATE `reservationlog` SET `status`=? WHERE `idreslog`=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, newStatus.toString());
+            ps.setInt(2, id);
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                System.out.println("✅ Statut mis à jour pour la réservation " + id + " : " + newStatus);
+            }
+        }
+    }
 }

@@ -12,7 +12,15 @@ public class reservationlog {
     private Status status;  // Changed from Enum to Status
     private String modalite;
     private Date dateLimitePaiement;
+    private String trackingId;
 
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+    }
     public Date getDateLimitePaiement() { return dateLimitePaiement; }
     public void setDateLimitePaiement(Date dateLimitePaiement) { this.dateLimitePaiement = dateLimitePaiement; }
     // Constructor

@@ -11,15 +11,13 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
+import tn.esprit.services.GeminiService;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AccueilController {
@@ -46,7 +44,8 @@ public class AccueilController {
     private HBox userBox;
     @FXML
     private Label userNameLabel;
-
+    @FXML
+    private Button btnRecommendations;
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
     private List<logement> logementsFiltres;
@@ -64,6 +63,7 @@ public class AccueilController {
 
         // Configuration du userBox (profil utilisateur)
         setupUserBox();
+        btnRecommendations.setOnAction(e -> chargerRecommandations());
 
         // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
@@ -374,7 +374,47 @@ public class AccueilController {
                     "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
         }
     }
+    private void chargerRecommandations() {
+        // Désactiver le bouton pendant le chargement
+        btnRecommendations.setDisable(true);
+        btnRecommendations.setText("Chargement...");
 
+        // Lancer l'appel API dans un thread séparé pour ne pas bloquer l'UI
+        new Thread(() -> {
+            try {
+                GeminiService gemini = new GeminiService();
+                List<Map<String, Object>> recos = gemini.getRecommendations(currentUser, tousLesLogements);
+
+                // Récupérer les objets logement correspondants aux IDs recommandés
+                List<logement> logementsRecommandes = new ArrayList<>();
+                for (Map<String, Object> reco : recos) {
+                    // L'ID peut être retourné comme Double selon le parsing Gson
+                    Number idNumber = (Number) reco.get("id_logement");
+                    int id = idNumber.intValue();
+
+                    tousLesLogements.stream()
+                            .filter(l -> l.getId() == id)
+                            .findFirst()
+                            .ifPresent(logementsRecommandes::add);
+                }
+
+                // Mettre à jour l'UI sur le thread JavaFX
+                javafx.application.Platform.runLater(() -> {
+                    afficherLogements(logementsRecommandes);
+                    btnRecommendations.setDisable(false);
+                    btnRecommendations.setText("Recommandations pour vous");
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                javafx.application.Platform.runLater(() -> {
+                    showAlert("Erreur", "Impossible d'obtenir des recommandations pour le moment.");
+                    btnRecommendations.setDisable(false);
+                    btnRecommendations.setText("Recommandations pour vous");
+                });
+            }
+        }).start();
+    }
     @FXML
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {

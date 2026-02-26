@@ -5,6 +5,14 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.scene.web.WebView;
+import javafx.scene.web.WebEngine;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.geometry.Pos;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.Status;
@@ -13,18 +21,23 @@ import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
+import tn.esprit.utils.StripeService;
+import tn.esprit.utils.EmailService;
+import tn.esprit.utils.QRCodeGenerator;
 
+import javax.mail.MessagingException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
 
 public class ReservationFormController {
-    @FXML private Label prixParNuitLabel;
+
     @FXML private ImageView imageLogement;
     @FXML private Label nomLabel;
     @FXML private Label typeLabel;
@@ -48,7 +61,7 @@ public class ReservationFormController {
     @FXML private HBox userBox;
     @FXML private Label userNameLabel;
     @FXML private Label totalNuitLabel;
-    @FXML private Label nuitsLabel; // Nouveau label pour afficher le nombre de nuits
+    @FXML private Label nuitsLabel;
 
     // Labels d'erreur
     @FXML private Label arriveeErrorLabel;
@@ -63,7 +76,7 @@ public class ReservationFormController {
     private Servicelogement serviceLogement = new Servicelogement();
     private Servicereservationlog serviceReservation = new Servicereservationlog();
 
-    private int currentNuits = 1; // valeur par défaut
+    private int currentNuits = 1;
 
     @FXML
     public void initialize() {
@@ -101,12 +114,10 @@ public class ReservationFormController {
 
         afficherInfosLogement();
 
-        // Initialisation des spinners avec la capacité du logement
         int capaciteMax = selectedLogement.getCapacite();
         adultesSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, capaciteMax, 1));
         enfantsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, capaciteMax - 1, 0));
 
-        // Valeur par défaut pour la modalité
         enLigneRadio.setSelected(true);
 
         if (reservationToEdit != null) {
@@ -123,7 +134,7 @@ public class ReservationFormController {
         });
 
         resetErrorLabels();
-        calculerTotal(); // initialise l'affichage
+        calculerTotal();
     }
 
     private void setupUserBox() {
@@ -194,7 +205,6 @@ public class ReservationFormController {
     }
 
     private void afficherInfosLogement() {
-        prixParNuitLabel.setText(String.format("%.0f DT", selectedLogement.getTarif_nuit()));
         String imagePath = selectedLogement.getImage();
         if (imagePath != null && !imagePath.isEmpty()) {
             try {
@@ -244,7 +254,6 @@ public class ReservationFormController {
             enLigneRadio.setSelected(true);
         }
 
-        // Recalculer la durée après avoir rempli les dates
         calculerDuree();
     }
 
@@ -303,7 +312,7 @@ public class ReservationFormController {
         if (arrivee != null && depart != null && depart.isAfter(arrivee)) {
             currentNuits = (int) ChronoUnit.DAYS.between(arrivee, depart);
         } else {
-            currentNuits = 1; // valeur par défaut
+            currentNuits = 1;
         }
         nuitsLabel.setText(String.valueOf(currentNuits));
         calculerTotal();
@@ -385,98 +394,224 @@ public class ReservationFormController {
         String modalite = enLigneRadio.isSelected() ? "En ligne" : "Sur place";
 
         if (reservationToEdit != null) {
-            enregistrerReservation(reservationToEdit.getStatus(), modalite, null);
+            try {
+                enregistrerReservation(reservationToEdit.getStatus(), modalite, null);
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Erreur lors de la modification.");
+            }
             return;
         }
 
         if ("Sur place".equals(modalite)) {
-            enregistrerReservation(Status.en_attente, modalite, null);
+            try {
+                int reservationId = enregistrerReservation(Status.confirmée, modalite, null);
+                // Envoyer email de confirmation pour réservation sur place
+                envoyerEmailConfirmation(reservationId, modalite, Status.confirmée);
+                NavigationManager.loadView("/fxml/mesreservations.fxml");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Erreur lors de l'enregistrement.");
+            }
         } else {
             gererPaiementEnLigne(modalite);
         }
     }
 
     private void gererPaiementEnLigne(String modalite) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Paiement en ligne");
-        alert.setHeaderText("Choisissez votre option de paiement");
-        alert.setContentText("Voulez-vous payer maintenant ou plus tard ?");
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Paiement en ligne");
+        dialog.setHeaderText("Choisissez votre option de paiement");
 
-        ButtonType payerMaintenant = new ButtonType("Payer maintenant");
-        ButtonType payerPlusTard = new ButtonType("Payer plus tard (24h)");
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/paiementstyle.css").toExternalForm());
+        dialogPane.getStyleClass().add("custom-dialog");
+
+        Label content = new Label("Voulez-vous payer maintenant ou plus tard ?");
+        content.setStyle("-fx-font-size: 14px; -fx-text-fill: #1A3C5A;");
+        dialogPane.setContent(content);
+
+        ButtonType payerMaintenant = new ButtonType("Payer maintenant (Stripe)", ButtonBar.ButtonData.OK_DONE);
+        ButtonType payerPlusTard = new ButtonType("Payer plus tard (24h)", ButtonBar.ButtonData.OTHER);
         ButtonType annuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialogPane.getButtonTypes().addAll(payerMaintenant, payerPlusTard, annuler);
 
-        alert.getButtonTypes().setAll(payerMaintenant, payerPlusTard, annuler);
+        dialogPane.lookupButton(payerMaintenant).getStyleClass().add("confirm-button");
+        dialogPane.lookupButton(payerPlusTard).getStyleClass().add("info-button");
+        dialogPane.lookupButton(annuler).getStyleClass().add("cancel-button");
 
-        Optional<ButtonType> result = alert.showAndWait();
+        Optional<ButtonType> result = dialog.showAndWait();
+
         if (result.isPresent()) {
             if (result.get() == payerMaintenant) {
-                boolean paiementReussi = simulerPaiement();
-                if (paiementReussi) {
-                    enregistrerReservation(Status.confirmée, modalite, null);
-                    showAlert("Succès", "Paiement accepté. Réservation confirmée !");
-                } else {
-                    enregistrerReservation(Status.annulée, modalite, null);
-                    showAlert("Paiement échoué", "Le paiement a échoué. Réservation annulée.");
+                try {
+                    double montant = currentNuits * selectedLogement.getTarif_nuit();
+                    long montantCentimes = Math.round(montant * 100);
+                    String currency = "eur";
+
+                    String successUrl = "https://example.com/success";
+                    String cancelUrl = "https://example.com/cancel";
+
+                    String checkoutUrl = StripeService.createCheckoutSession(montantCentimes, currency, successUrl, cancelUrl);
+                    ouvrirPagePaiement(checkoutUrl, modalite);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Impossible de lancer le paiement : " + e.getMessage());
                 }
+
             } else if (result.get() == payerPlusTard) {
-                Date dateLimite = Date.from(LocalDateTime.now().plusHours(24)
-                        .atZone(ZoneId.systemDefault()).toInstant());
-                enregistrerReservation(Status.en_attente, modalite, dateLimite);
-                showAlert("Paiement différé",
-                        "Vous avez 24h pour finaliser votre paiement. Passé ce délai, la réservation sera automatiquement annulée.");
+                Date dateLimite = Date.from(LocalDateTime.now().plusHours(24).atZone(ZoneId.systemDefault()).toInstant());
+                try {
+                    int reservationId = enregistrerReservation(Status.en_attente, modalite, dateLimite);
+                    showStyledAlert(Alert.AlertType.INFORMATION, "Paiement différé", null,
+                            "⏳ Vous avez 24h pour finaliser votre paiement. Passé ce délai, la réservation sera automatiquement annulée.");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Erreur lors de l'enregistrement.");
+                }
             }
         }
     }
 
-    private boolean simulerPaiement() {
-        Alert choix = new Alert(Alert.AlertType.CONFIRMATION);
-        choix.setTitle("Simulation de paiement");
-        choix.setHeaderText("Choisissez l'issue du paiement");
-        choix.setContentText("Simuler un paiement réussi ou échoué ?");
+    /**
+     * Ouvre une fenêtre avec WebView pour le paiement Stripe.
+     */
+    private void ouvrirPagePaiement(String checkoutUrl, String modalite) {
+        Stage stage = new Stage();
+        stage.setTitle("Paiement sécurisé");
 
-        ButtonType succes = new ButtonType("Succès");
-        ButtonType echec = new ButtonType("Échec");
-        choix.getButtonTypes().setAll(succes, echec);
+        HBox titleBar = new HBox(10);
+        titleBar.setAlignment(Pos.CENTER_LEFT);
+        titleBar.setStyle("-fx-background-color: #1A3C5A; -fx-padding: 10 15;");
+        Label titleLabel = new Label("💳 Paiement par carte bancaire");
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Button closeButton = new Button("✕");
+        closeButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;");
+        closeButton.setOnAction(e -> stage.close());
+        titleBar.getChildren().addAll(titleLabel, spacer, closeButton);
 
-        Optional<ButtonType> result = choix.showAndWait();
-        return result.isPresent() && result.get() == succes;
+        Region greenLine = new Region();
+        greenLine.setPrefHeight(4);
+        greenLine.setStyle("-fx-background-color: #2ECC71;");
+
+        WebView webView = new WebView();
+        WebEngine engine = webView.getEngine();
+
+        engine.locationProperty().addListener((obs, oldUrl, newUrl) -> {
+            if (newUrl.startsWith("https://example.com/success")) {
+                stage.close();
+                try {
+                    int reservationId = enregistrerReservation(Status.confirmée, modalite, null);
+                    // Envoyer email de confirmation après paiement réussi
+                    envoyerEmailConfirmation(reservationId, modalite, Status.confirmée);
+                    showAlert("Succès", "✅ Paiement accepté. Réservation confirmée !");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    showAlert("Erreur", "Erreur lors de l'enregistrement.");
+                }
+            } else if (newUrl.startsWith("https://example.com/cancel")) {
+                stage.close();
+                try {
+                    enregistrerReservation(Status.annulée, modalite, null);
+                    showAlert("Paiement annulé", "❌ Vous avez annulé le paiement. Réservation annulée.");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    showAlert("Erreur", "Erreur lors de l'enregistrement.");
+                }
+            }
+        });
+
+        engine.load(checkoutUrl);
+
+        VBox root = new VBox(titleBar, greenLine, webView);
+        VBox.setVgrow(webView, Priority.ALWAYS);
+
+        Scene scene = new Scene(root, 900, 700);
+        stage.setScene(scene);
+        stage.show();
     }
 
-    private void enregistrerReservation(Status statut, String modalite, Date dateLimitePaiement) {
+    /**
+     * Envoie un email de confirmation avec PDF contenant les détails et le QR code.
+     */
+    private void envoyerEmailConfirmation(int reservationId, String modalite, Status statut) {
+        try {
+            String qrContent = "🏠 Logement: " + selectedLogement.getNom() + "\n" +
+                    "📅 Arrivée: " + dateArriveePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                    "📅 Départ: " + dateDepartPicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                    "💰 Montant: " + totalLabel.getText() + "\n" +
+                    "💳 Modalité: " + modalite + "\n" +
+                    (modalite.equals("En ligne") ? "✅ Paiement: Effectué" : "🏧 Paiement: À régler sur place");
+
+            String subject = "Confirmation de réservation #" + reservationId;
+
+            String logementAdresse = selectedLogement.getAdresse(); // si votre entité logement a une adresse
+            EmailService.sendReservationEmailWithPDF(
+                    currentUser.getEmail(),
+                    "Confirmation de réservation #" + reservationId,
+                    currentUser.getNom(),
+                    currentUser.getPrenom(),
+                    selectedLogement.getNom(),
+                    logementAdresse,
+                    dateArriveePicker.getValue(),
+                    dateDepartPicker.getValue(),
+                    currentNuits * selectedLogement.getTarif_nuit(),
+                    modalite,
+                    statut.toString(),
+                    qrContent,
+                    "reservation_" + reservationId + ".pdf"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "La réservation a été enregistrée mais l'envoi de l'email a échoué : " + e.getMessage());
+        }
+    }
+
+    private void showStyledAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("/paiementstyle.css").toExternalForm());
+        alert.showAndWait();
+    }
+
+    /**
+     * Enregistre ou modifie une réservation et retourne son ID.
+     */
+    private int enregistrerReservation(Status statut, String modalite, Date dateLimitePaiement) throws SQLException {
         LocalDate arrivee = dateArriveePicker.getValue();
         LocalDate depart = dateDepartPicker.getValue();
         float montant = currentNuits * selectedLogement.getTarif_nuit();
 
-        try {
-            if (reservationToEdit == null) {
-                reservationlog reservation = new reservationlog();
-                reservation.setId_l(selectedLogement.getId());
-                reservation.setIdc(currentUser.getId());
-                reservation.setDate_debut(Date.from(arrivee.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                reservation.setDate_fin(Date.from(depart.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                reservation.setMontant(montant);
-                reservation.setStatus(statut);
-                reservation.setModalite(modalite);
+        if (reservationToEdit == null) {
+            reservationlog reservation = new reservationlog();
+            reservation.setId_l(selectedLogement.getId());
+            reservation.setIdc(currentUser.getId());
+            reservation.setDate_debut(Date.from(arrivee.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            reservation.setDate_fin(Date.from(depart.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            reservation.setMontant(montant);
+            reservation.setStatus(statut);
+            reservation.setModalite(modalite);
+            // Si vous avez un champ date_limite_paiement, ajoutez-le ici
 
-                serviceReservation.ajouter(reservation);
-            } else {
-                reservationToEdit.setDate_debut(Date.from(arrivee.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                reservationToEdit.setDate_fin(Date.from(depart.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-                reservationToEdit.setMontant(montant);
-                reservationToEdit.setStatus(statut);
-                reservationToEdit.setModalite(modalite);
-
-                serviceReservation.modifier(reservationToEdit);
-            }
-
-            SessionManager.clearSelectedLogement();
-            SessionManager.clearEditingReservation();
-            NavigationManager.loadView("/fxml/mesreservations.fxml");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "❌ Erreur lors de l'enregistrement : " + e.getMessage());
+            serviceReservation.ajouter(reservation);
+            return reservation.getId();
+        } else {
+            reservationToEdit.setDate_debut(Date.from(arrivee.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            reservationToEdit.setDate_fin(Date.from(depart.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+            reservationToEdit.setMontant(montant);
+            reservationToEdit.setStatus(statut);
+            reservationToEdit.setModalite(modalite);
+            serviceReservation.modifier(reservationToEdit);
+            return reservationToEdit.getId();
         }
     }
 

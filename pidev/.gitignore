@@ -3,6 +3,12 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 models/
+src/main/java/tn/esprit/utils/StripeService.java
+
+src/main/java/tn/esprit/utils/EmailService.java
+src/main/java/tn/esprit/services/GeminiService.java
+
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
