@@ -76,7 +76,7 @@ public class Servicelogement implements IService<logement> {
                 l.setId(rs.getInt("id"));
                 l.setType(rs.getString("type"));
                 l.setNom(rs.getString("nom"));
-                l.setImage(rs.getString("image"));
+                l.setImage(rs.getString("images/images"));
                 l.setAdresse(rs.getString("adresse"));
                 l.setCapacite(rs.getInt("capacite"));
                 l.setEquipement(rs.getString("equipement"));
@@ -114,7 +114,7 @@ public class Servicelogement implements IService<logement> {
                     l.setId(rs.getInt("id"));
                     l.setType(rs.getString("type"));
                     l.setNom(rs.getString("nom"));
-                    l.setImage(rs.getString("image"));
+                    l.setImage(rs.getString("images/images"));
                     l.setAdresse(rs.getString("adresse"));
                     l.setCapacite(rs.getInt("capacite"));
                     l.setEquipement(rs.getString("equipement"));
@@ -177,7 +177,7 @@ public class Servicelogement implements IService<logement> {
         List<logement> logements = new ArrayList<>();
 
         // Updated allowed attributes to match DB column names: removed non-matching ones like "ville", "pays", "id_proprietaire" (not in schema), added "nom", "image"
-        List<String> attributsAutorises = List.of("type", "nom", "image", "adresse", "capacite", "equipement", "tarif_nuit", "disponibilite");
+        List<String> attributsAutorises = List.of("type", "nom", "images/images", "adresse", "capacite", "equipement", "tarif_nuit", "disponibilite");
 
         if (!attributsAutorises.contains(attribut)) {
             throw new IllegalArgumentException("Attribut de tri non valide : " + attribut);
@@ -194,7 +194,7 @@ public class Servicelogement implements IService<logement> {
             l.setId(rs.getInt("id"));
             l.setType(rs.getString("type"));
             l.setNom(rs.getString("nom"));
-            l.setImage(rs.getString("image"));
+            l.setImage(rs.getString("images/images"));
             l.setAdresse(rs.getString("adresse"));
             l.setCapacite(rs.getInt("capacite"));
             l.setEquipement(rs.getString("equipement"));
@@ -222,7 +222,7 @@ public class Servicelogement implements IService<logement> {
                         rs.getInt("id"),
                         rs.getString("type"),
                         rs.getString("nom"),
-                        rs.getString("image"),
+                        rs.getString("images/images"),
                         rs.getString("adresse"),
                         rs.getInt("capacite"),
                         rs.getString("equipement"),

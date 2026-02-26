@@ -34,7 +34,7 @@
                 <HBox spacing="8" alignment="CENTER">
                     <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                         <image>
-                            <Image url="@../image/mod.png" />
+                            <Image url="@../images/mod.png" />
                         </image>
                     </ImageView>
                     <Label text="Modifier" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
@@ -48,7 +48,7 @@
                 <HBox spacing="8" alignment="CENTER">
                     <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
                         <image>
-                            <Image url="@../image/supp.png" />
+                            <Image url="@../images/supp.png" />
                         </image>
                     </ImageView>
                     <Label text="Supprimer" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />

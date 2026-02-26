@@ -15,7 +15,7 @@
 
     <HBox alignment="CENTER_LEFT" prefHeight="100.0" spacing="20" style="-fx-background-color: linear-gradient(to right, #2c3e50, #4ca1af); -fx-padding: 0 40;">
         <ImageView fitHeight="25" fitWidth="25" preserveRatio="true">
-            <Image url="@../image/log.png" />
+            <Image url="@../images/log.png" />
         </ImageView>
         <VBox alignment="CENTER_LEFT">
 
@@ -61,7 +61,7 @@
                             <TextField fx:id="nomField" HBox.hgrow="ALWAYS" prefHeight="45" promptText="Ex: Villa Yasmin"
                                        style="-fx-background-color: #f8f9fa; -fx-border-color: #dcdde1; -fx-border-radius: 8;" />
                             <Button fx:id="nomMicroBtn" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 8; -fx-pref-width: 45; -fx-pref-height: 45;">
-                                <graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../image/micro.png"/></ImageView></graphic>
+                                <graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../images/micro.png"/></ImageView></graphic>
                             </Button>
                         </HBox>
                     </VBox>
@@ -72,7 +72,7 @@
                             <TextField fx:id="adresseField" HBox.hgrow="ALWAYS" prefHeight="45" promptText="Numéro, Rue, Ville..."
                                        style="-fx-background-color: #f8f9fa; -fx-border-color: #dcdde1; -fx-border-radius: 8;" />
                             <Button fx:id="adresseMicroBtn" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 8; -fx-pref-width: 45;">
-                                <graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../image/micro.png"/></ImageView></graphic>
+                                <graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../images/micro.png"/></ImageView></graphic>
                             </Button>
                         </HBox>
                     </VBox>
@@ -100,7 +100,7 @@
                         <Label text="Tarif (DT / Nuit)" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
                         <HBox spacing="5" alignment="CENTER_LEFT">
                             <TextField fx:id="tarifField" prefHeight="45" HBox.hgrow="ALWAYS" promptText="0.0" style="-fx-border-radius: 8; -fx-background-color: #f8f9fa;" />
-                            <Button fx:id="tarifMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="18" fitWidth="18"><Image url="@../image/micro.png"/></ImageView></graphic></Button>
+                            <Button fx:id="tarifMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="18" fitWidth="18"><Image url="@../images/micro.png"/></ImageView></graphic></Button>
                         </HBox>
                     </VBox>
 
@@ -139,7 +139,7 @@
                         <Label text="Équipements (Wifi, Piscine, Parking...)" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
                         <HBox spacing="10">
                             <TextField fx:id="equipementField" HBox.hgrow="ALWAYS" prefHeight="45" style="-fx-background-color: #f8f9fa; -fx-border-radius: 8;" />
-                            <Button fx:id="equipementMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../image/micro.png"/></ImageView></graphic></Button>
+                            <Button fx:id="equipementMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../images/micro.png"/></ImageView></graphic></Button>
                         </HBox>
                     </VBox>
 
@@ -147,7 +147,7 @@
                         <Label text="Image du logement (URL)" style="-fx-text-fill: #7f8c8d; -fx-font-weight: bold;" />
                         <HBox spacing="10">
                             <TextField fx:id="imageField" HBox.hgrow="ALWAYS" prefHeight="45" style="-fx-background-color: #f8f9fa; -fx-border-radius: 8;" />
-                            <Button fx:id="imageMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../image/micro.png"/></ImageView></graphic></Button>
+                            <Button fx:id="imageMicroBtn" style="-fx-background-color: #3498db; -fx-pref-height: 45;"><graphic><ImageView fitHeight="20" fitWidth="20"><Image url="@../images/micro.png"/></ImageView></graphic></Button>
                         </HBox>
                     </VBox>
                 </VBox>

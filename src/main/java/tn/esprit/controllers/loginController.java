@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import com.github.sarxos.webcam.Webcam;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.util.Duration;
 import tn.esprit.entities.User;
 import tn.esprit.services.AuthService;
 import tn.esprit.services.FaceRecognitionService;
+import tn.esprit.utils.EmailService;
 import tn.esprit.utils.NavigationManager;
 
 import java.io.IOException;
@@ -35,6 +37,10 @@ public class loginController {
     private AuthService authService = new AuthService();
     private FaceRecognitionService faceService;
     private boolean faceServiceAvailable = false;
+    // 🔴 NOUVELLES VARIABLES
+    private int failedAttempts = 0;
+    private static final int MAX_FAILED_ATTEMPTS = 3;
+    private Webcam securityWebcam;  // Webcam pour la capture de sécurité
 
     @FXML
     public void initialize() {
@@ -142,11 +148,9 @@ public class loginController {
             redirectToAdminDashboard(user);
         } else if ("CLIENT".equals(userType)) {
             showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
-            if (faceServiceAvailable) {
-                proposeFaceRegistration(user);
-            } else {
+
                 redirectToAccueilClient(user);
-            }
+
         } else {
             showMessage("Type d'utilisateur inconnu", "error");
             btnLogin.setDisable(false);
@@ -206,10 +210,20 @@ public class loginController {
     }
 
     private void handleFailedLogin(String email) {
+        failedAttempts++;
+        System.out.println("⚠️ Tentative échouée #" + failedAttempts + " pour: " + email);
+
+        // 🔴 SI 3 ÉCHECS, DÉCLENCHER LA CAPTURE
+        if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+            captureIntruder(email);
+            // Réinitialiser le compteur après capture
+            failedAttempts = 0;
+        }
+
         boolean emailExists = authService.checkEmailExists(email);
 
         if (emailExists) {
-            showMessage("❌ Mot de passe incorrect !", "error");
+            showMessage("❌ Mot de passe incorrect ! Tentative " + failedAttempts + "/" + MAX_FAILED_ATTEMPTS, "error");
             btnLogin.setDisable(false);
             btnLogin.setText("Se connecter");
         } else {
@@ -220,6 +234,102 @@ public class loginController {
             PauseTransition pause = new PauseTransition(Duration.seconds(2));
             pause.setOnFinished(event -> goToSignUp());
             pause.play();
+        }
+    }
+
+    private void captureIntruder(String email) {
+        System.out.println("📸 3 échecs - Capture de l'intrus!");
+
+        new Thread(() -> {
+            try {
+                // Initialiser la webcam
+                securityWebcam = Webcam.getDefault();
+                if (securityWebcam == null) {
+                    System.err.println("❌ Impossible d'initialiser la webcam de sécurité");
+                    return;
+                }
+
+                securityWebcam.open();
+
+                // Attendre que la webcam s'initialise
+                Thread.sleep(1000);
+
+                // Capturer l'image
+                java.awt.image.BufferedImage bufferedImage = securityWebcam.getImage();
+
+                if (bufferedImage != null) {
+                    // Sauvegarder l'image
+                    String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+                    String filename = "intruder_" + email.replace("@", "_") + "_" + timestamp + ".jpg";
+                    String filepath = "data/intruders/" + filename;
+
+                    // Créer le dossier si nécessaire
+                    java.nio.file.Files.createDirectories(java.nio.file.Paths.get("data/intruders"));
+
+                    // Sauvegarder l'image
+                    javax.imageio.ImageIO.write(bufferedImage, "jpg", new java.io.File(filepath));
+                    System.out.println("✅ Image sauvegardée: " + filepath);
+
+                    // Envoyer l'email à l'admin
+                    sendIntruderAlert(email, filepath);
+                }
+
+                // Fermer la webcam
+                securityWebcam.close();
+
+            } catch (Exception e) {
+                System.err.println("❌ Erreur lors de la capture de sécurité: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    private void sendIntruderAlert(String email, String imagePath) {
+        try {
+            String adminEmail = "khalilbenlahmer@gmail.com";
+            String subject = "🚨 ALERTE SÉCURITÉ - Tentatives de connexion suspectes";
+
+            // Corps du message pour l'admin
+            StringBuilder adminBody = new StringBuilder();
+            adminBody.append("<h2>🚨 Alerte de sécurité</h2>");
+            adminBody.append("<p><strong>3 tentatives de connexion échouées</strong> ont été détectées.</p>");
+            adminBody.append("<p><strong>Email concerné :</strong> ").append(email).append("</p>");
+            adminBody.append("<p><strong>Date :</strong> ").append(new java.util.Date()).append("</p>");
+            adminBody.append("<p><strong>IP/Machine :</strong> ").append(java.net.InetAddress.getLocalHost().getHostName()).append("</p>");
+            adminBody.append("<p>Une capture de la personne a été jointe à cet email.</p>");
+
+            // Envoyer l'email à l'admin avec la photo
+            EmailService.sendEmail(adminEmail, subject + " - ADMIN", adminBody.toString(), imagePath);
+
+            // 🔴 VÉRIFIER SI L'EMAIL EXISTE DANS LA BASE
+            boolean emailExists = authService.checkEmailExists(email);
+
+            if (emailExists) {
+                // Envoyer une alerte à l'utilisateur concerné
+                String userSubject = "🔐 ALERTE - Tentatives de connexion sur votre compte";
+                String userBody = "🔐 ALERTE DE SÉCURITÉ\n" +
+                        "=====================\n\n" +
+                        "3 tentatives de connexion échouées ont été détectées sur votre compte.\n\n" +
+                        "Détails :\n" +
+                        "- Date : " + new java.util.Date() + "\n" +
+                        "- IP/Machine : " + java.net.InetAddress.getLocalHost().getHostName() + "\n\n" +
+                        "Si ce n'était pas vous, nous vous recommandons de :\n" +
+                        "- Changer immédiatement votre mot de passe\n" +
+                        "- Activer la reconnaissance faciale\n" +
+                        "- Contacter l'administrateur\n\n" +
+                        "Si vous êtes à l'origine de ces tentatives, ignorez cet email.\n\n" +
+                        "Cordialement,\n" +
+                        "L'équipe de sécurité";
+                // Envoyer sans photo à l'utilisateur (pour ne pas l'effrayer avec sa propre photo 😅)
+                EmailService.sendEmail(email, userSubject, userBody.toString(), null);
+
+                System.out.println("✅ Alertes envoyées à l'admin et à l'utilisateur: " + email);
+            } else {
+                System.out.println("ℹ️ Email " + email + " n'existe pas dans la base - alerte uniquement à l'admin");
+            }
+
+        } catch (Exception e) {
+            System.out.println("❌ Erreur : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -351,5 +461,11 @@ public class loginController {
         NavigationManager.loadView("/fxml/ForgotPassword.fxml");
     }
 
-
+    @FXML
+    private void handleGoogleLogin() {
+        new Thread(() -> {
+            GoogleOAuthController googleAuth = new GoogleOAuthController();
+            googleAuth.startOAuthFlow();
+        }).start();
+    }
 }

@@ -14,7 +14,7 @@
             <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1A3C5A; -fx-padding: 15 40;">
                 <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
                     <image>
-                        <Image url="@/image/logo.png" />
+                        <Image url="@/images/logo.png" />
                     </image>
                 </ImageView>
 

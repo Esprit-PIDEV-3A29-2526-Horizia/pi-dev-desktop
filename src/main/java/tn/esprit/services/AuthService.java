@@ -159,4 +159,20 @@ public class AuthService {
             return false;
         }
     }
+    public boolean createUserFromGoogle(User user) {
+        String sql = "INSERT INTO user (email, nom, prenom, password, profil_id) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getNom());
+            ps.setString(3, user.getPrenom());
+            ps.setString(4, ""); // Pas de mot de passe
+            ps.setInt(5, 2); // ID du profil CLIENT (à adapter selon ta base)
+
+            int result = ps.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

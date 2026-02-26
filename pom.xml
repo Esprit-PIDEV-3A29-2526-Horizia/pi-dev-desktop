@@ -112,7 +112,36 @@
             <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- Noyau OAuth -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.39.0</version>
+        </dependency>
+        <!-- Support pour Java 6+ -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-java6</artifactId>
+            <version>1.39.0</version>
+        </dependency>
+        <!-- Gère le serveur Jetty local pour le callback -->
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.39.0</version>
+        </dependency>
+        <!-- Pour traiter le JSON -->
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.43.3</version> <!-- Ou une version récente -->
+        </dependency>
+        <!-- Pour appeler l'API Google et obtenir le profil -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-oauth2</artifactId>
+            <version>v2-rev20200213-2.0.0</version> <!-- Ou une version récente -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -147,10 +176,12 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.fxml</include>
-                    <include>**/*.xml</include>
-                    <include>**/*.css</include>
+                    <include>**/*.jpg</include>
                     <include>**/*.png</include>
+                    <include>**/*.svg</include>
+                    <include>**/*.fxml</include>
+                    <include>**/*.css</include>
+                    <include>**/*.xml</include>
                 </includes>
             </resource>
         </resources>

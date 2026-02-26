@@ -25,7 +25,7 @@
                 <!-- Logo -->
                 <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
                     <image>
-                        <Image url="@/image/logo.png" />
+                        <Image url="@/images/logo.png" />
                     </image>
                 </ImageView>
 
