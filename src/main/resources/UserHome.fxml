@@ -8,16 +8,20 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="700" prefWidth="1200" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.UserController">
+<AnchorPane prefHeight="720.0" prefWidth="1200.0" style="-fx-background-color: #F3F6FA;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.UserController">
 
-    <top>
-        <VBox>
+    <children>
+        <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
+
+            <!-- TOP NAV -->
             <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
                 <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
                     <image>
@@ -25,56 +29,66 @@
                     </image>
                 </ImageView>
 
-                <Region HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS"/>
 
-                <HBox spacing="25" alignment="CENTER">
-                    <Button style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
-                    <Button style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Événements" />
-                    <Button fx:id="myEventsBtn" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;" text="Mes réservations" />
+                <!-- Menu (centre) -->
+                <HBox spacing="35" alignment="CENTER">
+                    <Button style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
+                    <Button style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;" text="Nos Événements" />
+                    <Button fx:id="myEventsBtn" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Mes Réservations" />
+                    <Button style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Contact" />
                 </HBox>
 
-                <Region HBox.hgrow="ALWAYS" />
+                <Region HBox.hgrow="ALWAYS"/>
 
-                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 8 20;">
-                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 18px;" />
+                <!-- User chip (droite) -->
+                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
+                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
                     <Label text="Utilisateur" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
                 </HBox>
+
+                <Button text="Déconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;" />
             </HBox>
 
-            <Region prefHeight="5" style="-fx-background-color: #81AE8D;" />
-        </VBox>
-    </top>
-
-    <center>
-        <VBox spacing="25" style="-fx-padding: 30;" alignment="TOP_CENTER">
-
-            <VBox alignment="CENTER" spacing="10" style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 20; -fx-padding: 40;">
-                <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="Découvrez nos événements" />
-                <Label style="-fx-text-fill: #DACEB6; -fx-font-size: 18px;" text="Concerts, spectacles, conférences et plus encore" />
-            </VBox>
-
-            <HBox alignment="CENTER_LEFT" spacing="15">
-                <TextField fx:id="searchField" promptText="Rechercher un événement..." style="-fx-background-radius: 25; -fx-pref-width: 350; -fx-padding: 12 20; -fx-background-color: white; -fx-border-color: #DACEB6; -fx-border-radius: 25;" />
-
-                <Button onAction="#handleSearch" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 25; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand;" text="Rechercher" />
-
-                <ComboBox fx:id="sortCombo" promptText="Trier par" style="-fx-background-radius: 25; -fx-pref-width: 150; -fx-background-color: white; -fx-border-color: #DACEB6; -fx-border-radius: 25;" />
-
-                <Region HBox.hgrow="ALWAYS" />
-
-                <HBox spacing="10">
-                    <Button fx:id="allFilterBtn" style="-fx-background-color: #E8B156; -fx-text-fill: black; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;" text="Tous" />
-                    <Button fx:id="concertFilterBtn" style="-fx-background-color: #DACEB6; -fx-text-fill: #23779C; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;" text="Concerts" />
-                    <Button fx:id="spectacleFilterBtn" style="-fx-background-color: #DACEB6; -fx-text-fill: #23779C; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;" text="Spectacles" />
-                    <Button fx:id="conferenceFilterBtn" style="-fx-background-color: #DACEB6; -fx-text-fill: #23779C; -fx-background-radius: 20; -fx-padding: 8 20; -fx-font-weight: bold; -fx-cursor: hand;" text="Conférences" />
-                </HBox>
-            </HBox>
-
-            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+            <!-- CONTENT -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <content>
-                    <FlowPane fx:id="flowEvents" hgap="25" vgap="25" prefWrapLength="1100" style="-fx-padding: 10;" />
+                    <VBox spacing="18" style="-fx-padding: 26;">
+
+                        <!-- HERO centré -->
+                        <StackPane>
+                            <AnchorPane maxWidth="950" prefHeight="170" style="-fx-background-color: #3D94CA; -fx-background-radius: 18; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                                <children>
+                                    <VBox spacing="8" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.topAnchor="26" AnchorPane.bottomAnchor="26" alignment="CENTER">
+                                        <Label text="Découvrez nos événements" style="-fx-text-fill: white; -fx-font-size: 26; -fx-font-weight: bold;" />
+                                        <Label text="Concerts, spectacles, conférences et plus encore" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12;" />
+
+                                        <Region prefHeight="10" />
+
+                                        <HBox spacing="12" alignment="CENTER">
+                                            <TextField fx:id="searchField" promptText="Rechercher un événement..." prefHeight="36" prefWidth="340" style="-fx-background-color: white; -fx-background-radius: 18; -fx-border-radius: 18; -fx-border-color: transparent; -fx-padding: 0 14;" />
+                                            <ComboBox fx:id="sortCombo" promptText="Trier par" prefHeight="36" prefWidth="190" style="-fx-background-radius: 18; -fx-border-radius: 18;" />
+                                        </HBox>
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </StackPane>
+
+                        <!-- CHIPS filtres (centrés) -->
+                        <HBox spacing="12" alignment="CENTER">
+                            <Button fx:id="allFilterBtn" text="Tous" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;" />
+                            <Button fx:id="concertFilterBtn" text="Concerts" style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;" />
+                            <Button fx:id="spectacleFilterBtn" text="Spectacles" style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;" />
+                            <Button fx:id="conferenceFilterBtn" text="Conférences" style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;" />
+                        </HBox>
+
+                        <!-- EVENTS GRID (FlowPane) -->
+                        <FlowPane fx:id="flowEvents" hgap="25" vgap="25" prefWrapLength="1100" alignment="TOP_CENTER" style="-fx-padding: 10;" />
+
+                    </VBox>
                 </content>
             </ScrollPane>
+
         </VBox>
-    </center>
-</BorderPane>
+    </children>
+</AnchorPane>

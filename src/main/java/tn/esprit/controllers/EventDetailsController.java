@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
+import tn.esprit.services.EmailService;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
 
@@ -75,12 +76,10 @@ public class EventDetailsController implements Initializable {
         }
         datesLabel.setText(dateText);
 
-        // Price and capacity
         priceLabel.setText(String.format("%.0f DT", event.getPrix()));
         availableLabel.setText(String.valueOf(event.getPlacesRestantes()));
         capacityLabel.setText(String.valueOf(event.getCapaciteMax()));
 
-        // Load image
         loadEventImage();
 
         if (event.getPlacesRestantes() > 0) {
@@ -100,7 +99,7 @@ public class EventDetailsController implements Initializable {
     private void loadEventImage() {
         if (event.getImage_url() != null && !event.getImage_url().isEmpty()) {
             try {
-                Image image = new Image(event.getImage_url(), 500, 250, true, true);
+                Image image = new Image(event.getImage_url(), 1100, 300, true, true);
                 eventImage.setImage(image);
             } catch (Exception e) {
                 showImagePlaceholder();
@@ -118,12 +117,10 @@ public class EventDetailsController implements Initializable {
     }
 
     private void setupBookingForm() {
-        // Setup spinner
         SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, event.getPlacesRestantes(), 1);
         placesSpinner.setValueFactory(valueFactory);
 
-        // Update total price when spinner changes
         placesSpinner.valueProperty().addListener((obs, old, val) -> {
             updateTotalPrice();
         });
@@ -139,7 +136,6 @@ public class EventDetailsController implements Initializable {
 
     @FXML
     private void handleConfirmBooking() {
-        // Validate fields
         if (nomField.getText().isEmpty() || emailField.getText().isEmpty()) {
             showAlert("Erreur", "Veuillez remplir votre nom et email");
             return;
@@ -148,7 +144,6 @@ public class EventDetailsController implements Initializable {
         try {
             int places = placesSpinner.getValue();
 
-            // Create participation
             Participation p = new Participation();
             p.setId_event(event.getId_event());
             p.setNombrePlaces(places);
@@ -156,17 +151,24 @@ public class EventDetailsController implements Initializable {
             p.setStatut("Confirmée");
             p.setDateParticipation(new Timestamp(System.currentTimeMillis()));
 
-            // Save to database
             serviceParticipation.ajouter(p);
 
-            // Update available places
             int newPlaces = event.getPlacesRestantes() - places;
             serviceEvent.updatePlaces(event.getId_event(), newPlaces);
 
-            showAlert("Succès", "Réservation effectuée avec succès!");
+            try {
+                EmailService.sendConfirmationEmail(
+                        emailField.getText(),
+                        nomField.getText(),
+                        event,
+                        p
+                );
+                showAlert("Succès", "Réservation effectuée avec succès!\nUn email de confirmation vous a été envoyé.");
+            } catch (Exception e) {
+                showAlert("Succès", "Réservation effectuée avec succès!");
+            }
 
-            // Close window
-            ((Stage) nomField.getScene().getWindow()).close();
+            handleBack();
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -176,13 +178,12 @@ public class EventDetailsController implements Initializable {
 
     @FXML
     private void handleBack() {
-        //((Stage) titleLabel.getScene().getWindow()).close();
         try{
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/UserHome.fxml"));
             Parent root = fxmlLoader.load();
             Stage stage = (Stage) titleLabel.getScene().getWindow();
             stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("EventHub - Acceuil");
+            stage.setTitle("EventHub - Accueil");
         }catch (Exception e){
             e.printStackTrace();
         }

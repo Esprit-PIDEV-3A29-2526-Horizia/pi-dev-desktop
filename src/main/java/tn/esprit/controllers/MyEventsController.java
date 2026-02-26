@@ -8,10 +8,13 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
+import tn.esprit.services.QRCodeService;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
 
@@ -146,7 +149,14 @@ public class MyEventsController implements Initializable {
         HBox.setHgrow(deleteBtn, Priority.ALWAYS);
         deleteBtn.setOnAction(e -> deleteParticipation(participation, event));
 
-        buttonBox.getChildren().addAll(modifyBtn, deleteBtn);
+        Button qrBtn = new Button("📱 QR Code");
+        qrBtn.setStyle("-fx-background-color: #23779C; -fx-text-fill: white; " +
+                "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
+        qrBtn.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(qrBtn, Priority.ALWAYS);
+        qrBtn.setOnAction(e -> showQRCode(participation));
+
+        buttonBox.getChildren().addAll(modifyBtn, deleteBtn, qrBtn);
 
         Button viewBtn = new Button("Voir l'événement");
         viewBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; " +
@@ -156,6 +166,39 @@ public class MyEventsController implements Initializable {
 
         card.getChildren().addAll(title, category, places, total, date, status, buttonBox, viewBtn);
         return card;
+    }
+
+    private void showQRCode(Participation participation) {
+        Image qrImage = QRCodeService.generateQRCode(participation);
+
+        if (qrImage != null) {
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("QR Code - Réservation #" + participation.getId_participation());
+            dialog.setHeaderText("🎫 Votre billet électronique");
+
+            ImageView qrView = new ImageView(qrImage);
+            qrView.setFitWidth(300);
+            qrView.setFitHeight(300);
+
+            VBox content = new VBox(15);
+            content.setAlignment(Pos.CENTER);
+            content.setPadding(new Insets(20));
+
+            Label info = new Label("Présentez ce QR code à l'entrée de l'événement");
+            info.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+
+            Label reservationInfo = new Label(String.format("Réservation #%d - %d place(s)",
+                    participation.getId_participation(), participation.getNombrePlaces()));
+            reservationInfo.setStyle("-fx-text-fill: #23779C; -fx-font-weight: bold; -fx-font-size: 14px;");
+
+            content.getChildren().addAll(reservationInfo, qrView, info);
+
+            dialog.getDialogPane().setContent(content);
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+            dialog.showAndWait();
+        } else {
+            showAlert("Erreur", "Impossible de générer le QR code");
+        }
     }
 
     private void showModifyDialog(Participation participation, Events event) {

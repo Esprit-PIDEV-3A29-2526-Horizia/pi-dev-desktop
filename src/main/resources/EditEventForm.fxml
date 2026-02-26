@@ -4,9 +4,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 20;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.EditEventFormController">
+<VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 20;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AddEventFormController">
 
-    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Modifier l'événement" />
+    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Ajouter un événement" />
 
     <Separator />
 
@@ -46,17 +46,12 @@
         <Label fx:id="prixError" text=" " GridPane.rowIndex="6" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
         <Label text="Capacité max :" GridPane.rowIndex="7" GridPane.columnIndex="0" />
-        <Spinner fx:id="capaciteSpinner" GridPane.rowIndex="7" GridPane.columnIndex="1" />
+        <Spinner fx:id="capaciteSpinner" initialValue="100" min="1" max="1000" GridPane.rowIndex="7" GridPane.columnIndex="1" />
         <Label fx:id="capaciteError" text=" " GridPane.rowIndex="7" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
 
         <Label text="Image URL :" GridPane.rowIndex="8" GridPane.columnIndex="0" />
         <TextField fx:id="imageUrlField" promptText="URL de l'image" GridPane.rowIndex="8" GridPane.columnIndex="1" />
         <Label fx:id="imageError" text=" " GridPane.rowIndex="8" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
-
-        <!-- STATUT -->
-        <Label text="Statut :" GridPane.rowIndex="9" GridPane.columnIndex="0" />
-        <ComboBox fx:id="statutCombo" promptText="Sélectionner" GridPane.rowIndex="9" GridPane.columnIndex="1" />
-        <Label fx:id="statutError" text=" " GridPane.rowIndex="9" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
     </GridPane>
 
     <Region VBox.vgrow="ALWAYS" />

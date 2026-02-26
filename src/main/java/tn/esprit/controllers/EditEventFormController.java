@@ -1,17 +1,26 @@
 package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.services.ServiceEvent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
+import javafx.stage.Modality;
+import tn.esprit.controllers.MapPickerController;
+
 
 import java.net.URL;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class EditEventFormController implements Initializable {
@@ -27,6 +36,8 @@ public class EditEventFormController implements Initializable {
     @FXML private TextField imageUrlField;
     @FXML private ComboBox<String> statutCombo;
 
+    @FXML private Button pickLocationBtn;
+
     @FXML private Label titreError;
     @FXML private Label descriptionError;
     @FXML private Label categorieError;
@@ -37,6 +48,7 @@ public class EditEventFormController implements Initializable {
     @FXML private Label capaciteError;
     @FXML private Label imageError;
     @FXML private Label statutError;
+
 
     private ServiceEvent serviceEvent;
     private Events currentEvent;
@@ -51,6 +63,7 @@ public class EditEventFormController implements Initializable {
         capaciteSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 10000, 100));
 
         setupValidation();
+        pickLocationBtn.setOnAction(e -> openMapPicker());
     }
 
     public void setEvent(Events event) {
@@ -332,5 +345,38 @@ public class EditEventFormController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private double selectedLat = 0;
+    private double selectedLng = 0;
+
+    private void openMapPicker() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MapPicker.fxml"));
+            DialogPane dialogPane = loader.load();
+
+            MapPickerController controller = loader.getController();
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Sélectionner un emplacement");
+
+            Optional<ButtonType> result = dialog.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                String address = controller.getSelectedAddress();
+                selectedLat = controller.getSelectedLat();
+                selectedLng = controller.getSelectedLng();
+
+                if (!address.isEmpty()) {
+                    locationField.setText(address);
+                    // Vous pouvez stocker les coordonnées dans la base de données
+                    // event.setLatitude(selectedLat);
+                    // event.setLongitude(selectedLng);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir la carte");
+        }
     }
 }
