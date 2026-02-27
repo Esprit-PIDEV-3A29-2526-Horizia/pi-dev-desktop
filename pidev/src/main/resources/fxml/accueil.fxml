@@ -37,6 +37,15 @@
                     <Label fx:id="userIconLabel" text="👤" style="-fx-text-fill: white; -fx-font-size: 16;" />
                     <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-text-fill: white; -fx-font-weight: bold;" />
                 </HBox>
+                <!-- 🔴 NOUVEAU BOUTON DE DÉCONNEXION -->
+                <Button fx:id="btnLogout" styleClass="logout-button" onAction="#handleLogout">
+                    <graphic>
+                        <Label text="🚪" style="-fx-font-size: 16;"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Se déconnecter" />
+                    </tooltip>
+                </Button>
             </HBox>
             <Region prefHeight="4" style="-fx-background-color: #2ECC71;" />
         </VBox>

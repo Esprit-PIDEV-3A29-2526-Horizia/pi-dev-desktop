@@ -30,11 +30,11 @@
 
     <HBox spacing="20" alignment="CENTER">
         <Button fx:id="btnSave" text="📸 Enregistrer mon visage"  onAction="#handleSaveFace"
-        style="-fx-background-color: #4CAF50; -fx-text-fill: white;
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white;
         -fx-padding: 10 20; -fx-background-radius: 5;"/>
         <Button fx:id="btnSkip" text="⏭ Passer"
-        onAction="#handleSkip"
-        style="-fx-background-color: #9e9e9e; -fx-text-fill: white;
+                onAction="#handleSkip"
+                style="-fx-background-color: #9e9e9e; -fx-text-fill: white;
         -fx-padding: 10 20; -fx-background-radius: 5;"/>
     </HBox>
 </VBox>

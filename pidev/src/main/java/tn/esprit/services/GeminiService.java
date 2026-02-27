@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class GeminiService {
 
     // Remplacez par votre vraie clé API (à ne pas commiter !)
-    private static final String API_KEY = "AIzaSyD2rupgpspGcjc0ohbDnozi4VlWdi0qVFc";
+    private static final String API_KEY = "AIzaSyBPFBct72SYy6Yb1M5lKLwtLd2G0qx1D5g";
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + API_KEY;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();

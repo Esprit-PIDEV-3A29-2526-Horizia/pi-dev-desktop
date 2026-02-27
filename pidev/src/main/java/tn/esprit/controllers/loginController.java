@@ -140,6 +140,7 @@ public class loginController {
         }
     }
 
+
     private void handleSuccessfulLogin(User user) {
         String userType = user.getType();
 
@@ -148,15 +149,18 @@ public class loginController {
             redirectToAdminDashboard(user);
         } else if ("CLIENT".equals(userType)) {
             showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
-
-            redirectToAccueilClient(user);
-
+            if (faceServiceAvailable) {
+                proposeFaceRegistration(user);
+            } else {
+                redirectToAccueilClient(user);
+            }
         } else {
             showMessage("Type d'utilisateur inconnu", "error");
             btnLogin.setDisable(false);
             btnLogin.setText("Se connecter");
         }
     }
+
 
     private void proposeFaceRegistration(User user) {
         boolean hasFace = authService.hasFaceRegistered(user.getId());

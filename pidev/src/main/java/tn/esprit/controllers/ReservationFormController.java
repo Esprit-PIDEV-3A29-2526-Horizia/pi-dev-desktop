@@ -383,6 +383,41 @@ public class ReservationFormController {
 
         return isValid;
     }
+    /**
+     * Envoie un email de confirmation avec PDF contenant les détails et le QR code.
+     */
+    private void envoyerEmailConfirmation(int reservationId, String modalite, Status statut) {
+        try {
+            String qrContent = "🏠 Logement: " + selectedLogement.getNom() + "\n" +
+                    "📅 Arrivée: " + dateArriveePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                    "📅 Départ: " + dateDepartPicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
+                    "💰 Montant: " + totalLabel.getText() + "\n" +
+                    "💳 Modalité: " + modalite + "\n" +
+                    (modalite.equals("En ligne") ? "✅ Paiement: Effectué" : "🏧 Paiement: À régler sur place");
+
+            String subject = "Confirmation de réservation";
+
+            String logementAdresse = selectedLogement.getAdresse(); // si votre entité logement a une adresse
+            EmailService.sendReservationEmailWithPDF(
+                    currentUser.getEmail(),
+                    "Confirmation de réservation " ,
+                    currentUser.getNom(),
+                    currentUser.getPrenom(),
+                    selectedLogement.getNom(),
+                    logementAdresse,
+                    dateArriveePicker.getValue(),
+                    dateDepartPicker.getValue(),
+                    currentNuits * selectedLogement.getTarif_nuit(),
+                    modalite,
+                    statut.toString(),
+                    qrContent,
+                    "reservation_logement.pdf"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "La réservation a été enregistrée mais l'envoi de l'email a échoué : " + e.getMessage());
+        }
+    }
 
     private void confirmerReservation() {
         if (!validerSaisie()) return;
@@ -573,41 +608,7 @@ public class ReservationFormController {
         stage.show();
     }
 
-    /**
-     * Envoie un email de confirmation avec PDF contenant les détails et le QR code.
-     */
-    private void envoyerEmailConfirmation(int reservationId, String modalite, Status statut) {
-        try {
-            String qrContent = "🏠 Logement: " + selectedLogement.getNom() + "\n" +
-                    "📅 Arrivée: " + dateArriveePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
-                    "📅 Départ: " + dateDepartPicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + "\n" +
-                    "💰 Montant: " + totalLabel.getText() + "\n" +
-                    "💳 Modalité: " + modalite + "\n" +
-                    (modalite.equals("En ligne") ? "✅ Paiement: Effectué" : "🏧 Paiement: À régler sur place");
 
-            String subject = "Confirmation de réservation";
-
-            String logementAdresse = selectedLogement.getAdresse(); // si votre entité logement a une adresse
-            EmailService.sendReservationEmailWithPDF(
-                    currentUser.getEmail(),
-                    "Confirmation de réservation " ,
-                    currentUser.getNom(),
-                    currentUser.getPrenom(),
-                    selectedLogement.getNom(),
-                    logementAdresse,
-                    dateArriveePicker.getValue(),
-                    dateDepartPicker.getValue(),
-                    currentNuits * selectedLogement.getTarif_nuit(),
-                    modalite,
-                    statut.toString(),
-                    qrContent,
-                    "reservation_logement.pdf"
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "La réservation a été enregistrée mais l'envoi de l'email a échoué : " + e.getMessage());
-        }
-    }
 
     private void showStyledAlert(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
@@ -657,4 +658,5 @@ public class ReservationFormController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 }

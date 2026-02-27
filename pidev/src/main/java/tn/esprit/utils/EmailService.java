@@ -41,6 +41,8 @@ public class EmailService {
     private static final String SMTP_PORT = "587";
     private static final String USERNAME = "khadijaderbel123@gmail.com";
     private static final String PASSWORD = "ebfj wsnb wkek tbku"; // mot de passe d'application
+//    private static final String FROM_EMAIL = "khalilbenlahmer@gmail.com";
+//    private static final String PASSWORD = "eodrpvucmjtvwiwo"; // Sans espaces
 
     // Nom de l'application pour l'expéditeur
     private static final String APP_NAME = "Horizia";
