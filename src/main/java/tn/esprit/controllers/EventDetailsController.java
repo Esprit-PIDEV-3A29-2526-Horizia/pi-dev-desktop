@@ -3,6 +3,7 @@ package tn.esprit.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -17,10 +18,16 @@ import tn.esprit.services.EmailService;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
 
+import tn.esprit.services.RecommandationService;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class EventDetailsController implements Initializable {
@@ -45,6 +52,16 @@ public class EventDetailsController implements Initializable {
 
     @FXML private VBox fullMessage;
 
+    @FXML private VBox recommandationsBox;
+    @FXML private FlowPane recommandationsFlow;
+    @FXML private ToggleGroup niveauRecommandation;
+    @FXML private RadioButton radioSimple;
+    @FXML private RadioButton radioSimilarite;
+    @FXML private RadioButton radioCollaboratif;
+
+    private RecommandationService recommandationService;
+    private List<Events> allEvents;
+
     private Events event;
     private ServiceEvent serviceEvent;
     private ServiceParticipation serviceParticipation;
@@ -53,6 +70,9 @@ public class EventDetailsController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
         serviceParticipation = new ServiceParticipation();
+
+        recommandationService = new RecommandationService();
+        loadAllEvents();
     }
 
     public void setEvent(Events event) {
@@ -196,4 +216,93 @@ public class EventDetailsController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    //recommendation
+    private void loadAllEvents() {
+        try {
+            allEvents = serviceEvent.afficher();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleRecommandation() {
+        if (allEvents == null) return;
+
+        List<Events> recommandations = new ArrayList<>();
+
+        if (radioSimple.isSelected()) {
+            recommandations = recommandationService.recommanderParCategorie(event, allEvents);
+        } else if (radioSimilarite.isSelected()) {
+            recommandations = recommandationService.recommanderParSimilarite(event, allEvents);
+        } else if (radioCollaboratif.isSelected()) {
+            recommandations = recommandationService.recommenderCollaboratif(event, allEvents);
+        }
+
+        afficherRecommandations(recommandations);
+    }
+
+    private void afficherRecommandations(List<Events> recommandations) {
+        recommandationsFlow.getChildren().clear();
+
+        if (recommandations.isEmpty()) {
+            Label noRec = new Label("Aucune recommandation disponible");
+            noRec.setStyle("-fx-text-fill: #666; -fx-padding: 20;");
+            recommandationsFlow.getChildren().add(noRec);
+            return;
+        }
+
+        for (Events rec : recommandations) {
+            VBox recCard = createRecommandationCard(rec);
+            recommandationsFlow.getChildren().add(recCard);
+        }
+    }
+
+    private VBox createRecommandationCard(Events rec) {
+        VBox card = new VBox();
+        card.setPrefWidth(200);
+        card.setSpacing(8);
+        card.setPadding(new Insets(12));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; " +
+                "-fx-border-color: #DACEB6; -fx-border-radius: 15; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);");
+
+        Label title = new Label(rec.getTitre());
+        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        title.setWrapText(true);
+
+        Label category = new Label("🎫 " + rec.getCategorie());
+        category.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
+
+        Label price = new Label(String.format("%.0f DT", rec.getPrix()));
+        price.setStyle("-fx-text-fill: #81AE8D; -fx-font-weight: bold;");
+
+        Button voirBtn = new Button("Voir");
+        voirBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; " +
+                "-fx-padding: 5 15; -fx-background-radius: 8; -fx-cursor: hand;");
+        voirBtn.setOnAction(e -> navigateToEventDetails(rec));
+
+        card.getChildren().addAll(title, category, price, voirBtn);
+        return card;
+    }
+
+    private void navigateToEventDetails(Events event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
+            Parent root = loader.load();
+
+            EventDetailsController controller = loader.getController();
+            controller.setEvent(event);
+
+            Stage stage = (Stage) titleLabel.getScene().getWindow();
+            stage.setScene(new Scene(root, 1200, 700));
+            stage.setTitle("Détails de l'événement - " + event.getTitre());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir l'événement");
+        }
+    }
+
 }
