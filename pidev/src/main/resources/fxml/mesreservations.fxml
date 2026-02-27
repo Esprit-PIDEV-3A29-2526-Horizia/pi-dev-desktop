@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.effect.DropShadow?>
+
+<BorderPane prefHeight="800" prefWidth="1300" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.MesReservationsController" stylesheets="@../style.css">
+
+    <!-- Barre de navigation supérieure (identique à Accueil) -->
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1A3C5A; -fx-padding: 15 40;">
+                <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <HBox spacing="30" alignment="CENTER">
+                    <Button fx:id="btnAccueil" styleClass="nav-button" text="Accueil" onAction="#retourAccueil" />
+                    <Button fx:id="btnNosLogements" styleClass="nav-button" text="Nos Logements" onAction="#retourAccueil" />
+                    <Button fx:id="btnMesReservationsNav" styleClass="nav-button" text="Mes Réservations" />
+                    <Button styleClass="nav-button" text="Voyager" />
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS" />
+                <HBox fx:id="userBox" spacing="12" alignment="CENTER"
+                      style="-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;"
+                      onMouseEntered="#onUserBoxHover"
+                      onMouseExited="#onUserBoxExit"
+                      onMouseClicked="#showUserProfile">
+                    <Label fx:id="userIconLabel" text="👤" style="-fx-text-fill: white; -fx-font-size: 16;" />
+                    <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                </HBox>
+            </HBox>
+            <Region prefHeight="4" style="-fx-background-color: #2ECC71;" />
+        </VBox>
+    </top>
+
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <VBox spacing="25" style="-fx-padding: 30;" alignment="CENTER">
+
+                <!-- Section Héro -->
+                <VBox alignment="CENTER" spacing="15" style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 40;">
+                    <effect>
+                        <DropShadow color="#00000022" radius="15" offsetY="5"/>
+                    </effect>
+                    <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="Mes Réservations" />
+                    <Label style="-fx-text-fill: #DACEB6; -fx-font-size: 18px;" text="Consultez l'historique de vos séjours" />
+                </VBox>
+
+                <!-- Barre de recherche et filtres -->
+                <HBox spacing="15" alignment="CENTER">
+                    <HBox alignment="CENTER_LEFT" spacing="10" prefWidth="400" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 8 15;">
+                        <Label text="🔍" style="-fx-font-size: 16;"/>
+                        <TextField fx:id="searchField" promptText="Rechercher par logement..." style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
+                    </HBox>
+                    <ComboBox fx:id="filterStatusCombo" prefWidth="150" promptText="Filtrer par statut" style="-fx-background-color: white; -fx-background-radius: 30;" />
+                    <Button fx:id="btnRechercher" text="Rechercher" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;" />
+                    <Button fx:id="btnReset" text="Réinitialiser" style="-fx-background-color: #DACEB6; -fx-text-fill: #1A3C5A; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;" />
+                </HBox>
+
+                <!-- Grille des réservations sous forme de cartes -->
+                <FlowPane fx:id="flowReservations" hgap="30" vgap="30" alignment="CENTER" />
+
+                <!-- Message si aucune réservation -->
+                <Label fx:id="emptyMessage" text="Aucune réservation trouvée." style="-fx-text-fill: #7f8c8d; -fx-font-size: 16;" visible="false" managed="false" />
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>
