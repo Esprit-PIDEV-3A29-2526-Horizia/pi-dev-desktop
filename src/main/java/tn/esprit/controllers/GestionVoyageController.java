@@ -7,14 +7,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import tn.esprit.entites.Voyage;
 import tn.esprit.services.VoyageService;
@@ -35,6 +32,7 @@ public class GestionVoyageController implements Initializable {
     @FXML private TextField tfRecherche;
     @FXML private FlowPane gridVoyages;
     @FXML private ComboBox<String> comboTri;
+    @FXML private BorderPane mainBorderPane;
 
     private final VoyageService vs = new VoyageService();
     private List<Voyage> listeOriginale = new ArrayList<>();
@@ -42,7 +40,13 @@ public class GestionVoyageController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         if (comboTri != null) {
-            comboTri.getItems().addAll("Prix : Croissant", "Prix : Décroissant", "Date : Plus proche");
+            comboTri.getItems().addAll(
+                    "Tous",
+                    "Prix : Croissant",
+                    "Prix : Décroissant",
+                    "Date : Plus proche"
+            );
+            comboTri.setValue("Tous");
             comboTri.setOnAction(e -> appliquerFiltresEtTris());
         }
         chargerDonnees();
@@ -58,15 +62,16 @@ public class GestionVoyageController implements Initializable {
         appliquerFiltresEtTris();
     }
 
-
     private void appliquerFiltresEtTris() {
         String keyword = tfRecherche.getText().toLowerCase();
         List<Voyage> resultats = listeOriginale.stream()
                 .filter(v -> v.getDestination().toLowerCase().contains(keyword))
                 .collect(Collectors.toList());
+
         String tri = comboTri.getValue();
         if (tri != null) {
             switch (tri) {
+                case "Tous" -> {}
                 case "Prix : Croissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix));
                 case "Prix : Décroissant" -> resultats.sort(Comparator.comparingDouble(Voyage::getPrix).reversed());
                 case "Date : Plus proche" -> resultats.sort(Comparator.comparing(Voyage::getDate_depart));
@@ -89,7 +94,6 @@ public class GestionVoyageController implements Initializable {
                 if (ctrl != null) {
                     ctrl.setData(v);
                     ctrl.setParentController(this);
-                    card.setOnMouseClicked(e -> ouvrirDetails(v));
                 }
                 gridVoyages.getChildren().add(card);
             }
@@ -98,13 +102,14 @@ public class GestionVoyageController implements Initializable {
         }
     }
 
-
     private void updateStats(List<Voyage> voyages) {
         if (lblDestActive != null) lblDestActive.setText(String.valueOf(voyages.size()));
         if (lblPlacesTotales != null) {
             int total = voyages.stream().mapToInt(Voyage::getPlaces_total).sum();
             lblPlacesTotales.setText(String.valueOf(total));
         }
+        long promoCount = voyages.stream().filter(v -> v.getPrix() <= 2000).count();
+        if (lblPromo != null) lblPromo.setText(String.valueOf(promoCount));
     }
 
     @FXML
@@ -120,13 +125,20 @@ public class GestionVoyageController implements Initializable {
         }
     }
 
-    @FXML private void naviguerCategories() { changerScene("/GestionCategorie.fxml"); }
-    @FXML private void naviguerReservations() { changerScene("/GestionReservationsAdmin.fxml"); }
+    @FXML private void naviguerCategories() {
+        changerScene("/GestionCategorie.fxml");
+    }
+
+    @FXML private void naviguerReservations() {
+        changerScene("/GestionReservationsAdmin.fxml");
+    }
 
     private void changerScene(String fxml) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxml));
-            gridVoyages.getScene().setRoot(root);
+            if (mainBorderPane != null && mainBorderPane.getScene() != null) {
+                mainBorderPane.getScene().setRoot(root);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -136,32 +148,66 @@ public class GestionVoyageController implements Initializable {
     private void ouvrirFormulaireAjout() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
+            Parent ajoutView = loader.load();
+
+            AjouterVoyageController controller = loader.getController();
+            controller.setParentController(this);
+            controller.setOnVoyageAjouteCallback(() -> {
+                retourALaListe();
+            });
+
+            if (mainBorderPane != null) {
+                mainBorderPane.setCenter(ajoutView);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void ouvrirDetails(Voyage v) {
+    public void ouvrirDetailsDansMemeFenetre(Voyage voyage) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyage.fxml"));
-            Parent root = loader.load();
+            Parent detailsView = loader.load();
+
             DetailsVoyageController controller = loader.getController();
             if (controller != null) {
-                controller.initData(v);
+                controller.initData(voyage);
                 controller.setParentController(this);
             }
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-            chargerDonnees();
+
+            if (mainBorderPane != null) {
+                mainBorderPane.setCenter(detailsView);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void retourALaListe() {
+        // Recharger les données
+        chargerDonnees();
+
+        // Recharger la vue de la liste
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionVoyage.fxml"));
+            Parent root = loader.load();
+
+            GestionVoyageController newController = loader.getController();
+
+            if (mainBorderPane != null) {
+                // Remplacer uniquement le centre
+                if (newController.getMainBorderPane() != null) {
+                    mainBorderPane.setCenter(newController.getMainBorderPane().getCenter());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public BorderPane getMainBorderPane() {
+        return mainBorderPane;
     }
 }

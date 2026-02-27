@@ -12,8 +12,10 @@ public class MyDataBase {
     private static MyDataBase instance;
     private Connection cnx;
 
-    //Le constructeur privé
     private MyDataBase() {
+        ouvrirConnexion();
+    }
+    private void ouvrirConnexion() {
         try {
             cnx = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("Connexion établie avec succès !");
@@ -22,16 +24,22 @@ public class MyDataBase {
         }
     }
 
-    //Méthode pour récupérer l'unique instance de la classe
-    public static MyDataBase getInstance() {
+    public static synchronized  MyDataBase getInstance() {
         if (instance == null) {
             instance = new MyDataBase();
         }
         return instance;
     }
 
-    //Méthode pour récupérer l'objet Connection
     public Connection getCnx() {
-        return cnx;
+
+        try {
+            if (cnx == null || cnx.isClosed()) {
+                ouvrirConnexion(); // 🔥 réouvre si fermée
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur check cnx : " + e.getMessage());
+            ouvrirConnexion();
+        }return cnx;
     }
 }

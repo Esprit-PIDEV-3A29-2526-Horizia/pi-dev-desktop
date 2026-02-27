@@ -15,10 +15,9 @@ public class Voyage {
     private int places_total;
     private int places_restantes;
 
-    //Constructeur vide
+
     public Voyage() {}
 
-    //Constructeur pour l'ajout
     public Voyage(String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.titre = titre;
         this.destination = destination;
@@ -32,7 +31,6 @@ public class Voyage {
         this.places_restantes = places_restantes;
     }
 
-    //Constructeur complet
     public Voyage(int id, String titre, String destination, String description, double prix, Date date_depart, Date date_retour, String image_url, int id_categorie, int places_total, int places_restantes) {
         this.id = id;
         this.titre = titre;

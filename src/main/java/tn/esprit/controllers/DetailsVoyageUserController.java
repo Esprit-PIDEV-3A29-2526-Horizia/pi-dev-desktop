@@ -6,6 +6,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import tn.esprit.entites.Reservation;
 import tn.esprit.entites.Voyage;
 
 public class DetailsVoyageUserController {
@@ -44,4 +45,7 @@ public class DetailsVoyageUserController {
 
     @FXML
     private void retourCatalogue() {}
+
+    public void setReservation(Reservation r) {
+    }
 }

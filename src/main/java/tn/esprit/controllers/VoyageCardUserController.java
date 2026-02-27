@@ -37,7 +37,6 @@ public class VoyageCardUserController {
     @FXML private Button btnReserver;
     @FXML private StackPane imageZone;
 
-
     private Voyage voyage;
     private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private final NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRANCE);
@@ -45,6 +44,18 @@ public class VoyageCardUserController {
     private ConcurrentHashMap<String, WeatherInfo> cacheMeteo;
     private ExecutorService executor;
 
+
+    @FXML
+    public void initialize() {
+        if (imgVoyage != null) {
+            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+            clip.setArcWidth(18);
+            clip.setArcHeight(18);
+            clip.widthProperty().bind(imgVoyage.fitWidthProperty());
+            clip.heightProperty().bind(imgVoyage.fitHeightProperty());
+            imgVoyage.setClip(clip);
+        }
+    }
     public void setData(Voyage v) {
         this.voyage = v;
         if (v == null) return;

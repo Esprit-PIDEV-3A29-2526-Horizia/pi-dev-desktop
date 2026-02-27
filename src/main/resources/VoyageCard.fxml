@@ -55,7 +55,7 @@
                style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #E8B156;"
                text="900 DT" />
 
-    <Label fx:id="lblPlaces" style="-fx-text-fill: #555; -fx-font-size: 12;" text="30/40 places" />
+        <Label fx:id="lblPlaces" style="-fx-text-fill: #555; -fx-font-size: 12;" text="30/40 places" />
         <Button fx:id="btnDetails"
                 onAction="#handleDetails"
                 alignment="CENTER"

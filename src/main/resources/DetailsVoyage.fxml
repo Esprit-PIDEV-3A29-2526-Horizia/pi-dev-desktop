@@ -5,8 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
 <VBox prefWidth="550.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 15;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsVoyageController">
     <padding>
@@ -14,7 +14,7 @@
     </padding>
     <children>
         <HBox alignment="CENTER_LEFT" spacing="10.0">
-            <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="Titre" />
+            <Label fx:id="lblTitre" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #333;" text="Titre du voyage" />
             <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="lblStatut" style="-fx-background-color: #E3D9C6; -fx-text-fill: #7A6B4B; -fx-padding: 5 15; -fx-background-radius: 10; -fx-font-weight: bold;" text="DISPONIBLE" />
         </HBox>
@@ -24,20 +24,24 @@
         <VBox spacing="12.0">
             <HBox spacing="50.0">
                 <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Destination" />
-                <Label fx:id="lblDest" style="-fx-text-fill: #333;" text="Ville, Pays" />
+                <Label fx:id="lblDestination" style="-fx-text-fill: #333;" text="Ville, Pays" />
             </HBox>
+
             <HBox spacing="50.0">
                 <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Description" />
-                <Label fx:id="lblDescription" wrapText="true" style="-fx-text-fill: #333;" text="..." />
+                <Label fx:id="lblDescription" wrapText="true" style="-fx-text-fill: #333; -fx-max-width: 350;" text="Description du voyage..." />
             </HBox>
+
             <HBox spacing="50.0">
                 <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Dates" />
                 <Label fx:id="lblDates" style="-fx-text-fill: #333;" text="Du ... au ..." />
             </HBox>
+
             <HBox spacing="50.0">
                 <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Prix" />
-                <Label fx:id="lblPrix" style="-fx-text-fill: #333;" text="0 DT" />
+                <Label fx:id="lblPrix" style="-fx-text-fill: #333; -fx-font-weight: bold;" text="0 DT" />
             </HBox>
+
             <HBox spacing="50.0">
                 <Label prefWidth="100.0" style="-fx-text-fill: #777; -fx-font-weight: bold;" text="Places restantes" />
                 <Label fx:id="lblPlaces" style="-fx-text-fill: #333;" text="0/0" />

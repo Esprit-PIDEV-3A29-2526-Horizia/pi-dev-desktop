@@ -64,6 +64,7 @@
                 <Separator/>
 
                 <!-- SUMMARY BOX (comme ta capture) -->
+                <!-- SUMMARY BOX -->
                 <VBox spacing="14" styleClass="summaryBox">
 
                     <!-- Prix unitaire DT -->
@@ -73,16 +74,20 @@
                         <Label fx:id="lblPrixUnitaire" text="0.0 DT" styleClass="value"/>
                     </HBox>
 
-                    <!-- ✅ Prix unitaire EUR -->
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="≈ en EUR" styleClass="muted"/>
+                    <!-- Ligne devise + prix unitaire converti -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Devise" styleClass="muted"/>
+
+                        <ChoiceBox fx:id="cbCurrency" prefWidth="110"/>
+
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblPrixUnitaireEur" text="-- €" styleClass="value"/>
+
+                        <Label fx:id="lblPrixUnitaireFx" text="--" styleClass="value"/>
                     </HBox>
 
-                    <!-- ✅ Taux -->
+                    <!-- Taux -->
                     <HBox alignment="CENTER_LEFT">
-                        <Label fx:id="lblRateInfo" text="1€ = -- DT" styleClass="muted"/>
+                        <Label fx:id="lblRateInfo" text="Taux: --" styleClass="muted"/>
                     </HBox>
 
                     <Separator/>
@@ -94,11 +99,11 @@
                         <Label fx:id="lblPrixTotal" text="0 DT" styleClass="totalValue"/>
                     </HBox>
 
-                    <!-- ✅ Total EUR -->
+                    <!-- Total converti -->
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="≈ Total EUR" styleClass="muted"/>
+                        <Label text="Total (devise)" styleClass="muted"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="lblPrixTotalEur" text="-- €" styleClass="value"/>
+                        <Label fx:id="lblPrixTotalFx" text="--" styleClass="value"/>
                     </HBox>
 
                 </VBox>
@@ -108,13 +113,7 @@
                         prefHeight="46"
                         maxWidth="9999"
                         styleClass="primaryBtn"/>
-                <Label text="Assistant IA" styleClass="titleSmall"/>
 
-                <TextArea fx:id="taChat" prefHeight="180" wrapText="true" editable="false"/>
-                <HBox spacing="8">
-                    <TextField fx:id="tfMessage" HBox.hgrow="ALWAYS" promptText="Pose une question (budget, itinéraire, hôtels...)"/>
-                    <Button text="Envoyer" onAction="#sendToAI" styleClass="primaryBtn"/>
-                </HBox>
                 <Label fx:id="lblAIStatus" text="" styleClass="hint"/>
                 <Label text="Paiement sécurisé • Annulation selon conditions"
                        styleClass="hint"/>

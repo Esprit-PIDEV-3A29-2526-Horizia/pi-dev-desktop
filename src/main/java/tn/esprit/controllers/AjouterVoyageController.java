@@ -2,7 +2,9 @@ package tn.esprit.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -15,6 +17,7 @@ import tn.esprit.services.CategorieService;
 import tn.esprit.services.VoyageService;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
 
@@ -40,6 +43,12 @@ public class AjouterVoyageController {
     private String imagePath = "";
     private int idVoyageAModifier = -1;
 
+    // Callback pour rafraîchir la liste après ajout/modification
+    private Runnable onVoyageAjouteCallback;
+
+    // Référence au contrôleur parent
+    private GestionVoyageController parentController;
+
     @FXML
     public void initialize() {
         chargerCategories();
@@ -51,6 +60,19 @@ public class AjouterVoyageController {
         });
     }
 
+    /**
+     * Définit le contrôleur parent
+     */
+    public void setParentController(GestionVoyageController controller) {
+        this.parentController = controller;
+    }
+
+    /**
+     * Définit le callback à appeler après l'ajout/modification d'un voyage
+     */
+    public void setOnVoyageAjouteCallback(Runnable callback) {
+        this.onVoyageAjouteCallback = callback;
+    }
 
     public void prepareModif(Voyage v) {
         if (v == null) return;
@@ -139,6 +161,7 @@ public class AjouterVoyageController {
             v.setId_categorie(cbCategorie.getValue().getId());
             v.setPlaces_total(pTotal);
             v.setPlaces_restantes(pRest);
+
             if (idVoyageAModifier == -1) {
                 vs.ajouter(v);
                 afficherAlerteSucces("Succès", "Voyage ajouté avec succès !");
@@ -147,7 +170,17 @@ public class AjouterVoyageController {
                 vs.modifier(v);
                 afficherAlerteSucces("Succès", "Voyage mis à jour !");
             }
-            annuler();
+
+            // Appeler le callback pour rafraîchir la liste
+            if (onVoyageAjouteCallback != null) {
+                onVoyageAjouteCallback.run();
+            }
+
+            // Retourner à la liste via le parentController (sans recharger tout le fichier)
+            if (parentController != null) {
+                parentController.retourALaListe();
+            }
+
         } catch (NumberFormatException e) {
             afficherAlerte("Erreur", "Prix / places doivent être des nombres valides.");
         } catch (Exception e) {
@@ -162,18 +195,32 @@ public class AjouterVoyageController {
         fc.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp")
         );
-        Stage stage = (Stage) tfDestination.getScene().getWindow();
-        File selected = fc.showOpenDialog(stage);
-        if (selected != null) {
-            imagePath = selected.toURI().toString();
-            try { imgPreview.setImage(new Image(imagePath, true)); }
-            catch (Exception e) {
-                imgPreview.setImage(null);
-                afficherAlerte("Image", "Impossible de charger cette image.");
+
+        if (tfDestination != null && tfDestination.getScene() != null && tfDestination.getScene().getWindow() != null) {
+            Stage stage = (Stage) tfDestination.getScene().getWindow();
+            File selected = fc.showOpenDialog(stage);
+            if (selected != null) {
+                imagePath = selected.toURI().toString();
+                try {
+                    imgPreview.setImage(new Image(imagePath, true));
+                } catch (Exception e) {
+                    imgPreview.setImage(null);
+                    afficherAlerte("Image", "Impossible de charger cette image.");
+                }
+            }
+        } else {
+            File selected = fc.showOpenDialog(null);
+            if (selected != null) {
+                imagePath = selected.toURI().toString();
+                try {
+                    imgPreview.setImage(new Image(imagePath, true));
+                } catch (Exception e) {
+                    imgPreview.setImage(null);
+                    afficherAlerte("Image", "Impossible de charger cette image.");
+                }
             }
         }
     }
-
 
     @FXML
     void handleVider() {
@@ -192,17 +239,27 @@ public class AjouterVoyageController {
 
     @FXML
     void annuler() {
-        Stage stage = (Stage) tfDestination.getScene().getWindow();
-        stage.close();
+        if (parentController != null) {
+            parentController.retourALaListe();
+        }
     }
-
     private void chargerCategories() {
         List<Categorie> liste = cs.afficher();
         cbCategorie.setItems(FXCollections.observableArrayList(liste));
         cbCategorie.setConverter(new StringConverter<>() {
-            @Override public String toString(Categorie c) { return (c == null) ? "" : c.getNom(); }
-            @Override public Categorie fromString(String s) { return null; }
+            @Override
+            public String toString(Categorie c) {
+                return (c == null) ? "" : c.getNom();
+            }
+            @Override
+            public Categorie fromString(String s) {
+                return null;
+            }
         });
+
+        if (!liste.isEmpty() && idVoyageAModifier == -1) {
+            cbCategorie.setValue(liste.get(0));
+        }
     }
 
     private void afficherAlerteSucces(String titre, String msg) {
@@ -224,8 +281,6 @@ public class AjouterVoyageController {
     private boolean isBlank(TextField tf) {
         return tf == null || tf.getText() == null || tf.getText().trim().isEmpty();
     }
-
-
 
     private String nvl(String s) {
         return (s == null) ? "" : s;

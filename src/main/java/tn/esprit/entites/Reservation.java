@@ -11,11 +11,9 @@ public class Reservation {
     private int idVoyage;
     private int idUser;
     private String imageUrl;
-
-    // champ pour affichage (join avec voyage)
     private String destination;
+    private  String qrCode;
 
-    // Constructeurs
     public Reservation() {}
 
     // Pour ajout (sans id ni date)
@@ -60,6 +58,14 @@ public class Reservation {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
     @Override
     public String toString() {
         return "Reservation{" +
@@ -69,7 +75,9 @@ public class Reservation {
                 ", statut='" + statut + '\'' +
                 ", idVoyage=" + idVoyage +
                 ", idUser=" + idUser +
+                ", imageUrl='" + imageUrl + '\'' +
                 ", destination='" + destination + '\'' +
+                ", qrCode='" + qrCode + '\'' +
                 '}';
     }
 }

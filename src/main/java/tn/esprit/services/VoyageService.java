@@ -11,17 +11,13 @@ import java.util.List;
 public class VoyageService implements IService<Voyage> {
 
     private final Connection cnx;
-
     public VoyageService() {
         cnx = MyDataBase.getInstance().getCnx();
     }
-
-
     @Override
     public void ajouter(Voyage v) {
         String sql = "INSERT INTO voyage (titre, destination, description, prix, date_depart, date_retour, image_url, id_categorie, places_total, places_restantes) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setString(1, v.getTitre());
             ps.setString(2, v.getDestination());
@@ -33,19 +29,16 @@ public class VoyageService implements IService<Voyage> {
             ps.setInt(8, v.getId_categorie());
             ps.setInt(9, v.getPlaces_total());
             ps.setInt(10, v.getPlaces_restantes());
-
             ps.executeUpdate();
             System.out.println("Voyage ajouté avec succès !");
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'ajout voyage : " + e.getMessage());
         }
     }
-
     @Override
     public void modifier(Voyage v) {
         String sql = "UPDATE voyage SET titre=?, destination=?, description=?, prix=?, date_depart=?, date_retour=?, image_url=?, id_categorie=?, places_total=?, places_restantes=? " +
                 "WHERE id=?";
-
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setString(1, v.getTitre());
             ps.setString(2, v.getDestination());
@@ -58,15 +51,12 @@ public class VoyageService implements IService<Voyage> {
             ps.setInt(9, v.getPlaces_total());
             ps.setInt(10, v.getPlaces_restantes());
             ps.setInt(11, v.getId());
-
             ps.executeUpdate();
             System.out.println("Voyage modifié avec succès !");
         } catch (SQLException e) {
             System.err.println("Erreur lors de la modification voyage : " + e.getMessage());
         }
     }
-
-
     @Override
     public void supprimer(int id) {
         String sql = "DELETE FROM voyage WHERE id=?";
@@ -79,32 +69,24 @@ public class VoyageService implements IService<Voyage> {
             System.err.println("Erreur lors de la suppression voyage : " + e.getMessage());
         }
     }
-
-
     @Override
     public List<Voyage> afficher() {
         List<Voyage> voyages = new ArrayList<>();
         String sql = "SELECT * FROM voyage";
-
         try (Statement st = cnx.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
-
             while (rs.next()) {
                 voyages.add(mapperVoyage(rs));
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'affichage voyages : " + e.getMessage());
         }
-
         return voyages;
     }
-
     public Voyage getById(int id) {
         String sql = "SELECT * FROM voyage WHERE id=?";
-
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return mapperVoyage(rs);
@@ -113,66 +95,50 @@ public class VoyageService implements IService<Voyage> {
         } catch (SQLException e) {
             System.err.println("Erreur getById : " + e.getMessage());
         }
-
         return null;
     }
 
-//strem recherche+tri
     public List<Voyage> rechercherStream(String keyword) {
         String k = (keyword == null) ? "" : keyword.trim().toLowerCase();
-
         return afficher().stream()
                 .filter(v -> containsIgnoreCase(v.getTitre(), k) || containsIgnoreCase(v.getDestination(), k))
                 .toList();
     }
-    //Tri prix ASC
     public List<Voyage> trierParPrixAscStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingDouble(Voyage::getPrix))
                 .toList();
     }
-    //Tri prix DESC
     public List<Voyage> trierParPrixDescStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingDouble(Voyage::getPrix).reversed())
                 .toList();
     }
-
-    //Tri destination A-Z
     public List<Voyage> trierParDestinationAZStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparing(v -> safeStr(v.getDestination()).toLowerCase()))
                 .toList();
     }
-
-    //Tri places restantes DESC
     public List<Voyage> trierParPlacesRestantesDescStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed())
                 .toList();
     }
-
-    //Filtre par catégorie(id)
     public List<Voyage> filtrerParCategorieStream(List<Voyage> base, int idCategorie) {
         return safeList(base).stream()
                 .filter(v -> v.getId_categorie() == idCategorie)
                 .toList();
     }
-
-
     private boolean containsIgnoreCase(String text, String keywordLower) {
         if (keywordLower == null || keywordLower.isBlank()) return true;
         return safeStr(text).toLowerCase().contains(keywordLower);
     }
-
     private String safeStr(String s) {
         return (s == null) ? "" : s;
     }
-
     private List<Voyage> safeList(List<Voyage> list) {
         return (list == null) ? List.of() : list;
     }
-
     private Voyage mapperVoyage(ResultSet rs) throws SQLException {
         Voyage v = new Voyage();
         v.setId(rs.getInt("id"));

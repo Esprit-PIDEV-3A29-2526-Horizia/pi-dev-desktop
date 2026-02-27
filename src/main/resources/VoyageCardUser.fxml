@@ -5,20 +5,23 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="cardContainer" prefWidth="230" spacing="10"
+<VBox fx:id="cardContainer"
+      prefWidth="390" minWidth="390" maxWidth="390"
+      prefHeight="285" minHeight="285" maxHeight="285"
+      spacing="10"
       xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="tn.esprit.controllers.VoyageCardUserController"
-      style="-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 12;
+      style="-fx-background-color: white; -fx-background-radius: 18; -fx-padding: 14;
              -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.10), 14, 0, 0, 6);">
 
     <!-- ================= IMAGE + BADGES ================= -->
     <StackPane fx:id="imageZone">
 
         <ImageView fx:id="imgVoyage"
-                   fitWidth="206" fitHeight="110"
+                   fitWidth="362" fitHeight="135"
                    preserveRatio="false"
-                   style="-fx-background-radius: 14; -fx-border-radius: 14;"/>
+                   smooth="true"/>
 
         <!-- Badge statut (DISPONIBLE / COMPLET) -->
         <Label fx:id="badgeStatus" text="DISPONIBLE"
@@ -27,7 +30,7 @@
                       -fx-background-radius: 14; -fx-padding: 3 10;
                       -fx-font-weight: bold; -fx-font-size: 11;">
             <StackPane.margin>
-                <Insets top="8" left="8" right="0" bottom="0"/>
+                <Insets top="10" left="10" right="0" bottom="0"/>
             </StackPane.margin>
         </Label>
 
@@ -43,7 +46,7 @@
                      -fx-padding: 6 10;
                      -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 8, 0, 0, 2);">
             <StackPane.margin>
-                <Insets bottom="8" left="8"/>
+                <Insets bottom="10" left="10"/>
             </StackPane.margin>
 
             <ImageView fx:id="imgMeteo"
@@ -58,23 +61,30 @@
     </StackPane>
 
     <!-- ================= INFOS ================= -->
-    <Label fx:id="lblDestination" text="Tokyo"
-           style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
+    <VBox spacing="6">
 
-    <Label fx:id="lblDates" text="Du 03/11/2026 au 10/11/2026"
-           style="-fx-text-fill: #64748B; -fx-font-size: 11;"/>
+        <Label fx:id="lblDestination"
+               wrapText="true"
+               maxHeight="44"
+               style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0F172A;"/>
 
-    <HBox alignment="CENTER_LEFT">
-        <Label fx:id="lblPrix" text="3 500 DT"
-               style="-fx-text-fill: #E8B156; -fx-font-weight: bold; -fx-font-size: 12;"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        <Label fx:id="lblPlacesInfo" text="Places restantes : 25"
-               style="-fx-text-fill: #64748B; -fx-font-size: 11;"/>
-    </HBox>
+        <Label fx:id="lblDates"
+               maxHeight="20"
+               style="-fx-text-fill: #64748B; -fx-font-size: 12;"/>
+
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="lblPrix"
+                   style="-fx-text-fill: #E8B156; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblPlacesInfo"
+                   style="-fx-text-fill: #64748B; -fx-font-size: 12;"/>
+        </HBox>
+
+    </VBox>
 
     <!-- ================= ACTION ================= -->
     <Button fx:id="btnReserver" text="Réserver" onAction="#handleReserver"
-            prefHeight="30" maxWidth="9999"
+            prefHeight="34" maxWidth="9999"
             style="-fx-background-color: #E8B156; -fx-text-fill: white;
                    -fx-background-radius: 12; -fx-font-weight: bold; -fx-cursor: hand;"/>
 

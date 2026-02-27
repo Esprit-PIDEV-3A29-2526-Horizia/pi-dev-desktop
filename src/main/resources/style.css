@@ -119,3 +119,40 @@
     -fx-background-color: transparent;
     -fx-background: transparent;
 }
+.ai-fab{
+    -fx-background-color: #E67E22;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 999;
+    -fx-padding: 12 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 12, 0, 0, 6);
+}
+
+.ai-panel{
+    -fx-pref-width: 360;
+    -fx-pref-height: 520;
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 20, 0, 0, 8);
+    -fx-padding: 10;
+    -fx-translate-x: -20;
+    -fx-translate-y: -20;
+}
+
+.ai-header{
+    -fx-padding: 8 10;
+}
+
+.ai-title{ -fx-font-size: 14; -fx-font-weight: bold; }
+.ai-close{ -fx-background-color: transparent; -fx-cursor: hand; }
+
+.ai-scroll{ -fx-background-color: transparent; -fx-border-color: transparent; }
+.ai-messages{ -fx-padding: 8; }
+
+.ai-inputbar{ -fx-padding: 10 0 0 0; }
+.ai-send{
+    -fx-background-color: #163A56;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+}
