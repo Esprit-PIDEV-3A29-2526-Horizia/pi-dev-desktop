@@ -126,7 +126,7 @@ public class logement {
                 ", equipement='" + equipement + '\'' +
                 ", tarif_nuit=" + tarif_nuit +
                 ", disponibilite=" + disponibilite +
-
+"integration"+
                 '}';
     }
 }
