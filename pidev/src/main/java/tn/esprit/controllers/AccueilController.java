@@ -2,6 +2,10 @@ package tn.esprit.controllers;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -12,12 +16,19 @@ import javafx.scene.layout.VBox;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
 import tn.esprit.services.GeminiService;
+import javafx.stage.Stage;
+import tn.esprit.entities.logement;
+import tn.esprit.entities.User;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
 
 import java.sql.SQLException;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AccueilController {
@@ -46,6 +57,9 @@ public class AccueilController {
     private Label userNameLabel;
     @FXML
     private Button btnRecommendations;
+    @FXML private Button btnLogout;  // ← Ajoute ce champ
+
+
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
     private List<logement> logementsFiltres;
@@ -64,6 +78,7 @@ public class AccueilController {
         // Configuration du userBox (profil utilisateur)
         setupUserBox();
         btnRecommendations.setOnAction(e -> chargerRecommandations());
+
 
         // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
@@ -110,6 +125,7 @@ public class AccueilController {
         searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
         sortCombo.setOnAction(e -> trier());
     }
+
 
     /**
      * Configure la boîte utilisateur (affichage du nom et clic vers profil)
@@ -415,6 +431,7 @@ public class AccueilController {
             }
         }).start();
     }
+
     @FXML
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
@@ -427,5 +444,27 @@ public class AccueilController {
     }
 
 
+
+    // 🔴 NOUVELLE MÉTHODE DE DÉCONNEXION
+    @FXML
+    private void handleLogout() {
+        try {
+            // Retourner à l'écran de login
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) btnLogout.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Connexion - Système de Réservation");
+            stage.centerOnScreen();
+            stage.show();
+
+            System.out.println("✅ Déconnexion réussie");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de la déconnexion: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
 }

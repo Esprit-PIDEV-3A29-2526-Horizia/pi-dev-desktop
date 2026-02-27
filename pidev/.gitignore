@@ -2,12 +2,12 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
 models/
 src/main/java/tn/esprit/utils/StripeService.java
 
 src/main/java/tn/esprit/utils/EmailService.java
 src/main/java/tn/esprit/services/GeminiService.java
-
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -41,4 +41,7 @@ build/
 .vscode/
 
 ### Mac OS ###
+
 .DS_Storep
+.DS_Store
+

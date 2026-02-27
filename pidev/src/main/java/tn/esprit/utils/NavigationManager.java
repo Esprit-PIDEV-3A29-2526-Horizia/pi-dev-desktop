@@ -4,30 +4,57 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 
 public class NavigationManager {
-    private static Stage primaryStage;  // Stage partagé pour toute l'application
+    private static Stage primaryStage;
+    private static int windowWidth = 1200;
+    private static int windowHeight = 700;
 
-    // Méthode pour définir le Stage principal (appelée dans MainFX.java)
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
+        // ✅ S'assurer que la fenêtre n'est pas redimensionnable
+        primaryStage.setResizable(false);
     }
 
-    // Méthode pour charger une vue FXML et changer la scène
+    public static void setDimensions(int width, int height) {
+        windowWidth = width;
+        windowHeight = height;
+    }
+
     public static void loadView(String fxmlPath) {
         try {
-            if (primaryStage == null) {
-                throw new IllegalStateException("PrimaryStage non défini. Appelez setPrimaryStage() d'abord.");
-            }
             FXMLLoader loader = new FXMLLoader(NavigationManager.class.getResource(fxmlPath));
             Parent root = loader.load();
-            Scene scene = new Scene(root);
-            primaryStage.setScene(scene);
+
+            // ✅ Réutiliser la MÊME scène avec les mêmes dimensions
+            primaryStage.setScene(new Scene(root, windowWidth, windowHeight));
+            primaryStage.centerOnScreen();
             primaryStage.show();
-        } catch (Exception e) {
-            System.err.println("Erreur lors du chargement de la vue : " + fxmlPath + " - " + e.getMessage());
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement " + fxmlPath + ": " + e.getMessage());
             e.printStackTrace();
-            // Optionnel : afficher une alerte ou rester sur la page actuelle
+        }
+    }
+
+    // Méthode utilitaire pour obtenir le contrôleur si besoin
+    public static FXMLLoader loadViewWithController(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(NavigationManager.class.getResource(fxmlPath));
+            Parent root = loader.load();
+
+            // ✅ Utiliser les dimensions définies dans MainFX
+            primaryStage.setScene(new Scene(root, windowWidth, windowHeight));
+            primaryStage.centerOnScreen();
+            primaryStage.show();
+
+            return loader;  // Retourne le loader pour accéder au contrôleur
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement " + fxmlPath + ": " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 }
