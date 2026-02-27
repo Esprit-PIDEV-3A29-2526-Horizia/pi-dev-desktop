@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.PlanningController"
+      spacing="0"
+      style="-fx-background-color: #f5f7fa;"
+      prefWidth="1300" prefHeight="900">
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- HEADER                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <HBox alignment="CENTER_LEFT" spacing="18"
+          style="-fx-background-color: white;
+                 -fx-padding: 20 30 20 30;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);">
+
+        <Button text="← Retour" onAction="#retourDashboard"
+                style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
+                       -fx-font-size: 14px; -fx-padding: 10 20;
+                       -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;"/>
+
+        <Separator orientation="VERTICAL" prefHeight="40"
+                   style="-fx-background-color: #e5e7eb;"/>
+
+        <Label text="📅" style="-fx-font-size: 40px;"/>
+        <VBox spacing="3">
+            <Label text="Planning &amp; Calendrier"
+                   style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+            <Label text="Visualisez et gérez toutes vos locations sur le calendrier mensuel"
+                   style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+        </VBox>
+
+        <HBox HBox.hgrow="ALWAYS"/>
+
+        <!-- Boutons de rafraîchissement -->
+        <Button text="🔄 Rafraîchir" onAction="#rafraichir"
+                style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
+                       -fx-font-size: 13px; -fx-padding: 10 18;
+                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+        <Button text="📅 Aujourd'hui" onAction="#allerAujourdhui"
+                style="-fx-background-color: #0384b7; -fx-text-fill: white;
+                       -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 10 18;
+                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- CONTENU PRINCIPAL                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <HBox spacing="0" VBox.vgrow="ALWAYS">
+
+        <!-- ──────────────────────────────────────────────────────── -->
+        <!-- COLONNE GAUCHE : Statistiques + Alertes                  -->
+        <!-- ──────────────────────────────────────────────────────── -->
+        <ScrollPane fitToWidth="true"
+                    style="-fx-background-color: transparent; -fx-background: transparent;"
+                    prefWidth="310" minWidth="310" maxWidth="310">
+            <VBox spacing="15" style="-fx-padding: 20;">
+
+                <!-- Statistiques du mois -->
+                <VBox spacing="12"
+                      style="-fx-background-color: white; -fx-padding: 20;
+                             -fx-background-radius: 12;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                    <Label text="📊 Statistiques du Mois"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+
+                    <!-- Taux d'occupation -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: #f0fff4; -fx-padding: 15;
+                                 -fx-background-radius: 8; -fx-border-color: #a7f3d0;
+                                 -fx-border-radius: 8; -fx-border-width: 1;">
+                        <Label text="🚗 Taux d'Occupation"
+                               style="-fx-font-size: 12px; -fx-text-fill: #065f46;"/>
+                        <Label fx:id="lblTauxOccupation" text="—"
+                               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                        <Label text="du parc véhicules"
+                               style="-fx-font-size: 10px; -fx-text-fill: #6b7280;"/>
+                    </VBox>
+
+                    <!-- CA du mois -->
+                    <VBox spacing="5"
+                          style="-fx-background-color: #eff6ff; -fx-padding: 15;
+                                 -fx-background-radius: 8; -fx-border-color: #bfdbfe;
+                                 -fx-border-radius: 8; -fx-border-width: 1;">
+                        <Label text="💰 Chiffre d'Affaires"
+                               style="-fx-font-size: 12px; -fx-text-fill: #1e40af;"/>
+                        <Label fx:id="lblCAMois" text="—"
+                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
+                        <Label text="estimé pour le mois"
+                               style="-fx-font-size: 10px; -fx-text-fill: #6b7280;"/>
+                    </VBox>
+
+                    <!-- Grille de stats -->
+                    <GridPane hgap="10" vgap="10">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Nb Locations -->
+                        <VBox GridPane.columnIndex="0" spacing="3" alignment="CENTER"
+                              style="-fx-background-color: #f8f9fa; -fx-padding: 12;
+                                     -fx-background-radius: 8;">
+                            <Label text="📋" style="-fx-font-size: 20px;"/>
+                            <Label fx:id="lblNbLocations" text="0"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #f49c11;"/>
+                            <Label text="locations" style="-fx-font-size: 10px; -fx-text-fill: #6b7280;"/>
+                        </VBox>
+
+                        <!-- Conflits -->
+                        <VBox GridPane.columnIndex="1" spacing="3" alignment="CENTER"
+                              style="-fx-background-color: #f8f9fa; -fx-padding: 12;
+                                     -fx-background-radius: 8;">
+                            <Label text="⚠️" style="-fx-font-size: 20px;"/>
+                            <Label fx:id="lblNbConflits" text="0"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                            <Label text="conflits" style="-fx-font-size: 10px; -fx-text-fill: #6b7280;"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- Répartition par statuts -->
+                <VBox spacing="10"
+                      style="-fx-background-color: white; -fx-padding: 20;
+                             -fx-background-radius: 12;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                    <Label text="📈 Répartition par Statut"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+                    <VBox fx:id="vboxStatuts" spacing="8"/>
+                </VBox>
+
+                <!-- Légende calendrier -->
+                <VBox spacing="8"
+                      style="-fx-background-color: white; -fx-padding: 20;
+                             -fx-background-radius: 12;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                    <Label text="🎨 Légende"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #3498db; -fx-font-size: 16px;"/>
+                        <Label text="Réservée" style="-fx-font-size: 12px; -fx-text-fill: #2c3e50;"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #27ae60; -fx-font-size: 16px;"/>
+                        <Label text="En cours" style="-fx-font-size: 12px; -fx-text-fill: #2c3e50;"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #95a5a6; -fx-font-size: 16px;"/>
+                        <Label text="Terminée" style="-fx-font-size: 12px; -fx-text-fill: #2c3e50;"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #e74c3c; -fx-font-size: 16px;"/>
+                        <Label text="Annulée" style="-fx-font-size: 12px; -fx-text-fill: #2c3e50;"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="●" style="-fx-text-fill: #e67e22; -fx-font-size: 16px;"/>
+                        <Label text="No-show" style="-fx-font-size: 12px; -fx-text-fill: #2c3e50;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Alertes retour -->
+                <VBox spacing="10"
+                      style="-fx-background-color: white; -fx-padding: 20;
+                             -fx-background-radius: 12;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                    <Label text="⚠️ Retours dans 3 jours"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+                    <VBox fx:id="vboxAlertesRetour" spacing="8"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+
+        <!-- Séparateur vertical -->
+        <Separator orientation="VERTICAL"/>
+
+        <!-- ──────────────────────────────────────────────────────── -->
+        <!-- ZONE CALENDRIER PRINCIPALE                               -->
+        <!-- ──────────────────────────────────────────────────────── -->
+        <VBox spacing="0" HBox.hgrow="ALWAYS">
+
+            <!-- Navigation mois -->
+            <HBox alignment="CENTER" spacing="20"
+                  style="-fx-background-color: #2c3e50; -fx-padding: 15 30;">
+
+                <Button text="◀" onAction="#moisPrecedent"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white;
+                               -fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 8 18;
+                               -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+                <Label fx:id="lblMoisAnnee" text="CHARGEMENT..."
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"
+                       minWidth="280" alignment="CENTER"/>
+
+                <Button text="▶" onAction="#moisSuivant"
+                        style="-fx-background-color: rgba(255,255,255,0.15); -fx-text-fill: white;
+                               -fx-font-size: 18px; -fx-font-weight: bold; -fx-padding: 8 18;
+                               -fx-background-radius: 8; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- Calendrier -->
+            <ScrollPane fx:id="scrollCalendrier" fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: #f5f7fa; -fx-background: #f5f7fa;">
+                <VBox style="-fx-padding: 20;">
+                    <GridPane fx:id="gridCalendrier"
+                              hgap="6" vgap="6"
+                              maxWidth="Infinity"
+                              style="-fx-background-color: transparent;"/>
+                </VBox>
+            </ScrollPane>
+
+        </VBox>
+
+    </HBox>
+
+</VBox>

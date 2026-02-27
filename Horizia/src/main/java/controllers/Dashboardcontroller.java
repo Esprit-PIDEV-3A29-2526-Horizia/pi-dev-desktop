@@ -1,232 +1,168 @@
 package controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import javafx.scene.layout.StackPane;
 import org.example.services.Dashboardservice;
 
-import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
+import java.util.ResourceBundle;
 
-public class Dashboardcontroller {
+/**
+ * Contrôleur du Dashboard Horizia
+ * CORRIGÉ : noms des méthodes Dashboardservice (getNombreLocationsActives,
+ *            getNombreVehiculesDisponibles, getNombreVehiculesLoues,
+ *            getModeleLesPlusLoue → Map<String,Object>,
+ *            getTop5ModelesLoues, getLocationsParStatut)
+ */
+public class Dashboardcontroller implements Initializable {
 
+    // ─── Labels statistiques ──────────────────────────────────────
     @FXML private Label lblModeleTopNom;
     @FXML private Label lblModeleTopCount;
     @FXML private Label lblLocationsActives;
     @FXML private Label lblVehiculesDisponibles;
     @FXML private Label lblVehiculesLoues;
 
+    // ─── Graphiques ───────────────────────────────────────────────
     @FXML private BarChart<String, Number> barChartTopModeles;
-    @FXML private CategoryAxis xAxis;
-    @FXML private NumberAxis yAxis;
-
     @FXML private PieChart pieChartStatuts;
 
+    // ─── Cards de navigation ──────────────────────────────────────
     @FXML private HBox cardGestionLocations;
     @FXML private HBox cardGestionVehicules;
     @FXML private HBox cardGestionMarques;
+    @FXML private HBox cardDocuments;
+    @FXML private HBox cardPlanning;
 
-    private Dashboardservice dashboardservice;
+    private Dashboardservice dashboardService;
 
-    public Dashboardcontroller() {
-        this.dashboardservice = new Dashboardservice();
-    }
+    // ─────────────────────────────────────────────────────────────
+    // INITIALISATION
+    // ─────────────────────────────────────────────────────────────
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+        dashboardService = new Dashboardservice();
         chargerStatistiques();
-        chargerGraphiqueTopModeles();
-        chargerGraphiqueStatuts();
-        configurerCards();
+        configurerCardsNavigation();
     }
 
-    /**
-     * Charge les statistiques principales
-     */
     private void chargerStatistiques() {
-        System.out.println("=== Chargement des statistiques ===");
+        // FIX : getNombreVehiculesDisponibles() (pas getNbVehiculesDisponibles())
+        int disponibles = dashboardService.getNombreVehiculesDisponibles();
+        // FIX : getNombreVehiculesLoues()
+        int loues       = dashboardService.getNombreVehiculesLoues();
+        // FIX : getNombreLocationsActives()
+        int actives     = dashboardService.getNombreLocationsActives();
 
-        // Modèle le plus loué
-        Map<String, Object> topModele = dashboardservice.getModeleLesPlusLoue();
-        String marque = (String) topModele.get("nomMarque");
-        String modele = (String) topModele.get("nomModele");
-        int nbLocations = (int) topModele.get("nombreLocations");
+        if (lblVehiculesDisponibles != null) lblVehiculesDisponibles.setText(String.valueOf(disponibles));
+        if (lblVehiculesLoues       != null) lblVehiculesLoues.setText(String.valueOf(loues));
+        if (lblLocationsActives     != null) lblLocationsActives.setText(String.valueOf(actives));
 
-        System.out.println("Modèle le plus loué : " + marque + " " + modele + " (" + nbLocations + " locations)");
-        lblModeleTopNom.setText(marque + " " + modele);
-        lblModeleTopCount.setText(nbLocations + " location" + (nbLocations > 1 ? "s" : ""));
+        // FIX : getModeleLesPlusLoue() retourne Map<String, Object> avec clés "nomMarque", "nomModele", "nombreLocations"
+        Map<String, Object> topModele = dashboardService.getModeleLesPlusLoue();
+        if (topModele != null && !topModele.isEmpty()) {
+            String nomMarque  = (String) topModele.getOrDefault("nomMarque",  "—");
+            String nomModele  = (String) topModele.getOrDefault("nomModele",  "");
+            Object nbLoc      = topModele.getOrDefault("nombreLocations", 0);
+            if (lblModeleTopNom   != null) lblModeleTopNom.setText(nomMarque + " " + nomModele);
+            if (lblModeleTopCount != null) lblModeleTopCount.setText(nbLoc + " location(s)");
+        }
 
-        // Locations actives
-        int locationsActives = dashboardservice.getNombreLocationsActives();
-        System.out.println("Locations actives : " + locationsActives);
-        lblLocationsActives.setText(String.valueOf(locationsActives));
-
-        // Véhicules disponibles
-        int vehiculesDisponibles = dashboardservice.getNombreVehiculesDisponibles();
-        System.out.println("Véhicules disponibles : " + vehiculesDisponibles);
-        lblVehiculesDisponibles.setText(String.valueOf(vehiculesDisponibles));
-
-        // Véhicules loués
-        int vehiculesLoues = dashboardservice.getNombreVehiculesLoues();
-        System.out.println("Véhicules loués : " + vehiculesLoues);
-        lblVehiculesLoues.setText(String.valueOf(vehiculesLoues));
-
-        System.out.println("=== Statistiques chargées ===");
+        chargerBarChart();
+        chargerPieChart();
     }
 
-    /**
-     * Charge le graphique en barres des top 5 modèles
-     */
-    private void chargerGraphiqueTopModeles() {
-        Map<String, Integer> topModeles = dashboardservice.getTop5ModelesLoues();
+    private void chargerBarChart() {
+        if (barChartTopModeles == null) return;
+        barChartTopModeles.getData().clear();
+
+        // FIX : getTop5ModelesLoues() (pas getTop5ModeleLoues())
+        Map<String, Integer> topModeles = dashboardService.getTop5ModelesLoues();
+        if (topModeles == null || topModeles.isEmpty()) return;
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Nombre de locations");
-
+        series.setName("Locations");
         for (Map.Entry<String, Integer> entry : topModeles.entrySet()) {
             series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
         }
-
-        barChartTopModeles.getData().clear();
         barChartTopModeles.getData().add(series);
-        barChartTopModeles.setLegendVisible(false);
     }
 
-    /**
-     * Charge le graphique en camembert des statuts
-     */
-    private void chargerGraphiqueStatuts() {
-        Map<String, Integer> statutsData = dashboardservice.getLocationsParStatut();
-
+    private void chargerPieChart() {
+        if (pieChartStatuts == null) return;
         pieChartStatuts.getData().clear();
 
-        for (Map.Entry<String, Integer> entry : statutsData.entrySet()) {
-            PieChart.Data slice = new PieChart.Data(
-                    formatStatut(entry.getKey()) + " (" + entry.getValue() + ")",
-                    entry.getValue()
-            );
-            pieChartStatuts.getData().add(slice);
+        // FIX : getLocationsParStatut() (pas getLocationsByStatut())
+        Map<String, Integer> statuts = dashboardService.getLocationsParStatut();
+        if (statuts == null || statuts.isEmpty()) return;
+
+        ObservableList<PieChart.Data> data = FXCollections.observableArrayList();
+        for (Map.Entry<String, Integer> entry : statuts.entrySet()) {
+            if (entry.getValue() > 0) {
+                data.add(new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")", entry.getValue()));
+            }
         }
-
-        pieChartStatuts.setLegendVisible(true);
+        pieChartStatuts.setData(data);
     }
 
-    /**
-     * Formate les noms de statuts pour affichage
-     */
-    private String formatStatut(String statut) {
-        switch (statut) {
-            case "réservée": return "Réservée";
-            case "en_cours": return "En cours";
-            case "terminée": return "Terminée";
-            case "annulée": return "Annulée";
-            case "no_show": return "No show";
-            default: return statut;
+    // ─────────────────────────────────────────────────────────────
+    // CONFIGURATION DES CARDS (hover effects)
+    // ─────────────────────────────────────────────────────────────
+
+    private void configurerCardsNavigation() {
+        if (cardDocuments != null) {
+            cardDocuments.setOnMouseEntered(e ->
+                    cardDocuments.setStyle(cardDocuments.getStyle().replace("0.2", "0.4")));
+            cardDocuments.setOnMouseExited(e ->
+                    cardDocuments.setStyle(cardDocuments.getStyle().replace("0.4", "0.2")));
         }
-    }
-
-    /**
-     * Configure les actions de clic sur les cards
-     */
-    private void configurerCards() {
-        cardGestionLocations.setOnMouseClicked(event -> ouvrirGestionLocations());
-        cardGestionVehicules.setOnMouseClicked(event -> ouvrirGestionVehicules());
-        cardGestionMarques.setOnMouseClicked(event -> ouvrirGestionMarques());
-
-        // Effet hover
-        ajouterEffetHover(cardGestionLocations);
-        ajouterEffetHover(cardGestionVehicules);
-        ajouterEffetHover(cardGestionMarques);
-    }
-
-    /**
-     * Ajoute un effet de survol aux cards
-     */
-    private void ajouterEffetHover(HBox card) {
-        card.setOnMouseEntered(event -> {
-            card.setStyle(card.getStyle() + "-fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);");
-        });
-
-        card.setOnMouseExited(event -> {
-            card.setStyle(card.getStyle().replace("-fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 15, 0, 0, 5);", ""));
-        });
-    }
-
-    /**
-     * Ouvre l'interface de gestion des locations
-     */
-    @FXML
-    private void ouvrirGestionLocations() {
-        chargerNouvelleInterface("/views/GestionLocationsView.fxml", "Gestion des Locations");
-    }
-
-    /**
-     * Ouvre l'interface de gestion des véhicules
-     */
-    @FXML
-    private void ouvrirGestionVehicules() {
-        chargerNouvelleInterface("/views/GestionVehiculesView.fxml", "Gestion des Véhicules");
-    }
-
-    /**
-     * Ouvre l'interface de gestion des marques
-     */
-    @FXML
-    private void ouvrirGestionMarques() {
-        chargerNouvelleInterface("/views/GestionMarquesView.fxml", "Gestion des Marques");
-    }
-
-    /**
-     * Charge une nouvelle interface dans une nouvelle fenêtre (plein écran)
-     */
-    private void chargerNouvelleInterface(String fxmlPath, String titre) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle(titre);
-            stage.setScene(new Scene(root));
-            stage.setMaximized(true); // Plein écran
-            stage.setResizable(true); // Responsive
-            stage.show();
-
-        } catch (IOException e) {
-            System.err.println("Erreur chargement de l'interface " + fxmlPath + " : " + e.getMessage());
-            e.printStackTrace();
+        if (cardPlanning != null) {
+            cardPlanning.setOnMouseEntered(e ->
+                    cardPlanning.setStyle(cardPlanning.getStyle().replace("0.2", "0.4")));
+            cardPlanning.setOnMouseExited(e ->
+                    cardPlanning.setStyle(cardPlanning.getStyle().replace("0.4", "0.2")));
         }
     }
 
-    /**
-     * Rafraîchit toutes les données du dashboard
-     */
+    // ─────────────────────────────────────────────────────────────
+    // NAVIGATION
+    // ─────────────────────────────────────────────────────────────
+
+    @FXML private void handleCardGestionLocationsClick(MouseEvent event) { naviguerVers("/views/GestionLocationsView.fxml"); }
+    @FXML private void handleCardGestionVehiculesClick(MouseEvent event) { naviguerVers("/views/GestionVehiculesView.fxml"); }
+    @FXML private void handleCardGestionMarquesClick(MouseEvent event)   { naviguerVers("/views/GestionMarquesView.fxml"); }
+    @FXML private void ouvrirDocuments(MouseEvent event)                 { naviguerVers("/views/DocumentsView.fxml"); }
+    @FXML private void ouvrirPlanning(MouseEvent event)                  { naviguerVers("/views/PlanningView.fxml"); }
+
     @FXML
     private void rafraichirDashboard() {
         chargerStatistiques();
-        chargerGraphiqueTopModeles();
-        chargerGraphiqueStatuts();
-        System.out.println("Dashboard rafraîchi !");
     }
 
-    // Ouvrir l'interface Ajouter Marque
-    @FXML
-    private void ouvrirAjouterMarque() {
-        chargerNouvelleInterface("/views/AjouterMarqueView.fxml", "Ajouter une Marque");
-    }
-
-    // Ouvrir l'interface Afficher Marques
-    @FXML
-    private void ouvrirAfficherMarques() {
-        chargerNouvelleInterface("/views/AfficherMarquesView.fxml", "Catalogue des Marques");
+    private void naviguerVers(String fxmlPath) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            StackPane contentArea = (StackPane) barChartTopModeles.getScene().lookup("#contentArea");
+            if (contentArea != null) {
+                contentArea.getChildren().setAll(root);
+            } else {
+                barChartTopModeles.getScene().setRoot(root);
+            }
+        } catch (Exception e) {
+            System.err.println("[Dashboardcontroller] Erreur navigation vers " + fxmlPath + ": " + e.getMessage());
+        }
     }
 }

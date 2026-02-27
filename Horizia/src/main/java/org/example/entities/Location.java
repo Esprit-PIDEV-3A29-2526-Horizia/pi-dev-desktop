@@ -7,6 +7,14 @@ public class Location {
     private String clientNomComplet;
     private String clientTelephone;
     private String clientCin;
+
+    // Champs de géolocalisation
+    private String clientAdresse;
+    private String clientVille;
+    private String clientCodePostal;
+    private Double clientLatitude;
+    private Double clientLongitude;
+
     private Timestamp dateDebut;
     private Timestamp dateFinPrev;
     private Timestamp dateFinReelle;
@@ -152,6 +160,47 @@ public class Location {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    // Getters et Setters pour la géolocalisation
+    public String getClientAdresse() {
+        return clientAdresse;
+    }
+
+    public void setClientAdresse(String clientAdresse) {
+        this.clientAdresse = clientAdresse;
+    }
+
+    public String getClientVille() {
+        return clientVille;
+    }
+
+    public void setClientVille(String clientVille) {
+        this.clientVille = clientVille;
+    }
+
+    public String getClientCodePostal() {
+        return clientCodePostal;
+    }
+
+    public void setClientCodePostal(String clientCodePostal) {
+        this.clientCodePostal = clientCodePostal;
+    }
+
+    public Double getClientLatitude() {
+        return clientLatitude;
+    }
+
+    public void setClientLatitude(Double clientLatitude) {
+        this.clientLatitude = clientLatitude;
+    }
+
+    public Double getClientLongitude() {
+        return clientLongitude;
+    }
+
+    public void setClientLongitude(Double clientLongitude) {
+        this.clientLongitude = clientLongitude;
     }
 
     @Override

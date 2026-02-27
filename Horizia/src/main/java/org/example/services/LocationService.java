@@ -16,8 +16,9 @@ public class LocationService {
     // CREATE - Ajouter une location
     public boolean ajouterLocation(Location l) {
         String sql = "INSERT INTO location (id_vehicule, client_nom_complet, client_telephone, client_cin, " +
+                "client_adresse, client_ville, client_code_postal, client_latitude, client_longitude, " +
                 "date_debut, date_fin_prevue, kilometrage_debut, prix_par_jour, montant_total, statut, avance, notes) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         Connection conn = null;
         PreparedStatement ps = null;
@@ -31,14 +32,31 @@ public class LocationService {
             ps.setString(2, l.getClientNomComplet());
             ps.setString(3, l.getClientTelephone());
             ps.setString(4, l.getClientCin());
-            ps.setTimestamp(5, l.getDateDebut());
-            ps.setTimestamp(6, l.getDateFinPrev());
-            ps.setInt(7, l.getKilometrageDebut());
-            ps.setDouble(8, l.getPrixParJour());
-            ps.setDouble(9, l.getMontantTotal());
-            ps.setString(10, l.getStatut());
-            ps.setDouble(11, l.getAvance());
-            ps.setString(12, l.getNotes());
+            ps.setString(5, l.getClientAdresse());
+            ps.setString(6, l.getClientVille());
+            ps.setString(7, l.getClientCodePostal());
+
+            // Gérer les valeurs null pour latitude/longitude
+            if (l.getClientLatitude() != null) {
+                ps.setDouble(8, l.getClientLatitude());
+            } else {
+                ps.setNull(8, java.sql.Types.DOUBLE);
+            }
+
+            if (l.getClientLongitude() != null) {
+                ps.setDouble(9, l.getClientLongitude());
+            } else {
+                ps.setNull(9, java.sql.Types.DOUBLE);
+            }
+
+            ps.setTimestamp(10, l.getDateDebut());
+            ps.setTimestamp(11, l.getDateFinPrev());
+            ps.setInt(12, l.getKilometrageDebut());
+            ps.setDouble(13, l.getPrixParJour());
+            ps.setDouble(14, l.getMontantTotal());
+            ps.setString(15, l.getStatut());
+            ps.setDouble(16, l.getAvance());
+            ps.setString(17, l.getNotes());
 
             if (ps.executeUpdate() > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
@@ -93,6 +111,20 @@ public class LocationService {
                 l.setClientNomComplet(rs.getString("client_nom_complet"));
                 l.setClientTelephone(rs.getString("client_telephone"));
                 l.setClientCin(rs.getString("client_cin"));
+                l.setClientAdresse(rs.getString("client_adresse"));
+                l.setClientVille(rs.getString("client_ville"));
+                l.setClientCodePostal(rs.getString("client_code_postal"));
+
+                // Gérer les valeurs null pour les coordonnées
+                Double latitude = rs.getDouble("client_latitude");
+                if (!rs.wasNull()) {
+                    l.setClientLatitude(latitude);
+                }
+                Double longitude = rs.getDouble("client_longitude");
+                if (!rs.wasNull()) {
+                    l.setClientLongitude(longitude);
+                }
+
                 l.setDateDebut(rs.getTimestamp("date_debut"));
                 l.setDateFinPrev(rs.getTimestamp("date_fin_prevue"));
                 l.setDateFinReelle(rs.getTimestamp("date_fin_reelle"));

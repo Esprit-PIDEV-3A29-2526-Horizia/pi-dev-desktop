@@ -3,6 +3,7 @@ package controllers;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.entities.Location;
@@ -10,22 +11,35 @@ import org.example.entities.Vehicule;
 import org.example.entities.Pays;
 import org.example.services.LocationService;
 import org.example.services.VehiculeService;
+import org.example.services.OCRService;
+import org.example.services.GeolocationService;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class AjouterLocationController {
 
+    // Champs existants
     @FXML private ComboBox<Vehicule> comboVehicule;
     @FXML private Label lblInfoVehicule;
     @FXML private TextField txtNomClient;
     @FXML private ComboBox<Pays> comboPays;
     @FXML private TextField txtTelephone;
     @FXML private TextField txtCIN;
+
+    // 🆕 NOUVEAUX CHAMPS - Géolocalisation
+    @FXML private TextField txtAdresse;
+    @FXML private TextField txtVille;
+    @FXML private TextField txtCodePostal;
+    @FXML private Button btnScannerCIN;
+    @FXML private Button btnGeocoderAdresse;
+    @FXML private Label lblCoordonnees;
+
     @FXML private DatePicker dateDebut;
     @FXML private DatePicker dateFinPrevue;
     @FXML private TextField txtKilometrageDebut;
@@ -41,46 +55,46 @@ public class AjouterLocationController {
     private VehiculeService vehiculeService;
     private LocationService locationService;
 
-    // Patterns de validation pour différents pays
-    private static final Pattern PHONE_TUNISIA = Pattern.compile("^(\\+216)?[2459]\\d{7}$");
-    private static final Pattern PHONE_FRANCE = Pattern.compile("^(\\+33|0)[1-9]\\d{8}$");
-    private static final Pattern PHONE_MAROC = Pattern.compile("^(\\+212|0)[5-7]\\d{8}$");
-    private static final Pattern PHONE_ALGERIE = Pattern.compile("^(\\+213|0)[5-7]\\d{8}$");
-    private static final Pattern PHONE_INTERNATIONAL = Pattern.compile("^\\+?[1-9]\\d{7,14}$");
+    // 🆕 NOUVEAUX SERVICES
+    private OCRService ocrService;
+    private GeolocationService geoService;
 
-    // Patterns pour CIN/Passport
+    // Coordonnées GPS stockées temporairement
+    private Double latitudeClient = null;
+    private Double longitudeClient = null;
+
+    // Patterns de validation
+    private static final Pattern PHONE_TUNISIA = Pattern.compile("^(\\+216)?[2459]\\d{7}$");
     private static final Pattern CIN_TUNISIA = Pattern.compile("^[0-9]{8}$");
-    private static final Pattern PASSPORT_INTERNATIONAL = Pattern.compile("^[A-Z0-9]{6,12}$");
 
     @FXML
     public void initialize() {
         vehiculeService = new VehiculeService();
         locationService = new LocationService();
+        ocrService = new OCRService();
+        geoService = new GeolocationService();
 
         System.out.println("═══════════════════════════════════════════════");
-        System.out.println("  Interface Ajouter Location - Chargée");
+        System.out.println("  Interface Ajouter Location - Chargée (avec OCR)");
         System.out.println("═══════════════════════════════════════════════");
 
         initialiserComboBoxes();
         chargerVehiculesDisponibles();
         configurerCalculAutomatique();
         configurerValidationEnTempsReel();
+        configurerGeolocalisation();
     }
 
     private void initialiserComboBoxes() {
-        // Initialiser les statuts
         comboStatut.getItems().addAll("réservée", "en_cours", "terminée", "annulée", "no_show");
         comboStatut.setValue("réservée");
 
-        // Initialiser les pays avec la Tunisie par défaut
         comboPays.getItems().addAll(Pays.getPaysSupportes());
         comboPays.setValue(comboPays.getItems().get(0)); // Tunisie par défaut
 
-        // Mettre à jour le placeholder du téléphone selon le pays sélectionné
         comboPays.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 txtTelephone.setPromptText("Ex: " + newVal.getFormatExemple());
-                System.out.println("📱 Pays sélectionné : " + newVal.getNom() + " " + newVal.getIndicatif());
             }
         });
     }
@@ -91,398 +105,336 @@ public class AjouterLocationController {
                 .toList();
 
         comboVehicule.getItems().addAll(vehicules);
-        System.out.println("✓ " + vehicules.size() + " véhicule(s) disponible(s) chargé(s)");
+        System.out.println("✓ " + vehicules.size() + " véhicule(s) disponible(s)");
     }
 
     private void configurerCalculAutomatique() {
         comboVehicule.valueProperty().addListener((obs, old, nouv) -> {
             if (nouv != null) {
-                txtPrixParJour.setText(String.format("%.3f TND", nouv.getPrixParJour()));
-                txtKilometrageDebut.setText(String.valueOf(nouv.getKilometrage()));
-                lblInfoVehicule.setText("✓ " + nouv.getImmatriculation() + " - " + nouv.getPrixParJour() + " TND/jour");
-                lblInfoVehicule.setVisible(true);
-                calculerMontant();
+                txtPrixParJour.setText(String.format("%.3f", nouv.getPrixParJour()));
+                lblInfoVehicule.setText(String.format("%s - %.3f TND/jour",
+                        nouv.getImmatriculation(), nouv.getPrixParJour()));
+                calculerMontantTotal();
             }
         });
 
-        dateDebut.valueProperty().addListener((obs, old, nouv) -> calculerMontant());
-        dateFinPrevue.valueProperty().addListener((obs, old, nouv) -> calculerMontant());
+        dateDebut.valueProperty().addListener((obs, old, nouv) -> calculerNombreJours());
+        dateFinPrevue.valueProperty().addListener((obs, old, nouv) -> calculerNombreJours());
+        txtPrixParJour.textProperty().addListener((obs, old, nouv) -> calculerMontantTotal());
+        txtNombreJours.textProperty().addListener((obs, old, nouv) -> calculerMontantTotal());
     }
 
-    /**
-     * Configure la validation en temps réel des champs
-     */
+    private void calculerNombreJours() {
+        if (dateDebut.getValue() != null && dateFinPrevue.getValue() != null) {
+            long jours = ChronoUnit.DAYS.between(dateDebut.getValue(), dateFinPrevue.getValue());
+            if (jours < 0) {
+                afficherErreur("La date de fin doit être après la date de début !");
+                txtNombreJours.clear();
+            } else {
+                txtNombreJours.setText(String.valueOf(jours > 0 ? jours : 1));
+            }
+        }
+    }
+
+    private void calculerMontantTotal() {
+        try {
+            if (!txtPrixParJour.getText().isEmpty() && !txtNombreJours.getText().isEmpty()) {
+                double prix = Double.parseDouble(txtPrixParJour.getText());
+                int jours = Integer.parseInt(txtNombreJours.getText());
+                double total = prix * jours;
+                txtMontantTotal.setText(String.format("%.3f", total));
+            }
+        } catch (NumberFormatException e) {
+            // Ignorer les erreurs de parsing pendant la saisie
+        }
+    }
+
     private void configurerValidationEnTempsReel() {
-        // Validation téléphone en temps réel
-        txtTelephone.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && !newVal.trim().isEmpty() && comboPays.getValue() != null) {
-                if (validerTelephoneAvecPays(comboPays.getValue(), newVal)) {
-                    txtTelephone.setStyle("-fx-border-color: #27ae60; -fx-border-width: 2; -fx-font-size: 14px; -fx-padding: 10;");
-                } else {
-                    txtTelephone.setStyle("-fx-border-color: #e74c3c; -fx-border-width: 2; -fx-font-size: 14px; -fx-padding: 10;");
-                }
+        txtTelephone.textProperty().addListener((obs, old, nouv) -> {
+            if (!nouv.isEmpty() && !PHONE_TUNISIA.matcher(nouv).matches()) {
+                txtTelephone.setStyle("-fx-border-color: orange;");
             } else {
-                txtTelephone.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+                txtTelephone.setStyle("");
             }
         });
 
-        // Revalider le téléphone quand le pays change
-        comboPays.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (txtTelephone.getText() != null && !txtTelephone.getText().trim().isEmpty()) {
-                // Déclencher la validation
-                txtTelephone.setText(txtTelephone.getText());
-            }
-        });
-
-        // Validation CIN en temps réel
-        txtCIN.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && !newVal.trim().isEmpty()) {
-                if (validerCinOuPassport(newVal)) {
-                    txtCIN.setStyle("-fx-border-color: #27ae60; -fx-border-width: 2; -fx-font-size: 14px; -fx-padding: 10;");
-                } else {
-                    txtCIN.setStyle("-fx-border-color: #e74c3c; -fx-border-width: 2; -fx-font-size: 14px; -fx-padding: 10;");
-                }
+        txtCIN.textProperty().addListener((obs, old, nouv) -> {
+            if (!nouv.isEmpty() && !CIN_TUNISIA.matcher(nouv).matches()) {
+                txtCIN.setStyle("-fx-border-color: orange;");
             } else {
-                txtCIN.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
+                txtCIN.setStyle("");
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🆕 GÉOLOCALISATION AUTOMATIQUE
+    // ═══════════════════════════════════════════════════════════════
+
+    private void configurerGeolocalisation() {
+        // Géocoder automatiquement quand l'adresse ou la ville change
+        txtAdresse.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (wasFocused && !isNowFocused && !txtAdresse.getText().trim().isEmpty()) {
+                geocoderAdresseAuto();
+            }
+        });
+
+        txtVille.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (wasFocused && !isNowFocused && !txtVille.getText().trim().isEmpty()) {
+                geocoderAdresseAuto();
             }
         });
     }
 
     /**
-     * Valide le format du numéro de téléphone selon le pays sélectionné
+     * 🆕 Géocoder automatiquement l'adresse entrée
      */
-    private boolean validerTelephoneAvecPays(Pays pays, String telephone) {
-        if (pays == null || telephone == null || telephone.trim().isEmpty()) {
-            return false;
-        }
+    private void geocoderAdresseAuto() {
+        String adresse = txtAdresse.getText().trim();
+        String ville = txtVille.getText().trim();
 
-        // Nettoyer les espaces et tirets
-        String telClean = telephone.replaceAll("[\\s-]", "");
-
-        // Si "Autre" est sélectionné, validation générique
-        if (pays.getNom().equals("Autre")) {
-            return PHONE_INTERNATIONAL.matcher(telClean).matches();
-        }
-
-        // Vérifier selon le pays
-        switch (pays.getIndicatif()) {
-            case "+216": // Tunisie
-                return PHONE_TUNISIA.matcher(telClean).matches();
-            case "+33": // France
-                return PHONE_FRANCE.matcher(telClean).matches();
-            case "+212": // Maroc
-                return PHONE_MAROC.matcher(telClean).matches();
-            case "+213": // Algérie
-                return PHONE_ALGERIE.matcher(telClean).matches();
-            default:
-                // Pour les autres pays, validation générique
-                return PHONE_INTERNATIONAL.matcher(telClean).matches();
-        }
-    }
-
-    /**
-     * Retourne un message d'aide pour le format téléphone
-     */
-    private String getFormatTelephoneHelp() {
-        if (comboPays.getValue() != null) {
-            return "Format attendu pour " + comboPays.getValue().getNom() + " :\n" +
-                    "Exemple : " + comboPays.getValue().getFormatExemple() + "\n" +
-                    "Indicatif : " + comboPays.getValue().getIndicatif();
-        }
-        return "Veuillez sélectionner un pays d'abord.";
-    }
-
-    /**
-     * Valide le format CIN tunisien ou Passport international
-     */
-    private boolean validerCinOuPassport(String document) {
-        if (document == null || document.trim().isEmpty()) {
-            return true; // Optionnel
-        }
-
-        String docClean = document.trim().toUpperCase().replaceAll("[\\s-]", "");
-
-        // CIN Tunisien : 8 chiffres
-        if (CIN_TUNISIA.matcher(docClean).matches()) {
-            return true;
-        }
-
-        // Passport international : 6 à 12 caractères alphanumériques
-        if (PASSPORT_INTERNATIONAL.matcher(docClean).matches()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Vérifie si le CIN/Passport existe déjà dans la base de données
-     */
-    private boolean cinDejaExiste(String cin) {
-        if (cin == null || cin.trim().isEmpty()) {
-            return false; // Pas de vérification si vide (optionnel)
-        }
-
-        String cinClean = cin.trim().toUpperCase().replaceAll("[\\s-]", "");
-
-        // Récupérer toutes les locations et vérifier si le CIN existe
-        List<Location> locations = locationService.getAllLocations();
-
-        for (Location loc : locations) {
-            if (loc.getClientCin() != null) {
-                String existingCin = loc.getClientCin().trim().toUpperCase().replaceAll("[\\s-]", "");
-                if (existingCin.equals(cinClean)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private void calculerMontant() {
-        if (comboVehicule.getValue() == null || dateDebut.getValue() == null || dateFinPrevue.getValue() == null) {
+        if (adresse.isEmpty() && ville.isEmpty()) {
             return;
         }
 
-        LocalDate debut = dateDebut.getValue();
-        LocalDate fin = dateFinPrevue.getValue();
+        // Construire l'adresse complète
+        String adresseComplete;
+        if (!ville.isEmpty()) {
+            adresseComplete = adresse.isEmpty() ? ville : adresse + ", " + ville + ", Tunisie";
+        } else {
+            adresseComplete = adresse;
+        }
 
-        if (fin.isBefore(debut)) {
-            txtNombreJours.setText("0");
-            txtMontantTotal.setText("0.000 TND");
+        System.out.println("→ Géocodage automatique : " + adresseComplete);
+
+        // Géocoder en arrière-plan
+        new Thread(() -> {
+            Map<String, String> resultats = geoService.geocoderAdresse(adresseComplete);
+
+            javafx.application.Platform.runLater(() -> {
+                if (resultats.containsKey("latitude") && resultats.containsKey("longitude")) {
+                    latitudeClient = Double.parseDouble(resultats.get("latitude"));
+                    longitudeClient = Double.parseDouble(resultats.get("longitude"));
+
+                    // Calculer la distance depuis l'agence
+                    double distance = geoService.calculerDistanceDepuisAgence(latitudeClient, longitudeClient);
+                    String distanceFormatee = geoService.formaterDistance(distance);
+
+                    lblCoordonnees.setText("📍 " + distanceFormatee + " de l'agence");
+                    lblCoordonnees.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold;");
+
+                    // Auto-remplir la ville si vide
+                    if (txtVille.getText().trim().isEmpty() && resultats.containsKey("ville")) {
+                        txtVille.setText(resultats.get("ville"));
+                    }
+
+                    // Auto-remplir le code postal si vide
+                    if (txtCodePostal.getText().trim().isEmpty() && resultats.containsKey("code_postal")) {
+                        txtCodePostal.setText(resultats.get("code_postal"));
+                    }
+
+                    System.out.println("✓ Géocodage réussi : " + distanceFormatee);
+                } else {
+                    lblCoordonnees.setText("⚠ Adresse non trouvée");
+                    lblCoordonnees.setStyle("-fx-text-fill: #e67e22;");
+                }
+            });
+        }).start();
+    }
+
+    /**
+     * 🆕 Bouton manuel pour géocoder
+     */
+    @FXML
+    private void geocoderAdresseManuel() {
+        geocoderAdresseAuto();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🆕 SCANNER CIN AVEC OCR
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * 🆕 Scanner une CIN avec OCR
+     */
+    @FXML
+    private void scannerCIN() {
+        System.out.println("→ Ouverture du sélecteur de fichier...");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Sélectionner une photo de CIN");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.bmp"),
+                new FileChooser.ExtensionFilter("Tous les fichiers", "*.*")
+        );
+
+        Stage stage = (Stage) btnScannerCIN.getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile == null) {
+            System.out.println("✗ Aucun fichier sélectionné");
             return;
         }
 
-        long nbJours = ChronoUnit.DAYS.between(debut, fin);
-        if (nbJours == 0) nbJours = 1;
+        System.out.println("✓ Fichier sélectionné : " + selectedFile.getName());
+        afficherInfo("⏳ Scan en cours... Veuillez patienter.");
 
-        double prixJour = comboVehicule.getValue().getPrixParJour();
-        double total = nbJours * prixJour;
+        // Désactiver le bouton pendant le scan
+        btnScannerCIN.setDisable(true);
 
-        txtNombreJours.setText(String.valueOf(nbJours));
-        txtMontantTotal.setText(String.format("%.3f TND", total));
+        // Scanner en arrière-plan
+        new Thread(() -> {
+            Map<String, String> resultats = ocrService.scannerCIN(selectedFile);
 
-        System.out.println("💰 Calcul : " + nbJours + " jours × " + prixJour + " = " + total + " TND");
+            // Mettre à jour l'interface sur le thread JavaFX
+            javafx.application.Platform.runLater(() -> {
+                btnScannerCIN.setDisable(false);
+
+                if (resultats.containsKey("erreur")) {
+                    afficherErreur("❌ " + resultats.get("erreur"));
+                    return;
+                }
+
+                // Remplir automatiquement les champs
+                if (resultats.containsKey("nom_complet")) {
+                    txtNomClient.setText(resultats.get("nom_complet"));
+                }
+
+                if (resultats.containsKey("cin")) {
+                    txtCIN.setText(resultats.get("cin"));
+                }
+
+                if (resultats.containsKey("adresse")) {
+                    txtAdresse.setText(resultats.get("adresse"));
+                }
+
+                if (resultats.containsKey("ville")) {
+                    txtVille.setText(resultats.get("ville"));
+                }
+
+                if (resultats.containsKey("code_postal")) {
+                    txtCodePostal.setText(resultats.get("code_postal"));
+                }
+
+                // Géocoder l'adresse extraite
+                if (resultats.containsKey("adresse")) {
+                    geocoderAdresseAuto();
+                }
+
+                afficherSucces("✓ CIN scannée avec succès !");
+                System.out.println("✓ Scan OCR terminé avec succès");
+            });
+        }).start();
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // AJOUTER LA LOCATION
+    // ═══════════════════════════════════════════════════════════════
 
     @FXML
     private void ajouterLocation() {
-        // ═══════════════════════════════════════════════════════
-        // VALIDATIONS OBLIGATOIRES
-        // ═══════════════════════════════════════════════════════
-
-        if (comboVehicule.getValue() == null) {
-            afficherErreur("⚠️ Veuillez sélectionner un véhicule !");
+        // Validations
+        if (!validerFormulaire()) {
             return;
         }
 
-        if (txtNomClient.getText() == null || txtNomClient.getText().trim().isEmpty()) {
-            afficherErreur("⚠️ Le nom du client est obligatoire !");
-            txtNomClient.requestFocus();
-            return;
-        }
+        try {
+            // Créer l'objet Location
+            Location nouvelleLocation = new Location();
+            nouvelleLocation.setIdVehicule(comboVehicule.getValue().getIdVehicule());
+            nouvelleLocation.setClientNomComplet(txtNomClient.getText().trim());
 
-        // ═══════════════════════════════════════════════════════
-        // VALIDATION TÉLÉPHONE
-        // ═══════════════════════════════════════════════════════
+            // Formater le téléphone avec indicatif
+            Pays paysSel = comboPays.getValue();
+            String telephone = paysSel.formaterNumero(txtTelephone.getText().trim());
+            nouvelleLocation.setClientTelephone(telephone);
 
-        if (comboPays.getValue() == null) {
-            afficherErreur("⚠️ Veuillez sélectionner le pays du client !");
-            comboPays.requestFocus();
-            return;
-        }
+            nouvelleLocation.setClientCin(txtCIN.getText().trim());
 
-        if (txtTelephone.getText() == null || txtTelephone.getText().trim().isEmpty()) {
-            afficherErreur("⚠️ Le téléphone du client est obligatoire !");
-            txtTelephone.requestFocus();
-            return;
-        }
+            // 🆕 Ajouter les champs de géolocalisation
+            nouvelleLocation.setClientAdresse(txtAdresse.getText().trim());
+            nouvelleLocation.setClientVille(txtVille.getText().trim());
+            nouvelleLocation.setClientCodePostal(txtCodePostal.getText().trim());
+            nouvelleLocation.setClientLatitude(latitudeClient);
+            nouvelleLocation.setClientLongitude(longitudeClient);
 
-        if (!validerTelephoneAvecPays(comboPays.getValue(), txtTelephone.getText())) {
-            afficherErreur("❌ Format de téléphone invalide pour " + comboPays.getValue().getNom() + " !\n\n" +
-                    "Format attendu : " + comboPays.getValue().getFormatExemple() + "\n" +
-                    "Indicatif : " + comboPays.getValue().getIndicatif());
-            txtTelephone.requestFocus();
-            return;
-        }
+            nouvelleLocation.setDateDebut(Timestamp.valueOf(dateDebut.getValue().atStartOfDay()));
+            nouvelleLocation.setDateFinPrev(Timestamp.valueOf(dateFinPrevue.getValue().atTime(23, 59)));
+            nouvelleLocation.setKilometrageDebut(Integer.parseInt(txtKilometrageDebut.getText()));
+            nouvelleLocation.setPrixParJour(Double.parseDouble(txtPrixParJour.getText()));
+            nouvelleLocation.setMontantTotal(Double.parseDouble(txtMontantTotal.getText()));
+            nouvelleLocation.setAvance(txtAvance.getText().isEmpty() ? 0 : Double.parseDouble(txtAvance.getText()));
+            nouvelleLocation.setStatut(comboStatut.getValue());
+            nouvelleLocation.setNotes(txtNotes.getText());
 
-        // Formater le numéro avec l'indicatif du pays
-        String telephoneComplet = comboPays.getValue().formaterNumero(txtTelephone.getText().trim());
+            // Sauvegarder
+            boolean succes = locationService.ajouterLocation(nouvelleLocation);
 
-        // ═══════════════════════════════════════════════════════
-        // VALIDATION CIN/PASSPORT
-        // ═══════════════════════════════════════════════════════
+            if (succes) {
+                afficherSucces("✓ Location ajoutée avec succès !\nID: " + nouvelleLocation.getIdLocation());
 
-        String cin = txtCIN.getText();
-
-        // Vérifier le format si CIN est fourni
-        if (cin != null && !cin.trim().isEmpty()) {
-            if (!validerCinOuPassport(cin)) {
-                afficherErreur("❌ Format de CIN/Passport invalide !\n\n" +
-                        "Formats acceptés :\n" +
-                        "• CIN Tunisien : 8 chiffres (ex: 12345678)\n" +
-                        "• Passport : 6 à 12 caractères alphanumériques (ex: AB123456)");
-                txtCIN.requestFocus();
-                return;
-            }
-
-            // Vérifier l'unicité du CIN/Passport
-            if (cinDejaExiste(cin)) {
-                Alert confirmAlert = new Alert(Alert.AlertType.WARNING);
-                confirmAlert.setTitle("⚠️ CIN/Passport déjà enregistré");
-                confirmAlert.setHeaderText("Ce CIN/Passport existe déjà dans la base de données");
-                confirmAlert.setContentText(
-                        "Un client avec ce CIN/Passport a déjà effectué une location.\n\n" +
-                                "Voulez-vous continuer quand même ?\n" +
-                                "(Il est possible qu'un même client effectue plusieurs locations)"
-                );
-
-                ButtonType btnContinuer = new ButtonType("Continuer");
-                ButtonType btnAnnuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-                confirmAlert.getButtonTypes().setAll(btnContinuer, btnAnnuler);
-
-                confirmAlert.showAndWait().ifPresent(response -> {
-                    if (response != btnContinuer) {
-                        txtCIN.requestFocus();
+                // Réinitialiser après 2 secondes
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000);
+                        javafx.application.Platform.runLater(this::reinitialiser);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                });
-
-                if (confirmAlert.getResult() != btnContinuer) {
-                    return;
-                }
+                }).start();
+            } else {
+                afficherErreur("✗ Erreur lors de l'ajout de la location !");
             }
+
+        } catch (Exception e) {
+            afficherErreur("✗ Erreur : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private boolean validerFormulaire() {
+        if (comboVehicule.getValue() == null) {
+            afficherErreur("⚠ Veuillez sélectionner un véhicule !");
+            return false;
         }
 
-        // ═══════════════════════════════════════════════════════
-        // VALIDATION DATES
-        // ═══════════════════════════════════════════════════════
-
-        if (dateDebut.getValue() == null) {
-            afficherErreur("⚠️ La date de début est obligatoire !");
-            return;
+        if (txtNomClient.getText().trim().isEmpty()) {
+            afficherErreur("⚠ Le nom du client est obligatoire !");
+            txtNomClient.requestFocus();
+            return false;
         }
 
-        if (dateFinPrevue.getValue() == null) {
-            afficherErreur("⚠️ La date de fin prévue est obligatoire !");
-            return;
+        if (txtTelephone.getText().trim().isEmpty()) {
+            afficherErreur("⚠ Le téléphone est obligatoire !");
+            txtTelephone.requestFocus();
+            return false;
+        }
+
+        if (dateDebut.getValue() == null || dateFinPrevue.getValue() == null) {
+            afficherErreur("⚠ Les dates sont obligatoires !");
+            return false;
         }
 
         if (dateFinPrevue.getValue().isBefore(dateDebut.getValue())) {
-            afficherErreur("⚠️ La date de fin doit être après la date de début !");
-            return;
+            afficherErreur("⚠ La date de fin doit être après la date de début !");
+            return false;
         }
 
-        // ═══════════════════════════════════════════════════════
-        // VALIDATION KILOMÉTRAGE
-        // ═══════════════════════════════════════════════════════
-
-        if (txtKilometrageDebut.getText() == null || txtKilometrageDebut.getText().trim().isEmpty()) {
-            afficherErreur("⚠️ Le kilométrage de départ est obligatoire !");
-            txtKilometrageDebut.requestFocus();
-            return;
-        }
-
-        int kmDebut;
-        try {
-            kmDebut = Integer.parseInt(txtKilometrageDebut.getText().trim());
-            if (kmDebut < 0) {
-                afficherErreur("⚠️ Le kilométrage ne peut pas être négatif !");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            afficherErreur("⚠️ Le kilométrage doit être un nombre valide !");
-            return;
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // VALIDATION AVANCE
-        // ═══════════════════════════════════════════════════════
-
-        double avance = 0.0;
-        if (txtAvance.getText() != null && !txtAvance.getText().trim().isEmpty()) {
-            try {
-                avance = Double.parseDouble(txtAvance.getText().trim());
-                if (avance < 0) {
-                    afficherErreur("⚠️ L'avance ne peut pas être négative !");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                afficherErreur("⚠️ L'avance doit être un nombre valide !");
-                return;
-            }
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // CRÉATION DE LA LOCATION
-        // ═══════════════════════════════════════════════════════
-
-        Timestamp tsDebut = Timestamp.valueOf(dateDebut.getValue().atStartOfDay());
-        Timestamp tsFin = Timestamp.valueOf(dateFinPrevue.getValue().atTime(23, 59));
-
-        double prixJour = comboVehicule.getValue().getPrixParJour();
-        long nbJours = ChronoUnit.DAYS.between(dateDebut.getValue(), dateFinPrevue.getValue());
-        if (nbJours == 0) nbJours = 1;
-        double montantTotal = nbJours * prixJour;
-
-        Location nouvelleLocation = new Location(
-                comboVehicule.getValue().getIdVehicule(),
-                txtNomClient.getText().trim(),
-                telephoneComplet,  // Utiliser le numéro formaté avec indicatif
-                tsDebut,
-                tsFin,
-                kmDebut,
-                prixJour,
-                montantTotal,
-                comboStatut.getValue()
-        );
-
-        // Normaliser le CIN/Passport avant de l'enregistrer
-        if (cin != null && !cin.trim().isEmpty()) {
-            nouvelleLocation.setClientCin(cin.trim().toUpperCase().replaceAll("[\\s-]", ""));
-        }
-
-        nouvelleLocation.setAvance(avance);
-        nouvelleLocation.setNotes(txtNotes.getText() != null ? txtNotes.getText().trim() : null);
-
-        System.out.println("→ Ajout de la location pour " + nouvelleLocation.getClientNomComplet());
-
-        boolean succes = locationService.ajouterLocation(nouvelleLocation);
-
-        if (succes) {
-            System.out.println("✓ Location ajoutée avec succès (ID: " + nouvelleLocation.getIdLocation() + ")");
-            afficherSucces("✓ Location enregistrée avec succès !\n" +
-                    "Client : " + nouvelleLocation.getClientNomComplet() + "\n" +
-                    "Téléphone : " + nouvelleLocation.getClientTelephone() + "\n" +
-                    "Montant total : " + String.format("%.3f TND", montantTotal));
-
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2500);
-                    javafx.application.Platform.runLater(this::reinitialiser);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-        } else {
-            System.err.println("✗ Échec de l'ajout de la location");
-            afficherErreur("✗ Erreur lors de l'enregistrement de la location !");
-        }
+        return true;
     }
 
     @FXML
     private void reinitialiser() {
         comboVehicule.setValue(null);
-        lblInfoVehicule.setVisible(false);
+        lblInfoVehicule.setText("Sélectionnez un véhicule");
         txtNomClient.clear();
-        comboPays.setValue(comboPays.getItems().get(0)); // Réinitialiser à Tunisie
         txtTelephone.clear();
-        txtTelephone.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
         txtCIN.clear();
-        txtCIN.setStyle("-fx-font-size: 14px; -fx-padding: 10;");
-        dateDebut.setValue(null);
-        dateFinPrevue.setValue(null);
+        txtAdresse.clear();
+        txtVille.clear();
+        txtCodePostal.clear();
+        dateDebut.setValue(LocalDate.now());
+        dateFinPrevue.setValue(LocalDate.now().plusDays(1));
         txtKilometrageDebut.clear();
         txtPrixParJour.clear();
         txtNombreJours.clear();
@@ -491,23 +443,27 @@ public class AjouterLocationController {
         comboStatut.setValue("réservée");
         txtNotes.clear();
         cacherMessage();
-        System.out.println("🔄 Formulaire réinitialisé");
+        lblCoordonnees.setText("");
+        latitudeClient = null;
+        longitudeClient = null;
+        chargerVehiculesDisponibles();
     }
 
     @FXML
     private void annuler() {
-        System.out.println("✖ Annulation de l'ajout de location");
-        Stage stage = (Stage) txtNomClient.getScene().getWindow();
+        Stage stage = (Stage) btnAjouter.getScene().getWindow();
         stage.close();
     }
 
+    // Messages
     private void afficherSucces(String message) {
         lblMessage.setText(message);
-        lblMessage.setStyle("-fx-text-fill: #27ae60; -fx-background-color: #d5f4e6; -fx-font-weight: bold; -fx-border-color: #27ae60; -fx-border-width: 2; -fx-border-radius: 8;");
+        lblMessage.setStyle("-fx-text-fill: #27ae60; -fx-background-color: #d5f4e6; " +
+                "-fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #27ae60; " +
+                "-fx-border-width: 2; -fx-border-radius: 5;");
         lblMessage.setVisible(true);
-        lblMessage.setManaged(true);
 
-        FadeTransition fade = new FadeTransition(Duration.millis(500), lblMessage);
+        FadeTransition fade = new FadeTransition(Duration.millis(300), lblMessage);
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.play();
@@ -515,13 +471,26 @@ public class AjouterLocationController {
 
     private void afficherErreur(String message) {
         lblMessage.setText(message);
-        lblMessage.setStyle("-fx-text-fill: #e74c3c; -fx-background-color: #fadbd8; -fx-font-weight: bold; -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 8;");
+        lblMessage.setStyle("-fx-text-fill: #e74c3c; -fx-background-color: #fadbd8; " +
+                "-fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #e74c3c; " +
+                "-fx-border-width: 2; -fx-border-radius: 5;");
         lblMessage.setVisible(true);
-        lblMessage.setManaged(true);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(300), lblMessage);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.play();
+    }
+
+    private void afficherInfo(String message) {
+        lblMessage.setText(message);
+        lblMessage.setStyle("-fx-text-fill: #3498db; -fx-background-color: #d6eaf8; " +
+                "-fx-padding: 10; -fx-background-radius: 5; -fx-border-color: #3498db; " +
+                "-fx-border-width: 2; -fx-border-radius: 5;");
+        lblMessage.setVisible(true);
     }
 
     private void cacherMessage() {
         lblMessage.setVisible(false);
-        lblMessage.setManaged(false);
     }
 }

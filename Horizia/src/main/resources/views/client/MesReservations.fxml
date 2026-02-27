@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.client.MesReservationsController"
+            fitToWidth="true" hbarPolicy="NEVER"
+            style="-fx-background-color: #0a0f1e; -fx-background: #0a0f1e;">
+
+    <VBox spacing="0" style="-fx-background-color: #0a0f1e;">
+
+        <!-- NAVBAR -->
+        <HBox alignment="CENTER_LEFT" spacing="0"
+              style="-fx-background-color: rgba(10,15,30,0.95);
+                     -fx-padding: 0 40 0 40; -fx-min-height: 65;
+                     -fx-border-color: rgba(52,152,219,0.2); -fx-border-width: 0 0 1 0;">
+            <Label text="⬡ HORIZIA"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="← Retour à l'accueil" onAction="#retourAccueil"
+                    style="-fx-background-color: transparent; -fx-text-fill: #7f8c8d;
+                           -fx-font-size: 13px; -fx-cursor: hand; -fx-border-color: transparent;"/>
+        </HBox>
+
+        <!-- HEADER -->
+        <VBox alignment="CENTER" spacing="12"
+              style="-fx-background-color: #0a0f1e; -fx-padding: 60 40 40 40;">
+            <Label text="☰  Mes Réservations"
+                   style="-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Retrouvez vos réservations en saisissant votre numéro CIN ou Passport"
+                   style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;"/>
+        </VBox>
+
+        <!-- RECHERCHE PAR CIN -->
+        <VBox spacing="20" alignment="CENTER"
+              style="-fx-padding: 0 60 50 60; -fx-background-color: #0a0f1e;">
+
+            <HBox spacing="12" alignment="CENTER" maxWidth="700">
+                <TextField fx:id="txtCinRecherche"
+                           promptText="Entrez votre CIN ou numéro de Passport..."
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-font-size: 15px;
+                                  -fx-background-color: rgba(255,255,255,0.07);
+                                  -fx-background-radius: 12; -fx-text-fill: white;
+                                  -fx-prompt-text-fill: #4a5568;
+                                  -fx-padding: 14 18; -fx-border-color: rgba(52,152,219,0.3);
+                                  -fx-border-width: 1; -fx-border-radius: 12;"/>
+                <Button text="Rechercher" onAction="#rechercherReservations"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white;
+                               -fx-font-size: 15px; -fx-font-weight: bold;
+                               -fx-padding: 14 30; -fx-background-radius: 12;
+                               -fx-cursor: hand; -fx-border-color: transparent;"/>
+            </HBox>
+
+            <Label fx:id="lblErreur" text=""
+                   style="-fx-font-size: 13px; -fx-text-fill: #e74c3c;"/>
+        </VBox>
+
+        <!-- RÉSULTATS -->
+        <VBox fx:id="vboxResultats" spacing="20" visible="false"
+              style="-fx-padding: 0 60 60 60; -fx-background-color: #0a0f1e;">
+
+            <Label fx:id="lblNbResultats" text=""
+                   style="-fx-font-size: 16px; -fx-text-fill: #7f8c8d;"/>
+
+            <!-- Liste des réservations -->
+            <VBox fx:id="vboxListeReservations" spacing="20"/>
+        </VBox>
+
+        <!-- ÉTAT VIDE (aucun résultat) -->
+        <VBox fx:id="vboxVide" alignment="CENTER" spacing="15" visible="false"
+              style="-fx-padding: 60 40; -fx-background-color: #0a0f1e;">
+            <Label text="🔍" style="-fx-font-size: 60px;"/>
+            <Label text="Aucune réservation trouvée"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Vérifiez votre numéro CIN ou effectuez une nouvelle réservation"
+                   style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+            <Button text="🚗 Voir le catalogue" onAction="#retourCatalogue"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white;
+                           -fx-font-size: 14px; -fx-font-weight: bold;
+                           -fx-padding: 14 35; -fx-background-radius: 25; -fx-cursor: hand;
+                           -fx-border-color: transparent;"/>
+        </VBox>
+
+        <!-- FOOTER -->
+        <VBox alignment="CENTER" spacing="5"
+              style="-fx-padding: 25 40; -fx-background-color: #080c18;
+                     -fx-border-color: rgba(255,255,255,0.05); -fx-border-width: 1 0 0 0;">
+            <Label text="⬡ HORIZIA  —  Vos données sont sécurisées"
+                   style="-fx-text-fill: #4a5568; -fx-font-size: 12px;"/>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

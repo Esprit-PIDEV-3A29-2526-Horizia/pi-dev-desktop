@@ -3,13 +3,17 @@ package controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.entities.Location;
 import org.example.services.LocationService;
+import org.example.services.OCRService;
+import org.example.services.GeolocationService;
 
+import java.io.File;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class ModifierLocationController {
 
@@ -17,6 +21,14 @@ public class ModifierLocationController {
     @FXML private Label lblMessageRecherche;
     @FXML private VBox vboxFormulaire;
     @FXML private Label lblLocationInfo;
+
+    // NOUVEAUX CHAMPS - Géolocalisation
+    @FXML private TextField txtAdresse;
+    @FXML private TextField txtVille;
+    @FXML private TextField txtCodePostal;
+    @FXML private Button btnScannerCIN;
+    @FXML private Label lblCoordonnees;
+
     @FXML private DatePicker dateFinReelle;
     @FXML private TextField txtKilometrageRetour;
     @FXML private TextField txtAvance;
@@ -25,14 +37,17 @@ public class ModifierLocationController {
     @FXML private Label lblMessage;
 
     private LocationService locationService;
+    private OCRService ocrService;
+    private GeolocationService geoService;
     private Location locationCourante;
+    private Double latitudeClient = null;
+    private Double longitudeClient = null;
 
     @FXML
     public void initialize() {
         locationService = new LocationService();
-        System.out.println("═══════════════════════════════════════════════");
-        System.out.println("  Interface Modifier Location - Chargée");
-        System.out.println("═══════════════════════════════════════════════");
+        ocrService = new OCRService();
+        geoService = new GeolocationService();
 
         comboStatut.getItems().addAll("réservée", "en_cours", "terminée", "annulée", "no_show");
     }
@@ -41,35 +56,29 @@ public class ModifierLocationController {
     private void rechercherLocation() {
         String client = txtRechercheClient.getText();
         if (client == null || client.trim().isEmpty()) {
-            afficherErreurRecherche("⚠️ Veuillez saisir un nom de client !");
             return;
         }
 
         List<Location> locations = locationService.rechercherParClient(client.trim());
         if (locations.isEmpty()) {
-            afficherErreurRecherche("✗ Aucune location trouvée pour ce client !");
             vboxFormulaire.setVisible(false);
-            vboxFormulaire.setManaged(false);
             return;
         }
 
         locationCourante = locations.get(0);
-        afficherSuccesRecherche("✓ Location trouvée !");
         preremplirFormulaire();
         vboxFormulaire.setVisible(true);
-        vboxFormulaire.setManaged(true);
     }
 
     private void preremplirFormulaire() {
-        lblLocationInfo.setText("Client : " + locationCourante.getClientNomComplet() + " | Montant : " +
-                String.format("%.3f TND", locationCourante.getMontantTotal()));
-
-        if (locationCourante.getDateFinReelle() != null) {
-            dateFinReelle.setValue(locationCourante.getDateFinReelle().toLocalDateTime().toLocalDate());
+        if (locationCourante.getClientAdresse() != null) {
+            txtAdresse.setText(locationCourante.getClientAdresse());
         }
-
-        if (locationCourante.getKilometrageRetour() != null) {
-            txtKilometrageRetour.setText(String.valueOf(locationCourante.getKilometrageRetour()));
+        if (locationCourante.getClientVille() != null) {
+            txtVille.setText(locationCourante.getClientVille());
+        }
+        if (locationCourante.getClientCodePostal() != null) {
+            txtCodePostal.setText(locationCourante.getClientCodePostal());
         }
 
         txtAvance.setText(String.valueOf(locationCourante.getAvance()));
@@ -78,82 +87,70 @@ public class ModifierLocationController {
     }
 
     @FXML
+    private void scannerCIN() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Sélectionner une photo de CIN");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg")
+        );
+
+        Stage stage = (Stage) btnScannerCIN.getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile == null) return;
+
+        btnScannerCIN.setDisable(true);
+
+        new Thread(() -> {
+            Map<String, String> resultats = ocrService.scannerCIN(selectedFile);
+
+            javafx.application.Platform.runLater(() -> {
+                btnScannerCIN.setDisable(false);
+
+                if (resultats.containsKey("adresse")) {
+                    txtAdresse.setText(resultats.get("adresse"));
+                }
+                if (resultats.containsKey("ville")) {
+                    txtVille.setText(resultats.get("ville"));
+                }
+                if (resultats.containsKey("code_postal")) {
+                    txtCodePostal.setText(resultats.get("code_postal"));
+                }
+            });
+        }).start();
+    }
+
+    @FXML
     private void enregistrerModifications() {
         if (locationCourante == null) return;
 
-        if (dateFinReelle.getValue() != null) {
-            locationCourante.setDateFinReelle(Timestamp.valueOf(dateFinReelle.getValue().atStartOfDay()));
-        }
-
-        if (txtKilometrageRetour.getText() != null && !txtKilometrageRetour.getText().isEmpty()) {
-            try {
-                locationCourante.setKilometrageRetour(Integer.parseInt(txtKilometrageRetour.getText()));
-            } catch (NumberFormatException e) {
-                afficherErreur("⚠️ Kilométrage invalide !");
-                return;
-            }
-        }
-
         try {
+            if (dateFinReelle.getValue() != null) {
+                locationCourante.setDateFinReelle(
+                        Timestamp.valueOf(dateFinReelle.getValue().atTime(23, 59))
+                );
+            }
+
             locationCourante.setAvance(Double.parseDouble(txtAvance.getText()));
-        } catch (NumberFormatException e) {
-            afficherErreur("⚠️ Avance invalide !");
-            return;
-        }
+            locationCourante.setStatut(comboStatut.getValue());
+            locationCourante.setNotes(txtNotes.getText());
 
-        locationCourante.setStatut(comboStatut.getValue());
-        locationCourante.setNotes(txtNotes.getText());
+            locationCourante.setClientAdresse(txtAdresse.getText().trim());
+            locationCourante.setClientVille(txtVille.getText().trim());
+            locationCourante.setClientCodePostal(txtCodePostal.getText().trim());
+            locationCourante.setClientLatitude(latitudeClient);
+            locationCourante.setClientLongitude(longitudeClient);
 
-        boolean succes = locationService.modifierLocation(locationCourante);
-        if (succes) {
-            afficherSucces("✓ Modifications enregistrées !");
-            new Thread(() -> {
-                try {
-                    Thread.sleep(2000);
-                    javafx.application.Platform.runLater(() -> {
-                        Stage stage = (Stage) txtRechercheClient.getScene().getWindow();
-                        stage.close();
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } else {
-            afficherErreur("✗ Échec de la modification !");
+            locationService.modifierLocation(locationCourante);
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void annuler() {
-        Stage stage = (Stage) txtRechercheClient.getScene().getWindow();
+        Stage stage = (Stage) lblMessage.getScene().getWindow();
         stage.close();
-    }
-
-    private void afficherSuccesRecherche(String msg) {
-        lblMessageRecherche.setText(msg);
-        lblMessageRecherche.setStyle("-fx-text-fill: #27ae60; -fx-background-color: #d5f4e6; -fx-font-weight: bold;");
-        lblMessageRecherche.setVisible(true);
-        lblMessageRecherche.setManaged(true);
-    }
-
-    private void afficherErreurRecherche(String msg) {
-        lblMessageRecherche.setText(msg);
-        lblMessageRecherche.setStyle("-fx-text-fill: #e74c3c; -fx-background-color: #fadbd8; -fx-font-weight: bold;");
-        lblMessageRecherche.setVisible(true);
-        lblMessageRecherche.setManaged(true);
-    }
-
-    private void afficherSucces(String msg) {
-        lblMessage.setText(msg);
-        lblMessage.setStyle("-fx-text-fill: #27ae60; -fx-background-color: #d5f4e6; -fx-font-weight: bold; -fx-border-color: #27ae60; -fx-border-width: 2; -fx-border-radius: 8;");
-        lblMessage.setVisible(true);
-        lblMessage.setManaged(true);
-    }
-
-    private void afficherErreur(String msg) {
-        lblMessage.setText(msg);
-        lblMessage.setStyle("-fx-text-fill: #e74c3c; -fx-background-color: #fadbd8; -fx-font-weight: bold; -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 8;");
-        lblMessage.setVisible(true);
-        lblMessage.setManaged(true);
     }
 }

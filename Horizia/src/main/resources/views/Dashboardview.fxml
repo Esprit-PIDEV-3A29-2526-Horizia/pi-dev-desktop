@@ -104,12 +104,8 @@
               style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
             <Label text="📈 Top 5 Modèles Loués" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
             <BarChart fx:id="barChartTopModeles" VBox.vgrow="ALWAYS" legendVisible="false">
-                <xAxis>
-                    <CategoryAxis fx:id="xAxis" label="Modèle" side="BOTTOM"/>
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="yAxis" label="Nombre de locations" side="LEFT"/>
-                </yAxis>
+                <xAxis><CategoryAxis fx:id="xAxis" label="Modèle" side="BOTTOM"/></xAxis>
+                <yAxis><NumberAxis fx:id="yAxis" label="Nombre de locations" side="LEFT"/></yAxis>
             </BarChart>
         </VBox>
 
@@ -122,10 +118,13 @@
         </VBox>
     </HBox>
 
-    <!-- Section Cards de Navigation -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- Section Cards de Navigation - MODIFIÉE : 5 cards             -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
     <VBox spacing="15">
         <Label text="🎯 Accès Rapide" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
 
+        <!-- Ligne 1 : 3 cards existantes -->
         <GridPane hgap="20" vgap="20">
             <columnConstraints>
                 <ColumnConstraints percentWidth="33.33"/>
@@ -135,6 +134,7 @@
 
             <!-- Card Gestion Locations -->
             <HBox fx:id="cardGestionLocations" GridPane.columnIndex="0" spacing="15" alignment="CENTER_LEFT"
+                  onMouseClicked="#handleCardGestionLocationsClick"
                   style="-fx-background-color: linear-gradient(to right, #f49c11, #f49c00); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="📋" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
@@ -146,6 +146,7 @@
 
             <!-- Card Gestion Véhicules -->
             <HBox fx:id="cardGestionVehicules" GridPane.columnIndex="1" spacing="15" alignment="CENTER_LEFT"
+                  onMouseClicked="#handleCardGestionVehiculesClick"
                   style="-fx-background-color: linear-gradient(to right, #0384b7, #0384b1); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="🚙" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
@@ -157,6 +158,7 @@
 
             <!-- Card Gestion Marques -->
             <HBox fx:id="cardGestionMarques" GridPane.columnIndex="2" spacing="15" alignment="CENTER_LEFT"
+                  onMouseClicked="#handleCardGestionMarquesClick"
                   style="-fx-background-color: linear-gradient(to right, #ece9e5, #0384b7); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
                 <Label text="🏷️" style="-fx-font-size: 50px;"/>
                 <VBox spacing="5">
@@ -165,6 +167,57 @@
                     <Label text="Gérer marques et modèles" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
             </HBox>
+        </GridPane>
+
+        <!-- Ligne 2 : 2 nouvelles cards -->
+        <GridPane hgap="20">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50"/>
+                <ColumnConstraints percentWidth="50"/>
+            </columnConstraints>
+
+            <!-- 🆕 Card Documents & Facturation -->
+            <HBox fx:id="cardDocuments" GridPane.columnIndex="0" spacing="15" alignment="CENTER_LEFT"
+                  onMouseClicked="#ouvrirDocuments"
+                  style="-fx-background-color: linear-gradient(to right, #6c3483, #8e44ad);
+                         -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
+                <Label text="📄" style="-fx-font-size: 50px;"/>
+                <VBox spacing="5">
+                    <Label text="Documents &amp;" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Facturation" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Contrats, factures et QR Codes" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                </VBox>
+                <!-- Badge Nouveau -->
+                <HBox HBox.hgrow="ALWAYS" alignment="TOP_RIGHT">
+                    <Label text="🆕 NOUVEAU"
+                           style="-fx-background-color: rgba(255,255,255,0.25); -fx-text-fill: white;
+                                  -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 10;
+                                  -fx-background-radius: 10;"/>
+                </HBox>
+            </HBox>
+
+            <!-- 🆕 Card Planning & Calendrier -->
+            <HBox fx:id="cardPlanning" GridPane.columnIndex="1" spacing="15" alignment="CENTER_LEFT"
+                  onMouseClicked="#ouvrirPlanning"
+                  style="-fx-background-color: linear-gradient(to right, #0b5563, #117a8b);
+                         -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
+                <Label text="🗓️" style="-fx-font-size: 50px;"/>
+                <VBox spacing="5">
+                    <Label text="Planning &amp;" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Calendrier" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Calendrier mensuel et statistiques" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                </VBox>
+                <!-- Badge Nouveau -->
+                <HBox HBox.hgrow="ALWAYS" alignment="TOP_RIGHT">
+                    <Label text="🆕 NOUVEAU"
+                           style="-fx-background-color: rgba(255,255,255,0.25); -fx-text-fill: white;
+                                  -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 10;
+                                  -fx-background-radius: 10;"/>
+                </HBox>
+            </HBox>
+
         </GridPane>
     </VBox>
 
