@@ -1,0 +1,61 @@
+/* login.css */
+
+.login-root {
+    -fx-background-color: linear-gradient(to bottom right, #2a5298, #1e3a6b);
+}
+
+.login-container {
+    -fx-background-color: white;
+    -fx-padding: 40;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 20, 0, 0, 10);
+    -fx-pref-width: 400;
+    -fx-pref-height: 500;
+}
+
+.login-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.login-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6B7280;
+}
+
+.login-field {
+    -fx-background-color: #F9FAFB;
+    -fx-border-color: #E5E7EB;
+    -fx-border-radius: 8;
+    -fx-padding: 12 15;
+    -fx-font-size: 14px;
+    -fx-pref-width: 300;
+}
+
+.login-field:focused {
+    -fx-border-color: #2a5298;
+    -fx-border-width: 2;
+    -fx-background-color: white;
+}
+
+.login-button {
+    -fx-background-color: #2a5298;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 30;
+    -fx-background-radius: 8;
+    -fx-pref-width: 300;
+    -fx-cursor: hand;
+}
+
+.login-button:hover {
+    -fx-background-color: #1e3a6b;
+}
+
+.login-logo {
+    -fx-fit-width: 150;
+    -fx-fit-height: 60;
+    -fx-preserve-ratio: true;
+}

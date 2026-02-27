@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.lang.String?>
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="tn.esprit.controllers.StatisticsController">
+
+    <stylesheets>
+        <String fx:value="/css/global.css" />
+        <String fx:value="/css/statistics.css" />
+    </stylesheets>
+
+    <children>
+        <!-- ScrollPane qui prend tout l'espace disponible -->
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true"
+                    AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+                    AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
+                    style="-fx-background: #F9FAFB; -fx-background-color: #F9FAFB;">
+
+            <content>
+                <!-- Conteneur principal avec padding -->
+                <VBox spacing="20" style="-fx-background-color: #F9FAFB; -fx-padding: 20;">
+
+                    <!-- Header avec titre et bouton refresh -->
+                    <HBox alignment="CENTER_LEFT" spacing="20">
+                        <Label text="📊 Tableau de Bord Statistique"
+                               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button fx:id="btnRefresh" onAction="#refreshStats"
+                                style="-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 10 20; -fx-cursor: hand;"
+                                text="🔄 Actualiser" />
+                    </HBox>
+
+                    <!-- KPIs Cards - Grid pour meilleure disposition -->
+                    <GridPane hgap="20" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+                            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+                        </columnConstraints>
+
+                        <!-- Total Membres -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="👥 Total Membres" style="-fx-font-size: 16px; -fx-text-fill: #6B7280;" />
+                            <Label fx:id="totalMembersLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #3B82F6;" />
+                            <Label fx:id="membersEvolutionLabel" text="+0% vs mois dernier" style="-fx-font-size: 14px; -fx-text-fill: #10B981;" />
+                        </VBox>
+
+                        <!-- Membres Actifs -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="✅ Membres Actifs" style="-fx-font-size: 16px; -fx-text-fill: #6B7280;" />
+                            <Label fx:id="activeMembersLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #10B981;" />
+                            <Label fx:id="activePercentageLabel" text="0% du total" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                        </VBox>
+
+                        <!-- Membres Bloqués -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              GridPane.columnIndex="2" GridPane.rowIndex="0">
+                            <Label text="🔒 Membres Bloqués" style="-fx-font-size: 16px; -fx-text-fill: #6B7280;" />
+                            <Label fx:id="blockedMembersLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #EF4444;" />
+                            <Label fx:id="blockedPercentageLabel" text="0% du total" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                        </VBox>
+
+                        <!-- Total Profils -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              GridPane.columnIndex="3" GridPane.rowIndex="0">
+                            <Label text="📋 Total Profils" style="-fx-font-size: 16px; -fx-text-fill: #6B7280;" />
+                            <Label fx:id="totalProfilsLabel" text="0" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #F59E0B;" />
+                            <Label text="Types de profils" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                        </VBox>
+                    </GridPane>
+
+                    <!-- Graphiques en ligne -->
+                    <HBox spacing="20">
+                        <!-- Répartition par Type -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              HBox.hgrow="ALWAYS" prefHeight="350">
+                            <Label text="Répartition par Type" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                            <PieChart fx:id="typePieChart" prefHeight="300" legendVisible="true" />
+                        </VBox>
+
+                        <!-- Répartition par Statut -->
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);"
+                              HBox.hgrow="ALWAYS" prefHeight="350">
+                            <Label text="Répartition par Statut" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                            <PieChart fx:id="statutPieChart" prefHeight="300" legendVisible="true" />
+                        </VBox>
+                    </HBox>
+
+                    <!-- Graphique en barres -->
+                    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                        <Label text="Distribution Type/Statut" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+                        <BarChart fx:id="distributionBarChart" prefHeight="400">
+                            <xAxis>
+                                <CategoryAxis label="Type" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Nombre" />
+                            </yAxis>
+                        </BarChart>
+                    </VBox>
+
+                    <!-- Tableau récapitulatif -->
+                    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                        <Label text="Récapitulatif Détaillé" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;" />
+
+                        <TableView fx:id="summaryTable" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="colType" text="Type" prefWidth="150" />
+                                <TableColumn fx:id="colActif" text="Actif" prefWidth="100" />
+                                <TableColumn fx:id="colBloque" text="Bloqué" prefWidth="100" />
+                                <TableColumn fx:id="colInactif" text="Inactif" prefWidth="100" />
+                                <TableColumn fx:id="colTotal" text="Total" prefWidth="100" />
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <!-- Message -->
+                    <Label fx:id="lblMessage" style="-fx-text-fill: #10B981; -fx-font-weight: bold;" alignment="CENTER" />
+
+                    <!-- Espace supplémentaire en bas -->
+                    <Region prefHeight="20" />
+                </VBox>
+            </content>
+        </ScrollPane>
+    </children>
+</AnchorPane>

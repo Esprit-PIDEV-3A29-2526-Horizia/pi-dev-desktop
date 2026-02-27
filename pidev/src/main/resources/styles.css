@@ -1,0 +1,86 @@
+/* ============================================================
+   TOGGLEBUTTON SWITCH MODERNE - Style iOS/Android
+   ============================================================ */
+
+/* Style de base du switch - État NON SÉLECTIONNÉ (rouge) */
+#disponibiliteToggle {
+    -fx-background-color: #e74c3c;
+    -fx-background-radius: 15;
+    -fx-padding: 2;
+    -fx-cursor: hand;
+    -fx-background-insets: 0;
+    -fx-border-width: 0;
+    -fx-min-width: 60;
+    -fx-min-height: 30;
+    -fx-pref-width: 60;
+    -fx-pref-height: 30;
+    -fx-max-width: 60;
+    -fx-max-height: 30;
+}
+
+/* Le cercle intérieur (thumb) - position GAUCHE par défaut */
+#disponibiliteToggle .thumb {
+    -fx-background-color: white;
+    -fx-background-radius: 13;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);
+    -fx-min-width: 26;
+    -fx-min-height: 26;
+    -fx-max-width: 26;
+    -fx-max-height: 26;
+    -fx-translate-x: 0;
+}
+
+/* État SÉLECTIONNÉ (vert) - Disponible */
+#disponibiliteToggle:selected {
+    -fx-background-color: #2ecc71;
+}
+
+/* Cercle déplacé vers la DROITE quand sélectionné */
+#disponibiliteToggle:selected .thumb {
+    -fx-translate-x: 28;
+}
+
+/* Hover effects */
+#disponibiliteToggle:hover {
+    -fx-opacity: 0.9;
+}
+
+#disponibiliteToggle:selected:hover {
+    -fx-background-color: #27ae60;
+}
+
+/* Focus (accessibilité clavier) */
+#disponibiliteToggle:focused {
+    -fx-effect: dropshadow(gaussian, rgba(46, 204, 113, 0.4), 8, 0, 0, 0);
+}
+
+/* ============================================================
+   AUTRES STYLES
+   ============================================================ */
+
+.root {
+    -fx-font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Scrollbar personnalisée */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 10;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #94a3b8;
+}

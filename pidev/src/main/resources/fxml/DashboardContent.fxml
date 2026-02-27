@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<!--        admin@admin.com-->
+<!-- admin123-->
+<!-- khalil123-->
+<!--        khalilbenlahmer@gamil.com-->
+<!--    eodr pvuc mjtv wiwo  -->
+
+<VBox spacing="25" style="-fx-background-color: #F6F7FB; -fx-padding: 25;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DashboardContentController">
+<!-- Titre principal -->
+    <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Gestion du Catalogue" />
+    <!-- Cartes statistiques -->
+    <HBox spacing="20">
+        <VBox spacing="5" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 14; -fx-text-fill: #6B7280;" text="Total Réservations" />
+            <Label fx:id="totalReservationsLabel" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #111827;" text="0" />
+        </VBox>
+        <VBox spacing="5" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 14; -fx-text-fill: #6B7280;" text="Réservations du Jour" />
+            <Label fx:id="reservationsJourLabel" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #111827;" text="0" />
+        </VBox>
+        <VBox spacing="5" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);" HBox.hgrow="ALWAYS">
+            <Label style="-fx-font-size: 14; -fx-text-fill: #6B7280;" text="Revenu Total" />
+            <Label fx:id="revenuTotalLabel" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #111827;" text="0 DT" />
+        </VBox>
+    </HBox>
+
+    <!-- Section Activité des Réservations (graphique) -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
+        <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Activité des Réservations" />
+        <HBox fx:id="activityBarsContainer" alignment="BOTTOM_LEFT" spacing="15" style="-fx-padding: 10 0 0 0;" />
+        <Label style="-fx-font-size: 11; -fx-text-fill: #6B7280;" text="0%   1%   2%   3%   4%   5%   6%   7%   8%   9%   10%" />
+    </VBox>
+
+    <!-- Section Liste des réservations des logements -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 16; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 0);">
+        <!-- Titre de la section -->
+        <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Liste des réservations des logements" />
+
+        <!-- Barre de recherche et tri -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="searchField" promptText="Rechercher par statut..." HBox.hgrow="ALWAYS" style="-fx-padding: 8; -fx-background-radius: 5;" />
+            <Label text="Trier par:" style="-fx-font-size: 14; -fx-text-fill: #6B7280;" />
+            <ComboBox fx:id="sortComboBox" prefWidth="150" style="-fx-background-radius: 5;" />
+        </HBox>
+
+        <!-- Conteneur des cartes de réservations -->
+        <VBox fx:id="reservationsVBox" spacing="15">
+            <!-- Les cartes seront ajoutées dynamiquement ici -->
+        </VBox>
+    </VBox>
+</VBox>

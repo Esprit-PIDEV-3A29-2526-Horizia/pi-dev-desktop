@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="700.0" prefWidth="950.0" spacing="0" style="-fx-background-color: #F8F9FA;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DetailsLogementController">
+    <Label text="TEST DETAILS PAGE" />
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" prefHeight="120.0" spacing="20" style="-fx-background-color: linear-gradient(to right, #4A90A4, #5BA3B7); -fx-padding: 0 40;">
+        <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+            <Label fx:id="nomLabel" text="Nom du Logement" textFill="WHITE">
+                <font><Font name="System Bold" size="28.0" /></font>
+            </Label>
+            <Label fx:id="prixLabel" text="Prix/Nuit : 0.0 DT" textFill="WHITE" style="-fx-opacity: 0.9;">
+                <font><Font size="16.0" /></font>
+            </Label>
+        </VBox>
+        <!-- Badge "Disponible" avec fond vert -->
+        <Label fx:id="dispoBadge" text="Disponible" style="-fx-background-color: #28A745; -fx-text-fill: white; -fx-padding: 10 25; -fx-background-radius: 25; -fx-font-weight: bold; -fx-font-size: 14;" />
+    </HBox>
+
+    <!-- Barre d'actions -->
+    <HBox spacing="15" style="-fx-padding: 20 40; -fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+        <Button onAction="#retourListe" style="-fx-background-color: #6C757D; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold;" text="⬅ Retour à la liste" />
+        <Region HBox.hgrow="ALWAYS" />
+
+        <!-- Bouton Modifier avec icône et texte -->
+        <Button fx:id="modifierBtn" onAction="#modifierLogement" style="-fx-background-color: #3498DB; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-content-display: graphic-only;">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/mod.png" />
+                        </image>
+                    </ImageView>
+                    <Label text="Modifier" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
+                </HBox>
+            </graphic>
+        </Button>
+
+        <!-- Bouton Supprimer avec icône et texte -->
+        <Button fx:id="supprimerBtn" onAction="#supprimerLogement" style="-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-content-display: graphic-only;">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <ImageView fitWidth="16" fitHeight="16" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/supp.png" />
+                        </image>
+                    </ImageView>
+                    <Label text="Supprimer" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14;" />
+                </HBox>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <!-- Contenu scrollable (inchangé) -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="25" style="-fx-padding: 30 40;">
+
+            <!-- Image principale centrée -->
+            <HBox alignment="CENTER">
+                <StackPane style="-fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);">
+                    <ImageView fx:id="mainImage" fitHeight="280.0" fitWidth="450.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-radius: 15;" />
+                </StackPane>
+            </HBox>
+
+            <!-- Grille d'informations -->
+            <GridPane hgap="30" vgap="20" VBox.vgrow="ALWAYS">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="58" />
+                    <ColumnConstraints percentWidth="42" />
+                </columnConstraints>
+
+                <!-- Description -->
+                <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 12;" GridPane.columnIndex="0">
+                    <effect><DropShadow color="#0000000D" radius="8" /></effect>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📝" style="-fx-font-size: 20;" />
+                        <Label text="Description" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #2c3e50;" />
+                    </HBox>
+                    <Separator style="-fx-padding: 5 0;" />
+                    <Label fx:id="descriptionLabel" text="Chargement..." wrapText="true" style="-fx-text-fill: #555; -fx-font-size: 14; -fx-line-spacing: 1.6;" />
+                </VBox>
+
+                <!-- Caractéristiques -->
+                <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 12;" GridPane.columnIndex="1">
+                    <effect><DropShadow color="#0000000D" radius="8" /></effect>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="📋" style="-fx-font-size: 20;" />
+                        <Label text="Caractéristiques" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #2c3e50;" />
+                    </HBox>
+                    <Separator style="-fx-padding: 5 0;" />
+                    <VBox spacing="15">
+                        <Label fx:id="typeLabel" text="🏠 Type : --" style="-fx-font-size: 14; -fx-text-fill: #444;" />
+                        <Label fx:id="adresseLabel" text="📍 Adresse : --" style="-fx-font-size: 14; -fx-text-fill: #444;" wrapText="true" />
+                        <Label fx:id="capaciteLabel" text="👥 Capacité : --" style="-fx-font-size: 14; -fx-text-fill: #444;" />
+                        <Label fx:id="equipementLabel" text="✨ Équipements : --" wrapText="true" style="-fx-font-size: 14; -fx-text-fill: #444;" />
+                    </VBox>
+                </VBox>
+            </GridPane>
+        </VBox>
+    </ScrollPane>
+</VBox>

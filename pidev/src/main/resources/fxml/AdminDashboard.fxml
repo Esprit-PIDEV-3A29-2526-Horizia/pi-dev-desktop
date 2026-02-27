@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Region?>
+
+<ScrollPane fx:id="mainScrollPane"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            style="-fx-background-color: #111827; -fx-scrollbar-style: transparent;"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="tn.esprit.controllers.AdminDashboardController">
+
+    <content>
+        <BorderPane fx:id="mainContainer"
+                    prefWidth="1200.0"
+                    style="-fx-background-color: #111827;">
+
+            <!-- TOP: Barre de navigation -->
+            <top>
+                <AnchorPane prefHeight="70.0" style="-fx-background-color: #111827;">
+                    <children>
+                        <Label text="Administration"
+                               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white; -fx-padding: 0 0 0 30;"
+                               layoutX="30.0" layoutY="20.0" />
+
+                        <HBox alignment="CENTER_RIGHT" layoutX="800.0" layoutY="15.0" prefHeight="40.0" prefWidth="370.0" spacing="20.0">
+                            <children>
+                                <Label fx:id="lblWelcome" text="Bienvenue, Admin"
+                                       style="-fx-text-fill: white; -fx-font-size: 14px;" />
+                                <Button onAction="#handleLogout"
+                                        style="-fx-background-color: #EF4444; -fx-background-radius: 5; -fx-text-fill: white; -fx-padding: 8 16; -fx-cursor: hand; -fx-font-weight: bold;"
+                                        text="Déconnexion" />
+                            </children>
+                        </HBox>
+                    </children>
+                </AnchorPane>
+            </top>
+
+            <!-- LEFT: Menu latéral -->
+            <left>
+                <VBox prefWidth="260" spacing="18" style="-fx-background-color: #111827; -fx-padding: 22 18 18 18;">
+
+                    <!-- Logo -->
+                    <ImageView fitHeight="40" fitWidth="150" preserveRatio="true" smooth="false">
+                        <image>
+                            <Image url="@/images/logo.png" backgroundLoading="true" />
+                        </image>
+                    </ImageView>
+
+                    <!-- Menu Items -->
+                    <VBox spacing="5">
+                        <Button fx:id="btnDashboard" onAction="#showDashboard" text="📊 Dashboard"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                        <Button fx:id="btnUsers" onAction="#showUsers" text="👥 Membres"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                        <Button fx:id="btnProfils" onAction="#showProfils" text="📋 Profils"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                        <Button fx:id="btnStats" onAction="#showStats" text="📈 Statistiques"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                        <Button fx:id="btnSettings" onAction="#showSettings" text="⚙️ Paramètres"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+
+                        <!-- Bouton Voyages - STYLE UNIFORMISÉ -->
+                        <Button fx:id="btnVoyages" onAction="#showVoyages" text="✈️ Voyages"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+
+                        <!-- Bouton Réservations - STYLE UNIFORMISÉ -->
+                        <Button fx:id="btnReservations" onAction="#showReservations" text="📅 Réservations"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+
+                        <!-- Bouton Logements - STYLE UNIFORMISÉ -->
+                        <Button fx:id="btnLogements" onAction="#showlogement" text="🏠 Logements"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                    </VBox>
+
+                    <Separator style="-fx-background-color: #374151; -fx-pref-height: 1;" />
+
+                    <!-- Statistiques rapides -->
+                    <VBox spacing="10">
+                        <Label text="STATISTIQUES" style="-fx-text-fill: #9CA3AF; -fx-font-size: 11px; -fx-font-weight: bold;" />
+
+                        <!-- Total Membres -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="👥" style="-fx-font-size:16px;" />
+                            <Label text="Total membres:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="totalMembresLabel" text="0" style="-fx-text-fill: #10B981; -fx-font-weight: bold;" />
+                        </HBox>
+
+                        <!-- Admins -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="👑" style="-fx-font-size:16px;" />
+                            <Label text="Administrateurs:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="totalAdminsLabel" text="0" style="-fx-text-fill: #EF4444; -fx-font-weight: bold;" />
+                        </HBox>
+
+                        <!-- Agents -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="🛠️" style="-fx-font-size:16px;" />
+                            <Label text="Agents:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="totalAgentsLabel" text="0" style="-fx-text-fill: #F59E0B; -fx-font-weight: bold;" />
+                        </HBox>
+
+                        <!-- Clients -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="👤" style="-fx-font-size:16px;" />
+                            <Label text="Clients:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Label fx:id="totalClientsLabel" text="0" style="-fx-text-fill: #10B981; -fx-font-weight: bold;" />
+                        </HBox>
+                    </VBox>
+
+                    <!-- Espace flexible -->
+                    <Region VBox.vgrow="ALWAYS" />
+
+                    <!-- Carte admin -->
+                    <VBox style="-fx-background-color: #0B1220; -fx-background-radius: 16; -fx-padding: 12; -fx-spacing: 6;">
+                        <Label fx:id="lblAdminName" text="Administrateur" style="-fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold;" />
+                        <Label fx:id="lblAdminEmail" text="admin@horiza.com" style="-fx-text-fill: #9CA3AF; -fx-font-size: 10px;" />
+                        <Button onAction="#handleLogout"
+                                style="-fx-background-color:#EF4444; -fx-text-fill:white; -fx-font-size:11; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:8; -fx-cursor:hand; -fx-pref-width: 180;"
+                                text="Déconnexion" />
+                    </VBox>
+
+                    <Label text="© 2026 Horozia" style="-fx-text-fill: #6B7280; -fx-font-size: 11px;" />
+                </VBox>
+            </left>
+
+            <!-- CENTER: Contenu principal -->
+            <center>
+                <AnchorPane fx:id="contentArea" style="-fx-background-color: #f4f7fc; -fx-padding: 20;" />
+            </center>
+        </BorderPane>
+    </content>
+</ScrollPane>
