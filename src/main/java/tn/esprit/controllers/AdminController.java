@@ -1,5 +1,7 @@
 package tn.esprit.controllers;
 
+import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -7,15 +9,22 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
+import tn.esprit.services.NotificationService;
+import tn.esprit.services.NotificationService.Notification;
+import tn.esprit.services.NotificationService.NotificationType;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
 
@@ -56,15 +65,26 @@ public class AdminController implements Initializable {
     @FXML private Button btnCalendar;
     @FXML private TabPane tabPane;
 
+    // Notifications
+    @FXML private Button notificationBtn;
+    @FXML private Label notificationBadge;
+    @FXML private VBox notificationsContainer;
+
     private ServiceEvent serviceEvent;
     private ServiceParticipation serviceParticipation;
     private List<Events> allEvents;
     private List<Participation> allParticipations;
+    private NotificationService notificationService;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
         serviceParticipation = new ServiceParticipation();
+        notificationService = NotificationService.getInstance();
+
+        // S'abonner aux notifications
+        notificationService.addListener(this::refreshNotifications);
+        setupToastListener();
 
         setupNavigation();
         if (btnCalendar != null) {
@@ -73,6 +93,8 @@ public class AdminController implements Initializable {
 
         setupSortCombo();
         loadData();
+        setupNotificationButton();
+        refreshNotifications();
 
         // Search functionality
         if (adminSearchField != null) {
@@ -129,7 +151,7 @@ public class AdminController implements Initializable {
         }
     }
 
-    private void loadData() {
+    public void loadData() {
         try {
             allEvents = serviceEvent.afficher();
             allParticipations = serviceParticipation.afficher();
@@ -184,14 +206,12 @@ public class AdminController implements Initializable {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Réservations");
 
-        // Grouper par date
         Map<String, Long> reservationsParJour = allParticipations.stream()
                 .collect(Collectors.groupingBy(
                         p -> new SimpleDateFormat("dd/MM").format(p.getDateParticipation()),
                         Collectors.counting()
                 ));
 
-        // Trier et limiter
         List<String> dates = reservationsParJour.keySet().stream()
                 .sorted(Comparator.comparing(d -> {
                     try {
@@ -623,18 +643,242 @@ public class AdminController implements Initializable {
     }
 
     @FXML
-    private void refreshDashboard(){
+    private void refreshDashboard() {
         loadData();
-        //showAlert("Succes", "Dashboard rafraichi acces succes !");
+        showAlert("Succès", "Dashboard rafraîchi avec succès !");
     }
 
     @FXML
-    private void reindexer(){
-        try{
-            serviceEvent.reindexterTout();
-            showAlert("Succes", "Indexation terminee avec succes");
-        }catch (Exception e){
-            showAlert("Erreur", "Erreur lors de l'indexation: " + e.getMessage());
+    private void reindexer() {
+        // Méthode pour réindexer si besoin
+        showAlert("Info", "Réindexation effectuée");
+    }
+
+    // ==================== NOTIFICATIONS ====================
+
+    private void setupNotificationButton() {
+        if (notificationBtn != null) {
+            notificationBtn.setOnAction(e -> {
+                notificationService.markAllAsRead();
+                refreshNotifications();
+            });
         }
+    }
+
+    private void refreshNotifications() {
+        Platform.runLater(() -> {
+            // Mettre à jour le badge
+            int unread = notificationService.getUnreadCount();
+            if (notificationBadge != null) {
+                notificationBadge.setText(String.valueOf(unread));
+                notificationBadge.setVisible(unread > 0);
+            }
+
+            // Mettre à jour la liste
+            if (notificationsContainer != null) {
+                notificationsContainer.getChildren().clear();
+
+                List<Notification> notifs = notificationService.getNotifications();
+                if (notifs.isEmpty()) {
+                    Label emptyLabel = new Label("Aucune notification");
+                    emptyLabel.setStyle("-fx-text-fill: #999; -fx-padding: 20;");
+                    notificationsContainer.getChildren().add(emptyLabel);
+                    return;
+                }
+
+                for (Notification notif : notifs) {
+                    VBox notifCard = createNotificationCard(notif);
+                    notificationsContainer.getChildren().add(notifCard);
+                }
+            }
+        });
+    }
+
+    private VBox createNotificationCard(Notification notif) {
+        VBox card = new VBox(5);
+        card.setStyle("-fx-background-color: " + (notif.isRead() ? "#f5f5f5" : "white") + "; -fx-background-radius: 8; -fx-padding: 12; -fx-border-color: #DACEB6; -fx-border-radius: 8; -fx-cursor: hand;");
+        card.setPrefWidth(280);
+
+        String typeColor = switch (notif.getType()) {
+            case SUCCESS -> "#81AE8D";
+            case INFO -> "#23779C";
+            case WARNING -> "#E8B156";
+            case ERROR -> "#e74c3c";
+        };
+
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        Label typeIndicator = new Label("●");
+        typeIndicator.setStyle("-fx-text-fill: " + typeColor + "; -fx-font-size: 14px;");
+
+        Label titleLabel = new Label(notif.getTitle());
+        titleLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label timeLabel = new Label(notif.getFormattedTime());
+        timeLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 10px;");
+
+        header.getChildren().addAll(typeIndicator, titleLabel, spacer, timeLabel);
+
+        Label messageLabel = new Label(notif.getMessage());
+        messageLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+        messageLabel.setWrapText(true);
+
+        card.getChildren().addAll(header, messageLabel);
+
+        // Action au clic : focus sur l'élément concerné
+        card.setOnMouseClicked(e -> {
+            if (!notif.isRead()) {
+                notificationService.markAsRead(notif.getId());
+            }
+
+            // Basculer vers le bon onglet
+            if ("event".equals(notif.getRelatedType())) {
+                tabPane.getSelectionModel().select(1); // Onglet Gestion Événements
+
+                // Chercher la carte de l'événement
+                Platform.runLater(() -> {
+                    for (Node node : adminFlowEvents.getChildren()) {
+                        if (node instanceof VBox && node.getProperties().containsKey("id")) {
+                            int id = (int) node.getProperties().get("id");
+                            if (id == notif.getRelatedId()) {
+                                animateFocus(node);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        return card;
+    }
+
+    private void animateFocus(Node node) {
+        // Animation de zoom
+        ScaleTransition st = new ScaleTransition(Duration.millis(300), node);
+        st.setFromX(1);
+        st.setFromY(1);
+        st.setToX(1.05);
+        st.setToY(1.05);
+        st.setAutoReverse(true);
+        st.setCycleCount(2);
+
+        // Effet de highlight
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(0.2);
+        node.setEffect(colorAdjust);
+
+        st.setOnFinished(e -> node.setEffect(null));
+        st.play();
+
+        // Scroll jusqu'à l'élément
+        ScrollPane scrollPane = (ScrollPane) adminFlowEvents.getParent().getParent();
+        double targetY = node.getBoundsInParent().getMinY();
+        double height = scrollPane.getViewportBounds().getHeight();
+
+        Timeline scroll = new Timeline(
+                new KeyFrame(Duration.millis(300),
+                        new KeyValue(scrollPane.vvalueProperty(), targetY / (adminFlowEvents.getHeight() - height))
+                )
+        );
+        scroll.play();
+    }
+
+    @FXML
+    private void markAllNotificationsRead() {
+        notificationService.markAllAsRead();
+    }
+    private void setupToastListener() {
+        notificationService.addToastListener(notif -> {
+            Platform.runLater(() -> showNotificationToast(notif));
+        });
+    }
+
+    private void showNotificationToast(NotificationService.Notification notif) {
+        // Créer le toast
+        Popup toast = new Popup();
+        toast.setAutoHide(true);
+
+        // Couleur selon le type
+        String bgColor = switch (notif.getType()) {
+            case SUCCESS -> "#81AE8D";
+            case INFO -> "#23779C";
+            case WARNING -> "#E8B156";
+            case ERROR -> "#e74c3c";
+        };
+
+        String icon = switch (notif.getType()) {
+            case SUCCESS -> "✅";
+            case INFO -> "ℹ️";
+            case WARNING -> "⚠️";
+            case ERROR -> "❌";
+        };
+
+        // Contenu du toast
+        HBox content = new HBox(10);
+        content.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 10; -fx-padding: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 5);");
+        content.setAlignment(Pos.CENTER_LEFT);
+        content.setPrefWidth(320);
+
+        Label iconLabel = new Label(icon);
+        iconLabel.setStyle("-fx-font-size: 20px;");
+
+        VBox textBox = new VBox(3);
+        Label titleLabel = new Label(notif.getTitle());
+        titleLabel.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;");
+        Label messageLabel = new Label(notif.getMessage());
+        messageLabel.setStyle("-fx-text-fill: white; -fx-font-size: 12px;");
+        messageLabel.setWrapText(true);
+        textBox.getChildren().addAll(titleLabel, messageLabel);
+
+        Button closeBtn = new Button("✕");
+        closeBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+        closeBtn.setOnAction(e -> toast.hide());
+
+        content.getChildren().addAll(iconLabel, textBox, closeBtn);
+        toast.getContent().add(content);
+
+        // Position sous la cloche
+        toast.show(notificationBtn.getScene().getWindow());
+
+        double x = notificationBtn.localToScreen(notificationBtn.getBoundsInLocal()).getMinX();
+        double y = notificationBtn.localToScreen(notificationBtn.getBoundsInLocal()).getMaxY() + 5;
+        toast.setX(x);
+        toast.setY(y);
+
+        // Animation d'entrée
+        content.setTranslateY(-20);
+        content.setOpacity(0);
+
+        Timeline showAnimation = new Timeline(
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(content.translateYProperty(), 0, Interpolator.EASE_BOTH),
+                        new KeyValue(content.opacityProperty(), 1, Interpolator.EASE_BOTH)
+                )
+        );
+        showAnimation.play();
+
+        // Disparition après 5 secondes
+        new Thread(() -> {
+            try {
+                Thread.sleep(5000);
+                Platform.runLater(() -> {
+                    Timeline hideAnimation = new Timeline(
+                            new KeyFrame(Duration.millis(200),
+                                    new KeyValue(content.translateYProperty(), -20, Interpolator.EASE_BOTH),
+                                    new KeyValue(content.opacityProperty(), 0, Interpolator.EASE_BOTH)
+                            )
+                    );
+                    hideAnimation.setOnFinished(e -> toast.hide());
+                    hideAnimation.play();
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }

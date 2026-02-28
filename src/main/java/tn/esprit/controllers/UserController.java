@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
+import tn.esprit.services.RefreshService;
 import tn.esprit.services.ServiceEvent;
 
 import java.net.URL;
@@ -83,6 +84,8 @@ public class UserController implements Initializable {
 
         // Sort functionality
         sortCombo.setOnAction(e -> sortEvents());
+
+        RefreshService.setUserController(this);
     }
 
     private void setupCategoryFilters() {
@@ -410,5 +413,9 @@ public class UserController implements Initializable {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir les détails: " + e.getMessage());
         }
+    }
+
+    public void refreshEvents(){
+        loadEvents();
     }
 }

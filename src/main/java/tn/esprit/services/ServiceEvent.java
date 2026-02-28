@@ -14,17 +14,43 @@ import java.util.ArrayList;
 import java.util.List;
 import tn.esprit.entities.Events;
 import tn.esprit.utils.MyDataBase;
-import tn.esprit.utils.HibernateUtil;
-import tn.esprit.utils.FrenchAnalysisConfigurer;
 
 public class ServiceEvent implements IService<Events> {
     private Connection connection = MyDataBase.getInstance().getMyConnection();
 
     public void ajouter(Events events) throws SQLException {
-        String var10000 = events.getTitre();
-        String sql = "INSERT INTO `events`(`titre`,`description`,`categorie`,`location`,`date_debut`,`date_fin`,`prix`,`capacite_max`,`places_restantes`,`image_url`,`statut`,`id_createur`) VALUES ('" + var10000 + "','" + events.getDescription() + "','" + events.getCategorie() + "','" + events.getLocation() + "','" + String.valueOf(events.getDateDebut()) + "','" + String.valueOf(events.getDateFin()) + "'," + events.getPrix() + "," + events.getCapaciteMax() + "," + events.getPlacesRestantes() + ",'" + events.getImage_url() + "','" + events.getStatut() + "'," + events.getId_createur() + ")";
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(sql);
+        String sql = "INSERT INTO `events`(`titre`,`description`,`categorie`,`location`,`date_debut`,`date_fin`,`prix`,`capacite_max`,`places_restantes`,`image_url`,`statut`,`id_createur`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        ps.setString(1, events.getTitre());
+        ps.setString(2, events.getDescription());
+        ps.setString(3, events.getCategorie());
+        ps.setString(4, events.getLocation());
+        ps.setTimestamp(5, events.getDateDebut());
+        ps.setTimestamp(6, events.getDateFin());
+        ps.setFloat(7, events.getPrix());
+        ps.setInt(8, events.getCapaciteMax());
+        ps.setInt(9, events.getPlacesRestantes());
+        ps.setString(10, events.getImage_url());
+        ps.setString(11, events.getStatut());
+        ps.setInt(12, events.getId_createur());
+
+        ps.executeUpdate();
+
+        // Récupérer l'ID généré
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            events.setId_event(rs.getInt(1));
+        }
+
+        RefreshService.refreshAll();
+        NotificationService.getInstance().addNotification(
+                "Événement créé",
+                events.getTitre() + " a été ajouté",
+                NotificationService.NotificationType.SUCCESS,
+                events.getId_event(),
+                "event"
+        );
     }
 
     public void modifier(Events events) throws SQLException {
@@ -43,18 +69,36 @@ public class ServiceEvent implements IService<Events> {
         ps.setString(11, events.getStatut());
         ps.setInt(12, events.getId_event());
         ps.executeUpdate();
+
+        RefreshService.refreshAll();
+        NotificationService.getInstance().addNotification(
+                "Événement modifié",
+                events.getTitre() + " a été mis à jour",
+                NotificationService.NotificationType.INFO,
+                events.getId_event(),
+                "event"
+        );
     }
 
     public void supprimer(int id) throws SQLException {
-        String sql = "Delete from events where id_event =?";
+        String sql = "DELETE FROM events WHERE id_event=?";
         PreparedStatement ps = this.connection.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
+
+        RefreshService.refreshAll();
+        NotificationService.getInstance().addNotification(
+                "Événement supprimé",
+                "Un événement a été supprimé",
+                NotificationService.NotificationType.WARNING,
+                id,
+                "event"
+        );
     }
 
     public List<Events> afficher() throws SQLException {
         List<Events> events = new ArrayList();
-        String sql = "Select * from events";
+        String sql = "SELECT * FROM events";
         Statement statement = this.connection.createStatement();
         ResultSet rs = statement.executeQuery(sql);
 
@@ -78,6 +122,7 @@ public class ServiceEvent implements IService<Events> {
 
         return events;
     }
+
     @Override
     public List<Events> rechercher(String keyword) throws SQLException {
         List<Events> events = new ArrayList<>();
@@ -93,7 +138,7 @@ public class ServiceEvent implements IService<Events> {
             e.setTitre(rs.getString("titre"));
             e.setDescription(rs.getString("description"));
             e.setCategorie(rs.getString("categorie"));
-            e.setLocation(rs.getString("location")); // or rs.getString("lieu") if that's the real column
+            e.setLocation(rs.getString("location"));
             e.setDateDebut(rs.getTimestamp("date_debut"));
             e.setDateFin(rs.getTimestamp("date_fin"));
             e.setPrix(rs.getFloat("prix"));
@@ -125,7 +170,7 @@ public class ServiceEvent implements IService<Events> {
             e.setTitre(rs.getString("titre"));
             e.setDescription(rs.getString("description"));
             e.setCategorie(rs.getString("categorie"));
-            e.setLocation(rs.getString("location")); // or "lieu"
+            e.setLocation(rs.getString("location"));
             e.setDateDebut(rs.getTimestamp("date_debut"));
             e.setDateFin(rs.getTimestamp("date_fin"));
             e.setPrix(rs.getFloat("prix"));
@@ -140,8 +185,6 @@ public class ServiceEvent implements IService<Events> {
         return events;
     }
 
-
-
     @Override
     public void updatePlaces(int id_event, int Places_Restantes) throws SQLException{
         String sql = "UPDATE events SET places_restantes = ? WHERE id_event= ? ";
@@ -152,10 +195,12 @@ public class ServiceEvent implements IService<Events> {
     }
 
     private SearchService searchService = new SearchService();
+
     public List<Events> rechercherAvancee(String keyword){
         return searchService.search(keyword);
     }
-    public void reindexterTout(){
+
+    public void reindexerTout(){
         searchService.reindexAll();
     }
 }

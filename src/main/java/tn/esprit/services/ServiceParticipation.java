@@ -19,7 +19,7 @@ public class ServiceParticipation implements IService<Participation> {
     public void ajouter(Participation p) throws SQLException {
         String sql = "INSERT INTO `participation`(`id_event`, `nombre_places`, `montant_total`, `statut`, `date_participation`) VALUES (?, ?, ?, ?, ?)";
 
-        PreparedStatement ps = connection.prepareStatement(sql);
+        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setInt(1, p.getId_event());
         ps.setInt(2, p.getNombrePlaces());
         ps.setFloat(3, p.getMontantTotal());
@@ -27,7 +27,25 @@ public class ServiceParticipation implements IService<Participation> {
         ps.setTimestamp(5, p.getDateParticipation());
 
         ps.executeUpdate();
+
+        // Récupérer l'ID généré
+        ResultSet rs = ps.getGeneratedKeys();
+        if (rs.next()) {
+            p.setId_participation(rs.getInt(1));
+        }
+
         System.out.println("✅ Participation ajoutée avec succès!");
+
+        RefreshService.refreshAll();
+
+        // Notification avec l'ID de l'événement concerné
+        NotificationService.getInstance().addNotification(
+                "Nouvelle réservation",
+                p.getNombrePlaces() + " place(s) réservée(s) pour l'événement #" + p.getId_event(),
+                NotificationService.NotificationType.SUCCESS,
+                p.getId_event(),
+                "event"
+        );
     }
 
     @Override
@@ -41,14 +59,44 @@ public class ServiceParticipation implements IService<Participation> {
         ps.setInt(4, p.getId_participation());
 
         ps.executeUpdate();
+
+        RefreshService.refreshAll();
+
+        NotificationService.getInstance().addNotification(
+                "Réservation modifiée",
+                "La réservation #" + p.getId_participation() + " a été modifiée",
+                NotificationService.NotificationType.INFO,
+                p.getId_event(),
+                "event"
+        );
     }
 
     @Override
     public void supprimer(int id) throws SQLException {
+        // Récupérer l'ID de l'événement avant de supprimer
+        int eventId = -1;
+        String selectSql = "SELECT id_event FROM participation WHERE id_participation = ?";
+        PreparedStatement selectPs = connection.prepareStatement(selectSql);
+        selectPs.setInt(1, id);
+        ResultSet rs = selectPs.executeQuery();
+        if (rs.next()) {
+            eventId = rs.getInt("id_event");
+        }
+
         String sql = "DELETE FROM participation WHERE id_participation = ?";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, id);
         ps.executeUpdate();
+
+        RefreshService.refreshAll();
+
+        NotificationService.getInstance().addNotification(
+                "Réservation annulée",
+                "Une réservation a été annulée",
+                NotificationService.NotificationType.WARNING,
+                eventId,
+                "event"
+        );
     }
 
     @Override
