@@ -8,22 +8,20 @@ import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
 import tn.esprit.entities.reservationlog;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class GeminiService {
-
-    // Remplacez par votre vraie clé API (à ne pas commiter !)
-    private static final String API_KEY = "AIzaSyBPFBct72SYy6Yb1M5lKLwtLd2G0qx1D5g";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + API_KEY;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
@@ -31,18 +29,36 @@ public class GeminiService {
     // Service pour récupérer l'historique des réservations
     private final Servicereservationlog reservationService = new Servicereservationlog();
 
+    // URL de l'API, la clé sera injectée dynamiquement depuis config.properties
+    private String apiKey;
+    private String apiUrl;
+
+    public GeminiService() {
+        loadApiKey();
+    }
+
+    /** Charge la clé API depuis config.properties */
+    private void loadApiKey() {
+        Properties props = new Properties();
+        String path = "C:\\Users\\khali\\integration\\pidev\\src\\main\\resources\\config.properties";
+        try (FileInputStream fis = new FileInputStream(path)) {
+            props.load(fis);
+            apiKey = props.getProperty("gemini.api.key");
+            if (apiKey == null || apiKey.isEmpty()) {
+                throw new RuntimeException("La clé Gemini API est manquante dans config.properties !");
+            }
+            apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=" + apiKey;
+        } catch (IOException e) {
+            throw new RuntimeException("Impossible de charger le fichier config.properties à : " + path, e);
+        }
+    }
+
     /**
      * Appelle Gemini et retourne une liste d'IDs de logements recommandés.
-     *
-     * @param user       l'utilisateur connecté (peut être null)
-     * @param logements  la liste complète des logements disponibles
-     * @return une liste de Map contenant "id_logement" (int) et "raison" (String)
      */
     public List<Map<String, Object>> getRecommendations(User user, List<logement> logements) {
-        // 1. Construire le prompt
         String prompt = buildPrompt(user, logements);
 
-        // 2. Créer le corps de la requête
         JsonObject requestBody = new JsonObject();
         JsonObject content = new JsonObject();
         JsonObject parts = new JsonObject();
@@ -50,14 +66,12 @@ public class GeminiService {
         content.add("parts", gson.toJsonTree(List.of(parts)));
         requestBody.add("contents", gson.toJsonTree(List.of(content)));
 
-        // Demander une réponse JSON structurée
         JsonObject generationConfig = new JsonObject();
         generationConfig.addProperty("response_mime_type", "application/json");
         requestBody.add("generationConfig", generationConfig);
 
-        // 3. Envoyer la requête
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(API_URL))
+                .uri(URI.create(apiUrl))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)))
                 .build();
@@ -76,9 +90,6 @@ public class GeminiService {
         }
     }
 
-    /**
-     * Construit le prompt en incluant le profil utilisateur et l'historique.
-     */
     private String buildPrompt(User user, List<logement> logements) {
         StringBuilder sb = new StringBuilder();
         sb.append("Tu es un assistant de recommandation de logements pour une agence de voyage.\n");
@@ -88,12 +99,10 @@ public class GeminiService {
             sb.append("- Prénom : ").append(user.getPrenom()).append("\n");
             sb.append("- Nom : ").append(user.getNom()).append("\n");
 
-            // Récupérer l'historique des réservations de l'utilisateur
             List<reservationlog> historique = getHistoriqueReservations(user);
             if (!historique.isEmpty()) {
                 sb.append("- Réservations passées :\n");
                 for (reservationlog r : historique) {
-                    // Pour chaque réservation, récupérer le logement associé
                     logement log = getLogementById(r.getId_l(), logements);
                     if (log != null) {
                         sb.append("  * ").append(log.getNom())
@@ -110,8 +119,6 @@ public class GeminiService {
             sb.append("Utilisateur non connecté (anonyme).\n");
         }
 
-        // Liste des logements disponibles (format JSON simplifié)
-        sb.append("\nVoici la liste des logements disponibles (au format JSON) :\n");
         List<Map<String, ? extends Serializable>> logementsSimplifies = logements.stream()
                 .map(l -> Map.of(
                         "id", l.getId(),
@@ -123,9 +130,9 @@ public class GeminiService {
                         "disponible", l.isDisponibilite()
                 ))
                 .collect(Collectors.toList());
+        sb.append("\nVoici la liste des logements disponibles (au format JSON) :\n");
         sb.append(gson.toJson(logementsSimplifies));
 
-        // Tâche demandée
         sb.append("\n\nTâche : Sélectionne 5 logements parmi cette liste qui pourraient le plus intéresser cet utilisateur. ");
         sb.append("Pour chaque recommandation, fournis une brève explication personnalisée.\n");
         sb.append("Retourne uniquement un objet JSON avec une clé \"recommandations\" contenant une liste d'objets. ");
@@ -134,9 +141,6 @@ public class GeminiService {
         return sb.toString();
     }
 
-    /**
-     * Récupère l'historique des réservations pour un utilisateur.
-     */
     private List<reservationlog> getHistoriqueReservations(User user) {
         try {
             return reservationService.getReservationsByClientId(user.getId());
@@ -146,9 +150,6 @@ public class GeminiService {
         }
     }
 
-    /**
-     * Cherche un logement par son ID dans la liste complète.
-     */
     private logement getLogementById(int id, List<logement> logements) {
         return logements.stream()
                 .filter(l -> l.getId() == id)
@@ -156,11 +157,7 @@ public class GeminiService {
                 .orElse(null);
     }
 
-    /**
-     * Extrait la liste des recommandations depuis la réponse JSON de Gemini.
-     */
     private List<Map<String, Object>> parseRecommendations(String responseBody) {
-        // La réponse contient "candidates" -> "content" -> "parts" -> "text"
         JsonObject json = JsonParser.parseString(responseBody).getAsJsonObject();
         String text = json.getAsJsonArray("candidates")
                 .get(0).getAsJsonObject()
@@ -169,7 +166,6 @@ public class GeminiService {
                 .get(0).getAsJsonObject()
                 .get("text").getAsString();
 
-        // Le texte est lui-même un JSON (grâce à response_mime_type)
         JsonObject recosJson = JsonParser.parseString(text).getAsJsonObject();
         return gson.fromJson(recosJson.getAsJsonArray("recommandations"), new TypeToken<List<Map<String, Object>>>(){}.getType());
     }
