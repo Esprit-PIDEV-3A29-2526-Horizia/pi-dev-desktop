@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane xmlns="http://javafx.com/javafx/17"
+           style="-fx-background-color: #f8fafc;">
+    <Label text="Page de connexion (à implémenter)"
+           style="-fx-font-size: 24; -fx-text-fill: #334155;"/>
+</StackPane>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.frontend.common.CommentairesController">
+
+    <VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
+
+        <Label fx:id="publicationInfoLabel" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+        <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+            <Label text="Ajouter un commentaire"/>
+            <TextField fx:id="auteurField" promptText="Votre nom"/>
+            <TextArea fx:id="contenuField" promptText="Votre commentaire..." wrapText="true" prefRowCount="3"/>
+            <Button fx:id="ajouterBtn" text="Publier" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand;"/>
+        </VBox>
+
+        <VBox fx:id="commentairesContainer" spacing="10">
+            <!-- Les cartes de commentaires seront insérées ici -->
+        </VBox>
+
+        <Button fx:id="retourBtn" text="← Retour" style="-fx-background-color: #94a3b8; -fx-text-fill: white; -fx-cursor: hand;"/>
+    </VBox>
+</ScrollPane>

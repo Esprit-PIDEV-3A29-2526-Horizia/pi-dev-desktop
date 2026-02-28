@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane fitToWidth="true" style="-fx-background-color: #f1f5f9; -fx-border-color: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.frontend.admin.DashboardContentController">
+
+    <VBox spacing="25" style="-fx-background-color: #f1f5f9; -fx-padding: 30;">
+
+        <!-- Header avec bienvenue -->
+        <HBox alignment="CENTER_LEFT" spacing="15">
+            <VBox>
+                <Label text="🏨 Dashboard Administrateur"
+                       style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #0f172a;">
+                    <font>
+                        <Font size="32.0" />
+                    </font>
+                </Label>
+                <Label text="Gérez votre plateforme de réservation hôtelière"
+                       style="-fx-font-size: 16; -fx-text-fill: #475569;" />
+            </VBox>
+            <HBox HBox.hgrow="ALWAYS" />
+            <Button text="📅 Aujourd'hui: 27 Fév 2026"
+                    style="-fx-background-color: white; -fx-text-fill: #1e293b;
+                           -fx-background-radius: 25; -fx-padding: 10 20; -fx-font-size: 14;" />
+        </HBox>
+
+        <!-- Cartes de statistiques premium -->
+        <GridPane hgap="20" vgap="20">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25" />
+                <ColumnConstraints percentWidth="25" />
+                <ColumnConstraints percentWidth="25" />
+                <ColumnConstraints percentWidth="25" />
+            </columnConstraints>
+
+            <!-- Carte 1: Réservations -->
+            <VBox style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6);
+                        -fx-background-radius: 20; -fx-padding: 25;
+                        -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.3), 15, 0, 0, 5);"
+                  GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📅" style="-fx-font-size: 32;" />
+                    <VBox>
+                        <Label text="Réservations" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14;" />
+                        <Label text="1,247" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                    </VBox>
+                </HBox>
+                <Label text="+12% cette semaine" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12; -fx-padding: 10 0 0 0;" />
+            </VBox>
+
+            <!-- Carte 2: Logements -->
+            <VBox style="-fx-background-color: linear-gradient(to right, #7c3aed, #8b5cf6);
+                        -fx-background-radius: 20; -fx-padding: 25;
+                        -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.3), 15, 0, 0, 5);"
+                  GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🏨" style="-fx-font-size: 32;" />
+                    <VBox>
+                        <Label text="Logements" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14;" />
+                        <Label text="342" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                    </VBox>
+                </HBox>
+                <Label text="15 nouvelles annonces" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12; -fx-padding: 10 0 0 0;" />
+            </VBox>
+
+            <!-- Carte 3: Utilisateurs -->
+            <VBox style="-fx-background-color: linear-gradient(to right, #059669, #10b981);
+                        -fx-background-radius: 20; -fx-padding: 25;
+                        -fx-effect: dropshadow(gaussian, rgba(5,150,105,0.3), 15, 0, 0, 5);"
+                  GridPane.columnIndex="2" GridPane.rowIndex="0">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="👥" style="-fx-font-size: 32;" />
+                    <VBox>
+                        <Label text="Utilisateurs" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14;" />
+                        <Label text="2,891" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                    </VBox>
+                </HBox>
+                <Label text="+48 nouveaux" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12; -fx-padding: 10 0 0 0;" />
+            </VBox>
+
+            <!-- Carte 4: Revenus -->
+            <VBox style="-fx-background-color: linear-gradient(to right, #b45309, #d97706);
+                        -fx-background-radius: 20; -fx-padding: 25;
+                        -fx-effect: dropshadow(gaussian, rgba(180,83,9,0.3), 15, 0, 0, 5);"
+                  GridPane.columnIndex="3" GridPane.rowIndex="0">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="💰" style="-fx-font-size: 32;" />
+                    <VBox>
+                        <Label text="Revenus" style="-fx-text-fill: rgba(255,255,255,0.8); -fx-font-size: 14;" />
+                        <Label text="48.5K DT" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                    </VBox>
+                </HBox>
+                <Label text="+23% ce mois" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12; -fx-padding: 10 0 0 0;" />
+            </VBox>
+        </GridPane>
+
+        <!-- Section "Trouvez votre refuge idéal" -->
+        <HBox spacing="20" alignment="CENTER"
+              style="-fx-background-color: white; -fx-background-radius: 20; -fx-padding: 30; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+
+            <VBox spacing="15" HBox.hgrow="ALWAYS">
+                <Label text="🏔️ Trouvez votre refuge idéal"
+                       style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+                <Label text="Villas de luxe, appartements cosy et hôtels de charme"
+                       style="-fx-font-size: 16; -fx-text-fill: #475569;" />
+
+                <!-- Barre de recherche -->
+                <HBox spacing="10" style="-fx-padding: 10 0;">
+                    <TextField promptText="Où voulez-vous aller ?"
+                               style="-fx-background-color: #f1f5f9; -fx-background-radius: 30;
+                                      -fx-padding: 15 20; -fx-font-size: 14;"
+                               HBox.hgrow="ALWAYS" />
+                    <Button text="🔍 Rechercher"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                                   -fx-background-radius: 30; -fx-padding: 15 30; -fx-font-size: 14; -fx-font-weight: bold;" />
+                </HBox>
+
+                <!-- Filtres -->
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <Label text="Trier par:" style="-fx-font-weight: bold; -fx-text-fill: #334155;" />
+                    <Button text="Prix"
+                            style="-fx-background-color: #f1f5f9; -fx-text-fill: #334155;
+                                   -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                    <Button text="Note"
+                            style="-fx-background-color: #f1f5f9; -fx-text-fill: #334155;
+                                   -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                    <Button text="Popularité"
+                            style="-fx-background-color: #f1f5f9; -fx-text-fill: #334155;
+                                   -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                </HBox>
+
+                <!-- Catégories -->
+                <HBox spacing="10" style="-fx-padding: 10 0;">
+                    <Button text="Tous"
+                            style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                                   -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;" />
+                    <Button text="🏖️ Plage"
+                            style="-fx-background-color: white; -fx-text-fill: #334155;
+                                   -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;
+                                   -fx-border-color: #e2e8f0; -fx-border-radius: 25;" />
+                    <Button text="⛰️ Montagne"
+                            style="-fx-background-color: white; -fx-text-fill: #334155;
+                                   -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;
+                                   -fx-border-color: #e2e8f0; -fx-border-radius: 25;" />
+                    <Button text="🏙️ Ville"
+                            style="-fx-background-color: white; -fx-text-fill: #334155;
+                                   -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;
+                                   -fx-border-color: #e2e8f0; -fx-border-radius: 25;" />
+                    <Button text="🏜️ Désert"
+                            style="-fx-background-color: white; -fx-text-fill: #334155;
+                                   -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;
+                                   -fx-border-color: #e2e8f0; -fx-border-radius: 25;" />
+                </HBox>
+            </VBox>
+
+            <!-- Image décorative -->
+            <VBox alignment="CENTER" style="-fx-background-color: #f1f5f9; -fx-background-radius: 15; -fx-padding: 20; -fx-min-width: 200;">
+                <Label text="🏔️✨" style="-fx-font-size: 64;" />
+                <Label text="Villas &amp; Appartements" style="-fx-font-weight: bold;" />  <!-- ✅ CORRIGÉ: &amp; au lieu de & -->
+            </VBox>
+        </HBox>
+
+        <!-- Statistiques avancées -->
+        <GridPane hgap="20" vgap="20">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="33.33" />
+                <ColumnConstraints percentWidth="33.33" />
+                <ColumnConstraints percentWidth="33.33" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50" />
+                <RowConstraints percentHeight="50" />
+            </rowConstraints>
+
+            <!-- Graphique -->
+            <VBox style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;"
+                  GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">
+                <Label text="📊 Réservations par mois"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <BarChart fx:id="reservationsChart" prefHeight="300" prefWidth="400">
+                    <xAxis>
+                        <CategoryAxis label="Mois" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Nombre" />
+                    </yAxis>
+                </BarChart>
+            </VBox>
+
+            <!-- Top destinations -->
+            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;"
+                  GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label text="🔥 Top destinations"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="1." style="-fx-font-weight: bold; -fx-text-fill: #f59e0b;" />
+                    <Label text="Hammamet" style="-fx-text-fill: #334155;" />
+                    <Label text="234 résa" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="2." style="-fx-font-weight: bold; -fx-text-fill: #94a3b8;" />
+                    <Label text="Djerba" style="-fx-text-fill: #334155;" />
+                    <Label text="189 résa" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="3." style="-fx-font-weight: bold; -fx-text-fill: #cd7f32;" />
+                    <Label text="Sousse" style="-fx-text-fill: #334155;" />
+                    <Label text="156 résa" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="4." style="-fx-text-fill: #94a3b8;" />
+                    <Label text="Tunis" style="-fx-text-fill: #334155;" />
+                    <Label text="142 résa" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </HBox>
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="5." style="-fx-text-fill: #94a3b8;" />
+                    <Label text="Tabarka" style="-fx-text-fill: #334155;" />
+                    <Label text="98 résa" style="-fx-text-fill: #94a3b8; -fx-font-size: 12;" />
+                </HBox>
+            </VBox>
+
+            <!-- Activité récente -->
+            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;"
+                  GridPane.columnIndex="2" GridPane.rowIndex="0">
+                <Label text="🕐 Activité récente"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <HBox spacing="10">
+                    <Label text="•" style="-fx-text-fill: #3b82f6; -fx-font-size: 16;" />
+                    <VBox>
+                        <Label text="Nouvelle réservation" style="-fx-font-weight: bold;" />
+                        <Label text="Villa Jasmin - 2 nuits" style="-fx-text-fill: #64748b; -fx-font-size: 12;" />
+                    </VBox>
+                </HBox>
+                <HBox spacing="10">
+                    <Label text="•" style="-fx-text-fill: #3b82f6; -fx-font-size: 16;" />
+                    <VBox>
+                        <Label text="Nouveau logement" style="-fx-font-weight: bold;" />
+                        <Label text="Appartement Marsa" style="-fx-text-fill: #64748b; -fx-font-size: 12;" />
+                    </VBox>
+                </HBox>
+                <HBox spacing="10">
+                    <Label text="•" style="-fx-text-fill: #3b82f6; -fx-font-size: 16;" />
+                    <VBox>
+                        <Label text="Nouvel utilisateur" style="-fx-font-weight: bold;" />
+                        <Label text="Ahmed Ben Ali" style="-fx-text-fill: #64748b; -fx-font-size: 12;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Types de logements -->
+            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;"
+                  GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <Label text="🏷️ Types de logements"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <HBox spacing="15">
+                    <VBox alignment="CENTER">
+                        <Label text="🏨" style="-fx-font-size: 24;" />
+                        <Label text="Hôtels" />
+                        <Label text="124" style="-fx-font-weight: bold; -fx-text-fill: #3b82f6;" />
+                    </VBox>
+                    <VBox alignment="CENTER">
+                        <Label text="🏡" style="-fx-font-size: 24;" />
+                        <Label text="Villas" />
+                        <Label text="89" style="-fx-font-weight: bold; -fx-text-fill: #3b82f6;" />
+                    </VBox>
+                    <VBox alignment="CENTER">
+                        <Label text="🏢" style="-fx-font-size: 24;" />
+                        <Label text="Apparts" />
+                        <Label text="156" style="-fx-font-weight: bold; -fx-text-fill: #3b82f6;" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Satisfaction -->
+            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;"
+                  GridPane.columnIndex="2" GridPane.rowIndex="1">
+                <Label text="⭐ Satisfaction client"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+                <Label text="4.8 / 5" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #f59e0b;" />
+                <Label text="Basé sur 1,247 avis" style="-fx-text-fill: #64748b; -fx-font-size: 12;" />
+                <ProgressBar progress="0.96" prefWidth="200" />
+            </VBox>
+        </GridPane>
+    </VBox>
+</ScrollPane>

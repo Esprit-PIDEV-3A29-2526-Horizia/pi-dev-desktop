@@ -38,3 +38,4 @@ build/
 desktop.ini
 ### Mac OS ###
 .DS_Store
+openai.api.key=VOTRE_CLE_API_OPENAI_ICI

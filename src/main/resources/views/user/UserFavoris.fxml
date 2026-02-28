@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="20" style="-fx-padding: 50; -fx-background-color: #f8fafc;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.frontend.user.UserFavorisController">
+
+    <Label text="❤️ Mes favoris" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+    <Label text="Vous n'avez encore aucun favori." style="-fx-font-size: 16; -fx-text-fill: #64748b;"/>
+    <Label text="Explorez les publications et ajoutez-les à vos favoris !"
+           style="-fx-font-size: 14; -fx-text-fill: #475569;" wrapText="true" alignment="CENTER"/>
+
+    <Button fx:id="btnExplorer" text="🔍 Explorer les publications"
+            style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 30; -fx-cursor: hand; -fx-font-size: 14; -fx-font-weight: bold;"
+            onAction="#explorer"/>
+</VBox>
