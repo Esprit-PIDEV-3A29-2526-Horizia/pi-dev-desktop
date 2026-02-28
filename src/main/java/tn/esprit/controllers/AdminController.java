@@ -1,5 +1,7 @@
 package tn.esprit.controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -7,10 +9,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
 import tn.esprit.services.ServiceEvent;
@@ -19,29 +22,38 @@ import tn.esprit.services.ServiceParticipation;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AdminController implements Initializable {
 
+    // Dashboard Stats
     @FXML private Label totalEventsLabel;
     @FXML private Label totalPlacesLabel;
     @FXML private Label totalParticipationsLabel;
     @FXML private Label fillRateLabel;
     @FXML private FlowPane recentEventsFlow;
 
+    // Dashboard Charts
+    @FXML private LineChart<String, Number> evolutionChart;
+    @FXML private PieChart categoriesChart;
+    @FXML private BarChart<String, Number> topEventsChart;
+    @FXML private HBox eventsContainer;
+
+    // Events Management
     @FXML private TextField adminSearchField;
     @FXML private ComboBox<String> adminSortCombo;
     @FXML private FlowPane adminFlowEvents;
 
+    // Participations
     @FXML private TextField participationSearchField;
     @FXML private FlowPane participationsFlow;
 
+    // Navigation
     @FXML private Button btnDashboard;
     @FXML private Button btnEvents;
     @FXML private Button btnParticipations;
-    @FXML private Button btnCalendar;  // ← ICI
+    @FXML private Button btnCalendar;
     @FXML private TabPane tabPane;
 
     private ServiceEvent serviceEvent;
@@ -55,34 +67,43 @@ public class AdminController implements Initializable {
         serviceParticipation = new ServiceParticipation();
 
         setupNavigation();
-        btnCalendar.setOnAction(e -> openCalendarView()); // ← OK maintenant
+        if (btnCalendar != null) {
+            btnCalendar.setOnAction(e -> openCalendarView());
+        }
 
         setupSortCombo();
         loadData();
 
-        adminSearchField.textProperty().addListener((obs, old, newVal) -> {
-            if (newVal.isEmpty()) {
-                displayEvents(allEvents);
-            } else {
-                filterEvents(newVal);
-            }
-        });
+        // Search functionality
+        if (adminSearchField != null) {
+            adminSearchField.textProperty().addListener((obs, old, newVal) -> {
+                if (newVal.isEmpty()) {
+                    displayEvents(allEvents);
+                } else {
+                    filterEvents(newVal);
+                }
+            });
+        }
 
-        participationSearchField.textProperty().addListener((obs, old, newVal) -> {
-            if (newVal.isEmpty()) {
-                displayParticipations(allParticipations);
-            } else {
-                filterParticipations(newVal);
-            }
-        });
+        if (participationSearchField != null) {
+            participationSearchField.textProperty().addListener((obs, old, newVal) -> {
+                if (newVal.isEmpty()) {
+                    displayParticipations(allParticipations);
+                } else {
+                    filterParticipations(newVal);
+                }
+            });
+        }
 
-        adminSortCombo.setOnAction(e -> sortEvents());
+        if (adminSortCombo != null) {
+            adminSortCombo.setOnAction(e -> sortEvents());
+        }
     }
 
     private void setupNavigation() {
-        btnDashboard.setOnAction(e -> tabPane.getSelectionModel().select(0));
-        btnEvents.setOnAction(e -> tabPane.getSelectionModel().select(1));
-        btnParticipations.setOnAction(e -> tabPane.getSelectionModel().select(2));
+        if (btnDashboard != null) btnDashboard.setOnAction(e -> tabPane.getSelectionModel().select(0));
+        if (btnEvents != null) btnEvents.setOnAction(e -> tabPane.getSelectionModel().select(1));
+        if (btnParticipations != null) btnParticipations.setOnAction(e -> tabPane.getSelectionModel().select(2));
 
         tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, old, newVal) -> {
             updateButtonStyles(newVal.intValue());
@@ -93,6 +114,7 @@ public class AdminController implements Initializable {
         Button[] buttons = {btnDashboard, btnEvents, btnParticipations};
 
         for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i] == null) continue;
             if (i == selectedIndex) {
                 buttons[i].setStyle("-fx-background-color: #2d9cdb; -fx-text-fill: white; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand;");
             } else {
@@ -102,7 +124,9 @@ public class AdminController implements Initializable {
     }
 
     private void setupSortCombo() {
-        adminSortCombo.getItems().addAll("Titre", "Prix", "Date", "Places", "Capacité");
+        if (adminSortCombo != null) {
+            adminSortCombo.getItems().addAll("Titre", "Prix", "Date", "Places", "Capacité");
+        }
     }
 
     private void loadData() {
@@ -113,6 +137,7 @@ public class AdminController implements Initializable {
             System.out.println("✅ Données chargées: " + allEvents.size() + " événements, " + allParticipations.size() + " participations");
 
             updateStatistics();
+            updateDashboardCharts();
             displayEvents(allEvents);
             displayParticipations(allParticipations);
             displayRecentEvents();
@@ -127,7 +152,7 @@ public class AdminController implements Initializable {
         int totalEvents = allEvents.size();
         int totalPlaces = 0;
         int totalBooked = 0;
-        int totalRevenue = 0;
+        double totalRevenue = 0;
 
         for (Events event : allEvents) {
             totalPlaces += event.getCapaciteMax();
@@ -136,15 +161,141 @@ public class AdminController implements Initializable {
             totalRevenue += booked * event.getPrix();
         }
 
-        totalEventsLabel.setText(String.valueOf(totalEvents));
-        totalPlacesLabel.setText(String.valueOf(totalPlaces));
-        totalParticipationsLabel.setText(String.valueOf(allParticipations.size()));
+        if (totalEventsLabel != null) totalEventsLabel.setText(String.valueOf(totalEvents));
+        if (totalPlacesLabel != null) totalPlacesLabel.setText(String.valueOf(totalPlaces));
+        if (totalParticipationsLabel != null) totalParticipationsLabel.setText(String.valueOf(allParticipations.size()));
 
         int fillRate = totalPlaces > 0 ? (totalBooked * 100 / totalPlaces) : 0;
-        fillRateLabel.setText(fillRate + "%");
+        if (fillRateLabel != null) fillRateLabel.setText(fillRate + "%");
+    }
+
+    private void updateDashboardCharts() {
+        updateEvolutionChart();
+        updateCategoriesChart();
+        updateTopEventsChart();
+        updateEventsList();
+    }
+
+    private void updateEvolutionChart() {
+        if (evolutionChart == null) return;
+
+        evolutionChart.getData().clear();
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Réservations");
+
+        // Grouper par date
+        Map<String, Long> reservationsParJour = allParticipations.stream()
+                .collect(Collectors.groupingBy(
+                        p -> new SimpleDateFormat("dd/MM").format(p.getDateParticipation()),
+                        Collectors.counting()
+                ));
+
+        // Trier et limiter
+        List<String> dates = reservationsParJour.keySet().stream()
+                .sorted(Comparator.comparing(d -> {
+                    try {
+                        return new SimpleDateFormat("dd/MM").parse(d);
+                    } catch (Exception e) {
+                        return new Date();
+                    }
+                }))
+                .limit(7)
+                .collect(Collectors.toList());
+
+        for (String date : dates) {
+            series.getData().add(new XYChart.Data<>(date, reservationsParJour.getOrDefault(date, 0L)));
+        }
+
+        evolutionChart.getData().add(series);
+    }
+
+    private void updateCategoriesChart() {
+        if (categoriesChart == null) return;
+
+        categoriesChart.getData().clear();
+
+        Map<String, Long> countParCategorie = allEvents.stream()
+                .collect(Collectors.groupingBy(Events::getCategorie, Collectors.counting()));
+
+        ObservableList<PieChart.Data> pieData = FXCollections.observableArrayList();
+
+        for (Map.Entry<String, Long> entry : countParCategorie.entrySet()) {
+            pieData.add(new PieChart.Data(entry.getKey() + " (" + entry.getValue() + ")", entry.getValue()));
+        }
+
+        categoriesChart.setData(pieData);
+    }
+
+    private void updateTopEventsChart() {
+        if (topEventsChart == null) return;
+
+        topEventsChart.getData().clear();
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Taux de remplissage");
+
+        List<Events> topEvents = allEvents.stream()
+                .sorted((e1, e2) -> Integer.compare(
+                        e2.getCapaciteMax() - e2.getPlacesRestantes(),
+                        e1.getCapaciteMax() - e1.getPlacesRestantes()
+                ))
+                .limit(5)
+                .collect(Collectors.toList());
+
+        for (Events event : topEvents) {
+            double taux = (event.getCapaciteMax() - event.getPlacesRestantes()) * 100.0 / event.getCapaciteMax();
+            series.getData().add(new XYChart.Data<>(event.getTitre(), taux));
+        }
+
+        topEventsChart.getData().add(series);
+    }
+
+    private void updateEventsList() {
+        if (eventsContainer == null) return;
+
+        eventsContainer.getChildren().clear();
+
+        List<Events> topEvents = allEvents.stream()
+                .sorted((e1, e2) -> Integer.compare(
+                        e2.getCapaciteMax() - e2.getPlacesRestantes(),
+                        e1.getCapaciteMax() - e1.getPlacesRestantes()
+                ))
+                .limit(3)
+                .collect(Collectors.toList());
+
+        for (Events event : topEvents) {
+            double taux = (event.getCapaciteMax() - event.getPlacesRestantes()) * 100.0 / event.getCapaciteMax();
+            VBox card = createEventCard(event, taux);
+            eventsContainer.getChildren().add(card);
+        }
+    }
+
+    private VBox createEventCard(Events event, double taux) {
+        VBox card = new VBox(5);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 10; -fx-border-color: #DACEB6; -fx-border-radius: 10;");
+        card.setPrefWidth(200);
+
+        Label title = new Label(event.getTitre());
+        title.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-wrap-text: true;");
+
+        Label progress = new Label(String.format("Taux: %.1f%%", taux));
+        progress.setStyle("-fx-text-fill: " + (taux > 80 ? "#e74c3c" : "#27ae60") + ";");
+
+        Label places = new Label(event.getPlacesRestantes() + "/" + event.getCapaciteMax() + " places");
+        places.setStyle("-fx-text-fill: #666;");
+
+        ProgressBar progressBar = new ProgressBar(taux / 100);
+        progressBar.setPrefWidth(180);
+        progressBar.setStyle("-fx-accent: " + (taux > 80 ? "#e74c3c" : "#81AE8D") + ";");
+
+        card.getChildren().addAll(title, progress, places, progressBar);
+        return card;
     }
 
     private void displayRecentEvents() {
+        if (recentEventsFlow == null) return;
+
         recentEventsFlow.getChildren().clear();
         List<Events> recent = allEvents.stream().limit(3).toList();
         for (Events event : recent) {
@@ -172,6 +323,8 @@ public class AdminController implements Initializable {
     }
 
     private void displayEvents(List<Events> events) {
+        if (adminFlowEvents == null) return;
+
         adminFlowEvents.getChildren().clear();
         for (Events event : events) {
             adminFlowEvents.getChildren().add(createAdminEventCard(event));
@@ -230,6 +383,8 @@ public class AdminController implements Initializable {
     }
 
     private void displayParticipations(List<Participation> participations) {
+        if (participationsFlow == null) return;
+
         participationsFlow.getChildren().clear();
         for (Participation p : participations) {
             participationsFlow.getChildren().add(createParticipationCard(p));
@@ -271,13 +426,11 @@ public class AdminController implements Initializable {
         detailsBtn.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-size: 12px;");
         detailsBtn.setMaxWidth(Double.MAX_VALUE);
-
         detailsBtn.setOnAction(e -> showParticipantDetails(p));
 
         card.getChildren().addAll(eventLabel, placesLabel, totalLabel, dateLabel, detailsBtn);
         return card;
     }
-
 
     private void showParticipantDetails(Participation p) {
         Dialog<Void> dialog = new Dialog<>();
@@ -320,6 +473,7 @@ public class AdminController implements Initializable {
         dialog.getDialogPane().setContent(content);
         dialog.showAndWait();
     }
+
     private void filterEvents(String keyword) {
         try {
             List<Events> filtered = serviceEvent.rechercher(keyword);
@@ -438,6 +592,28 @@ public class AdminController implements Initializable {
         }
     }
 
+    private void openCalendarView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CalendarView.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Calendrier des événements - EventHub");
+            try {
+                Image icon = new Image(getClass().getResourceAsStream("/images/LOGO.png"));
+                stage.getIcons().add(icon);
+            } catch (Exception e) {
+                System.out.println("Logo non trouvé");
+            }
+            stage.setScene(new Scene(root, 1200, 800));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir le calendrier");
+        }
+    }
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -446,20 +622,9 @@ public class AdminController implements Initializable {
         alert.showAndWait();
     }
 
-    private void openCalendarView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CalendarView.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.setTitle("Calendrier des événements - EventHub");
-            stage.getIcons().add(new Image(getClass().getResourceAsStream("/images/LOGO.png")));
-            stage.setScene(new Scene(root, 1200, 800));
-            stage.show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir le calendrier");
-        }
+    @FXML
+    private void refreshDashboard(){
+        loadData();
+        //showAlert("Succes", "Dashboard rafraichi acces succes !");
     }
 }
