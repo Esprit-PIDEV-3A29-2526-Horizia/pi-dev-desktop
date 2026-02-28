@@ -1,0 +1,188 @@
+/* =========================
+   PAGE
+   ========================= */
+.page {
+    -fx-background-color: #F5F1E9;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+/* =========================
+   TOP BAR
+   ========================= */
+.topbar {
+    -fx-background-color: #163A56;
+}
+
+.linkBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+/* =========================
+   CARDS
+   ========================= */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.12), 18, 0, 0, 8);
+}
+
+/* =========================
+   TITLES / TEXT
+   ========================= */
+.title {
+    -fx-font-size: 26;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.titleSmall {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.subtitle {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.paragraph {
+    -fx-text-fill: #475569;
+    -fx-line-spacing: 6px;
+    -fx-font-size: 13.5;
+}
+
+/* =========================
+   BADGES
+   ========================= */
+.badgeGreen {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #059669;
+    -fx-background-radius: 14;
+    -fx-padding: 4 10;
+    -fx-font-weight: bold;
+    -fx-font-size: 11;
+}
+
+/* =========================
+   IMAGE CONTAINER
+   ========================= */
+.imageContainer {
+    -fx-background-color: transparent;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);
+}
+
+/* ⚠️ Remarque JavaFX:
+   Les radius ne coupent pas l'image automatiquement.
+   On gère le clipping dans le controller (je te donne le code plus bas).
+*/
+
+/* Badge sur l'image: stable en StackPane */
+.imageBadge {
+    -fx-background-color: rgba(0,0,0,0.55);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 6 14;
+    -fx-background-radius: 14;
+    -fx-font-size: 12;
+}
+
+/* =========================
+   CHIPS
+   ========================= */
+.chip {
+    -fx-background-radius: 16;
+    -fx-padding: 6 12;
+    -fx-font-size: 12;
+}
+
+/* variantes */
+.infoChip {
+    -fx-background-color: #EEF2F7;
+    -fx-text-fill: #334155;
+}
+
+.priceChip {
+    -fx-background-color: #FEF3C7;
+    -fx-text-fill: #92400E;
+    -fx-font-weight: bold;
+}
+
+.placesChip {
+    -fx-background-color: #DCFCE7;
+    -fx-text-fill: #166534;
+    -fx-font-weight: bold;
+}
+
+/* =========================
+   PRICES
+   ========================= */
+.muted {
+    -fx-text-fill: #64748B;
+}
+
+.value {
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.totalLabel {
+    -fx-font-weight: bold;
+    -fx-text-fill: #0F172A;
+}
+
+.totalValue {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #16A34A;
+}
+
+/* =========================
+   SUMMARY BOX
+   ========================= */
+.summaryBox {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 14;
+    -fx-padding: 14;
+}
+
+/* =========================
+   BUTTON
+   ========================= */
+.primaryBtn {
+    -fx-background-color: linear-gradient(to right, #2563EB, #1D4ED8);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
+    -fx-background-radius: 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.45), 15, 0, 0, 6);
+}
+
+.primaryBtn:hover {
+    -fx-opacity: 0.95;
+}
+
+.primaryBtn:disabled {
+    -fx-background-color: #E2E8F0;
+    -fx-text-fill: #94A3B8;
+    -fx-effect: none;
+}
+
+/* =========================
+   HINT
+   ========================= */
+.hint {
+    -fx-text-fill: #64748B;
+    -fx-font-size: 11;
+}
+.label {
+    -fx-text-fill: #0F172A;
+    -fx-font-size: 12.5;
+    -fx-font-weight: bold;
+}

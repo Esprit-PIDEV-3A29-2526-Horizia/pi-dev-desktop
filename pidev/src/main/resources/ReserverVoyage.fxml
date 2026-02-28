@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefWidth="1200" prefHeight="720"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.ReserverVoyageController"
+            stylesheets="@details.css"
+            styleClass="page">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox styleClass="topbar">
+            <padding><Insets left="24" right="24" top="14" bottom="14"/></padding>
+            <Button text="← Retour au catalogue"
+                    onAction="#retour"
+                    styleClass="linkBtn"/>
+        </HBox>
+    </top>
+
+    <!-- CONTENT -->
+    <center>
+        <HBox spacing="28" styleClass="content">
+            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+            <!-- LEFT CARD -->
+            <VBox spacing="18" HBox.hgrow="ALWAYS" styleClass="card">
+                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+
+                <!-- Title -->
+                <Label fx:id="lblTitre" text="Voyage à ..." styleClass="title"/>
+
+                <!-- Image -->
+                <StackPane styleClass="imageContainer">
+                    <ImageView fx:id="imgVoyage"
+                               fitHeight="300"
+                               preserveRatio="true"/>
+                </StackPane>
+
+                <!-- Subtitle -->
+                <Label text="Découvre ta destination" styleClass="subtitle"/>
+
+                <!-- Description -->
+                <Label fx:id="lblDescription"
+                       wrapText="true"
+                       styleClass="paragraph"/>
+            </VBox>
+
+            <!-- RIGHT CARD -->
+            <VBox spacing="18" prefWidth="360" styleClass="card">
+                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+
+                <Label text="Finaliser ma réservation" styleClass="titleSmall"/>
+
+                <VBox spacing="8">
+                    <Label text="Combien de personnes ?" styleClass="label"/>
+                    <Spinner fx:id="spinnerPlaces" prefHeight="40"/>
+                </VBox>
+
+                <Separator/>
+
+                <!-- SUMMARY BOX (comme ta capture) -->
+                <!-- SUMMARY BOX -->
+                <VBox spacing="14" styleClass="summaryBox">
+
+                    <!-- Prix unitaire DT -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Prix unitaire" styleClass="muted"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblPrixUnitaire" text="0.0 DT" styleClass="value"/>
+                    </HBox>
+
+                    <!-- Ligne devise + prix unitaire converti -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Devise" styleClass="muted"/>
+
+                        <ChoiceBox fx:id="cbCurrency" prefWidth="110"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <Label fx:id="lblPrixUnitaireFx" text="--" styleClass="value"/>
+                    </HBox>
+
+                    <!-- Taux -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="lblRateInfo" text="Taux: --" styleClass="muted"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <!-- Total DT -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Total à payer" styleClass="totalLabel"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblPrixTotal" text="0 DT" styleClass="totalValue"/>
+                    </HBox>
+
+                    <!-- Total converti -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Total (devise)" styleClass="muted"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblPrixTotalFx" text="--" styleClass="value"/>
+                    </HBox>
+
+                </VBox>
+
+                <Button text="Confirmer la réservation"
+                        onAction="#confirmerReservation"
+                        prefHeight="46"
+                        maxWidth="9999"
+                        styleClass="primaryBtn"/>
+
+                <Label fx:id="lblAIStatus" text="" styleClass="hint"/>
+                <Label text="Paiement sécurisé • Annulation selon conditions"
+                       styleClass="hint"/>
+
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true"
+            style="-fx-background-color: transparent; -fx-background: transparent;"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.CatalogueUserController">
+
+    <content>
+        <VBox spacing="18" style="-fx-padding: 26;">
+            <!-- HERO centré -->
+            <StackPane>
+                <AnchorPane maxWidth="950" prefHeight="170"
+                            style="-fx-background-color: #2F7EA8; -fx-background-radius: 18;
+                                   -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                    <children>
+                        <VBox spacing="8"
+                              AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30"
+                              AnchorPane.topAnchor="26" AnchorPane.bottomAnchor="26"
+                              alignment="CENTER">
+                            <Label text="Trouvez votre voyage idéal"
+                                   style="-fx-text-fill: white; -fx-font-size: 26; -fx-font-weight: bold;"/>
+                            <Label text="Circuits, séjours et expériences sur mesure"
+                                   style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12;"/>
+                            <Region prefHeight="10"/>
+                            <HBox spacing="12" alignment="CENTER">
+                                <TextField fx:id="searchField"
+                                           onKeyReleased="#handleRecherche"
+                                           promptText="Où voulez-vous aller ?"
+                                           prefHeight="36" prefWidth="340"
+                                           style="-fx-background-color: white; -fx-background-radius: 18;
+                                                  -fx-border-radius: 18; -fx-border-color: transparent; -fx-padding: 0 14;"/>
+                                <ComboBox fx:id="comboTri"
+                                          promptText="Prix : décroissant"
+                                          prefHeight="36" prefWidth="190"
+                                          style="-fx-background-radius: 18; -fx-border-radius: 18;"/>
+                            </HBox>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </StackPane>
+
+            <!-- CHIPS filtres (centrés) -->
+            <HBox spacing="12" alignment="CENTER">
+                <Button fx:id="btnTous" text="Tous" onAction="#filtrerTous"
+                        style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-weight: bold;
+                               -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+                <Button fx:id="btnTunisie" text="Tunisie" onAction="#filtrerTunisie"
+                        style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                               -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+                <Button fx:id="btnEurope" text="Europe" onAction="#filtrerEurope"
+                        style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                               -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+                <Button fx:id="btnPromos" text="Promos" onAction="#filtrerPromos"
+                        style="-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold;
+                               -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- GRID cartes -->
+            <GridPane fx:id="voyageGrid" hgap="18" vgap="18" alignment="TOP_CENTER">
+                <padding><Insets top="6" right="6" bottom="16" left="6"/></padding>
+            </GridPane>
+        </VBox>
+    </content>
+</ScrollPane>
