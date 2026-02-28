@@ -84,6 +84,16 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
         </dependency>
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-jdbc</artifactId>
+            <version>6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.44.1.0</version>
+        </dependency>
 
         <!-- Jackson pour le traitement JSON -->
         <dependency>
