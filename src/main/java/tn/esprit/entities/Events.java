@@ -5,21 +5,60 @@
 
 package tn.esprit.entities;
 
+import jakarta.persistence.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.*;
+
 import java.sql.Timestamp;
 
+@Entity
+@Table(name = "events")
+@Indexed
+
 public class Events {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_event")
     private int id_event;
+
+    @FullTextField(analyzer = "french")
+    @Column(name = "titre")
     private String titre;
+
+    @FullTextField(analyzer = "french")
+    @Column(name = "description")
     private String description;
+
+    @KeywordField
+    @Column(name = "categorie")
     private String categorie;
+
+    @FullTextField(analyzer = "french")
+    @Column(name = "location")
     private String location;
+
+    @Column(name = "date_debut")
     private Timestamp dateDebut;
+
+    @Column(name = "date_fin")
     private Timestamp dateFin;
+
+    @Column(name = "prix")
     private float prix;
+
+    @Column(name = "capacite_max")
     private int capaciteMax;
+
+    @Column(name = "places_restantes")
     private int placesRestantes;
+
+    @Column(name = "image_url")
     private String image_url;
+
+    @Column(name = "statut")
     private String statut;
+
+    @Column(name = "id_createur")
     private int id_createur;
 
     public Events() {

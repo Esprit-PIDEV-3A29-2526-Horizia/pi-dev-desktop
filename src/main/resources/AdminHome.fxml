@@ -65,6 +65,8 @@
                             <Region HBox.hgrow="ALWAYS" />
                             <Button text="🔄 Rafraîchir" onAction="#refreshDashboard"
                                     style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                            <Button text="🔄 Réindexer" onAction="#reindexer"
+                                    style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
                         </HBox>
 
 

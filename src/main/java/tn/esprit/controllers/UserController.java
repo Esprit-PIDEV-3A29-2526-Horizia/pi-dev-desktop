@@ -1,5 +1,6 @@
 package tn.esprit.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,8 +20,7 @@ import tn.esprit.services.ServiceEvent;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class UserController implements Initializable {
 
@@ -36,6 +36,8 @@ public class UserController implements Initializable {
     private ServiceEvent serviceEvent;
     private List<Events> allEvents;
     private String currentCategory = "Tous";
+    private Timer timer = new Timer(true);
+    private TimerTask searchTask;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -47,12 +49,36 @@ public class UserController implements Initializable {
         loadEvents();
 
         // Search functionality
-        searchField.textProperty().addListener((obs, old, newVal) -> {
+        /*searchField.textProperty().addListener((obs, old, newVal) -> {
             if (newVal.isEmpty()) {
                 filterByCategory(currentCategory);
             } else {
                 filterEvents(newVal);
             }
+        });*/
+        // Dans initialize(), remplace le listener par celui-ci :
+        searchField.textProperty().addListener((obs, old, newVal) -> {
+            // Annule la recherche précédente
+            if (searchTask != null) {
+                searchTask.cancel();
+            }
+
+            // Crée une nouvelle tâche avec délai
+            searchTask = new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(() -> {
+                        if (newVal.isEmpty()) {
+                            filterByCategory(currentCategory);
+                        } else {
+                            filterEvents(newVal);
+                        }
+                    });
+                }
+            };
+
+            // Délai de 300ms avant de lancer la recherche
+            timer.schedule(searchTask, 300);
         });
 
         // Sort functionality
@@ -101,6 +127,20 @@ public class UserController implements Initializable {
         }
     }
 
+    /*private void filterEvents(String keyword) {
+        try {
+            List<Events> filtered = serviceEvent.rechercher(keyword);
+            // Apply category filter if not "Tous"
+            if (!currentCategory.equals("Tous")) {
+                filtered = filtered.stream()
+                        .filter(e -> e.getCategorie().equalsIgnoreCase(currentCategory))
+                        .toList();
+            }
+            displayEvents(filtered);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }*/
     private void filterEvents(String keyword) {
         try {
             List<Events> filtered = serviceEvent.rechercher(keyword);

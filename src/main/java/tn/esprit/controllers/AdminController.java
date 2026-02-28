@@ -627,4 +627,14 @@ public class AdminController implements Initializable {
         loadData();
         //showAlert("Succes", "Dashboard rafraichi acces succes !");
     }
+
+    @FXML
+    private void reindexer(){
+        try{
+            serviceEvent.reindexterTout();
+            showAlert("Succes", "Indexation terminee avec succes");
+        }catch (Exception e){
+            showAlert("Erreur", "Erreur lors de l'indexation: " + e.getMessage());
+        }
+    }
 }

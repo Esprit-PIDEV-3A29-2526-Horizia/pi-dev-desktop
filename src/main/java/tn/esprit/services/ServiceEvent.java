@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import tn.esprit.entities.Events;
 import tn.esprit.utils.MyDataBase;
+import tn.esprit.utils.HibernateUtil;
+import tn.esprit.utils.FrenchAnalysisConfigurer;
 
 public class ServiceEvent implements IService<Events> {
     private Connection connection = MyDataBase.getInstance().getMyConnection();
@@ -147,5 +149,13 @@ public class ServiceEvent implements IService<Events> {
         ps.setInt(1, Places_Restantes);
         ps.setInt(2, id_event);
         ps.executeUpdate();
+    }
+
+    private SearchService searchService = new SearchService();
+    public List<Events> rechercherAvancee(String keyword){
+        return searchService.search(keyword);
+    }
+    public void reindexterTout(){
+        searchService.reindexAll();
     }
 }
