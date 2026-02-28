@@ -54,7 +54,7 @@ public class MainFX extends Application {
     }
 
     public static void main(String[] args) {
-        System.setProperty("prism.order", "sw");
+        //System.setProperty("prism.order", "sw");
         launch(args);
     }
 }

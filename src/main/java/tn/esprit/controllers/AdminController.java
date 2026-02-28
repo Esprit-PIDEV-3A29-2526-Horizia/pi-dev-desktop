@@ -41,6 +41,7 @@ public class AdminController implements Initializable {
     @FXML private Button btnDashboard;
     @FXML private Button btnEvents;
     @FXML private Button btnParticipations;
+    @FXML private Button btnCalendar;  // ← ICI
     @FXML private TabPane tabPane;
 
     private ServiceEvent serviceEvent;
@@ -54,7 +55,7 @@ public class AdminController implements Initializable {
         serviceParticipation = new ServiceParticipation();
 
         setupNavigation();
-        btnCalendar.setOnAction(e -> openCalendarView());
+        btnCalendar.setOnAction(e -> openCalendarView()); // ← OK maintenant
 
         setupSortCombo();
         loadData();
@@ -141,9 +142,6 @@ public class AdminController implements Initializable {
 
         int fillRate = totalPlaces > 0 ? (totalBooked * 100 / totalPlaces) : 0;
         fillRateLabel.setText(fillRate + "%");
-
-        // Optional: Add revenue stat
-        // revenueLabel.setText(String.format("%.0f DT", totalRevenue));
     }
 
     private void displayRecentEvents() {
@@ -304,9 +302,6 @@ public class AdminController implements Initializable {
         Label eventInfo = new Label("📌 " + eventTitle);
         eventInfo.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-font-size: 16px;");
 
-        //Label userIdLabel = new Label("🆔 ID Utilisateur: " + p.getId_utilisateur());
-        //userIdLabel.setStyle("-fx-text-fill: #666;");
-
         Label placesInfo = new Label("📋 Places réservées: " + p.getNombrePlaces());
         placesInfo.setStyle("-fx-text-fill: #666;");
 
@@ -451,11 +446,6 @@ public class AdminController implements Initializable {
         alert.showAndWait();
     }
 
-    // Ajoute ce champ avec les autres @FXML
-    @FXML private Button btnCalendar;
-
-
-    // Ajoute cette méthode
     private void openCalendarView() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/CalendarView.fxml"));
@@ -472,5 +462,4 @@ public class AdminController implements Initializable {
             showAlert("Erreur", "Impossible d'ouvrir le calendrier");
         }
     }
-
 }

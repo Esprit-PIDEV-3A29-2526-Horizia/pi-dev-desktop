@@ -88,6 +88,9 @@
                         <FlowPane fx:id="recentEventsFlow" hgap="15" vgap="15" prefWrapLength="900" />
                     </ScrollPane>
                 </VBox>
+
+                <fx:include source="DashboardView.fxml" />
+
             </Tab>
 
             <Tab text="Gestion Événements">
