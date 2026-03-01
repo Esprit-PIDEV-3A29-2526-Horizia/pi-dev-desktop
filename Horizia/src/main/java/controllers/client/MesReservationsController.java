@@ -22,19 +22,22 @@ import org.example.services.ModeleService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 /**
- * ✅ NOUVEAU Contrôleur de la page "Mes Réservations"
- * Permet au client de retrouver ses réservations par CIN
- * et de visualiser son QR Code pour chaque réservation.
+ * ✅ Contrôleur complet de la page "Mes Réservations"
+ * Avec filtres avancés et affichage amélioré
+ * CORRECTION: Gestion des composants FXML optionnels
  */
 public class MesReservationsController implements Initializable {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FMT_COMPLET = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", java.util.Locale.FRENCH);
 
     // ─── FXML ────────────────────────────────────────────────────
     @FXML private TextField txtCinRecherche;
@@ -44,9 +47,20 @@ public class MesReservationsController implements Initializable {
     @FXML private VBox vboxListeReservations;
     @FXML private VBox vboxVide;
 
+    // ✅ FILTRES (optionnels - peuvent être null si non présents dans le FXML)
+    @FXML private ComboBox<String> comboFiltreStatut;
+    @FXML private ComboBox<String> comboTri;
+    @FXML private DatePicker dpDateDebut;
+    @FXML private DatePicker dpDateFin;
+    @FXML private Button btnAppliquerFiltres;
+    @FXML private Button btnReinitialiserFiltres;
+
     private LocationService locationService = new LocationService();
     private VehiculeService vehiculeService = new VehiculeService();
     private ModeleService modeleService = new ModeleService();
+
+    private List<Location> toutesLesReservations = new java.util.ArrayList<>();
+    private String cinRecherche = "";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -54,10 +68,65 @@ public class MesReservationsController implements Initializable {
         if (txtCinRecherche != null) {
             txtCinRecherche.setOnAction(e -> rechercherReservations());
         }
+
+        configurerFiltres();
     }
 
     // ─────────────────────────────────────────────────────────────
-    // RECHERCHE
+    // CONFIGURATION DES FILTRES (avec vérification null)
+    // ─────────────────────────────────────────────────────────────
+
+    private void configurerFiltres() {
+        if (comboFiltreStatut != null) {
+            comboFiltreStatut.getItems().addAll(
+                    "Tous les statuts",
+                    "📅 À venir",
+                    "🚗 En cours",
+                    "✅ Terminées",
+                    "❌ Annulées"
+            );
+            comboFiltreStatut.setValue("Tous les statuts");
+
+            // Ajouter listener seulement si le composant existe
+            comboFiltreStatut.valueProperty().addListener((obs, old, newVal) -> {
+                if (!toutesLesReservations.isEmpty()) appliquerFiltres();
+            });
+        }
+
+        if (comboTri != null) {
+            comboTri.getItems().addAll(
+                    "Plus récentes",
+                    "Plus anciennes",
+                    "Montant croissant",
+                    "Montant décroissant",
+                    "Durée croissante",
+                    "Durée décroissante"
+            );
+            comboTri.setValue("Plus récentes");
+
+            comboTri.valueProperty().addListener((obs, old, newVal) -> {
+                if (!toutesLesReservations.isEmpty()) appliquerFiltres();
+            });
+        }
+
+        if (dpDateDebut != null) {
+            dpDateDebut.setValue(null);
+        }
+        if (dpDateFin != null) {
+            dpDateFin.setValue(null);
+        }
+
+        if (btnAppliquerFiltres != null) {
+            btnAppliquerFiltres.setOnAction(e -> appliquerFiltres());
+        }
+
+        if (btnReinitialiserFiltres != null) {
+            btnReinitialiserFiltres.setOnAction(e -> reinitialiserFiltres());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // RECHERCHE PRINCIPALE
     // ─────────────────────────────────────────────────────────────
 
     @FXML
@@ -71,28 +140,154 @@ public class MesReservationsController implements Initializable {
         }
 
         lblErreur.setText("");
+        this.cinRecherche = cin;
 
         // Rechercher dans toutes les locations
         List<Location> toutes = locationService.getAllLocations();
-        List<Location> mesLocations = toutes.stream()
+        toutesLesReservations = toutes.stream()
                 .filter(l -> l.getClientCin() != null &&
                         l.getClientCin().trim().toUpperCase().replaceAll("[\\s-]", "").equals(cin))
-                .sorted((l1, l2) -> {
-                    if (l1.getDateDebut() == null) return 1;
-                    if (l2.getDateDebut() == null) return -1;
-                    return l2.getDateDebut().compareTo(l1.getDateDebut());
-                })
                 .collect(Collectors.toList());
 
-        if (mesLocations.isEmpty()) {
+        if (toutesLesReservations.isEmpty()) {
             masquerResultats();
             vboxVide.setVisible(true);
             vboxVide.setManaged(true);
         } else {
             vboxVide.setVisible(false);
             vboxVide.setManaged(false);
-            afficherReservations(mesLocations);
+            appliquerFiltres();
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // APPLICATION DES FILTRES (avec vérification null)
+    // ─────────────────────────────────────────────────────────────
+
+    @FXML
+    private void appliquerFiltres() {
+        if (toutesLesReservations.isEmpty()) return;
+
+        List<Location> filtrees = new java.util.ArrayList<>(toutesLesReservations);
+
+        // ✅ FILTRE PAR STATUT - seulement si le composant existe
+        if (comboFiltreStatut != null) {
+            String filtreStatut = comboFiltreStatut.getValue();
+            if (filtreStatut != null && !"Tous les statuts".equals(filtreStatut)) {
+                LocalDate now = LocalDate.now();
+
+                filtrees = filtrees.stream()
+                        .filter(l -> {
+                            LocalDate debut = l.getDateDebut() != null ?
+                                    l.getDateDebut().toLocalDateTime().toLocalDate() : null;
+                            LocalDate fin = l.getDateFinPrev() != null ?
+                                    l.getDateFinPrev().toLocalDateTime().toLocalDate() : null;
+
+                            switch (filtreStatut) {
+                                case "📅 À venir":
+                                    return debut != null && debut.isAfter(now);
+                                case "🚗 En cours":
+                                    return debut != null && fin != null &&
+                                            !debut.isAfter(now) && !fin.isBefore(now) &&
+                                            !"terminée".equals(l.getStatut()) &&
+                                            !"annulée".equals(l.getStatut()) &&
+                                            !"no_show".equals(l.getStatut());
+                                case "✅ Terminées":
+                                    return fin != null && fin.isBefore(now) &&
+                                            "terminée".equals(l.getStatut());
+                                case "❌ Annulées":
+                                    return "annulée".equals(l.getStatut()) ||
+                                            "no_show".equals(l.getStatut());
+                                default:
+                                    return true;
+                            }
+                        })
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // ✅ FILTRE PAR PLAGE DE DATES - seulement si les composants existent
+        if (dpDateDebut != null || dpDateFin != null) {
+            LocalDate debutFiltre = (dpDateDebut != null && dpDateDebut.getValue() != null)
+                    ? dpDateDebut.getValue() : LocalDate.MIN;
+            LocalDate finFiltre = (dpDateFin != null && dpDateFin.getValue() != null)
+                    ? dpDateFin.getValue() : LocalDate.MAX;
+
+            if (debutFiltre != LocalDate.MIN || finFiltre != LocalDate.MAX) {
+                filtrees = filtrees.stream()
+                        .filter(l -> {
+                            LocalDate debutLoc = l.getDateDebut() != null ?
+                                    l.getDateDebut().toLocalDateTime().toLocalDate() : null;
+                            return debutLoc != null &&
+                                    (debutLoc.isEqual(debutFiltre) || debutLoc.isAfter(debutFiltre)) &&
+                                    (debutLoc.isEqual(finFiltre) || debutLoc.isBefore(finFiltre));
+                        })
+                        .collect(Collectors.toList());
+            }
+        }
+
+        // ✅ TRI - seulement si le composant existe
+        if (comboTri != null) {
+            String tri = comboTri.getValue();
+            if (tri != null) {
+                switch (tri) {
+                    case "Plus récentes":
+                        filtrees.sort((l1, l2) -> {
+                            if (l1.getDateDebut() == null) return 1;
+                            if (l2.getDateDebut() == null) return -1;
+                            return l2.getDateDebut().compareTo(l1.getDateDebut());
+                        });
+                        break;
+                    case "Plus anciennes":
+                        filtrees.sort((l1, l2) -> {
+                            if (l1.getDateDebut() == null) return 1;
+                            if (l2.getDateDebut() == null) return -1;
+                            return l1.getDateDebut().compareTo(l2.getDateDebut());
+                        });
+                        break;
+                    case "Montant croissant":
+                        filtrees.sort(Comparator.comparingDouble(Location::getMontantTotal));
+                        break;
+                    case "Montant décroissant":
+                        filtrees.sort((l1, l2) -> Double.compare(l2.getMontantTotal(), l1.getMontantTotal()));
+                        break;
+                    case "Durée croissante":
+                        filtrees.sort((l1, l2) -> {
+                            long d1 = calculerDuree(l1);
+                            long d2 = calculerDuree(l2);
+                            return Long.compare(d1, d2);
+                        });
+                        break;
+                    case "Durée décroissante":
+                        filtrees.sort((l1, l2) -> {
+                            long d1 = calculerDuree(l1);
+                            long d2 = calculerDuree(l2);
+                            return Long.compare(d2, d1);
+                        });
+                        break;
+                }
+            }
+        }
+
+        afficherReservations(filtrees);
+    }
+
+    private long calculerDuree(Location loc) {
+        if (loc.getDateDebut() == null || loc.getDateFinPrev() == null) return 0;
+        return java.time.Duration.between(
+                loc.getDateDebut().toLocalDateTime(),
+                loc.getDateFinPrev().toLocalDateTime()
+        ).toDays();
+    }
+
+    @FXML
+    private void reinitialiserFiltres() {
+        if (comboFiltreStatut != null) comboFiltreStatut.setValue("Tous les statuts");
+        if (comboTri != null) comboTri.setValue("Plus récentes");
+        if (dpDateDebut != null) dpDateDebut.setValue(null);
+        if (dpDateFin != null) dpDateFin.setValue(null);
+
+        appliquerFiltres();
     }
 
     private void masquerResultats() {
@@ -107,7 +302,7 @@ public class MesReservationsController implements Initializable {
     private void afficherReservations(List<Location> locations) {
         vboxListeReservations.getChildren().clear();
 
-        lblNbResultats.setText(locations.size() + " réservation(s) trouvée(s) pour ce CIN");
+        lblNbResultats.setText(locations.size() + " réservation(s) trouvée(s)");
 
         for (Location loc : locations) {
             VBox card = creerCarteReservation(loc);
@@ -253,12 +448,19 @@ public class MesReservationsController implements Initializable {
      */
     private void afficherQRCodePopup(Location loc, String nomVehicule,
                                      String dateDebut, String dateFin) {
-        Alert popup = new Alert(Alert.AlertType.INFORMATION);
-        popup.setTitle("QR Code — Réservation #" + loc.getIdLocation());
-        popup.setHeaderText("QR Code de votre réservation");
+        // Créer un dialog personnalisé
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("QR Code — Réservation #" + loc.getIdLocation());
+        dialog.setHeaderText("QR Code de votre réservation");
+
+        // Style du dialog pour correspondre au thème
+        DialogPane dialogPane = dialog.getDialogPane();
+        dialogPane.setStyle("-fx-background-color: #0a0f1e;");
+        dialogPane.getScene().getWindow().setOnCloseRequest(e -> dialog.close());
 
         VBox content = new VBox(15);
         content.setAlignment(Pos.CENTER);
+        content.setStyle("-fx-padding: 20;");
 
         ImageView imgQR = new ImageView();
         imgQR.setFitWidth(300);
@@ -266,6 +468,10 @@ public class MesReservationsController implements Initializable {
         imgQR.setPreserveRatio(true);
 
         Label loading = new Label("Génération du QR Code...");
+        loading.setStyle("-fx-text-fill: #7f8c8d;");
+
+        Label info = new Label("Présentez ce QR Code lors du retrait du véhicule");
+        info.setStyle("-fx-text-fill: white; -fx-font-size: 14px;");
 
         // Générer en arrière-plan
         new Thread(() -> {
@@ -281,11 +487,11 @@ public class MesReservationsController implements Initializable {
             });
         }).start();
 
-        content.getChildren().addAll(imgQR, loading,
-                new Label("Présentez ce QR Code lors du retrait du véhicule"));
+        content.getChildren().addAll(imgQR, loading, info);
+        dialogPane.setContent(content);
+        dialogPane.getButtonTypes().add(ButtonType.CLOSE);
 
-        popup.getDialogPane().setContent(content);
-        popup.showAndWait();
+        dialog.showAndWait();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -330,6 +536,11 @@ public class MesReservationsController implements Initializable {
         navigerVers("/views/client/CatalogueVoitures.fxml", "Horizia - Catalogue", 1400, 800);
     }
 
+    @FXML
+    private void allerPlanning() {
+        navigerVers("/views/client/ClientPlanning.fxml", "Horizia - Planning", 1200, 800);
+    }
+
     private void navigerVers(String fxmlPath, String titre, double w, double h) {
         try {
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
@@ -338,6 +549,15 @@ public class MesReservationsController implements Initializable {
             stage.setTitle(titre);
         } catch (IOException e) {
             System.err.println("[MesReservations] Erreur navigation: " + e.getMessage());
+            afficherAlerte("Erreur", "Impossible de charger la page : " + e.getMessage());
         }
+    }
+
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titre);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

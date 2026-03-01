@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import org.example.services.LocationService;
 import org.example.utils.DatabaseConnection;
 
 import java.sql.Connection;
@@ -22,7 +23,7 @@ public class Main extends Application {
             System.out.println("╔════════════════════════════════════════════════╗");
             System.out.println("║   HORIZIA - Système de Gestion de Location    ║");
             System.out.println("╚════════════════════════════════════════════════╝");
-            System.out.println("\n[1/3] Test de connexion à la base de données...");
+            System.out.println("\n[1/4] Test de connexion à la base de données...");
 
             Connection testConnection = DatabaseConnection.getInstance().getConnection();
 
@@ -34,7 +35,17 @@ public class Main extends Application {
                 throw new Exception("Connexion à la base de données échouée !");
             }
 
-            // Icône de l'application
+            // ═══════════════════════════════════════════════════════
+            // MISE À JOUR AUTOMATIQUE DES STATUTS
+            // ═══════════════════════════════════════════════════════
+            System.out.println("\n[2/4] Mise à jour automatique des statuts...");
+            LocationService locationService = new LocationService();
+            int nbMAJ = locationService.mettreAJourStatutsAutomatique();
+            System.out.println("   " + nbMAJ + " location(s) mise(s) à jour");
+
+            // ═══════════════════════════════════════════════════════
+            // CHARGEMENT DE L'ICÔNE
+            // ═══════════════════════════════════════════════════════
             Image icon64 = new Image(getClass().getResourceAsStream("/images/logo.png"));
             primaryStage.getIcons().clear();
             primaryStage.getIcons().add(icon64);
@@ -42,7 +53,7 @@ public class Main extends Application {
             // ═══════════════════════════════════════════════════════
             // ÉCRAN DE SÉLECTION ADMIN / CLIENT
             // ═══════════════════════════════════════════════════════
-            System.out.println("\n[2/3] Affichage de l'écran de sélection...");
+            System.out.println("\n[3/4] Affichage de l'écran de sélection...");
 
             showSelectionScreen(primaryStage, icon64);
 
@@ -51,14 +62,10 @@ public class Main extends Application {
             System.out.println("╚════════════════════════════════════════════════╝\n");
 
         } catch (Exception e) {
-            // ═══════════════════════════════════════════════════════
-            // GESTION DES ERREURS
-            // ═══════════════════════════════════════════════════════
             System.err.println("✗ ERREUR FATALE AU DÉMARRAGE :");
             System.err.println("   " + e.getMessage());
             e.printStackTrace();
 
-            // Affichage d'une alerte à l'utilisateur
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Erreur de démarrage");
             alert.setHeaderText("Impossible de démarrer l'application");
@@ -85,17 +92,16 @@ public class Main extends Application {
             root.setAlignment(javafx.geometry.Pos.CENTER);
             root.setStyle("-fx-background-color: linear-gradient(to bottom, #ece9e9, #ece9e5); -fx-padding: 50;");
 
-            // Logo (remplace le texte HORIZIA)
+            // Logo
             javafx.scene.image.ImageView logoView = new javafx.scene.image.ImageView();
             try {
                 Image logo = new Image(getClass().getResourceAsStream("/images/logo.png"));
                 logoView.setImage(logo);
-                logoView.setFitWidth(300);  // Ajustez la largeur selon vos besoins
+                logoView.setFitWidth(300);
                 logoView.setPreserveRatio(true);
                 logoView.setSmooth(true);
             } catch (Exception e) {
                 System.err.println("⚠ Impossible de charger le logo : " + e.getMessage());
-                // Fallback : afficher le texte si l'image n'est pas trouvée
                 javafx.scene.control.Label titleLabel = new javafx.scene.control.Label("HORIZIA");
                 titleLabel.setStyle("-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: white;");
                 root.getChildren().add(titleLabel);
@@ -118,7 +124,6 @@ public class Main extends Application {
 
             buttonContainer.getChildren().addAll(btnAdmin, btnClient);
 
-            // Ajouter le logo seulement si l'image a été chargée avec succès
             if (logoView.getImage() != null) {
                 root.getChildren().addAll(logoView, subtitleLabel, buttonContainer);
             } else {
@@ -138,6 +143,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
+
     /**
      * Crée un bouton stylisé
      */
@@ -153,7 +159,6 @@ public class Main extends Application {
                         "-fx-cursor: hand;"
         );
 
-        // Effet hover
         button.setOnMouseEntered(e -> button.setStyle(
                 "-fx-background-color: derive(" + color + ", 20%);" +
                         "-fx-text-fill: white;" +
@@ -177,7 +182,6 @@ public class Main extends Application {
         return button;
     }
 
-    // Variables pour suivre les fenêtres ouvertes
     private Stage currentAdminStage = null;
     private Stage currentClientStage = null;
 
@@ -186,16 +190,13 @@ public class Main extends Application {
      */
     private void openAdminPanel(Stage selectionStage, Image icon) {
         try {
-            // Vérifier si une fenêtre admin est déjà ouverte
             if (currentAdminStage != null && currentAdminStage.isShowing()) {
-                // Ramener la fenêtre au premier plan
                 currentAdminStage.toFront();
                 currentAdminStage.requestFocus();
                 System.out.println("⚠ Panel Admin déjà ouvert - fenêtre ramenée au premier plan");
                 return;
             }
 
-            // Fermer la fenêtre client si elle est ouverte
             if (currentClientStage != null && currentClientStage.isShowing()) {
                 currentClientStage.close();
                 currentClientStage = null;
@@ -214,7 +215,6 @@ public class Main extends Application {
             adminStage.setResizable(true);
             adminStage.setMaximized(true);
 
-            // Gérer la fermeture de la fenêtre
             adminStage.setOnCloseRequest(e -> {
                 currentAdminStage = null;
                 System.out.println("✓ Panel Admin fermé");
@@ -242,16 +242,13 @@ public class Main extends Application {
      */
     private void openClientPanel(Stage selectionStage, Image icon) {
         try {
-            // Vérifier si une fenêtre client est déjà ouverte
             if (currentClientStage != null && currentClientStage.isShowing()) {
-                // Ramener la fenêtre au premier plan
                 currentClientStage.toFront();
                 currentClientStage.requestFocus();
                 System.out.println("⚠ Panel Client déjà ouvert - fenêtre ramenée au premier plan");
                 return;
             }
 
-            // Fermer la fenêtre admin si elle est ouverte
             if (currentAdminStage != null && currentAdminStage.isShowing()) {
                 currentAdminStage.close();
                 currentAdminStage = null;
@@ -270,7 +267,6 @@ public class Main extends Application {
             clientStage.setResizable(true);
             clientStage.setMaximized(true);
 
-            // Gérer la fermeture de la fenêtre
             clientStage.setOnCloseRequest(e -> {
                 currentClientStage = null;
                 System.out.println("✓ Panel Client fermé");

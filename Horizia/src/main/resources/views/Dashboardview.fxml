@@ -19,29 +19,51 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.Dashboardcontroller"
-      spacing="20" style="-fx-background-color: #f5f5f5;" prefWidth="1400" prefHeight="900">
+      spacing="20" style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
+      prefWidth="1400" prefHeight="900">
 
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
 
-    <!-- Header -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- HEADER                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <HBox alignment="CENTER_LEFT" spacing="20">
-        <VBox>
-            <Label text="Dashboard de Location" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-            <Label text="Vue d'ensemble des locations et véhicules" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+        <Label text="📊" style="-fx-font-size: 48px;"/>
+        <VBox spacing="5">
+            <Label text="Dashboard de Location"
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+            <Label text="Vue d'ensemble des locations et véhicules"
+                   style="-fx-font-size: 14px; -fx-text-fill: #6b7280;"/>
         </VBox>
         <HBox HBox.hgrow="ALWAYS"/>
-        <Button text="🔄 Rafraîchir"
+
+        <!-- Boutons d'action -->
+        <Button fx:id="btnRafraichir"
+                text="🔄 Rafraîchir"
                 onAction="#rafraichirDashboard"
-                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+                style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
+                       -fx-font-size: 13px; -fx-padding: 10 18;
+                       -fx-background-radius: 10; -fx-cursor: hand; -fx-font-weight: bold;"/>
+
+        <Button fx:id="btnMettreAJourStatuts"
+                text="⚡ Mettre à jour statuts"
+                onAction="#mettreAJourStatuts"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                       -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 10 18;
+                       -fx-background-radius: 10; -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(39,174,96,0.4), 8, 0, 0, 3);"/>
     </HBox>
 
-    <Separator/>
+    <Separator style="-fx-background-color: #e5e7eb;"/>
 
-    <!-- Section Statistiques Principales -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SECTION STATISTIQUES PRINCIPALES                                -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <VBox spacing="15">
-        <Label text="📊 Statistiques Principales" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+        <Label text="📈 Statistiques Principales"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
 
         <GridPane hgap="20" vgap="20">
             <columnConstraints>
@@ -50,46 +72,74 @@
                 <ColumnConstraints percentWidth="33.33"/>
             </columnConstraints>
 
-            <!-- Card Modèle le plus loué -->
-            <VBox GridPane.columnIndex="0" spacing="10"
-                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+            <!-- Card 1 : Modèle le plus loué -->
+            <VBox GridPane.columnIndex="0" spacing="15"
+                  style="-fx-background-color: white; -fx-padding: 25;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
                 <HBox alignment="CENTER_LEFT" spacing="15">
-                    <Label text="🏆" style="-fx-font-size: 40px;"/>
-                    <VBox>
-                        <Label text="Modèle le plus loué" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-                        <Label fx:id="lblModeleTopNom" text="Kia Picanto" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                        <Label fx:id="lblModeleTopCount" text="5 locations" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
+                    <VBox alignment="CENTER" style="-fx-background-color: #f59e0b20;
+                          -fx-background-radius: 12; -fx-padding: 15;">
+                        <Label text="🏆" style="-fx-font-size: 40px;"/>
                     </VBox>
-                </HBox>
-            </VBox>
-
-            <!-- Card Locations actives -->
-            <VBox GridPane.columnIndex="1" spacing="10"
-                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                <HBox alignment="CENTER_LEFT" spacing="15">
-                    <Label text="📅" style="-fx-font-size: 40px;"/>
-                    <VBox>
-                        <Label text="Locations actives" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-                        <Label fx:id="lblLocationsActives" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
-                        <Label text="En cours et réservées" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
-                    </VBox>
-                </HBox>
-            </VBox>
-
-            <!-- Card Véhicules -->
-            <VBox GridPane.columnIndex="2" spacing="10"
-                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-                <HBox alignment="CENTER_LEFT" spacing="15">
-                    <Label text="🚗" style="-fx-font-size: 40px;"/>
                     <VBox spacing="5">
-                        <Label text="État du parc" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label fx:id="lblVehiculesDisponibles" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
-                            <Label text="disponibles" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
-                        </HBox>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Label fx:id="lblVehiculesLoues" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
-                            <Label text="loués" style="-fx-font-size: 12px; -fx-text-fill: #95a5a6;"/>
+                        <Label text="Modèle le plus loué"
+                               style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblModeleTopNom" text="Kia Picanto"
+                               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+                        <Label fx:id="lblModeleTopCount" text="5 locations"
+                               style="-fx-font-size: 12px; -fx-text-fill: #f59e0b; -fx-font-weight: bold;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Card 2 : Locations actives -->
+            <VBox GridPane.columnIndex="1" spacing="15"
+                  style="-fx-background-color: white; -fx-padding: 25;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox alignment="CENTER" style="-fx-background-color: #27ae6020;
+                          -fx-background-radius: 12; -fx-padding: 15;">
+                        <Label text="📅" style="-fx-font-size: 40px;"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="Locations actives"
+                               style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+                        <Label fx:id="lblLocationsActives" text="0"
+                               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                        <Label text="En cours et réservées"
+                               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Card 3 : État du parc -->
+            <VBox GridPane.columnIndex="2" spacing="15"
+                  style="-fx-background-color: white; -fx-padding: 25;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox alignment="CENTER" style="-fx-background-color: #3498db20;
+                          -fx-background-radius: 12; -fx-padding: 15;">
+                        <Label text="🚗" style="-fx-font-size: 40px;"/>
+                    </VBox>
+                    <VBox spacing="5">
+                        <Label text="État du parc"
+                               style="-fx-font-size: 13px; -fx-text-fill: #6b7280;"/>
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <VBox>
+                                <Label fx:id="lblVehiculesDisponibles" text="0"
+                                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                                <Label text="disponibles"
+                                       style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
+                            </VBox>
+                            <VBox>
+                                <Label fx:id="lblVehiculesLoues" text="0"
+                                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+                                <Label text="loués"
+                                       style="-fx-font-size: 10px; -fx-text-fill: #95a5a6;"/>
+                            </VBox>
                         </HBox>
                     </VBox>
                 </HBox>
@@ -97,34 +147,55 @@
         </GridPane>
     </VBox>
 
-    <!-- Section Graphiques -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SECTION GRAPHIQUES                                              -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <HBox spacing="20" VBox.vgrow="ALWAYS">
-        <!-- Graphique en barres -->
-        <VBox spacing="10" HBox.hgrow="ALWAYS"
-              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-            <Label text="📈 Top 5 Modèles Loués" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-            <BarChart fx:id="barChartTopModeles" VBox.vgrow="ALWAYS" legendVisible="false">
-                <xAxis><CategoryAxis fx:id="xAxis" label="Modèle" side="BOTTOM"/></xAxis>
-                <yAxis><NumberAxis fx:id="yAxis" label="Nombre de locations" side="LEFT"/></yAxis>
+
+        <!-- Graphique en barres - Top modèles -->
+        <VBox spacing="15" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-padding: 25;
+                     -fx-background-radius: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+            <Label text="📊 Top 5 Modèles Loués"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+            <BarChart fx:id="barChartTopModeles"
+                      VBox.vgrow="ALWAYS"
+                      legendVisible="false"
+                      style="-fx-background-color: transparent;">
+                <xAxis>
+                    <CategoryAxis fx:id="xAxis" label="Modèle" side="BOTTOM"
+                                  style="-fx-font-size: 11px;"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="yAxis" label="Nombre de locations" side="LEFT"
+                                style="-fx-font-size: 11px;"/>
+                </yAxis>
             </BarChart>
         </VBox>
 
-        <!-- Graphique en camembert -->
-        <VBox spacing="10"
-              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
-              minWidth="400">
-            <Label text="🥧 Répartition par Statut" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-            <PieChart fx:id="pieChartStatuts" VBox.vgrow="ALWAYS" legendVisible="true"/>
+        <!-- Graphique en camembert - Statuts -->
+        <VBox spacing="15" minWidth="400"
+              style="-fx-background-color: white; -fx-padding: 25;
+                     -fx-background-radius: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+            <Label text="🥧 Répartition par Statut"
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
+            <PieChart fx:id="pieChartStatuts"
+                      VBox.vgrow="ALWAYS"
+                      legendVisible="true"
+                      style="-fx-background-color: transparent;"/>
         </VBox>
     </HBox>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- Section Cards de Navigation - MODIFIÉE : 5 cards             -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SECTION CARDS DE NAVIGATION                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     <VBox spacing="15">
-        <Label text="🎯 Accès Rapide" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+        <Label text="🎯 Accès Rapide"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
 
-        <!-- Ligne 1 : 3 cards existantes -->
+        <!-- Ligne 1 : 3 cards -->
         <GridPane hgap="20" vgap="20">
             <columnConstraints>
                 <ColumnConstraints percentWidth="33.33"/>
@@ -133,91 +204,124 @@
             </columnConstraints>
 
             <!-- Card Gestion Locations -->
-            <HBox fx:id="cardGestionLocations" GridPane.columnIndex="0" spacing="15" alignment="CENTER_LEFT"
+            <HBox fx:id="cardGestionLocations"
+                  GridPane.columnIndex="0"
+                  spacing="20"
+                  alignment="CENTER_LEFT"
                   onMouseClicked="#handleCardGestionLocationsClick"
-                  style="-fx-background-color: linear-gradient(to right, #f49c11, #f49c00); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
-                <Label text="📋" style="-fx-font-size: 50px;"/>
+                  style="-fx-background-color: linear-gradient(to bottom right, #f59e0b, #f39c12);
+                         -fx-padding: 25; -fx-background-radius: 16;
+                         -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);">
+                <Label text="📋" style="-fx-font-size: 48px;"/>
                 <VBox spacing="5">
-                    <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                    <Label text="Locations" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Gérer toutes les locations" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                    <Label text="Gestion des"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Locations"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Gérer toutes les locations"
+                           style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
             </HBox>
 
             <!-- Card Gestion Véhicules -->
-            <HBox fx:id="cardGestionVehicules" GridPane.columnIndex="1" spacing="15" alignment="CENTER_LEFT"
+            <HBox fx:id="cardGestionVehicules"
+                  GridPane.columnIndex="1"
+                  spacing="20"
+                  alignment="CENTER_LEFT"
                   onMouseClicked="#handleCardGestionVehiculesClick"
-                  style="-fx-background-color: linear-gradient(to right, #0384b7, #0384b1); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
-                <Label text="🚙" style="-fx-font-size: 50px;"/>
+                  style="-fx-background-color: linear-gradient(to bottom right, #0384b7, #0369a1);
+                         -fx-padding: 25; -fx-background-radius: 16;
+                         -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);">
+                <Label text="🚙" style="-fx-font-size: 48px;"/>
                 <VBox spacing="5">
-                    <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                    <Label text="Véhicules" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Ajouter et modifier véhicules" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                    <Label text="Gestion des"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Véhicules"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Ajouter et modifier véhicules"
+                           style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
             </HBox>
 
             <!-- Card Gestion Marques -->
-            <HBox fx:id="cardGestionMarques" GridPane.columnIndex="2" spacing="15" alignment="CENTER_LEFT"
+            <HBox fx:id="cardGestionMarques"
+                  GridPane.columnIndex="2"
+                  spacing="20"
+                  alignment="CENTER_LEFT"
                   onMouseClicked="#handleCardGestionMarquesClick"
-                  style="-fx-background-color: linear-gradient(to right, #ece9e5, #0384b7); -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
-                <Label text="🏷️" style="-fx-font-size: 50px;"/>
+                  style="-fx-background-color: linear-gradient(to bottom right, #8b5cf6, #6d28d9);
+                         -fx-padding: 25; -fx-background-radius: 16;
+                         -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);">
+                <Label text="🏷️" style="-fx-font-size: 48px;"/>
                 <VBox spacing="5">
-                    <Label text="Gestion des" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                    <Label text="Marques" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Gérer marques et modèles" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                    <Label text="Gestion des"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Marques et Modèles"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Gérer marques et modèles"
+                           style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
             </HBox>
         </GridPane>
 
-        <!-- Ligne 2 : 2 nouvelles cards -->
+        <!-- Ligne 2 : 2 cards -->
         <GridPane hgap="20">
             <columnConstraints>
                 <ColumnConstraints percentWidth="50"/>
                 <ColumnConstraints percentWidth="50"/>
             </columnConstraints>
 
-            <!-- 🆕 Card Documents & Facturation -->
-            <HBox fx:id="cardDocuments" GridPane.columnIndex="0" spacing="15" alignment="CENTER_LEFT"
+            <!-- Card Documents & Facturation -->
+            <HBox fx:id="cardDocuments"
+                  GridPane.columnIndex="0"
+                  spacing="20"
+                  alignment="CENTER_LEFT"
                   onMouseClicked="#ouvrirDocuments"
-                  style="-fx-background-color: linear-gradient(to right, #6c3483, #8e44ad);
-                         -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand;
-                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
-                <Label text="📄" style="-fx-font-size: 50px;"/>
+                  style="-fx-background-color: linear-gradient(to bottom right, #8e44ad, #6b3483);
+                         -fx-padding: 25; -fx-background-radius: 16;
+                         -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);">
+                <Label text="📄" style="-fx-font-size: 48px;"/>
                 <VBox spacing="5">
-                    <Label text="Documents &amp;" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                    <Label text="Facturation" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Contrats, factures et QR Codes" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                    <Label text="Documents et"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Facturation"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Contrats, factures et QR Codes"
+                           style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
-                <!-- Badge Nouveau -->
                 <HBox HBox.hgrow="ALWAYS" alignment="TOP_RIGHT">
-                    <Label text="🆕 NOUVEAU"
+                    <Label text="🆕"
                            style="-fx-background-color: rgba(255,255,255,0.25); -fx-text-fill: white;
-                                  -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 10;
-                                  -fx-background-radius: 10;"/>
+                                  -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 4 10;
+                                  -fx-background-radius: 20;"/>
                 </HBox>
             </HBox>
 
-            <!-- 🆕 Card Planning & Calendrier -->
-            <HBox fx:id="cardPlanning" GridPane.columnIndex="1" spacing="15" alignment="CENTER_LEFT"
+            <!-- Card Planning & Calendrier -->
+            <HBox fx:id="cardPlanning"
+                  GridPane.columnIndex="1"
+                  spacing="20"
+                  alignment="CENTER_LEFT"
                   onMouseClicked="#ouvrirPlanning"
-                  style="-fx-background-color: linear-gradient(to right, #0b5563, #117a8b);
-                         -fx-padding: 25; -fx-background-radius: 10; -fx-cursor: hand;
-                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3);">
-                <Label text="🗓️" style="-fx-font-size: 50px;"/>
+                  style="-fx-background-color: linear-gradient(to bottom right, #0e7c86, #0b5563);
+                         -fx-padding: 25; -fx-background-radius: 16;
+                         -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 12, 0, 0, 4);">
+                <Label text="🗓️" style="-fx-font-size: 48px;"/>
                 <VBox spacing="5">
-                    <Label text="Planning &amp;" style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.9);"/>
-                    <Label text="Calendrier" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Calendrier mensuel et statistiques" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
+                    <Label text="Planning et"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+                    <Label text="Calendrier"
+                           style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Calendrier mensuel et statistiques"
+                           style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.8);"/>
                 </VBox>
-                <!-- Badge Nouveau -->
                 <HBox HBox.hgrow="ALWAYS" alignment="TOP_RIGHT">
-                    <Label text="🆕 NOUVEAU"
+                    <Label text="🆕"
                            style="-fx-background-color: rgba(255,255,255,0.25); -fx-text-fill: white;
-                                  -fx-font-size: 10px; -fx-font-weight: bold; -fx-padding: 4 10;
-                                  -fx-background-radius: 10;"/>
+                                  -fx-font-size: 12px; -fx-font-weight: bold; -fx-padding: 4 10;
+                                  -fx-background-radius: 20;"/>
                 </HBox>
             </HBox>
-
         </GridPane>
     </VBox>
 

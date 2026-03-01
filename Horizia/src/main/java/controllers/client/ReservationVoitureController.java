@@ -14,6 +14,7 @@ import org.example.entities.Pays;
 import org.example.entities.Vehicule;
 import org.example.services.LocationService;
 import org.example.services.ModeleService;
+import org.example.services.PlanningService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -21,38 +22,57 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * ✅ Contrôleur complet de réservation avec validation avancée
+ * et vérification de disponibilité
+ */
 public class ReservationVoitureController {
 
+    // ─── FXML - Informations Véhicule ───────────────────────────
     @FXML private ImageView imgVoiture;
     @FXML private Label lblModele;
     @FXML private Label lblCaracteristiques;
     @FXML private Label lblPrixJour;
 
+    // ─── FXML - Dates et heures ─────────────────────────────────
     @FXML private DatePicker dpDateDebut;
     @FXML private DatePicker dpDateFin;
     @FXML private Spinner<Integer> spHeureDebut;
     @FXML private Spinner<Integer> spHeureFin;
 
+    // ─── FXML - Informations client ─────────────────────────────
     @FXML private TextField txtNomComplet;
     @FXML private ComboBox<Pays> comboPays;
     @FXML private TextField txtTelephone;
     @FXML private TextField txtCIN;
     @FXML private TextArea txtNotes;
 
+    // ─── FXML - Récapitulatif prix ──────────────────────────────
     @FXML private Label lblNbJours;
-    @FXML private Label lblPrixTotal;
+    @FXML private Label lblPrixBase;
     @FXML private Label lblAvance;
     @FXML private Label lblResteAPayer;
 
+    // ─── FXML - Options supplémentaires ─────────────────────────
+    @FXML private CheckBox chkGPS;
+    @FXML private CheckBox chkSiegeBebe;
+    @FXML private CheckBox chkAssurance;
+    @FXML private Label lblMontantExtras;
+    @FXML private Label lblMontantFinal;
+
+    // ─── FXML - Conditions et boutons ───────────────────────────
     @FXML private CheckBox cbAccepteConditions;
     @FXML private Button btnConfirmer;
     @FXML private Button btnAnnuler;
 
+    // ─── Services ────────────────────────────────────────────────
     private Vehicule voiture;
     private LocationService locationService;
     private ModeleService modeleService;
+    private PlanningService planningService;
 
     private static final Pattern PHONE_TUNISIA       = Pattern.compile("^(\\+216)?[2459]\\d{7}$");
     private static final Pattern PHONE_FRANCE        = Pattern.compile("^(\\+33|0)[1-9]\\d{8}$");
@@ -62,9 +82,15 @@ public class ReservationVoitureController {
     private static final Pattern CIN_TUNISIA         = Pattern.compile("^[0-9]{8}$");
     private static final Pattern PASSPORT_INTERNATIONAL = Pattern.compile("^[A-Z0-9]{6,12}$");
 
+    // Tarifs des extras
+    private static final double PRIX_GPS = 5.0;
+    private static final double PRIX_SIEGE_BEBE = 3.0;
+    private static final double PRIX_ASSURANCE = 15.0;
+
     public ReservationVoitureController() {
         this.locationService = new LocationService();
         this.modeleService   = new ModeleService();
+        this.planningService = new PlanningService();
     }
 
     @FXML
@@ -73,6 +99,19 @@ public class ReservationVoitureController {
         configurerCalculAuto();
         initialiserPays();
         configurerValidationEnTempsReel();
+        configurerExtras();
+    }
+
+    private void configurerExtras() {
+        if (chkGPS != null) {
+            chkGPS.setOnAction(e -> calculerMontants());
+        }
+        if (chkSiegeBebe != null) {
+            chkSiegeBebe.setOnAction(e -> calculerMontants());
+        }
+        if (chkAssurance != null) {
+            chkAssurance.setOnAction(e -> calculerMontants());
+        }
     }
 
     private void initialiserPays() {
@@ -88,25 +127,27 @@ public class ReservationVoitureController {
             if (newVal != null && !newVal.trim().isEmpty() && comboPays.getValue() != null) {
                 String style = "-fx-border-color: " +
                         (validerTelephoneAvecPays(comboPays.getValue(), newVal) ? "#27ae60" : "#e74c3c") +
-                        "; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;";
+                        "; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8;";
                 txtTelephone.setStyle(style);
             } else {
-                txtTelephone.setStyle("-fx-font-size: 14px; -fx-background-radius: 8;");
+                txtTelephone.setStyle("-fx-background-radius: 8;");
             }
         });
+
         comboPays.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (txtTelephone.getText() != null && !txtTelephone.getText().trim().isEmpty()) {
                 txtTelephone.setText(txtTelephone.getText()); // re-trigger listener
             }
         });
+
         txtCIN.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null && !newVal.trim().isEmpty()) {
                 String style = "-fx-border-color: " +
                         (validerCinOuPassport(newVal) ? "#27ae60" : "#e74c3c") +
-                        "; -fx-border-width: 2; -fx-font-size: 14px; -fx-background-radius: 8;";
+                        "; -fx-border-width: 2; -fx-border-radius: 8; -fx-background-radius: 8;";
                 txtCIN.setStyle(style);
             } else {
-                txtCIN.setStyle("-fx-font-size: 14px; -fx-background-radius: 8;");
+                txtCIN.setStyle("-fx-background-radius: 8;");
             }
         });
     }
@@ -186,13 +227,17 @@ public class ReservationVoitureController {
     private void calculerMontants() {
         if (dpDateDebut.getValue() == null || dpDateFin.getValue() == null) {
             lblNbJours.setText("--");
-            lblPrixTotal.setText("-- TND");
+            if (lblPrixBase != null) lblPrixBase.setText("-- TND");
             lblAvance.setText("-- TND");
             lblResteAPayer.setText("-- TND");
+            if (lblMontantExtras != null) lblMontantExtras.setText("-- TND");
+            if (lblMontantFinal != null) lblMontantFinal.setText("-- TND");
             return;
         }
+
         LocalDateTime debut = dpDateDebut.getValue().atTime(spHeureDebut.getValue(), 0);
         LocalDateTime fin   = dpDateFin.getValue().atTime(spHeureFin.getValue(), 0);
+
         long jours = ChronoUnit.DAYS.between(debut, fin);
         if (jours < 0) {
             lblNbJours.setText("Dates invalides");
@@ -200,19 +245,59 @@ public class ReservationVoitureController {
         }
         if (jours == 0) jours = 1;
 
-        double montantTotal = jours * voiture.getPrixParJour();
+        double montantBase = jours * voiture.getPrixParJour();
+
+        // Calcul des extras
+        double extras = 0;
+        if (chkGPS != null && chkGPS.isSelected()) extras += PRIX_GPS * jours;
+        if (chkSiegeBebe != null && chkSiegeBebe.isSelected()) extras += PRIX_SIEGE_BEBE * jours;
+        if (chkAssurance != null && chkAssurance.isSelected()) extras += PRIX_ASSURANCE * jours;
+
+        double montantTotal = montantBase + extras;
         double avance = montantTotal * 0.30;
         double reste  = montantTotal - avance;
 
         lblNbJours.setText(jours + " jour(s)");
-        lblPrixTotal.setText(String.format("%.3f TND", montantTotal));
+        if (lblPrixBase != null) lblPrixBase.setText(String.format("%.3f TND", montantBase));
+        if (lblMontantExtras != null) lblMontantExtras.setText(String.format("%.3f TND", extras));
+        if (lblMontantFinal != null) lblMontantFinal.setText(String.format("%.3f TND", montantTotal));
         lblAvance.setText(String.format("%.3f TND (30%%)", avance));
         lblResteAPayer.setText(String.format("%.3f TND", reste));
+    }
+
+    // ✅ Vérification de disponibilité
+    private boolean verifierDisponibilite() {
+        if (voiture == null || dpDateDebut.getValue() == null || dpDateFin.getValue() == null) {
+            return true;
+        }
+
+        LocalDate debut = dpDateDebut.getValue();
+        LocalDate fin = dpDateFin.getValue();
+
+        boolean disponible = planningService.isVehiculeDisponible(
+                voiture.getIdVehicule(),
+                debut,
+                fin,
+                -1
+        );
+
+        if (!disponible) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Véhicule non disponible");
+            alert.setHeaderText(null);
+            alert.setContentText("Ce véhicule est déjà réservé sur la période sélectionnée.\n" +
+                    "Veuillez choisir une autre période ou un autre véhicule.");
+            alert.showAndWait();
+            return false;
+        }
+        return true;
     }
 
     @FXML
     private void confirmerReservation() {
         if (!validerFormulaire()) return;
+
+        if (!verifierDisponibilite()) return;
 
         try {
             String telephoneComplet = comboPays.getValue().formaterNumero(txtTelephone.getText().trim());
@@ -231,18 +316,36 @@ public class ReservationVoitureController {
 
             long jours = ChronoUnit.DAYS.between(debut, fin);
             if (jours == 0) jours = 1;
-            double montantTotal = jours * voiture.getPrixParJour();
+
+            double montantBase = jours * voiture.getPrixParJour();
+
+            // Ajouter les extras dans les notes
+            StringBuilder notes = new StringBuilder();
+            if (txtNotes.getText() != null && !txtNotes.getText().trim().isEmpty()) {
+                notes.append(txtNotes.getText().trim()).append("\n");
+            }
+
+            StringBuilder extras = new StringBuilder();
+            if (chkGPS != null && chkGPS.isSelected()) extras.append("GPS, ");
+            if (chkSiegeBebe != null && chkSiegeBebe.isSelected()) extras.append("Siège bébé, ");
+            if (chkAssurance != null && chkAssurance.isSelected()) extras.append("Assurance, ");
+
+            if (extras.length() > 0) {
+                notes.append("Extras: ").append(extras.substring(0, extras.length() - 2));
+            }
+
+            location.setNotes(notes.toString());
+
+            double montantTotal = montantBase;
             double avance = montantTotal * 0.30;
 
             location.setMontantTotal(montantTotal);
             location.setAvance(avance);
             location.setStatut("réservée");
-            location.setNotes(txtNotes.getText() != null ? txtNotes.getText().trim() : "");
 
             boolean succes = locationService.ajouterLocation(location);
 
             if (succes) {
-                // ✅ CORRECTION PRINCIPALE : naviguer vers ConfirmationReservation.fxml
                 naviguerVersConfirmation(location);
             } else {
                 afficherAlerte("Erreur", "Impossible d'enregistrer la réservation.", Alert.AlertType.ERROR);
@@ -255,9 +358,6 @@ public class ReservationVoitureController {
         }
     }
 
-    /**
-     * ✅ NOUVEAU : Navigate to ConfirmationReservation.fxml and inject the location.
-     */
     private void naviguerVersConfirmation(Location location) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -274,7 +374,6 @@ public class ReservationVoitureController {
         } catch (IOException e) {
             System.err.println("[Reservation] Erreur navigation confirmation : " + e.getMessage());
             e.printStackTrace();
-            // Fallback : afficher une alerte simple
             afficherAlerte("Réservation confirmée !",
                     "Numéro : #" + location.getIdLocation() + "\nClient : " + location.getClientNomComplet(),
                     Alert.AlertType.INFORMATION);
@@ -330,8 +429,9 @@ public class ReservationVoitureController {
             ButtonType btnContinuer = new ButtonType("Continuer");
             ButtonType btnAnnuler2  = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
             confirmAlert.getButtonTypes().setAll(btnContinuer, btnAnnuler2);
-            confirmAlert.showAndWait();
-            if (confirmAlert.getResult() != btnContinuer) {
+
+            Optional<ButtonType> result = confirmAlert.showAndWait();
+            if (result.isPresent() && result.get() != btnContinuer) {
                 txtCIN.requestFocus();
                 return false;
             }
@@ -344,7 +444,7 @@ public class ReservationVoitureController {
             afficherAlerte("Dates invalides", "La date de fin doit être après la date de début.", Alert.AlertType.WARNING);
             return false;
         }
-        if (!cbAccepteConditions.isSelected()) {
+        if (cbAccepteConditions == null || !cbAccepteConditions.isSelected()) {
             afficherAlerte("Conditions", "Veuillez accepter les conditions générales.", Alert.AlertType.WARNING);
             return false;
         }
@@ -357,9 +457,11 @@ public class ReservationVoitureController {
         confirmation.setTitle("Annuler la réservation");
         confirmation.setHeaderText("Êtes-vous sûr ?");
         confirmation.setContentText("Les données saisies seront perdues.");
-        confirmation.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) retourCatalogue();
-        });
+
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            retourCatalogue();
+        }
     }
 
     private void retourCatalogue() {

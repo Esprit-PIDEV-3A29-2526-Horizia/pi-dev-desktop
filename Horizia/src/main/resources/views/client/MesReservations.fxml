@@ -37,7 +37,7 @@
 
         <!-- RECHERCHE PAR CIN -->
         <VBox spacing="20" alignment="CENTER"
-              style="-fx-padding: 0 60 50 60; -fx-background-color: #0a0f1e;">
+              style="-fx-padding: 0 60 30 60; -fx-background-color: #0a0f1e;">
 
             <HBox spacing="12" alignment="CENTER" maxWidth="700">
                 <TextField fx:id="txtCinRecherche"
@@ -58,6 +58,70 @@
 
             <Label fx:id="lblErreur" text=""
                    style="-fx-font-size: 13px; -fx-text-fill: #e74c3c;"/>
+        </VBox>
+
+        <!-- ✅ NOUVEAU : FILTRES AVANCÉS (apparaissent après recherche) -->
+        <VBox fx:id="vboxFiltres" spacing="15" visible="false" managed="false"
+              style="-fx-padding: 0 60 20 60; -fx-background-color: #0a0f1e;">
+
+            <Separator style="-fx-background-color: rgba(255,255,255,0.1);"/>
+
+            <HBox spacing="20" alignment="CENTER_LEFT">
+
+                <!-- Filtre par statut -->
+                <VBox spacing="5">
+                    <Label text="Filtrer par statut"
+                           style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    <ComboBox fx:id="comboFiltreStatut" prefWidth="150"
+                              style="-fx-background-color: rgba(255,255,255,0.08);
+                                     -fx-background-radius: 8; -fx-text-fill: white;"/>
+                </VBox>
+
+                <!-- Tri -->
+                <VBox spacing="5">
+                    <Label text="Trier par"
+                           style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    <ComboBox fx:id="comboTri" prefWidth="170"
+                              style="-fx-background-color: rgba(255,255,255,0.08);
+                                     -fx-background-radius: 8; -fx-text-fill: white;"/>
+                </VBox>
+
+                <!-- Filtre par date début -->
+                <VBox spacing="5">
+                    <Label text="Date début"
+                           style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    <DatePicker fx:id="dpDateDebut" promptText="jj/mm/aaaa" prefWidth="140"
+                                style="-fx-background-color: rgba(255,255,255,0.08);
+                                       -fx-background-radius: 8; -fx-text-fill: white;"/>
+                </VBox>
+
+                <!-- Filtre par date fin -->
+                <VBox spacing="5">
+                    <Label text="Date fin"
+                           style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    <DatePicker fx:id="dpDateFin" promptText="jj/mm/aaaa" prefWidth="140"
+                                style="-fx-background-color: rgba(255,255,255,0.08);
+                                       -fx-background-radius: 8; -fx-text-fill: white;"/>
+                </VBox>
+
+                <!-- Boutons d'action -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button fx:id="btnAppliquerFiltres" text="Appliquer"
+                            onAction="#appliquerFiltres"
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                                   -fx-font-size: 12px; -fx-font-weight: bold;
+                                   -fx-padding: 8 16; -fx-background-radius: 8;
+                                   -fx-cursor: hand;"/>
+                    <Button fx:id="btnReinitialiserFiltres" text="Réinitialiser"
+                            onAction="#reinitialiserFiltres"
+                            style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: #7f8c8d;
+                                   -fx-font-size: 12px; -fx-font-weight: bold;
+                                   -fx-padding: 8 16; -fx-background-radius: 8;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+            </HBox>
+
+            <Separator style="-fx-background-color: rgba(255,255,255,0.1);"/>
         </VBox>
 
         <!-- RÉSULTATS -->

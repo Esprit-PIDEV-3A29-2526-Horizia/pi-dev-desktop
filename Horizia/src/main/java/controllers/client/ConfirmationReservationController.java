@@ -27,15 +27,7 @@ import java.util.ResourceBundle;
 
 /**
  * Contrôleur de la page de confirmation de réservation.
- *
- * fx:id alignés avec ConfirmationReservation.fxml :
- *   imgQRCode, lblQRLoading, lblNumeroReservation,
- *   lblClient, lblVehicule, lblPeriode, lblMontant, lblAvance,
- *   txtEmail, lblStatutEmail
- *
- * onAction alignés :
- *   #sauvegarderQRCode, #envoyerEmail,
- *   #ouvrirMesReservations, #retourCatalogue
+ * Version complète avec email conservé
  */
 public class ConfirmationReservationController implements Initializable {
 
@@ -185,7 +177,7 @@ public class ConfirmationReservationController implements Initializable {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // ACTIONS FXML
+    // ACTIONS FXML (EMAIL CONSERVÉ)
     // ─────────────────────────────────────────────────────────────
 
     @FXML

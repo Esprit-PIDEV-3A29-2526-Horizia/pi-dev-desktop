@@ -228,16 +228,16 @@ public class CatalogueVoituresController {
         card.setPrefWidth(280);
         card.setPrefHeight(380);
         card.setStyle(
-                "-fx-background-color: white;" +
+                "-fx-background-color: #0a0f1e;" +  // Fond sombre
                         "-fx-background-radius: 16;" +
-                        "-fx-border-color: #e0e0e0;" +
+                        "-fx-border-color: rgba(3,132,183,0.22);" +  // Bordure bleutée
                         "-fx-border-width: 1;" +
                         "-fx-border-radius: 16;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 12, 0, 0, 4);" +
                         "-fx-cursor: hand;"
         );
 
-        // Image de la voiture
+        // Image de la voiture (inchangé)
         ImageView imageView = new ImageView();
         imageView.setFitWidth(280);
         imageView.setFitHeight(180);
@@ -259,11 +259,11 @@ public class CatalogueVoituresController {
         imageContainer.setStyle("-fx-background-radius: 16 16 0 0;");
         imageContainer.setMaxHeight(180);
 
-        // Badge carburant
+        // Badge carburant (inchangé)
         Label badgeCarburant = new Label(getIconeCarburant(voiture.getCarburant()) + " " + voiture.getCarburant());
         badgeCarburant.setStyle(
-                "-fx-background-color: rgba(255,255,255,0.95);" +
-                        "-fx-text-fill: #2c3e50;" +
+                "-fx-background-color: rgba(3,132,183,0.9);" +  // Fond bleu Horizia
+                        "-fx-text-fill: white;" +                        // Texte blanc
                         "-fx-font-size: 11px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-padding: 5 10;" +
@@ -282,13 +282,13 @@ public class CatalogueVoituresController {
         lblModele.setStyle(
                 "-fx-font-size: 18px;" +
                         "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #2c3e50;"
+                        "-fx-text-fill: white;"  // Texte blanc
         );
 
         Label lblDetails = new Label(voiture.getAnnee() + " • " + voiture.getCouleur());
         lblDetails.setStyle(
                 "-fx-font-size: 13px;" +
-                        "-fx-text-fill: #7f8c8d;"
+                        "-fx-text-fill: #7f8c8d;"  // Gris clair
         );
 
         HBox caracteristiques = new HBox(15);
@@ -308,7 +308,7 @@ public class CatalogueVoituresController {
         lblPrix.setStyle(
                 "-fx-font-size: 22px;" +
                         "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #27ae60;"
+                        "-fx-text-fill: #27ae60;"  // Vert conservé
         );
         Label lblParJour = new Label("par jour");
         lblParJour.setStyle("-fx-font-size: 11px; -fx-text-fill: #95a5a6;");
@@ -316,7 +316,7 @@ public class CatalogueVoituresController {
 
         Button btnReserver = new Button("Réserver");
         btnReserver.setStyle(
-                "-fx-background-color: #3498db;" +
+                "-fx-background-color: #0384b7;" +  // Bleu Horizia
                         "-fx-text-fill: white;" +
                         "-fx-font-weight: bold;" +
                         "-fx-padding: 10 20;" +
@@ -332,15 +332,15 @@ public class CatalogueVoituresController {
         infos.getChildren().addAll(lblModele, lblDetails, caracteristiques, footer);
         card.getChildren().addAll(imageContainer, infos);
 
-        // Animations hover
+        // Animations hover (adaptées au thème sombre)
         card.setOnMouseEntered(e -> {
             card.setStyle(
-                    "-fx-background-color: white;" +
+                    "-fx-background-color: #0a0f1e;" +
                             "-fx-background-radius: 16;" +
-                            "-fx-border-color: #3498db;" +
+                            "-fx-border-color: #0384b7;" +  // Bordure bleue au hover
                             "-fx-border-width: 2;" +
                             "-fx-border-radius: 16;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(52,152,219,0.3), 20, 0, 0, 8);" +
+                            "-fx-effect: dropshadow(gaussian, rgba(3,132,183,0.5), 20, 0, 0, 8);" +
                             "-fx-cursor: hand;"
             );
 
@@ -352,12 +352,12 @@ public class CatalogueVoituresController {
 
         card.setOnMouseExited(e -> {
             card.setStyle(
-                    "-fx-background-color: white;" +
+                    "-fx-background-color: #0a0f1e;" +
                             "-fx-background-radius: 16;" +
-                            "-fx-border-color: #e0e0e0;" +
+                            "-fx-border-color: rgba(3,132,183,0.22);" +
                             "-fx-border-width: 1;" +
                             "-fx-border-radius: 16;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 12, 0, 0, 4);" +
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 12, 0, 0, 4);" +
                             "-fx-cursor: hand;"
             );
 
@@ -375,7 +375,6 @@ public class CatalogueVoituresController {
 
         return card;
     }
-
     /**
      * Icône selon le type de carburant
      */

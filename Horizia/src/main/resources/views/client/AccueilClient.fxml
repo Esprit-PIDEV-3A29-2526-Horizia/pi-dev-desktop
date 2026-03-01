@@ -52,7 +52,10 @@
                     style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.72);
                            -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 16 8 16;
                            -fx-background-radius: 8;"/>
-
+            <Button text="📅  Planning" onAction="#allerPlanning"
+                    style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.72);
+               -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 16 8 16;
+               -fx-background-radius: 8;"/>
             <!-- Divider -->
             <Separator orientation="VERTICAL" prefHeight="26"
                        style="-fx-background-color: rgba(255,255,255,0.1);

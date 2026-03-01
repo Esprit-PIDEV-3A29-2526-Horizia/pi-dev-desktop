@@ -12,20 +12,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Service de reconnaissance optique de caractères (OCR) pour scanner les CIN tunisiennes
- * API utilisée : OCR.space (25,000 requêtes/mois gratuites)
+ * Service OCR – CIN tunisienne
+ *
+ * STRATÉGIE SIMPLIFIÉE :
+ * ─────────────────────
+ * • OCR.space Free Tier ne supporte PAS "ara" → erreur E201
+ * • On utilise "eng" (Engine 2) qui lit parfaitement les chiffres
+ * • Extraction : uniquement le numéro CIN (8 chiffres)
+ * • Le nom, adresse, etc. sont saisis manuellement
  */
 public class OCRService {
 
-    // ═══════════════════════════════════════════════════════
-    // CONFIGURATION API
-    // ═══════════════════════════════════════════════════════
-
     private static final String API_URL = "https://api.ocr.space/parse/image";
-
-    // ⚠️ IMPORTANT : Remplacez cette clé par votre propre clé API OCR.space
-    // Inscription gratuite sur : https://ocr.space/ocrapi
-    private static final String API_KEY = "K89712018688957";  // Clé d'exemple - À REMPLACER !
+    private static final String API_KEY = "K89712018688957";
 
     private final OkHttpClient client;
 
@@ -36,186 +35,162 @@ public class OCRService {
                 .build();
     }
 
-    /**
-     * Scanner une image de CIN et extraire les informations
-     * @param imageFile Fichier image de la CIN (JPG, PNG, etc.)
-     * @return Map contenant les données extraites (nom, cin, adresse)
-     */
-    public Map<String, String> scannerCIN(File imageFile) {
-        Map<String, String> resultats = new HashMap<>();
+    // ═══════════════════════════════════════════════════════
+    // SCAN RECTO – extrait uniquement le CIN (8 chiffres)
+    // ═══════════════════════════════════════════════════════
 
+    public Map<String, String> scannerCINRecto(File imageFile) {
+        Map<String, String> res = new HashMap<>();
         try {
-            System.out.println("→ Scan de la CIN en cours...");
+            // Engine 2 + eng : meilleure lecture des chiffres
+            System.out.println("→ [RECTO] Scan Engine 2, langue=eng...");
+            String texte = appelOCRSpace(imageFile, "eng", "2");
 
-            // Appel API OCR.space
-            String texteExtrait = appelOCRSpace(imageFile);
-
-            if (texteExtrait == null || texteExtrait.trim().isEmpty()) {
-                System.err.println("✗ Aucun texte extrait de l'image");
-                resultats.put("erreur", "Impossible de lire l'image. Assurez-vous qu'elle est claire.");
-                return resultats;
+            if (texte != null && !texte.trim().isEmpty()) {
+                System.out.println("[RECTO] Texte brut :\n" + texte);
+                extraireCIN(texte, res);
             }
 
-            System.out.println("✓ Texte extrait avec succès");
-            System.out.println("Texte brut : " + texteExtrait);
+            // Fallback Engine 1 si CIN non trouvé
+            if (!res.containsKey("cin")) {
+                System.out.println("→ [RECTO] Fallback Engine 1, langue=eng...");
+                String texte2 = appelOCRSpace(imageFile, "eng", "1");
+                if (texte2 != null && !texte2.trim().isEmpty()) {
+                    System.out.println("[RECTO-E1] Texte brut :\n" + texte2);
+                    extraireCIN(texte2, res);
+                }
+            }
 
-            // Parser les informations de la CIN tunisienne
-            parserCINTunisienne(texteExtrait, resultats);
-
-            if (resultats.isEmpty()) {
-                resultats.put("texte_brut", texteExtrait);
-                resultats.put("info", "Données non reconnues automatiquement. Veuillez saisir manuellement.");
+            if (!res.containsKey("cin")) {
+                res.put("info", "CIN non detectee – verifiez la qualite de l'image.");
+                System.out.println("⚠ CIN non trouvée dans l'image.");
+            } else {
+                System.out.println("✓ [RECTO] CIN extraite : " + res.get("cin"));
             }
 
         } catch (Exception e) {
-            System.err.println("✗ Erreur lors du scan OCR : " + e.getMessage());
-            e.printStackTrace();
-            resultats.put("erreur", "Erreur technique : " + e.getMessage());
+            System.err.println("✗ Erreur recto : " + e.getMessage());
+            res.put("erreur", "Erreur OCR : " + e.getMessage());
         }
-
-        return resultats;
+        return res;
     }
 
-    /**
-     * Appel à l'API OCR.space
-     */
-    private String appelOCRSpace(File imageFile) throws IOException {
+    // ═══════════════════════════════════════════════════════
+    // SCAN VERSO – gardé pour compatibilité controllers
+    // ═══════════════════════════════════════════════════════
+
+    public Map<String, String> scannerCINVerso(File imageFile) {
+        Map<String, String> res = new HashMap<>();
+        try {
+            System.out.println("→ [VERSO] Scan Engine 2, langue=eng...");
+            String texte = appelOCRSpace(imageFile, "eng", "2");
+
+            if (texte != null && !texte.trim().isEmpty()) {
+                System.out.println("[VERSO] Texte brut :\n" + texte);
+                extraireCIN(texte, res);
+            }
+
+            System.out.println("✓ [VERSO] Résultat : " + res);
+
+        } catch (Exception e) {
+            System.err.println("✗ Erreur verso : " + e.getMessage());
+            res.put("erreur", "Erreur OCR verso : " + e.getMessage());
+        }
+        return res;
+    }
+
+    /** @deprecated Utiliser scannerCINRecto() */
+    @Deprecated
+    public Map<String, String> scannerCIN(File imageFile) {
+        return scannerCINRecto(imageFile);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // EXTRACTION CIN (8 chiffres consécutifs)
+    // ═══════════════════════════════════════════════════════
+
+    private void extraireCIN(String texte, Map<String, String> res) {
+        if (res.containsKey("cin")) return; // déjà trouvé
+
+        String[] lignes = texte.split("[\\r\\n]+");
+
+        // Priorité 1 : ligne contenant EXACTEMENT 8 chiffres (après nettoyage)
+        for (String ligne : lignes) {
+            String l = ligne.trim().replaceAll("[^0-9]", "");
+            if (l.length() == 8) {
+                res.put("cin", l);
+                System.out.println("✓ CIN (ligne exacte 8 chiffres) : " + l);
+                return;
+            }
+        }
+
+        // Priorité 2 : séquence de 8 chiffres (word boundary)
+        Matcher m = Pattern.compile("\\b(\\d{8})\\b").matcher(texte);
+        if (m.find()) {
+            res.put("cin", m.group(1));
+            System.out.println("✓ CIN (regex \\b) : " + m.group(1));
+            return;
+        }
+
+        // Priorité 3 : n'importe quelle séquence de 8 chiffres
+        Matcher m2 = Pattern.compile("(\\d{8})").matcher(texte.replaceAll("\\s", ""));
+        if (m2.find()) {
+            res.put("cin", m2.group(1));
+            System.out.println("✓ CIN (regex simple) : " + m2.group(1));
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // APPEL API OCR.SPACE
+    // ═══════════════════════════════════════════════════════
+
+    private String appelOCRSpace(File imageFile, String language, String ocrEngine) throws IOException {
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("apikey", API_KEY)
-                .addFormDataPart("language", "fre")  // Français
+                .addFormDataPart("language", language)
                 .addFormDataPart("isOverlayRequired", "false")
                 .addFormDataPart("detectOrientation", "true")
                 .addFormDataPart("scale", "true")
-                .addFormDataPart("OCREngine", "2")  // Engine 2 = meilleur pour le français
+                .addFormDataPart("OCREngine", ocrEngine)
                 .addFormDataPart("file", imageFile.getName(),
                         RequestBody.create(imageFile, MediaType.parse("image/*")))
                 .build();
 
-        Request request = new Request.Builder()
-                .url(API_URL)
-                .post(requestBody)
-                .build();
+        Request request = new Request.Builder().url(API_URL).post(requestBody).build();
 
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException("Erreur API : " + response.code());
+            if (!response.isSuccessful()) throw new IOException("Erreur API HTTP : " + response.code());
+
+            String json = response.body().string();
+            JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+
+            if (obj.has("IsErroredOnProcessing") && obj.get("IsErroredOnProcessing").getAsBoolean()) {
+                throw new IOException("OCR error: " +
+                        (obj.has("ErrorMessage") ? obj.get("ErrorMessage").getAsString() : "inconnu"));
             }
 
-            String jsonResponse = response.body().string();
-            JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
-
-            // Vérifier si l'OCR a réussi
-            if (jsonObject.has("IsErroredOnProcessing") &&
-                    jsonObject.get("IsErroredOnProcessing").getAsBoolean()) {
-                String errorMessage = jsonObject.has("ErrorMessage") ?
-                        jsonObject.get("ErrorMessage").getAsString() : "Erreur inconnue";
-                throw new IOException("Erreur OCR : " + errorMessage);
-            }
-
-            // Extraire le texte reconnu
-            if (jsonObject.has("ParsedResults") &&
-                    jsonObject.getAsJsonArray("ParsedResults").size() > 0) {
-                return jsonObject.getAsJsonArray("ParsedResults")
-                        .get(0).getAsJsonObject()
-                        .get("ParsedText").getAsString();
+            if (obj.has("ParsedResults") && obj.getAsJsonArray("ParsedResults").size() > 0) {
+                return obj.getAsJsonArray("ParsedResults")
+                        .get(0).getAsJsonObject().get("ParsedText").getAsString();
             }
         }
-
         return null;
     }
 
-    /**
-     * Parser les informations d'une CIN tunisienne
-     * Format CIN tunisienne : 8 chiffres
-     */
-    private void parserCINTunisienne(String texte, Map<String, String> resultats) {
-        // Nettoyer le texte
-        String texteNettoye = texte.replaceAll("\\r\\n", " ").replaceAll("\\n", " ");
+    // ═══════════════════════════════════════════════════════
+    // TEST CLÉ API
+    // ═══════════════════════════════════════════════════════
 
-        // 1. Extraire le numéro CIN (8 chiffres)
-        Pattern patternCIN = Pattern.compile("\\b(\\d{8})\\b");
-        Matcher matcherCIN = patternCIN.matcher(texteNettoye);
-        if (matcherCIN.find()) {
-            resultats.put("cin", matcherCIN.group(1));
-            System.out.println("✓ CIN trouvé : " + matcherCIN.group(1));
-        }
-
-        // 2. Extraire le nom complet
-        // Généralement après "Nom" ou avant la date de naissance
-        Pattern patternNom = Pattern.compile("(?:Nom[:\\s]+)?([A-ZÀÂÄÇÈÉÊËÎÏÔÙÛÜ][a-zàâäçèéêëîïôùûü]+(?:[\\s-][A-ZÀÂÄÇÈÉÊËÎÏÔÙÛÜ][a-zàâäçèéêëîïôùûü]+)+)", Pattern.CASE_INSENSITIVE);
-        Matcher matcherNom = patternNom.matcher(texteNettoye);
-        if (matcherNom.find()) {
-            String nomComplet = matcherNom.group(1).trim();
-            resultats.put("nom_complet", nomComplet);
-            System.out.println("✓ Nom trouvé : " + nomComplet);
-        }
-
-        // 3. Extraire l'adresse (généralement après "Adresse" ou "Domicile")
-        Pattern patternAdresse = Pattern.compile("(?:Adresse|Domicile)[:\\s]+([^\\d]+(?:\\d+[^\\d]+)?)", Pattern.CASE_INSENSITIVE);
-        Matcher matcherAdresse = patternAdresse.matcher(texteNettoye);
-        if (matcherAdresse.find()) {
-            String adresse = matcherAdresse.group(1).trim();
-            // Nettoyer l'adresse
-            adresse = adresse.replaceAll("\\s{2,}", " ").trim();
-            resultats.put("adresse", adresse);
-            System.out.println("✓ Adresse trouvée : " + adresse);
-        }
-
-        // 4. Extraire la ville (mots après l'adresse ou codes postaux tunisiens)
-        if (resultats.containsKey("adresse")) {
-            String adresse = resultats.get("adresse");
-            // Villes tunisiennes communes
-            String[] villesTunisiennes = {"Tunis", "Sfax", "Sousse", "Kairouan", "Bizerte",
-                    "Gabès", "Ariana", "Gafsa", "Monastir", "Ben Arous", "Kasserine",
-                    "Médenine", "Nabeul", "Tataouine", "Béja", "Jendouba", "Mahdia",
-                    "Siliana", "Kébili", "Zaghouan", "Manouba", "Tozeur", "Sidi Bouzid"};
-
-            for (String ville : villesTunisiennes) {
-                if (adresse.toUpperCase().contains(ville.toUpperCase())) {
-                    resultats.put("ville", ville);
-                    System.out.println("✓ Ville trouvée : " + ville);
-                    break;
-                }
-            }
-        }
-
-        // 5. Extraire le code postal (4 chiffres pour la Tunisie)
-        Pattern patternCodePostal = Pattern.compile("\\b(\\d{4})\\b");
-        Matcher matcherCP = patternCodePostal.matcher(texteNettoye);
-        if (matcherCP.find()) {
-            String codePostal = matcherCP.group(1);
-            // Vérifier que ce n'est pas une date ou la CIN
-            if (!resultats.containsKey("cin") || !resultats.get("cin").contains(codePostal)) {
-                resultats.put("code_postal", codePostal);
-                System.out.println("✓ Code postal trouvé : " + codePostal);
-            }
-        }
-    }
-
-    /**
-     * Test de la clé API
-     */
     public boolean testerCleAPI() {
         try {
-            // Créer un fichier de test simple
-            RequestBody requestBody = new MultipartBody.Builder()
+            RequestBody rb = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("apikey", API_KEY)
                     .addFormDataPart("url", "https://via.placeholder.com/150")
                     .build();
-
-            Request request = new Request.Builder()
-                    .url(API_URL)
-                    .post(requestBody)
-                    .build();
-
-            try (Response response = client.newCall(request).execute()) {
-                return response.isSuccessful();
-            }
-        } catch (Exception e) {
-            System.err.println("Erreur test API : " + e.getMessage());
-            return false;
-        }
+            Request req = new Request.Builder().url(API_URL).post(rb).build();
+            try (Response r = client.newCall(req).execute()) { return r.isSuccessful(); }
+        } catch (Exception e) { return false; }
     }
 }

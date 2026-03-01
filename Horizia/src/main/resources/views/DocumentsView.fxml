@@ -69,7 +69,7 @@
                         <!-- Card Sélection Location -->
                         <VBox spacing="12"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="🔍 Sélectionner une Location"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
@@ -78,12 +78,17 @@
                                       onAction="#onLocationContratChanged"
                                       maxWidth="Infinity"
                                       promptText="Choisir une location..."
-                                      style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                                      style="-fx-font-size: 13px; -fx-padding: 8;
+                                             -fx-background-color: #f8fafc;
+                                             -fx-border-color: #e2e8f0;
+                                             -fx-border-width: 2;
+                                             -fx-border-radius: 10;
+                                             -fx-background-radius: 10;"/>
 
                             <!-- Détails location -->
                             <VBox spacing="8"
                                   style="-fx-background-color: #f8f9fa; -fx-padding: 15;
-                                         -fx-background-radius: 8;">
+                                         -fx-background-radius: 12;">
                                 <HBox spacing="10" alignment="CENTER_LEFT">
                                     <Label text="👤 Client :"
                                            style="-fx-font-size: 12px; -fx-text-fill: #6b7280;" minWidth="90"/>
@@ -112,28 +117,53 @@
                         </VBox>
 
                         <!-- Card Extras -->
+                        <!-- Card Extras - Version avec GridPane -->
                         <VBox spacing="12"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+             -fx-background-radius: 16;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+
                             <Label text="🎁 Options / Extras"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
 
-                            <HBox spacing="12" alignment="CENTER_LEFT">
-                                <CheckBox fx:id="chkGPS" text="🛰️ GPS (+5 TND/j)"/>
-                                <CheckBox fx:id="chkSiegeBebe" text="👶 Siège bébé (+3 TND/j)"/>
-                            </HBox>
-                            <HBox spacing="12" alignment="CENTER_LEFT">
-                                <CheckBox fx:id="chkAssurance" text="🛡️ Assurance (+15 TND/j)"/>
-                                <CheckBox fx:id="chkChauffeur" text="🧑‍✈️ Chauffeur (+50 TND/j)"/>
-                            </HBox>
-                            <CheckBox fx:id="chkCarburant" text="⛽ Carburant prépayé (+10 TND/j)"/>
+                            <GridPane hgap="20" vgap="10">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50"/>
+                                    <ColumnConstraints percentWidth="50"/>
+                                </columnConstraints>
+
+                                <!-- Ligne 1 -->
+                                <CheckBox fx:id="chkGPS"
+                                          text="🛰️ GPS (+5 TND/jour)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <CheckBox fx:id="chkSiegeBebe"
+                                          text="👶 Siège bébé (+3 TND/jour)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                <!-- Ligne 2 -->
+                                <CheckBox fx:id="chkAssurance"
+                                          text="🛡️ Assurance complète (+15 TND/jour)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <CheckBox fx:id="chkChauffeur"
+                                          text="🧑‍✈️ Chauffeur (+50 TND/jour)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                <!-- Ligne 3 : prend toute la largeur -->
+                                <CheckBox fx:id="chkCarburant"
+                                          text="⛽ Carburant prépayé (+10 TND/jour)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2"/>
+                            </GridPane>
                         </VBox>
 
                         <!-- Card Montants -->
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="💰 Récapitulatif Financier"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
@@ -164,7 +194,7 @@
                                        style="-fx-font-size: 13px; -fx-text-fill: #27ae60;"/>
                             </HBox>
                             <HBox spacing="10" alignment="CENTER_LEFT"
-                                  style="-fx-background-color: #fff3cd; -fx-padding: 10; -fx-background-radius: 6;">
+                                  style="-fx-background-color: #fff3cd; -fx-padding: 10; -fx-background-radius: 8;">
                                 <Label text="SOLDE RESTANT :" minWidth="140"
                                        style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
                                 <Label fx:id="lblSolde" text="0.00 TND"
@@ -175,21 +205,26 @@
                         <!-- Card Email -->
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="📧 Envoyer par Email"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
                             <TextField fx:id="txtEmailClient"
                                        promptText="email@client.com"
                                        style="-fx-font-size: 13px; -fx-padding: 10;
-                                              -fx-background-radius: 8; -fx-border-color: #e0e0e0;
-                                              -fx-border-radius: 8; -fx-border-width: 1.5;"/>
+                                              -fx-background-radius: 10;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-radius: 10;
+                                              -fx-border-width: 2;
+                                              -fx-background-color: #f8fafc;"/>
                             <Button text="📤 Envoyer le Contrat"
                                     onAction="#envoyerEmailContrat"
                                     maxWidth="Infinity"
                                     style="-fx-background-color: #0384b7; -fx-text-fill: white;
                                            -fx-font-size: 13px; -fx-font-weight: bold;
-                                           -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                           -fx-padding: 12; -fx-background-radius: 10;
+                                           -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, #0384b740, 8, 0, 0, 3);"/>
                             <Label fx:id="lblStatutEmail" text=""
                                    style="-fx-font-size: 12px; -fx-text-fill: #27ae60;"
                                    wrapText="true"/>
@@ -202,7 +237,7 @@
                     <VBox spacing="12" HBox.hgrow="ALWAYS">
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);"
                               VBox.vgrow="ALWAYS">
                             <HBox alignment="CENTER_LEFT" spacing="15">
@@ -212,11 +247,11 @@
                                 <Button text="🔄 Actualiser" onAction="#genererApercuContrat"
                                         style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
                                                -fx-font-size: 12px; -fx-padding: 7 15;
-                                               -fx-background-radius: 6; -fx-cursor: hand;"/>
+                                               -fx-background-radius: 8; -fx-cursor: hand;"/>
                                 <Button text="💾 Sauvegarder" onAction="#sauvegarderContrat"
                                         style="-fx-background-color: #27ae60; -fx-text-fill: white;
                                                -fx-font-size: 12px; -fx-font-weight: bold;
-                                               -fx-padding: 7 15; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                                               -fx-padding: 7 15; -fx-background-radius: 8; -fx-cursor: hand;"/>
                             </HBox>
 
                             <TextArea fx:id="txtApercuContrat"
@@ -226,7 +261,7 @@
                                              -fx-font-size: 12px;
                                              -fx-background-color: #1e1e1e;
                                              -fx-text-fill: #d4d4d4;
-                                             -fx-background-radius: 8;
+                                             -fx-background-radius: 12;
                                              -fx-border-color: transparent;
                                              -fx-padding: 15;"
                                       promptText="Sélectionnez une location pour voir l'aperçu du contrat..."
@@ -240,7 +275,7 @@
                     <VBox spacing="15" minWidth="280" maxWidth="300">
                         <VBox spacing="15" alignment="CENTER"
                               style="-fx-background-color: white; -fx-padding: 25;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="📱 QR Code Location"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
@@ -248,8 +283,8 @@
                             <!-- Cadre QR Code -->
                             <VBox alignment="CENTER" spacing="0"
                                   style="-fx-background-color: #f8f9fa; -fx-padding: 15;
-                                         -fx-background-radius: 10; -fx-border-color: #e0e0e0;
-                                         -fx-border-radius: 10; -fx-border-width: 1.5;">
+                                         -fx-background-radius: 12; -fx-border-color: #e2e8f0;
+                                         -fx-border-radius: 12; -fx-border-width: 2;">
                                 <ImageView fx:id="imgQRCode"
                                            fitWidth="220" fitHeight="220"
                                            preserveRatio="true"/>
@@ -264,14 +299,14 @@
                                     maxWidth="Infinity"
                                     style="-fx-background-color: #1a2332; -fx-text-fill: white;
                                            -fx-font-size: 13px; -fx-font-weight: bold;
-                                           -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                           -fx-padding: 12; -fx-background-radius: 10; -fx-cursor: hand;"/>
                         </VBox>
 
                         <!-- Info card -->
                         <VBox spacing="8"
                               style="-fx-background-color: #eff6ff; -fx-padding: 15;
-                                     -fx-background-radius: 10; -fx-border-color: #bfdbfe;
-                                     -fx-border-radius: 10; -fx-border-width: 1;">
+                                     -fx-background-radius: 12; -fx-border-color: #bfdbfe;
+                                     -fx-border-radius: 12; -fx-border-width: 2;">
                             <Label text="💡 Comment ça marche ?"
                                    style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1d4ed8;"/>
                             <Label text="1. Sélectionnez une location"
@@ -303,7 +338,7 @@
                         <!-- Sélection location -->
                         <VBox spacing="12"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="🔍 Sélectionner une Location (Retour)"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
@@ -311,7 +346,12 @@
                                       onAction="#onLocationFactureChanged"
                                       maxWidth="Infinity"
                                       promptText="Locations en cours / terminées..."
-                                      style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                                      style="-fx-font-size: 13px; -fx-padding: 8;
+                                             -fx-background-color: #f8fafc;
+                                             -fx-border-color: #e2e8f0;
+                                             -fx-border-width: 2;
+                                             -fx-border-radius: 10;
+                                             -fx-background-radius: 10;"/>
 
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <Label text="👤 Client :" minWidth="90"
@@ -327,45 +367,78 @@
                             </HBox>
                         </VBox>
 
-                        <!-- Inspection retour -->
+                        <!-- Inspection retour - Version GridPane -->
                         <VBox spacing="12"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
-                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+             -fx-background-radius: 16;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+
                             <Label text="🔍 Inspection de Retour"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
 
+                            <!-- Heures de retard -->
                             <HBox spacing="15" alignment="CENTER_LEFT">
                                 <Label text="⏱️ Heures de retard :"
                                        style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
-                                <Spinner fx:id="spnHeuresRetard" minWidth="80" prefWidth="80"/>
+                                <Spinner fx:id="spnHeuresRetard"
+                                         minWidth="80"
+                                         prefWidth="80"
+                                         style="-fx-background-color: #f8fafc;
+                        -fx-border-color: #e2e8f0;
+                        -fx-border-width: 2;
+                        -fx-border-radius: 10;
+                        -fx-background-radius: 10;"/>
                                 <Label text="x 5 TND/h"
                                        style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
                             </HBox>
 
                             <Separator/>
 
+                            <!-- ✅ CORRECTION : Problèmes constatés avec GridPane -->
                             <Label text="Problèmes constatés :"
-                                   style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
-                            <CheckBox fx:id="chkCarburantManquant"
-                                      text="⛽ Carburant manquant (+20 TND)"/>
-                            <CheckBox fx:id="chkDommagesLegers"
-                                      text="🔧 Dommages légers (+50 TND)"/>
-                            <CheckBox fx:id="chkDommagesGraves"
-                                      text="💥 Dommages graves (+200 TND)"/>
+                                   style="-fx-font-size: 12px; -fx-text-fill: #6b7280; -fx-font-weight: bold;"/>
 
+                            <GridPane hgap="20" vgap="8" style="-fx-padding: 5 0 0 0;">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50"/>
+                                    <ColumnConstraints percentWidth="50"/>
+                                </columnConstraints>
+
+                                <!-- Première colonne -->
+                                <CheckBox fx:id="chkCarburantManquant"
+                                          text="⛽ Carburant manquant (+20 TND)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <CheckBox fx:id="chkDommagesLegers"
+                                          text="🔧 Dommages légers (+50 TND)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+                                <!-- Deuxième colonne -->
+                                <CheckBox fx:id="chkDommagesGraves"
+                                          text="💥 Dommages graves (+200 TND)"
+                                          style="-fx-font-size: 13px; -fx-text-fill: #2c3e50;"
+                                          GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                <!-- Espace vide pour aligner -->
+                                <Region GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            </GridPane>
+
+                            <!-- Notes de l'inspection -->
                             <TextArea fx:id="txtNotesRetour"
                                       promptText="Notes de l'inspection (optionnel)..."
                                       prefRowCount="3"
                                       style="-fx-font-size: 12px; -fx-padding: 10;
-                                             -fx-background-radius: 8; -fx-border-color: #e0e0e0;
-                                             -fx-border-radius: 8; -fx-border-width: 1.5;"/>
+                     -fx-background-radius: 10;
+                     -fx-background-color: #f8fafc;
+                     -fx-border-color: #e2e8f0;
+                     -fx-border-radius: 10;
+                     -fx-border-width: 2;"/>
                         </VBox>
-
                         <!-- Récapitulatif financier -->
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="💰 Récapitulatif Final"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
@@ -383,7 +456,7 @@
                                        style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
                             </HBox>
                             <HBox spacing="10" alignment="CENTER_LEFT"
-                                  style="-fx-background-color: #fff3cd; -fx-padding: 10; -fx-background-radius: 6;">
+                                  style="-fx-background-color: #fff3cd; -fx-padding: 10; -fx-background-radius: 8;">
                                 <Label text="MONTANT À PAYER :" minWidth="140"
                                        style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
                                 <Label fx:id="lblSoldeFacture" text="0.00 TND"
@@ -394,21 +467,26 @@
                         <!-- Email -->
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
                             <Label text="📧 Envoyer la Facture"
                                    style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a2332;"/>
                             <TextField fx:id="txtEmailFacture"
                                        promptText="email@client.com"
                                        style="-fx-font-size: 13px; -fx-padding: 10;
-                                              -fx-background-radius: 8; -fx-border-color: #e0e0e0;
-                                              -fx-border-radius: 8; -fx-border-width: 1.5;"/>
+                                              -fx-background-radius: 10;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-radius: 10;
+                                              -fx-border-width: 2;
+                                              -fx-background-color: #f8fafc;"/>
                             <Button text="📤 Envoyer la Facture Finale"
                                     onAction="#envoyerEmailFacture"
                                     maxWidth="Infinity"
                                     style="-fx-background-color: #8e44ad; -fx-text-fill: white;
                                            -fx-font-size: 13px; -fx-font-weight: bold;
-                                           -fx-padding: 12; -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                           -fx-padding: 12; -fx-background-radius: 10;
+                                           -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, #8e44ad40, 8, 0, 0, 3);"/>
                             <Label fx:id="lblStatutEmailFacture" text=""
                                    style="-fx-font-size: 12px;" wrapText="true"/>
                         </VBox>
@@ -418,7 +496,7 @@
                     <VBox spacing="12" HBox.hgrow="ALWAYS">
                         <VBox spacing="10"
                               style="-fx-background-color: white; -fx-padding: 20;
-                                     -fx-background-radius: 12;
+                                     -fx-background-radius: 16;
                                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);"
                               VBox.vgrow="ALWAYS">
                             <HBox alignment="CENTER_LEFT" spacing="15">
@@ -428,11 +506,11 @@
                                 <Button text="🔄 Actualiser" onAction="#genererApercuFacture"
                                         style="-fx-background-color: #e5e7eb; -fx-text-fill: #374151;
                                                -fx-font-size: 12px; -fx-padding: 7 15;
-                                               -fx-background-radius: 6; -fx-cursor: hand;"/>
+                                               -fx-background-radius: 8; -fx-cursor: hand;"/>
                                 <Button text="💾 Sauvegarder" onAction="#sauvegarderFacture"
                                         style="-fx-background-color: #8e44ad; -fx-text-fill: white;
                                                -fx-font-size: 12px; -fx-font-weight: bold;
-                                               -fx-padding: 7 15; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                                               -fx-padding: 7 15; -fx-background-radius: 8; -fx-cursor: hand;"/>
                             </HBox>
 
                             <TextArea fx:id="txtApercuFacture"
@@ -442,7 +520,7 @@
                                              -fx-font-size: 12px;
                                              -fx-background-color: #1e1e1e;
                                              -fx-text-fill: #d4d4d4;
-                                             -fx-background-radius: 8;
+                                             -fx-background-radius: 12;
                                              -fx-border-color: transparent;
                                              -fx-padding: 15;"
                                       promptText="Sélectionnez une location pour voir la facture..."

@@ -28,21 +28,15 @@ public class AccueilClientController {
     @FXML private VBox             featuresSection;
     @FXML private Label            lblStatVehicules;
     @FXML private Label            lblStatLocations;
+    @FXML private HBox             navbar;
 
-    // ─── Référence racine pour getStage() ────────────────────────
-    // La navbar est toujours le premier enfant du VBox racine.
-    // On garde une référence sur un élément garanti d'être dans le FXML.
-    @FXML private HBox navbar;  // fx:id="navbar" doit être ajouté dans le FXML si absent
-    // Sinon on utilise heroSection qui est aussi garanti présent.
+    // ─── Stage ───────────────────────────────────────────────────
+    private Stage cachedStage = null;
 
     // ─── Services ────────────────────────────────────────────────
     private final VehiculeService  vehiculeService  = new VehiculeService();
     private final Dashboardservice dashboardservice = new Dashboardservice();
-
-    // ─── Stage stocké à l'initialize() ──────────────────────────
-    // C'est la solution la plus robuste : on capture le Stage dès initialize()
-    // car à ce moment les composants sont déjà dans la scène.
-    private Stage cachedStage = null;
+    // ✅ SUPPRIMÉ : private final NotificationService notificationService = new NotificationService();
 
     // ─────────────────────────────────────────────────────────────
     @FXML
@@ -51,9 +45,7 @@ public class AccueilClientController {
         System.out.println("  HORIZIA - Interface Client Chargée");
         System.out.println("═══════════════════════════════════════════════");
 
-        // Capturer le Stage dès que les composants sont disponibles
-        // On utilise un listener sur la scene property du heroSection
-        // car au moment d'initialize(), la scene peut ne pas encore être attachée.
+        // Capturer le Stage
         if (heroSection != null) {
             heroSection.sceneProperty().addListener((obs, oldScene, newScene) -> {
                 if (newScene != null && cachedStage == null) {
@@ -65,6 +57,8 @@ public class AccueilClientController {
         configurerRecherche();
         chargerStats();
         animerEntree();
+
+        // ✅ SUPPRIMÉ : notificationService.executerVerificationsQuotidiennes();
     }
 
     private void configurerRecherche() {
@@ -136,10 +130,25 @@ public class AccueilClientController {
         ouvrirCatalogue(debut, fin, type);
     }
 
-    @FXML private void voirToutesLesVoitures()  { ouvrirCatalogue(null, null, "Tous les types"); }
-    @FXML private void scrollToTop()             { /* déjà sur la page d'accueil */ }
-    @FXML private void allerCatalogue()          { ouvrirCatalogue(null, null, "Tous les types"); }
-    @FXML private void allerMesReservations()    { ouvrirMesReservations(); }
+    @FXML private void voirToutesLesVoitures()  {
+        ouvrirCatalogue(null, null, "Tous les types");
+    }
+
+    @FXML private void scrollToTop()             {
+        // déjà sur la page d'accueil
+    }
+
+    @FXML private void allerCatalogue()          {
+        ouvrirCatalogue(null, null, "Tous les types");
+    }
+
+    @FXML private void allerMesReservations()    {
+        ouvrirMesReservations();
+    }
+
+    @FXML private void allerPlanning() {
+        navigerVers("/views/client/ClientPlanning.fxml", "Horizia - Planning des disponibilités", 1200, 800);
+    }
 
     @FXML
     private void ouvrirMesReservations() {
@@ -186,15 +195,11 @@ public class AccueilClientController {
     }
 
     /**
-     * Récupère le Stage.
-     * Stratégie 1 : Stage mis en cache dès la première apparition dans la scène.
-     * Stratégie 2 : Cherche parmi les composants FXML.
+     * Récupère le Stage
      */
     private Stage getStage() {
-        // Stratégie 1 — Stage en cache (le plus fiable)
         if (cachedStage != null) return cachedStage;
 
-        // Stratégie 2 — Chercher dans les composants disponibles
         if (heroSection != null && heroSection.getScene() != null)
             return cachedStage = (Stage) heroSection.getScene().getWindow();
         if (btnRechercher != null && btnRechercher.getScene() != null)
@@ -203,8 +208,10 @@ public class AccueilClientController {
             return cachedStage = (Stage) featuresSection.getScene().getWindow();
         if (lblStatVehicules != null && lblStatVehicules.getScene() != null)
             return cachedStage = (Stage) lblStatVehicules.getScene().getWindow();
+        if (navbar != null && navbar.getScene() != null)
+            return cachedStage = (Stage) navbar.getScene().getWindow();
 
-        System.err.println("[AccueilClient] Impossible de récupérer le Stage — aucun composant dans la scène.");
+        System.err.println("[AccueilClient] Impossible de récupérer le Stage");
         return null;
     }
 

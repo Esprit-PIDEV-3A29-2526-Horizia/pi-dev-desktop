@@ -7,11 +7,14 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.example.services.PlanningService;
 
 import java.net.URL;
@@ -20,19 +23,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.YearMonth;
 import java.util.*;
 
-/**
- * Contrôleur de la page Planning & Calendrier
- * CORRIGÉ :
- *   - imports org.example.*
- *   - loc.getClientNomComplet()     (pas getNomClient())
- *   - loc.getClientTelephone()      (pas getTelClient())
- *   - loc.getIdVehicule()           (pas getVehicule() qui n'existe pas)
- *   - loc.getDateFinPrev()          (pas getDateFin())
- *   - Timestamp → .toLocalDateTime().toLocalDate()
- */
 public class PlanningController implements Initializable, MainLayoutController.ControllerAvecLayout {
 
-    // ✅ FIX 3 : Référence au MainLayoutController pour garder la sidebar
     private MainLayoutController mainLayoutController;
 
     @Override
@@ -41,6 +33,7 @@ public class PlanningController implements Initializable, MainLayoutController.C
     }
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FMT_AFFICHAGE = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", Locale.FRENCH);
 
     // ─── FXML Components ─────────────────────────────────────────
     @FXML private Label lblMoisAnnee;
@@ -115,7 +108,21 @@ public class PlanningController implements Initializable, MainLayoutController.C
         for (int jour = 1; jour <= nbJours; jour++) {
             LocalDate dateJour = LocalDate.of(anneeCourante, moisCourant, jour);
             List<Location> locsJour = getLocationsParDate(dateJour);
+
+            // ✅ AJOUT : Rendre la cellule cliquable
             VBox cellule = creerCelluleJour(jour, dateJour, locsJour);
+
+            // Ajouter un gestionnaire de clic
+            final LocalDate dateCliquee = dateJour;
+            cellule.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 1) { // Simple clic
+                    afficherLocationsDuJour(dateCliquee, locsJour);
+                }
+            });
+
+            // Style pour indiquer que c'est cliquable
+            cellule.setStyle(cellule.getStyle() + "; -fx-cursor: hand;");
+
             gridCalendrier.add(cellule, col, row);
             col++;
             if (col == 7) { col = 0; row++; }
@@ -160,6 +167,7 @@ public class PlanningController implements Initializable, MainLayoutController.C
         lblJour.setStyle("-fx-text-fill:" + (estAujourdhui ? "#e67e22" : (estWeekend ? "#3498db" : "#2c3e50")) + ";");
         cell.getChildren().add(lblJour);
 
+        // Afficher les 2 premières locations
         int count = 0;
         for (Location loc : locs) {
             if (count >= 2) {
@@ -175,8 +183,8 @@ public class PlanningController implements Initializable, MainLayoutController.C
         // Tooltip
         if (!locs.isEmpty()) {
             StringBuilder tt = new StringBuilder();
+            tt.append("📍 Cliquez pour voir les détails\n\n");
             for (Location loc : locs) {
-                // FIX : getClientNomComplet() + getIdVehicule()
                 tt.append(PlanningService.getEmojiStatut(loc.getStatut()))
                         .append(" ").append(loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "?")
                         .append(" | Véhicule #").append(loc.getIdVehicule())
@@ -192,7 +200,6 @@ public class PlanningController implements Initializable, MainLayoutController.C
     private Label creerBadgeLocation(Location loc) {
         String couleur = PlanningService.getCouleurStatut(loc.getStatut());
         String emoji   = PlanningService.getEmojiStatut(loc.getStatut());
-        // FIX : getClientNomComplet() (pas getNomClient())
         String client  = loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "?";
         String nom = client.length() > 10 ? client.substring(0, 10) + "…" : client;
 
@@ -206,13 +213,123 @@ public class PlanningController implements Initializable, MainLayoutController.C
     }
 
     /**
+     * ✅ NOUVELLE MÉTHODE : Affiche une popup avec les locations du jour
+     */
+    private void afficherLocationsDuJour(LocalDate date, List<Location> locations) {
+        // Créer une nouvelle fenêtre modale
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.initStyle(StageStyle.DECORATED);
+        popupStage.setTitle("Locations du " + date.format(FMT_AFFICHAGE));
+
+        // Conteneur principal
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setStyle("-fx-background-color: #f5f7fa;");
+
+        // Header
+        Label lblTitre = new Label("📋 Locations du " + date.format(FMT_AFFICHAGE));
+        lblTitre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a2332;");
+
+        Label lblNb = new Label(locations.size() + " location(s) trouvée(s)");
+        lblNb.setStyle("-fx-font-size: 13px; -fx-text-fill: #6b7280;");
+
+        VBox header = new VBox(5, lblTitre, lblNb);
+        header.setPadding(new Insets(0, 0, 10, 0));
+
+        // Liste des locations
+        VBox listeLocations = new VBox(10);
+        listeLocations.setPadding(new Insets(10, 0, 10, 0));
+
+        if (locations.isEmpty()) {
+            Label lblVide = new Label("Aucune location pour cette date");
+            lblVide.setStyle("-fx-font-size: 14px; -fx-text-fill: #95a5a6; -fx-font-style: italic;");
+            listeLocations.getChildren().add(lblVide);
+        } else {
+            for (Location loc : locations) {
+                HBox card = creerCardLocation(loc);
+                listeLocations.getChildren().add(card);
+            }
+        }
+
+        // ScrollPane pour la liste
+        ScrollPane scrollPane = new ScrollPane(listeLocations);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(400);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+
+        // Bouton fermer
+        Button btnFermer = new Button("Fermer");
+        btnFermer.setStyle("-fx-background-color: #0384b7; -fx-text-fill: white; " +
+                "-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 30; " +
+                "-fx-background-radius: 8; -fx-cursor: hand;");
+        btnFermer.setOnAction(e -> popupStage.close());
+
+        HBox footer = new HBox(btnFermer);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.setPadding(new Insets(10, 0, 0, 0));
+
+        root.getChildren().addAll(header, scrollPane, footer);
+
+        Scene scene = new Scene(root, 600, 500);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
+    }
+
+    /**
+     * ✅ NOUVELLE MÉTHODE : Crée une carte pour afficher une location
+     */
+    private HBox creerCardLocation(Location loc) {
+        HBox card = new HBox(15);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 12; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);");
+
+        // Indicateur de statut (carré coloré)
+        String couleur = PlanningService.getCouleurStatut(loc.getStatut());
+        Label indicateur = new Label("⬤");
+        indicateur.setStyle("-fx-text-fill: " + couleur + "; -fx-font-size: 20px;");
+        indicateur.setMinWidth(20);
+
+        // Informations principales
+        VBox infos = new VBox(5);
+
+        Label lblClient = new Label("👤 " + (loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "—"));
+        lblClient.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1a2332;");
+
+        Label lblVehicule = new Label("🚗 Véhicule #" + loc.getIdVehicule());
+        lblVehicule.setStyle("-fx-font-size: 12px; -fx-text-fill: #4b5563;");
+
+        String periode = "📅 " +
+                (loc.getDateDebut() != null ? loc.getDateDebut().toLocalDateTime().toLocalDate().format(FMT) : "?") +
+                " → " +
+                (loc.getDateFinPrev() != null ? loc.getDateFinPrev().toLocalDateTime().toLocalDate().format(FMT) : "?");
+        Label lblPeriode = new Label(periode);
+        lblPeriode.setStyle("-fx-font-size: 11px; -fx-text-fill: #6b7280;");
+
+        infos.getChildren().addAll(lblClient, lblVehicule, lblPeriode);
+
+        // Badge statut
+        Label badgeStatut = new Label(PlanningService.getEmojiStatut(loc.getStatut()) + " " +
+                (loc.getStatut() != null ? loc.getStatut() : "?"));
+        badgeStatut.setStyle("-fx-background-color: " + couleur + "; -fx-text-fill: white; " +
+                "-fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 8; " +
+                "-fx-background-radius: 12;");
+
+        HBox badgeContainer = new HBox(badgeStatut);
+        badgeContainer.setAlignment(Pos.TOP_RIGHT);
+        HBox.setHgrow(badgeContainer, Priority.ALWAYS);
+
+        card.getChildren().addAll(indicateur, infos, badgeContainer);
+        return card;
+    }
+
+    /**
      * Filtre les locations actives pour une date donnée
-     * FIX : Timestamp → .toLocalDateTime().toLocalDate(), getDateFinPrev()
      */
     private List<Location> getLocationsParDate(LocalDate date) {
         List<Location> result = new ArrayList<>();
         for (Location loc : locationsDuMois) {
-            // FIX : getDateFinPrev(), Timestamp → .toLocalDateTime().toLocalDate()
             if (loc.getDateDebut() == null || loc.getDateFinPrev() == null) continue;
             LocalDate debut = loc.getDateDebut().toLocalDateTime().toLocalDate();
             LocalDate fin   = loc.getDateFinPrev().toLocalDateTime().toLocalDate();
@@ -325,11 +442,9 @@ public class PlanningController implements Initializable, MainLayoutController.C
         icone.setStyle("-fx-font-size:18px;");
 
         VBox infos = new VBox(3);
-        // FIX : getClientNomComplet() (pas getNomClient())
         Label lblNom = new Label(loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "—");
         lblNom.setStyle("-fx-font-weight:bold; -fx-font-size:13px; -fx-text-fill:#2c3e50;");
 
-        // FIX : getIdVehicule() + getDateFinPrev() + Timestamp.toLocalDateTime().toLocalDate()
         String dateRetour = loc.getDateFinPrev() != null ?
                 loc.getDateFinPrev().toLocalDateTime().toLocalDate().format(FMT) : "?";
         Label lblDetails = new Label("Véhicule #" + loc.getIdVehicule() + " → Retour : " + dateRetour);
@@ -340,7 +455,6 @@ public class PlanningController implements Initializable, MainLayoutController.C
         HBox spacer = new HBox();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // FIX : getClientTelephone() (pas getTelClient())
         Label tel = new Label(loc.getClientTelephone() != null ? "📞 " + loc.getClientTelephone() : "");
         tel.setStyle("-fx-font-size:12px; -fx-text-fill:#3498db;");
 
@@ -381,11 +495,9 @@ public class PlanningController implements Initializable, MainLayoutController.C
 
     @FXML
     private void retourDashboard() {
-        // ✅ FIX 3 : Naviguer via MainLayoutController pour garder la sidebar
         if (mainLayoutController != null) {
             mainLayoutController.naviguerVers("/views/Dashboardview.fxml");
         } else {
-            // Fallback si le contrôleur parent n'est pas disponible
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/views/MainLayout.fxml"));
                 Stage stage = (Stage) gridCalendrier.getScene().getWindow();

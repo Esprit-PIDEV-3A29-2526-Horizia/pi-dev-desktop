@@ -23,25 +23,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
 
-/**
- * Contrôleur de la page Documents & Facturation
- * CORRIGÉ :
- *   - imports org.example.*
- *   - loc.getIdLocation()         (pas getId())
- *   - loc.getClientNomComplet()   (pas getNomClient())
- *   - loc.getClientTelephone()    (pas getTelClient())
- *   - loc.getDateFinPrev()        (pas getDateFin())
- *   - loc.getDateDebut().toLocalDateTime().toLocalDate()  (Timestamp !)
- *   - loc.getPrixParJour()        retourne double (pas BigDecimal)
- *   - loc.getAvance()             (pas getMontantAvance())
- *   - loc.getIdVehicule()         (pas getVehicule() qui n'existe pas)
- *   - getEmailClient()            n'existe pas → champ email saisi manuellement
- */
 public class DocumentsController implements Initializable, MainLayoutController.ControllerAvecLayout {
 
-    // ✅ FIX 3 : Référence au MainLayoutController pour garder la sidebar
     private MainLayoutController mainLayoutController;
-
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // ─── FXML Components ─────────────────────────────────────────
@@ -88,13 +72,13 @@ public class DocumentsController implements Initializable, MainLayoutController.
 
     // ─── Data ─────────────────────────────────────────────────────
     private List<Location> locations;
+    private Location locationSelectionneeContrat;
+    private Location locationSelectionneeFacture;
 
     @Override
     public void setMainLayoutController(MainLayoutController controller) {
         this.mainLayoutController = controller;
     }
-    private Location locationSelectionneeContrat;
-    private Location locationSelectionneeFacture;
 
     // ─────────────────────────────────────────────────────────────
     // INITIALISATION
@@ -115,7 +99,6 @@ public class DocumentsController implements Initializable, MainLayoutController.
         cmbLocationFacture.getItems().clear();
 
         for (Location loc : locations) {
-            // FIX : getIdLocation() + getClientNomComplet()
             String label = "#" + loc.getIdLocation() + " - " + loc.getClientNomComplet() +
                     " (" + (loc.getStatut() != null ? loc.getStatut() : "?") + ")";
             cmbLocationContrat.getItems().add(label);
@@ -130,17 +113,55 @@ public class DocumentsController implements Initializable, MainLayoutController.
         if (spnHeuresRetard != null) spnHeuresRetard.setValueFactory(factory);
     }
 
+    /**
+     * ✅ CORRECTION : Amélioration des listeners pour recalculer automatiquement
+     */
     private void configurerListeners() {
-        if (chkGPS != null)       chkGPS.setOnAction(e -> recalculerMontantContrat());
-        if (chkSiegeBebe != null)  chkSiegeBebe.setOnAction(e -> recalculerMontantContrat());
-        if (chkAssurance != null)  chkAssurance.setOnAction(e -> recalculerMontantContrat());
-        if (chkChauffeur != null)  chkChauffeur.setOnAction(e -> recalculerMontantContrat());
-        if (chkCarburant != null)  chkCarburant.setOnAction(e -> recalculerMontantContrat());
+        // Listeners pour les extras (onglet Contrats)
+        if (chkGPS != null) {
+            chkGPS.setOnAction(e -> {
+                recalculerMontantContrat();
+                genererApercuContrat();
+            });
+        }
+        if (chkSiegeBebe != null) {
+            chkSiegeBebe.setOnAction(e -> {
+                recalculerMontantContrat();
+                genererApercuContrat();
+            });
+        }
+        if (chkAssurance != null) {
+            chkAssurance.setOnAction(e -> {
+                recalculerMontantContrat();
+                genererApercuContrat();
+            });
+        }
+        if (chkChauffeur != null) {
+            chkChauffeur.setOnAction(e -> {
+                recalculerMontantContrat();
+                genererApercuContrat();
+            });
+        }
+        if (chkCarburant != null) {
+            chkCarburant.setOnAction(e -> {
+                recalculerMontantContrat();
+                genererApercuContrat();
+            });
+        }
 
-        if (spnHeuresRetard != null)       spnHeuresRetard.valueProperty().addListener((o, ov, nv) -> recalculerPenalites());
-        if (chkCarburantManquant != null)   chkCarburantManquant.setOnAction(e -> recalculerPenalites());
-        if (chkDommagesLegers != null)      chkDommagesLegers.setOnAction(e -> recalculerPenalites());
-        if (chkDommagesGraves != null)      chkDommagesGraves.setOnAction(e -> recalculerPenalites());
+        // Listeners pour les pénalités (onglet Factures)
+        if (spnHeuresRetard != null) {
+            spnHeuresRetard.valueProperty().addListener((o, ov, nv) -> recalculerPenalites());
+        }
+        if (chkCarburantManquant != null) {
+            chkCarburantManquant.setOnAction(e -> recalculerPenalites());
+        }
+        if (chkDommagesLegers != null) {
+            chkDommagesLegers.setOnAction(e -> recalculerPenalites());
+        }
+        if (chkDommagesGraves != null) {
+            chkDommagesGraves.setOnAction(e -> recalculerPenalites());
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -160,13 +181,10 @@ public class DocumentsController implements Initializable, MainLayoutController.
     }
 
     private void afficherDetailsContrat(Location loc) {
-        // FIX : getClientNomComplet() (pas getNomClient())
         if (lblClientContrat != null)
             lblClientContrat.setText(loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "—");
-        // FIX : getIdVehicule() — pas de getVehicule() dans Location.java
         if (lblVehiculeContrat != null)
             lblVehiculeContrat.setText("Véhicule #" + loc.getIdVehicule());
-        // FIX : getDateFinPrev() + Timestamp.toLocalDateTime().toLocalDate()
         if (lblPeriodeContrat != null) {
             String debut = loc.getDateDebut() != null ?
                     loc.getDateDebut().toLocalDateTime().toLocalDate().format(FMT) : "?";
@@ -174,43 +192,42 @@ public class DocumentsController implements Initializable, MainLayoutController.
                     loc.getDateFinPrev().toLocalDateTime().toLocalDate().format(FMT) : "?";
             lblPeriodeContrat.setText(debut + " → " + fin);
         }
-        // FIX : getPrixParJour() retourne double (pas BigDecimal), pas de .doubleValue()
         if (lblPrixJourContrat != null)
             lblPrixJourContrat.setText(ContratService.formaterMontant(loc.getPrixParJour()));
-        // FIX : getEmailClient() n'existe pas → ne pas préremplir (l'utilisateur saisit l'email)
-        // txtEmailClient reste vide (l'agent le saisit manuellement)
     }
 
+    /**
+     * ✅ CORRECTION : Recalcul complet avec les extras
+     */
     private void recalculerMontantContrat() {
         if (locationSelectionneeContrat == null) return;
 
-        // FIX : Timestamp → .toLocalDateTime().toLocalDate()
         LocalDate debut = locationSelectionneeContrat.getDateDebut() != null ?
                 locationSelectionneeContrat.getDateDebut().toLocalDateTime().toLocalDate() : LocalDate.now();
-        // FIX : getDateFinPrev() (pas getDateFin())
         LocalDate fin = locationSelectionneeContrat.getDateFinPrev() != null ?
                 locationSelectionneeContrat.getDateFinPrev().toLocalDateTime().toLocalDate() : LocalDate.now().plusDays(1);
-        // FIX : getPrixParJour() retourne double directement
         double prixJour = locationSelectionneeContrat.getPrixParJour();
 
-        long nbJours       = ContratService.calculerNbJours(debut, fin);
+        long nbJours = ContratService.calculerNbJours(debut, fin);
         double montantBase = ContratService.calculerMontantBase(prixJour, debut, fin);
-        double extras      = ContratService.calculerMontantExtras(nbJours,
+
+        // ✅ Calcul des extras avec les valeurs actuelles des CheckBox
+        double extras = ContratService.calculerMontantExtras(nbJours,
                 chkGPS != null && chkGPS.isSelected(),
                 chkSiegeBebe != null && chkSiegeBebe.isSelected(),
                 chkAssurance != null && chkAssurance.isSelected(),
                 chkChauffeur != null && chkChauffeur.isSelected(),
                 chkCarburant != null && chkCarburant.isSelected());
-        double total = montantBase + extras;
-        // FIX : getAvance() (pas getMontantAvance().doubleValue())
-        double avance = locationSelectionneeContrat.getAvance();
-        double solde  = ContratService.calculerSolde(total, avance);
 
-        if (lblMontantBase   != null) lblMontantBase.setText(ContratService.formaterMontant(montantBase));
+        double total = montantBase + extras;
+        double avance = locationSelectionneeContrat.getAvance();
+        double solde = ContratService.calculerSolde(total, avance);
+
+        if (lblMontantBase != null) lblMontantBase.setText(ContratService.formaterMontant(montantBase));
         if (lblMontantExtras != null) lblMontantExtras.setText(ContratService.formaterMontant(extras));
-        if (lblMontantTotal  != null) lblMontantTotal.setText(ContratService.formaterMontant(total));
-        if (lblAvance        != null) lblAvance.setText(ContratService.formaterMontant(avance));
-        if (lblSolde         != null) {
+        if (lblMontantTotal != null) lblMontantTotal.setText(ContratService.formaterMontant(total));
+        if (lblAvance != null) lblAvance.setText(ContratService.formaterMontant(avance));
+        if (lblSolde != null) {
             lblSolde.setText(ContratService.formaterMontant(solde));
             lblSolde.setStyle("-fx-font-weight:bold; -fx-font-size:16px; -fx-text-fill:" +
                     (solde > 0 ? "#e74c3c" : "#27ae60") + ";");
@@ -220,6 +237,8 @@ public class DocumentsController implements Initializable, MainLayoutController.
     @FXML
     private void genererApercuContrat() {
         if (locationSelectionneeContrat == null) return;
+
+        // ✅ Génération du contrat avec les extras sélectionnés
         String contrat = ContratService.genererContratTexte(
                 locationSelectionneeContrat,
                 chkGPS != null && chkGPS.isSelected(),
@@ -234,7 +253,6 @@ public class DocumentsController implements Initializable, MainLayoutController.
     private void genererQRCode() {
         if (locationSelectionneeContrat == null) return;
         Location loc = locationSelectionneeContrat;
-        // FIX : getIdLocation(), getClientNomComplet(), getIdVehicule(), getDateFinPrev()
         String dateDebut = loc.getDateDebut() != null ?
                 loc.getDateDebut().toLocalDateTime().toLocalDate().format(FMT) : "—";
         String dateFin = loc.getDateFinPrev() != null ?
@@ -261,7 +279,6 @@ public class DocumentsController implements Initializable, MainLayoutController.
         chooser.setTitle("Choisir le dossier de sauvegarde");
         File dir = chooser.showDialog(null);
         if (dir != null) {
-            // FIX : getIdLocation()
             String chemin = ContratService.sauvegarderContrat(
                     contenu, locationSelectionneeContrat.getIdLocation(), dir.getAbsolutePath());
             if (chemin != null)
@@ -350,9 +367,11 @@ public class DocumentsController implements Initializable, MainLayoutController.
             lblClientFacture.setText(loc.getClientNomComplet() != null ? loc.getClientNomComplet() : "—");
         if (lblVehiculeFacture != null)
             lblVehiculeFacture.setText("Véhicule #" + loc.getIdVehicule());
-        // email non stocké dans Location → l'agent saisit manuellement
     }
 
+    /**
+     * ✅ CORRECTION : Recalcul des pénalités avec mise à jour de l'aperçu
+     */
     private void recalculerPenalites() {
         if (locationSelectionneeFacture == null) return;
 
@@ -360,26 +379,28 @@ public class DocumentsController implements Initializable, MainLayoutController.
         double penalites = ContratService.calculerPenaliteRetard(
                 heures,
                 chkCarburantManquant != null && chkCarburantManquant.isSelected(),
-                chkDommagesLegers    != null && chkDommagesLegers.isSelected(),
-                chkDommagesGraves    != null && chkDommagesGraves.isSelected()
+                chkDommagesLegers != null && chkDommagesLegers.isSelected(),
+                chkDommagesGraves != null && chkDommagesGraves.isSelected()
         );
 
         LocalDate debut = locationSelectionneeFacture.getDateDebut() != null ?
                 locationSelectionneeFacture.getDateDebut().toLocalDateTime().toLocalDate() : LocalDate.now();
-        LocalDate fin   = locationSelectionneeFacture.getDateFinPrev() != null ?
+        LocalDate fin = locationSelectionneeFacture.getDateFinPrev() != null ?
                 locationSelectionneeFacture.getDateFinPrev().toLocalDateTime().toLocalDate() : LocalDate.now();
         double montantBase = ContratService.calculerMontantBase(locationSelectionneeFacture.getPrixParJour(), debut, fin);
-        double total   = montantBase + penalites;
-        double avance  = locationSelectionneeFacture.getAvance();
-        double solde   = ContratService.calculerSolde(total, avance);
+        double total = montantBase + penalites;
+        double avance = locationSelectionneeFacture.getAvance();
+        double solde = ContratService.calculerSolde(total, avance);
 
-        if (lblPenalites    != null) lblPenalites.setText(ContratService.formaterMontant(penalites));
+        if (lblPenalites != null) lblPenalites.setText(ContratService.formaterMontant(penalites));
         if (lblTotalFacture != null) lblTotalFacture.setText(ContratService.formaterMontant(total));
         if (lblSoldeFacture != null) {
             lblSoldeFacture.setText(ContratService.formaterMontant(solde));
             lblSoldeFacture.setStyle("-fx-font-weight:bold; -fx-font-size:16px; -fx-text-fill:" +
                     (solde > 0 ? "#e74c3c" : "#27ae60") + ";");
         }
+
+        // ✅ Mise à jour automatique de l'aperçu facture
         genererApercuFacture(montantBase, avance, penalites);
     }
 
@@ -389,7 +410,7 @@ public class DocumentsController implements Initializable, MainLayoutController.
         double avance = locationSelectionneeFacture.getAvance();
         LocalDate debut = locationSelectionneeFacture.getDateDebut() != null ?
                 locationSelectionneeFacture.getDateDebut().toLocalDateTime().toLocalDate() : LocalDate.now();
-        LocalDate fin   = locationSelectionneeFacture.getDateFinPrev() != null ?
+        LocalDate fin = locationSelectionneeFacture.getDateFinPrev() != null ?
                 locationSelectionneeFacture.getDateFinPrev().toLocalDateTime().toLocalDate() : LocalDate.now();
         double montantBase = ContratService.calculerMontantBase(locationSelectionneeFacture.getPrixParJour(), debut, fin);
 
@@ -397,8 +418,8 @@ public class DocumentsController implements Initializable, MainLayoutController.
         double penalites = ContratService.calculerPenaliteRetard(
                 heures,
                 chkCarburantManquant != null && chkCarburantManquant.isSelected(),
-                chkDommagesLegers    != null && chkDommagesLegers.isSelected(),
-                chkDommagesGraves    != null && chkDommagesGraves.isSelected()
+                chkDommagesLegers != null && chkDommagesLegers.isSelected(),
+                chkDommagesGraves != null && chkDommagesGraves.isSelected()
         );
         genererApercuFacture(montantBase, avance, penalites);
     }
@@ -449,15 +470,15 @@ public class DocumentsController implements Initializable, MainLayoutController.
 
         LocalDate debut = locationSelectionneeFacture.getDateDebut() != null ?
                 locationSelectionneeFacture.getDateDebut().toLocalDateTime().toLocalDate() : LocalDate.now();
-        LocalDate fin   = locationSelectionneeFacture.getDateFinPrev() != null ?
+        LocalDate fin = locationSelectionneeFacture.getDateFinPrev() != null ?
                 locationSelectionneeFacture.getDateFinPrev().toLocalDateTime().toLocalDate() : LocalDate.now();
         double montantBase = ContratService.calculerMontantBase(locationSelectionneeFacture.getPrixParJour(), debut, fin);
         double avance = locationSelectionneeFacture.getAvance();
         int heures = spnHeuresRetard != null ? spnHeuresRetard.getValue() : 0;
         double penalites = ContratService.calculerPenaliteRetard(heures,
                 chkCarburantManquant != null && chkCarburantManquant.isSelected(),
-                chkDommagesLegers    != null && chkDommagesLegers.isSelected(),
-                chkDommagesGraves    != null && chkDommagesGraves.isSelected());
+                chkDommagesLegers != null && chkDommagesLegers.isSelected(),
+                chkDommagesGraves != null && chkDommagesGraves.isSelected());
         final double total = montantBase + penalites;
         final double solde = ContratService.calculerSolde(total, avance);
 
@@ -479,11 +500,9 @@ public class DocumentsController implements Initializable, MainLayoutController.
 
     @FXML
     private void retourDashboard() {
-        // ✅ FIX 3 : Naviguer via MainLayoutController pour garder la sidebar
         if (mainLayoutController != null) {
             mainLayoutController.naviguerVers("/views/Dashboardview.fxml");
         } else {
-            // Fallback si le contrôleur parent n'est pas disponible
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/views/MainLayout.fxml"));
                 Stage stage = (Stage) tabPane.getScene().getWindow();

@@ -18,268 +18,597 @@
 <ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.AjouterLocationController"
             fitToWidth="true"
-            prefHeight="650"
-            maxHeight="650"
             style="-fx-background-color: transparent; -fx-background: transparent;">
 
-    <VBox spacing="25"
+    <VBox spacing="0"
           style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
-          prefWidth="700">
+          prefWidth="920">
 
         <padding>
             <Insets top="30" right="40" bottom="30" left="40"/>
         </padding>
 
-        <!-- HEADER -->
-        <VBox spacing="8" alignment="CENTER">
-            <Label text="📋" style="-fx-font-size: 56px;"/>
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- HEADER                                                  -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <VBox spacing="8" alignment="CENTER" style="-fx-padding: 20 0 30 0;">
+            <Label text="📝" style="-fx-font-size: 56px;"/>
             <Label text="Nouvelle Location"
-                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                   style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
                 <font>
-                    <Font name="System Bold" size="28"/>
+                    <Font name="System Bold" size="32"/>
                 </font>
             </Label>
-            <Label text="Enregistrez une nouvelle location de véhicule"
+            <Label text="Commencez par scanner la CIN du client"
                    style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
         </VBox>
 
-        <Separator style="-fx-background-color: #bdc3c7;"/>
+        <Separator style="-fx-background-color: #bdc3c7; -fx-padding: 0 0 20 0;"/>
 
-        <!-- FORMULAIRE -->
-        <VBox spacing="25"
-              style="-fx-background-color: white;
-                 -fx-padding: 35;
-                 -fx-background-radius: 15;
-                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- MAIN CONTENT                                            -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <VBox spacing="20">
 
-            <!-- SECTION 1 : VÉHICULE -->
-            <VBox spacing="18">
-                <Label text="🚗 Sélection du Véhicule"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                    <font><Font name="System Bold" size="18"/></font>
-                </Label>
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 1 : SCAN CIN                                    -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
 
-                <VBox spacing="8">
-                    <Label text="Véhicule à louer *"
-                           style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                    <ComboBox fx:id="comboVehicule"
-                              promptText="Sélectionnez un véhicule disponible..."
-                              maxWidth="Infinity"
-                              style="-fx-font-size: 14px; -fx-padding: 10;"/>
-                    <Label fx:id="lblInfoVehicule"
-                           text=""
-                           wrapText="true"
-                           visible="false"
-                           style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d; -fx-padding: 5;"/>
+                <!-- Header step avec badge de couleur -->
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 18 24;
+                             -fx-background-color: #f59e0b10;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #f59e0b;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="01"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 22px;
+                                  -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                    <VBox spacing="2">
+                        <Label text="SCAN CIN — OBLIGATOIRE"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <Label text="Scannez la CIN pour remplir automatiquement le numéro"
+                               style="-fx-font-size: 12px; -fx-text-fill: #94a3b8;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Body -->
+                <VBox spacing="16" style="-fx-padding: 24;">
+                    <HBox spacing="16" alignment="CENTER_LEFT">
+                        <Button fx:id="btnScannerCIN"
+                                text="📷 SCANNER LA CIN"
+                                onAction="#scannerCIN"
+                                prefHeight="52"
+                                style="-fx-background-color: #f59e0b;
+                                       -fx-text-fill: white;
+                                       -fx-font-family: 'Courier New';
+                                       -fx-font-weight: bold;
+                                       -fx-font-size: 13px;
+                                       -fx-padding: 0 32;
+                                       -fx-background-radius: 10;
+                                       -fx-cursor: hand;
+                                       -fx-effect: dropshadow(gaussian, #f59e0b40, 8, 0, 0, 3);"/>
+                        <VBox spacing="4">
+                            <Label text="Sélectionnez une photo de la CIN (recto)"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                            <Label text="Le numéro CIN (8 chiffres) sera extrait automatiquement"
+                                   style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                          -fx-text-fill: #94a3b8;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Champ CIN -->
+                    <VBox spacing="6">
+                        <Label text="NUMÉRO CIN *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtCIN"
+                                   promptText="00000000"
+                                   style="-fx-font-family: 'Courier New'; -fx-font-size: 20px;
+                                          -fx-font-weight: bold; -fx-padding: 14 18;
+                                          -fx-background-color: #f8fafc;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #1e293b;
+                                          -fx-prompt-text-fill: #cbd5e1;"/>
+                    </VBox>
                 </VBox>
             </VBox>
 
-            <Separator/>
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 2 : VÉHICULE                                    -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
 
-            <!-- SECTION 2 : INFORMATIONS CLIENT -->
-            <VBox spacing="18">
-                <Label text="👤 Informations Client"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                    <font><Font name="System Bold" size="18"/></font>
-                </Label>
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 14 24;
+                             -fx-background-color: #3b82f610;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #3b82f6;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="02"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 18px;
+                                  -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                    <Label text="VÉHICULE"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                </HBox>
 
-                <GridPane hgap="20" vgap="15">
+                <VBox spacing="10" style="-fx-padding: 20 24;">
+                    <Label text="VÉHICULE À LOUER *"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                    <ComboBox fx:id="comboVehicule"
+                              promptText="Sélectionnez un véhicule disponible…"
+                              maxWidth="Infinity"
+                              style="-fx-font-size: 13px; -fx-padding: 10;
+                                     -fx-background-color: #f8fafc;
+                                     -fx-border-color: #e2e8f0;
+                                     -fx-border-width: 2;
+                                     -fx-border-radius: 10;
+                                     -fx-background-radius: 10;
+                                     -fx-text-fill: #1e293b;"/>
+                    <Label fx:id="lblInfoVehicule"
+                           text="Sélectionnez un véhicule"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-text-fill: #94a3b8;"/>
+                </VBox>
+            </VBox>
+
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 3 : CLIENT                                      -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 14 24;
+                             -fx-background-color: #8b5cf610;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #8b5cf6;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="03"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 18px;
+                                  -fx-font-weight: bold; -fx-text-fill: #8b5cf6;"/>
+                    <Label text="INFORMATIONS CLIENT"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                </HBox>
+
+                <GridPane hgap="16" vgap="14" style="-fx-padding: 20 24;">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="50"/>
                         <ColumnConstraints percentWidth="50"/>
                     </columnConstraints>
 
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label text="Nom complet *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="NOM COMPLET *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
                         <TextField fx:id="txtNomClient"
-                                   promptText="Ex: Ahmed Ben Salah"
-                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                                   promptText="Ahmed Ben Salah"
+                                   style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                          -fx-background-color: #f8fafc;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #1e293b;
+                                          -fx-prompt-text-fill: #cbd5e1;"/>
                     </VBox>
 
-                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="Téléphone *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <HBox spacing="10">
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="TÉLÉPHONE *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <HBox spacing="8">
                             <ComboBox fx:id="comboPays"
                                       promptText="Pays"
-                                      prefWidth="180"
-                                      style="-fx-font-size: 13px; -fx-padding: 8;"/>
+                                      prefWidth="120"
+                                      style="-fx-font-size: 12px; -fx-padding: 8;
+                                             -fx-background-color: #f8fafc;
+                                             -fx-border-color: #e2e8f0;
+                                             -fx-border-width: 2;
+                                             -fx-border-radius: 10;
+                                             -fx-background-radius: 10;
+                                             -fx-text-fill: #1e293b;"/>
                             <TextField fx:id="txtTelephone"
-                                       promptText="Ex: 98 123 456"
-                                       style="-fx-font-size: 14px; -fx-padding: 10;"
-                                       HBox.hgrow="ALWAYS"/>
+                                       promptText="98 123 456"
+                                       HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                              -fx-background-color: #f8fafc;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-width: 2;
+                                              -fx-border-radius: 10;
+                                              -fx-background-radius: 10;
+                                              -fx-text-fill: #1e293b;
+                                              -fx-prompt-text-fill: #cbd5e1;"/>
+                        </HBox>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 4 : ADRESSE                                     -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 14 24;
+                             -fx-background-color: #10b98110;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #10b981;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="04"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 18px;
+                                  -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                    <Label text="ADRESSE CLIENT"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                </HBox>
+
+                <VBox spacing="14" style="-fx-padding: 20 24;">
+                    <VBox spacing="6">
+                        <Label text="ADRESSE COMPLÈTE"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <HBox spacing="10">
+                            <TextField fx:id="txtAdresse"
+                                       promptText="Avenue Habib Bourguiba, Immeuble 15"
+                                       HBox.hgrow="ALWAYS"
+                                       style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                              -fx-background-color: #f8fafc;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-width: 2;
+                                              -fx-border-radius: 10;
+                                              -fx-background-radius: 10;
+                                              -fx-text-fill: #1e293b;
+                                              -fx-prompt-text-fill: #cbd5e1;"/>
+                            <Button fx:id="btnGeocoderAdresse"
+                                    text="📍 Géolocaliser"
+                                    onAction="#geocoderAdresseManuel"
+                                    prefHeight="44"
+                                    style="-fx-background-color: #10b981;
+                                           -fx-text-fill: white;
+                                           -fx-font-size: 12px;
+                                           -fx-font-weight: bold;
+                                           -fx-padding: 0 18;
+                                           -fx-background-radius: 10;
+                                           -fx-cursor: hand;
+                                           -fx-effect: dropshadow(gaussian, #10b98140, 8, 0, 0, 3);"/>
                         </HBox>
                     </VBox>
 
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Label text="CIN (optionnel)"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtCIN"
-                                   promptText="Ex: 12345678"
-                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
-                    </VBox>
-                </GridPane>
+                    <GridPane hgap="16">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="60"/>
+                            <ColumnConstraints percentWidth="40"/>
+                        </columnConstraints>
+                        <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="VILLE"
+                                   style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                          -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                          -fx-letter-spacing: 2;"/>
+                            <TextField fx:id="txtVille"
+                                       promptText="Tunis"
+                                       style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                              -fx-background-color: #f8fafc;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-width: 2;
+                                              -fx-border-radius: 10;
+                                              -fx-background-radius: 10;
+                                              -fx-text-fill: #1e293b;
+                                              -fx-prompt-text-fill: #cbd5e1;"/>
+                        </VBox>
+                        <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="CODE POSTAL"
+                                   style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                          -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                          -fx-letter-spacing: 2;"/>
+                            <TextField fx:id="txtCodePostal"
+                                       promptText="1000"
+                                       style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                              -fx-background-color: #f8fafc;
+                                              -fx-border-color: #e2e8f0;
+                                              -fx-border-width: 2;
+                                              -fx-border-radius: 10;
+                                              -fx-background-radius: 10;
+                                              -fx-text-fill: #1e293b;
+                                              -fx-prompt-text-fill: #cbd5e1;"/>
+                        </VBox>
+                    </GridPane>
+
+                    <Label fx:id="lblCoordonnees"
+                           text=""
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-text-fill: #10b981; -fx-padding: 8 12;
+                                  -fx-background-color: #d1fae5;
+                                  -fx-background-radius: 8;"/>
+                </VBox>
             </VBox>
 
-            <Separator/>
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 5 : PÉRIODE                                     -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
 
-            <!-- SECTION 3 : PÉRIODE DE LOCATION -->
-            <VBox spacing="18">
-                <Label text="📅 Période de Location"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                    <font><Font name="System Bold" size="18"/></font>
-                </Label>
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 14 24;
+                             -fx-background-color: #06b6d410;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #06b6d4;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="05"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 18px;
+                                  -fx-font-weight: bold; -fx-text-fill: #06b6d4;"/>
+                    <Label text="PÉRIODE DE LOCATION"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                </HBox>
 
-                <GridPane hgap="20" vgap="15">
-                    <columnConstraints>
-                        <ColumnConstraints percentWidth="50"/>
-                        <ColumnConstraints percentWidth="50"/>
-                    </columnConstraints>
-
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label text="Date de début *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <DatePicker fx:id="dateDebut"
-                                    promptText="Sélectionnez..."
-                                    maxWidth="Infinity"
-                                    style="-fx-font-size: 14px;"/>
-                    </VBox>
-
-                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="Date de fin prévue *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <DatePicker fx:id="dateFinPrevue"
-                                    promptText="Sélectionnez..."
-                                    maxWidth="Infinity"
-                                    style="-fx-font-size: 14px;"/>
-                    </VBox>
-
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Label text="Kilométrage de départ *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtKilometrageDebut"
-                                   promptText="Ex: 15000"
-                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
-                    </VBox>
-                </GridPane>
-            </VBox>
-
-            <Separator/>
-
-            <!-- SECTION 4 : TARIFICATION -->
-            <VBox spacing="18">
-                <Label text="💰 Tarification et Paiement"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
-                    <font><Font name="System Bold" size="18"/></font>
-                </Label>
-
-                <GridPane hgap="20" vgap="15">
+                <GridPane hgap="16" vgap="14" style="-fx-padding: 20 24;">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="33"/>
                         <ColumnConstraints percentWidth="33"/>
                         <ColumnConstraints percentWidth="34"/>
                     </columnConstraints>
 
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
-                        <Label text="Prix par jour"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtPrixParJour"
-                                   editable="false"
-                                   style="-fx-font-size: 14px; -fx-padding: 10; -fx-background-color: #ecf0f1;"/>
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="DATE DÉBUT *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <DatePicker fx:id="dateDebut"
+                                    maxWidth="Infinity"
+                                    style="-fx-font-size: 13px;
+                                           -fx-background-color: #f8fafc;
+                                           -fx-border-color: #e2e8f0;
+                                           -fx-border-width: 2;
+                                           -fx-border-radius: 10;"/>
                     </VBox>
 
-                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                        <Label text="Nombre de jours"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtNombreJours"
-                                   editable="false"
-                                   style="-fx-font-size: 14px; -fx-padding: 10; -fx-background-color: #ecf0f1;"/>
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="DATE FIN PRÉVUE *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <DatePicker fx:id="dateFinPrevue"
+                                    maxWidth="Infinity"
+                                    style="-fx-font-size: 13px;
+                                           -fx-background-color: #f8fafc;
+                                           -fx-border-color: #e2e8f0;
+                                           -fx-border-width: 2;
+                                           -fx-border-radius: 10;"/>
                     </VBox>
 
-                    <VBox spacing="8" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                        <Label text="Montant total"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
-                        <TextField fx:id="txtMontantTotal"
-                                   editable="false"
-                                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 10; -fx-background-color: #d5f4e6; -fx-text-fill: #27ae60;"/>
-                    </VBox>
-
-                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
-                        <Label text="Avance versée"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <TextField fx:id="txtAvance"
-                                   promptText="0.000"
-                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
-                    </VBox>
-
-                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                        <Label text="Statut *"
-                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-                        <ComboBox fx:id="comboStatut"
-                                  maxWidth="Infinity"
-                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label text="KILOMÉTRAGE DÉPART *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtKilometrageDebut"
+                                   promptText="15000"
+                                   style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                          -fx-background-color: #f8fafc;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #1e293b;
+                                          -fx-prompt-text-fill: #cbd5e1;"/>
                     </VBox>
                 </GridPane>
-
-                <!-- Calcul automatique info -->
-                <HBox spacing="10" alignment="CENTER_LEFT"
-                      style="-fx-background-color: #e8f4f8; -fx-padding: 12; -fx-background-radius: 8;">
-                    <Label text="💡" style="-fx-font-size: 16px;"/>
-                    <Label text="Le montant total se calcule automatiquement : Prix/jour × Nombre de jours"
-                           wrapText="true"
-                           style="-fx-font-size: 12px; -fx-text-fill: #2980b9; -fx-font-style: italic;"
-                           HBox.hgrow="ALWAYS"/>
-                </HBox>
             </VBox>
 
-            <Separator/>
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- STEP 6 : TARIFICATION                                -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="0"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
 
-            <!-- SECTION 5 : NOTES -->
-            <VBox spacing="10">
-                <Label text="📝 Notes (optionnel)"
-                       style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                <HBox spacing="14" alignment="CENTER_LEFT"
+                      style="-fx-padding: 14 24;
+                             -fx-background-color: #f43f5e10;
+                             -fx-background-radius: 16 16 0 0;
+                             -fx-border-color: #f43f5e;
+                             -fx-border-width: 0 0 0 4;">
+                    <Label text="06"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 18px;
+                                  -fx-font-weight: bold; -fx-text-fill: #f43f5e;"/>
+                    <Label text="TARIFICATION"
+                           style="-fx-font-family: 'Courier New'; -fx-font-size: 11px;
+                                  -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                  -fx-letter-spacing: 2;"/>
+                </HBox>
+
+                <GridPane hgap="16" vgap="14" style="-fx-padding: 20 24;">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="25"/>
+                    </columnConstraints>
+
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="PRIX / JOUR"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtPrixParJour" editable="false"
+                                   style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                          -fx-background-color: #f1f5f9;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #64748b;"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="NOMBRE JOURS"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtNombreJours" editable="false"
+                                   style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                          -fx-background-color: #f1f5f9;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #64748b;"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                        <Label text="MONTANT TOTAL"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #f43f5e;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtMontantTotal" editable="false"
+                                   style="-fx-font-size: 16px; -fx-font-weight: bold;
+                                          -fx-padding: 11 14;
+                                          -fx-background-color: #fef2f2;
+                                          -fx-border-color: #f43f5e;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #f43f5e;"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="3" GridPane.rowIndex="0">
+                        <Label text="AVANCE VERSÉE"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <TextField fx:id="txtAvance"
+                                   promptText="0.000"
+                                   style="-fx-font-size: 14px; -fx-padding: 11 14;
+                                          -fx-background-color: #f8fafc;
+                                          -fx-border-color: #e2e8f0;
+                                          -fx-border-width: 2;
+                                          -fx-border-radius: 10;
+                                          -fx-background-radius: 10;
+                                          -fx-text-fill: #1e293b;
+                                          -fx-prompt-text-fill: #cbd5e1;"/>
+                    </VBox>
+
+                    <VBox spacing="6" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="STATUT *"
+                               style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                                      -fx-font-weight: bold; -fx-text-fill: #64748b;
+                                      -fx-letter-spacing: 2;"/>
+                        <ComboBox fx:id="comboStatut" maxWidth="Infinity"
+                                  style="-fx-font-size: 13px; -fx-padding: 8;
+                                         -fx-background-color: #f8fafc;
+                                         -fx-border-color: #e2e8f0;
+                                         -fx-border-width: 2;
+                                         -fx-border-radius: 10;
+                                         -fx-background-radius: 10;
+                                         -fx-text-fill: #1e293b;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- NOTES                                                -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <VBox spacing="8"
+                  style="-fx-background-color: white;
+                         -fx-padding: 20 24;
+                         -fx-background-radius: 16;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 12, 0, 0, 4);">
+                <Label text="NOTES"
+                       style="-fx-font-family: 'Courier New'; -fx-font-size: 10px;
+                              -fx-font-weight: bold; -fx-text-fill: #64748b;
+                              -fx-letter-spacing: 2;"/>
                 <TextArea fx:id="txtNotes"
-                          promptText="Remarques, conditions particulières..."
-                          prefRowCount="3"
-                          wrapText="true"
-                          style="-fx-font-size: 13px;"/>
+                          promptText="Remarques, conditions particulières…"
+                          prefRowCount="3" wrapText="true"
+                          style="-fx-font-size: 13px; -fx-padding: 10;
+                                 -fx-background-color: #f8fafc;
+                                 -fx-border-color: #e2e8f0;
+                                 -fx-border-width: 2;
+                                 -fx-border-radius: 10;
+                                 -fx-background-radius: 10;
+                                 -fx-text-fill: #1e293b;
+                                 -fx-prompt-text-fill: #cbd5e1;"/>
             </VBox>
 
             <!-- Message -->
             <Label fx:id="lblMessage"
-                   text=""
-                   wrapText="true"
-                   visible="false"
-                   managed="false"
-                   style="-fx-font-size: 13px; -fx-padding: 12; -fx-background-radius: 8;"/>
+                   text="" wrapText="true"
+                   visible="false" managed="false"
+                   style="-fx-font-family: 'Courier New'; -fx-font-size: 12px;
+                          -fx-padding: 14; -fx-background-radius: 8;"/>
+
+            <!-- ──────────────────────────────────────────────────── -->
+            <!-- BOUTONS                                              -->
+            <!-- ──────────────────────────────────────────────────── -->
+            <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+                <Button text="Annuler" onAction="#annuler"
+                        prefHeight="48" prefWidth="140"
+                        style="-fx-background-color: #e5e7eb;
+                               -fx-text-fill: #374151;
+                               -fx-font-family: 'Courier New';
+                               -fx-font-size: 12px; -fx-font-weight: bold;
+                               -fx-background-radius: 10;
+                               -fx-border-radius: 10;
+                               -fx-cursor: hand;"/>
+                <Button text="↺ Réinitialiser" onAction="#reinitialiser"
+                        prefHeight="48" prefWidth="160"
+                        style="-fx-background-color: #3b82f6;
+                               -fx-text-fill: white;
+                               -fx-font-family: 'Courier New';
+                               -fx-font-size: 12px; -fx-font-weight: bold;
+                               -fx-background-radius: 10;
+                               -fx-border-radius: 10;
+                               -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, #3b82f640, 8, 0, 0, 3);"/>
+                <Button fx:id="btnAjouter"
+                        text="✓ ENREGISTRER LA LOCATION"
+                        onAction="#ajouterLocation"
+                        prefHeight="48" prefWidth="280"
+                        defaultButton="true"
+                        style="-fx-background-color: #27ae60;
+                               -fx-text-fill: white;
+                               -fx-font-family: 'Courier New';
+                               -fx-font-size: 13px; -fx-font-weight: bold;
+                               -fx-background-radius: 10;
+                               -fx-border-radius: 10;
+                               -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, #27ae6040, 12, 0, 0, 4);"/>
+            </HBox>
+
         </VBox>
-
-        <!-- BOUTONS -->
-        <HBox spacing="15" alignment="CENTER">
-            <Button text="✖ Annuler"
-                    onAction="#annuler"
-                    prefWidth="200"
-                    style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
-                <font><Font name="System Bold" size="15"/></font>
-            </Button>
-
-            <Button text="🔄 Réinitialiser"
-                    onAction="#reinitialiser"
-                    prefWidth="200"
-                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
-                <font><Font name="System Bold" size="15"/></font>
-            </Button>
-
-            <Button fx:id="btnAjouter"
-                    text="✓ Enregistrer la Location"
-                    onAction="#ajouterLocation"
-                    prefWidth="250"
-                    defaultButton="true"
-                    style="-fx-background-color: linear-gradient(to bottom, #27ae60, #229954); -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 14 0; -fx-background-radius: 10; -fx-cursor: hand;">
-                <font><Font name="System Bold" size="16"/></font>
-            </Button>
-        </HBox>
-
     </VBox>
 </ScrollPane>
