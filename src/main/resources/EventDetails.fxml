@@ -4,6 +4,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.ToggleGroup?>
 
 <ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.EventDetailsController">
     <content>
@@ -31,6 +34,7 @@
                     <Label fx:id="datesLabel" style="-fx-text-fill: #666; -fx-font-size: 16px;" />
                 </HBox>
             </VBox>
+
             <!-- Section Météo -->
             <VBox fx:id="weatherBox" spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" prefWidth="1100" visible="false" managed="false">
                 <Label text="🌤️ Météo prévue" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
@@ -48,6 +52,50 @@
                     </VBox>
                 </HBox>
             </VBox>
+
+            <!-- TAB PANE avec localisation et artiste -->
+            <TabPane prefHeight="300" prefWidth="1100" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: transparent;">
+                <tabs>
+
+
+                    <!-- Onglet Artiste (nouveau) -->
+                    <!-- Onglet Artiste -->
+                    <Tab text="🎤 Artiste" fx:id="artistTab" disable="true">
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+                            <VBox fx:id="artistInfoBox" spacing="20" style="-fx-padding: 20;">
+
+                                <!-- En-tête avec image et nom -->
+                                <HBox spacing="20" alignment="CENTER_LEFT">
+                                    <ImageView fx:id="artistImageView" fitWidth="150" fitHeight="150" preserveRatio="true"
+                                               style="-fx-background-color: #f0f0f0; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" />
+                                    <VBox spacing="10">
+                                        <Label fx:id="artistNameLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                                        <Label fx:id="artistListenersLabel" style="-fx-text-fill: #666; -fx-font-size: 14px;" />
+                                        <Hyperlink fx:id="artistLink" style="-fx-text-fill: #3D94CA; -fx-font-size: 14px;" text="Voir sur Last.fm" />
+                                    </VBox>
+                                </HBox>
+
+                                <!-- Tags (genres) - Version simple sans FlowPane pour éviter les erreurs -->
+                                <VBox spacing="8">
+                                    <Label text="Genres" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                                    <FlowPane fx:id="artistTagsBox" hgap="10" vgap="10" prefWrapLength="800" />                                </VBox>
+
+                                <!-- Biographie -->
+                                <VBox spacing="8">
+                                    <Label text="Biographie" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                                    <Label fx:id="artistBioLabel" wrapText="true" style="-fx-text-fill: #666; -fx-font-size: 14px; -fx-line-spacing: 5;" />
+                                </VBox>
+
+                                <!-- Top titres -->
+                                <VBox spacing="8">
+                                    <Label text="Titres populaires" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+                                    <VBox fx:id="topTracksBox" spacing="10" />
+                                </VBox>
+                            </VBox>
+                        </ScrollPane>
+                    </Tab>
+                </tabs>
+            </TabPane>
 
             <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;" prefWidth="1100">
                 <Label text="Description" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />

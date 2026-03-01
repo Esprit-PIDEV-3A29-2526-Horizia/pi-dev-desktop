@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -21,6 +22,13 @@ import tn.esprit.services.ServiceParticipation;
 //weather
 import tn.esprit.services.WeatherService;
 import tn.esprit.services.WeatherService.WeatherInfo;
+
+//lastfm
+import tn.esprit.services.LastFmService;
+import tn.esprit.services.LastFmService.ArtistInfo;
+import tn.esprit.services.LastFmService.TrackInfo;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.ScrollPane;
 
 
 import tn.esprit.services.RecommandationService;
@@ -72,6 +80,20 @@ public class EventDetailsController implements Initializable {
     @FXML private Label humidityLabel;
     @FXML private Label windLabel;
 
+    //lastfm
+    @FXML private TabPane detailsTabPane;
+    @FXML private Tab artistTab;
+    @FXML private VBox artistInfoBox;
+    @FXML private Label artistNameLabel;
+    @FXML private ImageView artistImageView;
+    @FXML private Label artistBioLabel;
+    @FXML private Label artistListenersLabel;
+    @FXML private FlowPane artistTagsBox;
+    @FXML private VBox topTracksBox;
+    @FXML private Hyperlink artistLink;
+
+    private LastFmService lastFmService;
+
     private WeatherService weatherService;
 
     private RecommandationService recommandationService;
@@ -91,6 +113,8 @@ public class EventDetailsController implements Initializable {
 
         //weather
         weatherService = new WeatherService();
+        //lastfm
+        lastFmService = new LastFmService();
     }
 
     public void setEvent(Events event) {
@@ -118,6 +142,19 @@ public class EventDetailsController implements Initializable {
         priceLabel.setText(String.format("%.0f DT", event.getPrix()));
         availableLabel.setText(String.valueOf(event.getPlacesRestantes()));
         capacityLabel.setText(String.valueOf(event.getCapaciteMax()));
+        // Si l'événement est un concert, charger les infos de l'artiste
+        if (event.getCategorie().equalsIgnoreCase("Concert") ||
+                event.getCategorie().equalsIgnoreCase("Festival")) {
+
+            // Extract just the artist name from the title
+            String artistName = extractArtistName(event.getTitre());
+            System.out.println("🎤 Event title: " + event.getTitre());
+            System.out.println("🎤 Extracted artist: " + artistName);
+
+            loadArtistInfo(artistName);
+        } else {
+            artistTab.setDisable(true);
+        }
 
         loadEventImage();
 
@@ -377,6 +414,123 @@ public class EventDetailsController implements Initializable {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    //lastfm
+    private void loadArtistInfo(String artistName) {
+        if (artistName == null || artistName.isEmpty()) {
+            artistTab.setDisable(true);
+            return;
+        }
+
+        // Activer l'onglet
+        artistTab.setDisable(false);
+
+        new Thread(() -> {
+            ArtistInfo artist = lastFmService.getArtistInfo(artistName);
+            List<TrackInfo> topTracks = lastFmService.getTopTracks(artistName, 5);
+
+            javafx.application.Platform.runLater(() -> {
+                try {
+                    // Afficher les infos de l'artiste
+                    artistNameLabel.setText(artist.getName());
+                    artistBioLabel.setText(artist.getBio());
+                    artistListenersLabel.setText("👥 " + artist.getFormattedListeners() + " auditeurs");
+                    artistLink.setText("Voir sur Last.fm");
+                    artistLink.setOnAction(e -> {
+                        try {
+                            java.awt.Desktop.getDesktop().browse(new java.net.URI(artist.getUrl()));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+
+                    // Afficher les tags
+                    artistTagsBox.getChildren().clear();
+                    for (String tag : artist.getTags()) {
+                        Label tagLabel = new Label("#" + tag);
+                        tagLabel.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
+                                "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 11px;");
+                        artistTagsBox.getChildren().add(tagLabel);
+                    }
+
+                    // Afficher l'image
+                    if (artist.getImageUrl() != null && !artist.getImageUrl().isEmpty()) {
+                        Image image = new Image(artist.getImageUrl(), 150, 150, true, true);
+                        artistImageView.setImage(image);
+                    }
+                    // Dans loadArtistInfo(), après avoir récupéré les tags
+                    updateArtistTags(artist.getTags());
+
+                    // Afficher les top titres
+                    topTracksBox.getChildren().clear();
+                    int rank = 1;
+                    for (TrackInfo track : topTracks) {
+                        HBox trackBox = new HBox(10);
+                        trackBox.setAlignment(Pos.CENTER_LEFT);
+
+                        Label rankLabel = new Label(rank + ".");
+                        rankLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-min-width: 25;");
+
+                        Hyperlink trackLink = new Hyperlink(track.getName());
+                        trackLink.setOnAction(e -> {
+                            try {
+                                java.awt.Desktop.getDesktop().browse(new java.net.URI(track.getUrl()));
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        });
+
+                        Label playsLabel = new Label("(" + track.getPlayCount() + " écoutes)");
+                        playsLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
+
+                        trackBox.getChildren().addAll(rankLabel, trackLink, playsLabel);
+                        topTracksBox.getChildren().add(trackBox);
+                        rank++;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }).start();
+    }
+    private void updateArtistTags(List<String> tags) {
+        artistTagsBox.getChildren().clear();
+        if (tags == null || tags.isEmpty()) {
+            Label noTags = new Label("Aucun genre disponible");
+            noTags.setStyle("-fx-text-fill: #999; -fx-font-style: italic;");
+            artistTagsBox.getChildren().add(noTags);
+            return;
+        }
+
+        for (String tag : tags) {
+            Label tagLabel = new Label("#" + tag);
+            tagLabel.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
+                    "-fx-background-radius: 15; -fx-padding: 5 12; -fx-font-size: 12px;");
+            artistTagsBox.getChildren().add(tagLabel);
+        }
+    }
+
+    private String extractArtistName(String eventTitle) {
+        if (eventTitle == null || eventTitle.isEmpty()) return "";
+
+        // Remove common concert/festival words (case insensitive)
+        String artist = eventTitle
+                .replaceAll("(?i)concert", "")
+                .replaceAll("(?i)live", "")
+                .replaceAll("(?i)in concert", "")
+                .replaceAll("(?i)at", "")
+                .replaceAll("(?i)festival", "")
+                .replaceAll("(?i)tour", "")
+                .replaceAll("(?i)show", "")
+                .replaceAll("(?i)performance", "")
+                .replaceAll("(?i)feat\\.", "")
+                .replaceAll("(?i)featuring", "")
+                .replaceAll("-", "")
+                .trim();
+
+        return artist;
     }
 
 }
