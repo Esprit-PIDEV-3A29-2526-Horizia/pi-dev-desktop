@@ -19,8 +19,6 @@ import tn.esprit.backend.services.PublicationService;
 import tn.esprit.backend.utils.Session;
 import tn.esprit.frontend.admin.AdminDashboardController;
 import tn.esprit.frontend.user.UserMainController;
-import tn.esprit.frontend.utils.Navigator;
-import tn.esprit.backend.utils.ApiClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,8 +55,6 @@ public class AjouterPublicationController implements Initializable {
     @FXML private TextField dateField;
     @FXML private Button annulerBtn;
     @FXML private Button enregistrerBtn;
-
-    // Nouveaux boutons IA
     @FXML private Button btnGenererIA;
     @FXML private Button btnTraduire;
 
@@ -84,14 +80,13 @@ public class AjouterPublicationController implements Initializable {
         dateField.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         setupValidation();
 
+        // Événements
         retourBtn.setOnAction(e -> goBack());
         annulerBtn.setOnAction(e -> goBack());
         parcourirBtn.setOnAction(e -> choisirImage());
         enregistrerBtn.setOnAction(e -> enregistrer());
-
-        // Actions des boutons IA
-        btnGenererIA.setOnAction(e -> genererDescriptionIA());
-        btnTraduire.setOnAction(e -> traduireDescription());
+        if (btnGenererIA != null) btnGenererIA.setOnAction(e -> genererDescriptionIA());
+        if (btnTraduire != null) btnTraduire.setOnAction(e -> traduireDescription());
     }
 
     private void setupValidation() {
@@ -126,8 +121,10 @@ public class AjouterPublicationController implements Initializable {
                 showAlert("Erreur", "L'image ne doit pas dépasser 5 Mo !");
                 return;
             }
+
             selectedImageFile = file;
             imagePathLabel.setText("Fichier sélectionné: " + file.getName());
+
             try {
                 Image image = new Image(file.toURI().toString());
                 imagePreview.setImage(image);
@@ -224,110 +221,57 @@ public class AjouterPublicationController implements Initializable {
         }
     }
 
-    // ---------- Fonctionnalités IA ----------
+    // --- Fonctions IA (optionnelles) ---
     private void genererDescriptionIA() {
-        String titre = titreField.getText().trim();
-        String categorie = categorieCombo.getValue();
-
-        if (titre.isEmpty()) {
-            showAlert("Erreur", "Veuillez d'abord saisir un titre.");
-            return;
-        }
-        if (categorie == null) {
-            showAlert("Erreur", "Veuillez sélectionner une catégorie.");
-            return;
-        }
-
-        btnGenererIA.setDisable(true);
-        btnGenererIA.setText("Génération en cours...");
-
-        new Thread(() -> {
-            try {
-                String description = ApiClient.genererDescriptionIA(titre, categorie);
-                javafx.application.Platform.runLater(() -> {
-                    descriptionArea.setText(description);
-                    btnGenererIA.setDisable(false);
-                    btnGenererIA.setText("🤖 Générer description IA");
-                });
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                javafx.application.Platform.runLater(() -> {
-                    showAlert("Erreur API", "Impossible de générer la description : " + ex.getMessage());
-                    btnGenererIA.setDisable(false);
-                    btnGenererIA.setText("🤖 Générer description IA");
-                });
-            }
-        }).start();
+        // Implémentez votre logique IA ici
+        showAlert("Info", "Fonctionnalité IA à implémenter.");
     }
 
     private void traduireDescription() {
-        String description = descriptionArea.getText().trim();
-        if (description.isEmpty()) {
-            showAlert("Erreur", "Il n'y a rien à traduire.");
-            return;
-        }
-
-        btnTraduire.setDisable(true);
-        btnTraduire.setText("Traduction en cours...");
-
-        new Thread(() -> {
-            try {
-                // Traduire du français vers l'anglais (vous pouvez changer les codes)
-                String traduit = ApiClient.traduire(description, "fr", "en");
-                javafx.application.Platform.runLater(() -> {
-                    descriptionArea.setText(traduit);
-                    btnTraduire.setDisable(false);
-                    btnTraduire.setText("🌐 Traduire en anglais");
-                });
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                javafx.application.Platform.runLater(() -> {
-                    showAlert("Erreur API", "Traduction échouée : " + ex.getMessage());
-                    btnTraduire.setDisable(false);
-                    btnTraduire.setText("🌐 Traduire en anglais");
-                });
-            }
-        }).start();
+        // Implémentez votre logique de traduction ici
+        showAlert("Info", "Fonctionnalité traduction à implémenter.");
     }
-
-    // ---------- Fin IA ----------
 
     private void goBack() {
         System.out.println("=== goBack() appelé ===");
         try {
+            // 1. Si on est en mode admin
             if (AdminDashboardController.getInstance() != null) {
                 System.out.println("→ Retour vers admin");
                 AdminDashboardController.getInstance().showPublications();
                 return;
             }
+            // 2. Si on est en mode utilisateur
             if (UserMainController.getInstance() != null) {
                 System.out.println("→ Retour vers user");
                 UserMainController.getInstance().showPublications();
                 return;
             }
-            Navigator.loadView("/views/admin/GestionPublications.fxml");
-            return;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        // 3. Fallback : chercher le contentPane dans la scène
         try {
-            System.out.println("→ Recherche contentPane");
-            StackPane contentPane = (StackPane) retourBtn.getScene().lookup("#contentPane");
+            System.out.println("→ Tentative de retour via lookup #contentPane");
+            StackPane contentPane = (StackPane) annulerBtn.getScene().lookup("#contentPane");
             if (contentPane != null) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/admin/GestionPublications.fxml"));
                 Node view = loader.load();
                 contentPane.getChildren().setAll(view);
                 return;
+            } else {
+                System.out.println("→ contentPane non trouvé");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
+        // 4. Dernier recours : recharger tout le dashboard admin
         try {
-            System.out.println("→ Rechargement complet du dashboard");
+            System.out.println("→ Rechargement complet du dashboard admin");
             Parent root = FXMLLoader.load(getClass().getResource("/views/admin/admin_dashboard.fxml"));
-            Stage stage = (Stage) retourBtn.getScene().getWindow();
+            Stage stage = (Stage) annulerBtn.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Horizia - Administration");
             stage.setMaximized(true);

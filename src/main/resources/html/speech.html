@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reconnaissance vocale</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #result { border: 1px solid #ccc; padding: 10px; min-height: 60px; margin-top: 10px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    select { padding: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+<h3>Dictez votre message :</h3>
+<select id="lang">
+  <option value="fr-FR">Français</option>
+  <option value="en-US">English</option>
+  <option value="ar-SA">العربية</option>
+</select>
+<button id="start">🎤 Commencer</button>
+<button id="stop">⏹️ Arrêter</button>
+<div id="result">(Le texte apparaîtra ici)</div>
+
+<script>
+  const resultDiv = document.getElementById('result');
+  const startBtn = document.getElementById('start');
+  const stopBtn = document.getElementById('stop');
+  const langSelect = document.getElementById('lang');
+  let recognition = null;
+
+  if (!('webkitSpeechRecognition' in window)) {
+      resultDiv.innerText = "Désolé, votre navigateur ne supporte pas la reconnaissance vocale.";
+  } else {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+
+      recognition.onstart = function() {
+          resultDiv.innerText = "Écoute en cours... parlez";
+      };
+
+      recognition.onresult = function(event) {
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                  finalTranscript += event.results[i][0].transcript;
+              }
+          }
+          if (finalTranscript) {
+              resultDiv.innerText = finalTranscript;
+              // Envoi du résultat à JavaFX
+              if (window.javaConnector) {
+                  window.javaConnector.onSpeechResult(finalTranscript);
+              }
+          }
+      };
+
+      recognition.onerror = function(event) {
+          resultDiv.innerText = "Erreur : " + event.error;
+      };
+
+      recognition.onend = function() {
+          resultDiv.innerText += "\n(Fin de l'écoute)";
+      };
+
+      startBtn.onclick = function() {
+          recognition.lang = langSelect.value;
+          recognition.start();
+      };
+
+      stopBtn.onclick = function() {
+          recognition.stop();
+      };
+  }
+</script>
+</body>
+</html>

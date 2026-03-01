@@ -17,6 +17,14 @@
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
 
+    <!-- Repository pour Vosk -->
+    <repositories>
+        <repository>
+            <id>alphacephei</id>
+            <url>https://alphacephei.com/vosk/maven/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- MySQL Connector -->
         <dependency>
@@ -25,34 +33,34 @@
             <version>8.0.33</version>
         </dependency>
 
-        <!-- JavaFX Controls - Windows -->
+        <!-- JavaFX Modules (Windows) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
             <classifier>win</classifier>
         </dependency>
-
-        <!-- JavaFX FXML - Windows -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
             <classifier>win</classifier>
         </dependency>
-
-        <!-- JavaFX Graphics - Windows -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
             <classifier>win</classifier>
         </dependency>
-
-        <!-- JavaFX Media - Windows -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-media</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>win</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
             <classifier>win</classifier>
         </dependency>
@@ -78,12 +86,14 @@
             <version>2.11.0</version>
         </dependency>
 
-        <!-- Apache HttpClient pour les appels API -->
+        <!-- Apache HttpClient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
         </dependency>
+
+        <!-- ORMLite pour SQLite -->
         <dependency>
             <groupId>com.j256.ormlite</groupId>
             <artifactId>ormlite-jdbc</artifactId>
@@ -95,11 +105,18 @@
             <version>3.44.1.0</version>
         </dependency>
 
-        <!-- Jackson pour le traitement JSON -->
+        <!-- Jackson pour JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
+        </dependency>
+
+        <!-- Vosk pour reconnaissance vocale hors ligne -->
+        <dependency>
+            <groupId>com.alphacephei</groupId>
+            <artifactId>vosk</artifactId>
+            <version>0.3.45</version>
         </dependency>
     </dependencies>
 

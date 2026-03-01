@@ -25,7 +25,14 @@ public class UserMainController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
     @FXML private Label welcomeLabel;
-    @FXML private Button btnAccueil, btnExplorer, btnFavoris, btnMesPublications, btnProfil, btnModeAdmin, btnDeconnexion;
+    @FXML private Button btnAccueil;
+    @FXML private Button btnExplorer;
+    @FXML private Button btnFavoris;
+    @FXML private Button btnMesPublications;
+    @FXML private Button btnProfil;
+    @FXML private Button btnModeAdmin;
+    @FXML private Button btnDeconnexion;
+    @FXML private Button btnChat;   // important
 
     private static UserMainController instance;
 
@@ -49,6 +56,7 @@ public class UserMainController implements Initializable {
         btnProfil.setOnAction(e -> showProfil());
         btnModeAdmin.setOnAction(e -> switchToAdmin());
         btnDeconnexion.setOnAction(e -> deconnecter());
+        btnChat.setOnAction(e -> showChat());  // action du chat
         searchBtn.setOnAction(e -> rechercher());
         searchField.setOnAction(e -> rechercher());
 
@@ -79,10 +87,8 @@ public class UserMainController implements Initializable {
     @FXML public void showFavoris() { loadView("/views/user/UserFavoris.fxml"); }
     @FXML public void showPublications() { loadView("/views/user/UserPublications.fxml"); }
     @FXML public void showProfil() { loadView("/views/user/UserProfil.fxml"); }
-    @FXML
-    public void showChat() {
-        loadView("/views/chat/ChatView.fxml");
-    }
+    @FXML public void showChat() { loadView("/views/chat/ChatView.fxml"); }
+
     private void rechercher() {
         String query = searchField.getText().trim();
         if (!query.isEmpty()) {

@@ -16,10 +16,9 @@
             prefHeight="800" prefWidth="1400"
             style="-fx-background-color: #f8fafc;">
 
-    <!-- TOP BAR -->
     <top>
         <VBox style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
-            <!-- Première ligne : logo, recherche, météo, nom -->
+            <!-- Ligne 1 : logo, recherche, météo, date, nom -->
             <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15 30;">
                 <HBox spacing="10" alignment="CENTER">
                     <Label text="🏔️" style="-fx-font-size: 28;"/>
@@ -33,11 +32,13 @@
                 </HBox>
                 <HBox spacing="15" alignment="CENTER_RIGHT">
                     <Label text="9°C" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
-                    <Label fx:id="welcomeLabel" text="Bienvenue" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                    <Label text="1:37 AM" style="-fx-font-size: 14; -fx-text-fill: #64748b;"/>
+                    <Label text="2/23/2026" style="-fx-font-size: 14; -fx-text-fill: #64748b;"/>
+                    <Label fx:id="welcomeLabel" text="Bienvenue, Baha !" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
                 </HBox>
             </HBox>
 
-            <!-- Menu de navigation -->
+            <!-- Ligne 2 : menu de navigation + boutons chat, admin, déconnexion -->
             <HBox spacing="25" style="-fx-padding: 0 30 10 30;" alignment="CENTER_LEFT">
                 <Button fx:id="btnAccueil" text="Accueil"
                         style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-size: 14; -fx-font-weight: bold;"/>
@@ -50,7 +51,7 @@
                 <Button fx:id="btnProfil" text="Profil"
                         style="-fx-background-color: transparent; -fx-text-fill: #334155; -fx-font-size: 14; -fx-cursor: hand;"/>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="btnChat" text="💬 Chat" onAction="#showChat"
+                <Button fx:id="btnChat" text="💬 Chat"
                         style="-fx-background-color: transparent; -fx-text-fill: #334155; -fx-font-size: 14; -fx-cursor: hand;"/>
                 <Button fx:id="btnModeAdmin" text="Mode Admin" visible="false" managed="false"
                         style="-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-size: 13; -fx-font-weight: bold;"/>
@@ -60,7 +61,6 @@
         </VBox>
     </top>
 
-    <!-- CONTENT AREA -->
     <center>
         <StackPane fx:id="contentPane" style="-fx-background-color: #f8fafc;"/>
     </center>

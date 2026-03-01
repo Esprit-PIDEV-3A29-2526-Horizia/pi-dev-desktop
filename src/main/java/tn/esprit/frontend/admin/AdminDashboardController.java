@@ -34,6 +34,7 @@ public class AdminDashboardController implements Initializable {
     @FXML private Button btnPublications;
     @FXML private Button btnUtilisateurs;
     @FXML private Button btnStatistiques;
+    @FXML private Button btnChat;
     @FXML private Button btnModeUser;
     @FXML private Button btnDeconnexion;
     @FXML private Label welcomeLabel;
@@ -69,6 +70,7 @@ public class AdminDashboardController implements Initializable {
     public void loadView(String fxmlPath) {
         try {
             if (fxmlPath.equals(currentView)) return;
+
             System.out.println("🔍 Chargement: " + fxmlPath);
             URL url = getClass().getResource(fxmlPath);
             if (url == null) {
@@ -94,16 +96,17 @@ public class AdminDashboardController implements Initializable {
     @FXML public void showPublications() { loadView("/views/admin/GestionPublications.fxml"); }
     @FXML public void showUtilisateurs() { loadView("/views/admin/admin_utilisateurs.fxml"); }
     @FXML public void showStatistiques() { loadView("/views/admin/admin_statistiques.fxml"); }
-    @FXML
-    public void showChat() {
-        loadView("/views/chat/ChatView.fxml");
-    }
+    @FXML public void showChat() { loadView("/views/chat/ChatView.fxml"); }
+
+    // ✅ Méthodes pour l'ajout et la modification des publications
     public void openAddPublicationModal() {
         try {
             SelectedItem.clear();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/common/AjouterPublication.fxml"));
             Node form = loader.load();
             contentPane.getChildren().setAll(form);
+            // 🔥 Forcer le rechargement lors du retour en changeant la valeur de currentView
+            currentView = "modal";
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir le formulaire");
@@ -116,6 +119,7 @@ public class AdminDashboardController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/common/ModifierPublication.fxml"));
             Node form = loader.load();
             contentPane.getChildren().setAll(form);
+            currentView = "edit_modal";
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir le formulaire");

@@ -17,41 +17,41 @@
 
     <VBox spacing="30" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
 
-        <!-- Hero Section -->
+        <!-- Hero Section (dégradé bleu, même style que la première image) -->
         <VBox spacing="15" alignment="CENTER"
-              style="-fx-background-color: linear-gradient(to right, #2563eb, #3b82f6); -fx-background-radius: 20; -fx-padding: 50;">
+              style="-fx-background-color: linear-gradient(to right, #1e293b, #334155); -fx-background-radius: 20; -fx-padding: 50;">
             <Label text="📰 Découvrez les publications"
                    style="-fx-font-size: 36; -fx-font-weight: bold; -fx-text-fill: white;"/>
             <Label text="Explorez les expériences partagées par la communauté"
-                   style="-fx-font-size: 18; -fx-text-fill: #e0f2fe;"/>
+                   style="-fx-font-size: 18; -fx-text-fill: #cbd5e1;"/>
         </VBox>
 
-        <!-- Barre de recherche et tri -->
+        <!-- Barre de recherche et tri (centrés) -->
         <HBox spacing="10" alignment="CENTER">
             <TextField fx:id="searchField" promptText="Rechercher une publication..."
                        style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 15 25; -fx-font-size: 16; -fx-border-color: #e2e8f0; -fx-border-radius: 30;"
                        HBox.hgrow="ALWAYS"/>
-            <ComboBox fx:id="sortCombo" promptText="Plus récents"
+            <ComboBox fx:id="sortCombo" promptText="Trier par"
                       style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 5 15; -fx-font-size: 14; -fx-border-color: #e2e8f0; -fx-border-radius: 30;"
                       prefWidth="150"/>
             <Button fx:id="searchBtn" text="Rechercher"
                     style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 30; -fx-padding: 15 30; -fx-font-size: 16; -fx-font-weight: bold; -fx-cursor: hand;"/>
         </HBox>
 
-        <!-- Filtres par catégorie -->
+        <!-- Filtres par catégorie (vos catégories) -->
         <HBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Catégories:" style="-fx-font-weight: bold; -fx-text-fill: #334155; -fx-font-size: 14;"/>
             <Button fx:id="btnTous" text="Tous"
                     style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand;"/>
-            <Button fx:id="btnPlage" text="Plage"
+            <Button fx:id="btnPlage" text="🌊 Plage"
                     style="-fx-background-color: white; -fx-text-fill: #334155; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-border-color: #e2e8f0; -fx-border-radius: 25;"/>
-            <Button fx:id="btnMontagne" text="Montagne"
+            <Button fx:id="btnMontagne" text="⛰️ Montagne"
                     style="-fx-background-color: white; -fx-text-fill: #334155; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-border-color: #e2e8f0; -fx-border-radius: 25;"/>
-            <Button fx:id="btnVille" text="Ville"
+            <Button fx:id="btnVille" text="🏙️ Ville"
                     style="-fx-background-color: white; -fx-text-fill: #334155; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-border-color: #e2e8f0; -fx-border-radius: 25;"/>
-            <Button fx:id="btnDesert" text="Désert"
+            <Button fx:id="btnDesert" text="🏜️ Désert"
                     style="-fx-background-color: white; -fx-text-fill: #334155; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-border-color: #e2e8f0; -fx-border-radius: 25;"/>
-            <Button fx:id="btnCampagne" text="Campagne"
+            <Button fx:id="btnCampagne" text="🌾 Campagne"
                     style="-fx-background-color: white; -fx-text-fill: #334155; -fx-background-radius: 25; -fx-padding: 10 25; -fx-cursor: hand; -fx-border-color: #e2e8f0; -fx-border-radius: 25;"/>
         </HBox>
 

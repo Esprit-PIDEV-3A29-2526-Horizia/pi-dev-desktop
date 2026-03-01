@@ -120,16 +120,15 @@ public class PublicationService {
         return false;
     }
 
-    private Publication mapResultSet(ResultSet rs) throws SQLException {
+    // Méthode publique pour mapper un ResultSet vers Publication
+    public Publication mapResultSet(ResultSet rs) throws SQLException {
         Publication p = new Publication();
         p.setId(rs.getInt("id"));
         p.setTitre(rs.getString("titre"));
         p.setDescription(rs.getString("description"));
         p.setImage(rs.getString("image"));
-
         String catStr = rs.getString("categorie");
         p.setCategorie(catStr != null ? Categorie.valueOf(catStr) : Categorie.TOUS);
-
         p.setUtilisateurId(rs.getInt("utilisateur_id"));
         p.setAuteur(rs.getString("auteur"));
         p.setLikes(rs.getInt("likes"));

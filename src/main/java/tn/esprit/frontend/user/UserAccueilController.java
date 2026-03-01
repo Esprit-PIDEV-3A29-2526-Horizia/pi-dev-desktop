@@ -3,12 +3,13 @@ package tn.esprit.frontend.user;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
-import tn.esprit.backend.entities.Categorie;
 import tn.esprit.backend.entities.Publication;
 import tn.esprit.backend.services.PublicationService;
-import tn.esprit.backend.utils.Session;
+import tn.esprit.backend.utils.SelectedItem;
 
 import java.net.URL;
 import java.util.List;
@@ -18,74 +19,32 @@ import java.util.stream.Collectors;
 public class UserAccueilController implements Initializable {
 
     @FXML private TextField searchField;
-    @FXML private ComboBox<String> sortCombo;
+    @FXML private Button searchBtn;
     @FXML private FlowPane itemsGrid;
-    @FXML private Button btnTous, btnPlage, btnMontagne, btnVille, btnDesert, btnCampagne, searchBtn;
 
     private PublicationService publicationService = new PublicationService();
     private List<Publication> allPublications;
-    private Categorie currentCategorie = Categorie.TOUS;
-    private Button activeFilterBtn;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         allPublications = publicationService.getAll();
+        afficherPublications(allPublications);
 
-        sortCombo.getItems().addAll("Plus récents", "Plus anciens", "Plus aimés", "A-Z");
-        sortCombo.setValue("Plus récents");
-        sortCombo.setOnAction(e -> appliquerFiltres());
-
-        searchField.textProperty().addListener((obs, old, val) -> appliquerFiltres());
-        searchBtn.setOnAction(e -> appliquerFiltres());
-
-        btnTous.setOnAction(e -> setFilter(btnTous, Categorie.TOUS));
-        btnPlage.setOnAction(e -> setFilter(btnPlage, Categorie.PLAGE));
-        btnMontagne.setOnAction(e -> setFilter(btnMontagne, Categorie.MONTAGNE));
-        btnVille.setOnAction(e -> setFilter(btnVille, Categorie.VILLE));
-        btnDesert.setOnAction(e -> setFilter(btnDesert, Categorie.DESERT));
-        btnCampagne.setOnAction(e -> setFilter(btnCampagne, Categorie.CAMPAGNE));
-
-        activeFilterBtn = btnTous;
-        setFilter(btnTous, Categorie.TOUS);
+        searchField.textProperty().addListener((obs, old, val) -> filtrer());
+        searchBtn.setOnAction(e -> filtrer());
     }
 
-    private void appliquerFiltres() {
-        if (allPublications == null) return;
-        List<Publication> filtered = allPublications;
-
-        if (currentCategorie != Categorie.TOUS) {
-            filtered = filtered.stream()
-                    .filter(p -> p.getCategorie() == currentCategorie)
-                    .collect(Collectors.toList());
+    private void filtrer() {
+        String recherche = searchField.getText().toLowerCase().trim();
+        if (recherche.isEmpty()) {
+            afficherPublications(allPublications);
+            return;
         }
-
-        String search = searchField.getText().toLowerCase().trim();
-        if (!search.isEmpty()) {
-            filtered = filtered.stream()
-                    .filter(p -> p.getTitre().toLowerCase().contains(search) ||
-                            p.getDescription().toLowerCase().contains(search) ||
-                            (p.getAuteur() != null && p.getAuteur().toLowerCase().contains(search)))
-                    .collect(Collectors.toList());
-        }
-
-        String sortType = sortCombo.getValue();
-        if (sortType != null) {
-            switch (sortType) {
-                case "Plus anciens":
-                    filtered.sort((p1, p2) -> p1.getDateCreation().compareTo(p2.getDateCreation()));
-                    break;
-                case "Plus aimés":
-                    filtered.sort((p1, p2) -> Integer.compare(p2.getLikes(), p1.getLikes()));
-                    break;
-                case "A-Z":
-                    filtered.sort((p1, p2) -> p1.getTitre().compareToIgnoreCase(p2.getTitre()));
-                    break;
-                default:
-                    filtered.sort((p1, p2) -> p2.getDateCreation().compareTo(p1.getDateCreation()));
-            }
-        }
-
-        afficherPublications(filtered);
+        List<Publication> filtrees = allPublications.stream()
+                .filter(p -> p.getTitre().toLowerCase().contains(recherche) ||
+                        p.getDescription().toLowerCase().contains(recherche))
+                .collect(Collectors.toList());
+        afficherPublications(filtrees);
     }
 
     private void afficherPublications(List<Publication> publications) {
@@ -98,36 +57,45 @@ public class UserAccueilController implements Initializable {
 
     private VBox createCard(Publication p) {
         VBox card = new VBox(10);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-border-color: #e2e8f0; -fx-border-radius: 15;");
-        card.setPrefWidth(280);
+        card.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
+        card.setPrefWidth(250);
 
-        Label title = new Label(p.getTitre());
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
-        title.setWrapText(true);
-
-        Label category = new Label(p.getCategorie().getLabel());
-        category.setStyle("-fx-text-fill: #3b82f6; -fx-font-size: 14;");
-
-        Label author = new Label("Par " + (p.getAuteur() != null ? p.getAuteur() : "Test User"));
-        author.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13;");
-
-        Label likes = new Label("♥ " + p.getLikes());
-        likes.setStyle("-fx-text-fill: #ef4444;");
-
-        card.getChildren().addAll(title, category, author, likes);
-        return card;
-    }
-
-    private void setFilter(Button btn, Categorie cat) {
-        if (activeFilterBtn != null) {
-            activeFilterBtn.setStyle("-fx-background-color: white; -fx-text-fill: #334155; " +
-                    "-fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-background-radius: 25;");
+        // Image
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(220);
+        imageView.setFitHeight(150);
+        imageView.setPreserveRatio(true);
+        if (p.getImage() != null && !p.getImage().isEmpty()) {
+            try {
+                String path = p.getImage().startsWith("/") ? p.getImage() : "/" + p.getImage();
+                Image img = new Image(getClass().getResourceAsStream(path));
+                imageView.setImage(img);
+            } catch (Exception e) {
+                // Image par défaut (optionnel)
+            }
         }
-        btn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; " +
-                "-fx-background-radius: 25; -fx-padding: 10 25;");
-        activeFilterBtn = btn;
-        currentCategorie = cat;
-        appliquerFiltres();
+
+        // Titre
+        Label titre = new Label(p.getTitre());
+        titre.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+
+        // Catégorie
+        Label categorie = new Label(p.getCategorie().getLabel());
+        categorie.setStyle("-fx-text-fill: #3b82f6;");
+
+        // Auteur
+        Label auteur = new Label("Par " + (p.getAuteur() != null ? p.getAuteur() : "Anonyme"));
+        auteur.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px;");
+
+        // Bouton Voir détails
+        Button details = new Button("Voir détails");
+        details.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 8 20;");
+        details.setOnAction(e -> {
+            SelectedItem.setCurrentPublication(p);
+            UserMainController.getInstance().showExplorer(); // ou une vue de détail
+        });
+
+        card.getChildren().addAll(imageView, titre, categorie, auteur, details);
+        return card;
     }
 }

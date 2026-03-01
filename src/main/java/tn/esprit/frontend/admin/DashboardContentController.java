@@ -2,54 +2,46 @@ package tn.esprit.frontend.admin;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import tn.esprit.backend.entities.Publication;
+import tn.esprit.backend.services.CommentaireService;
 import tn.esprit.backend.services.PublicationService;
 import tn.esprit.backend.services.UtilisateurService;
-import tn.esprit.backend.utils.Session;
 
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class DashboardContentController implements Initializable {
 
-    @FXML private BarChart<String, Number> reservationsChart;
-    @FXML private ProgressBar satisfactionProgress;
+    @FXML private Label totalPublicationsLabel;
+    @FXML private Label totalUtilisateursLabel;
+    @FXML private Label totalCommentairesLabel;
+    @FXML private Label totalLikesLabel;
 
     private PublicationService publicationService = new PublicationService();
     private UtilisateurService utilisateurService = new UtilisateurService();
+    private CommentaireService commentaireService = new CommentaireService();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if (!Session.estAdmin()) return;
-
         chargerStatistiques();
-        chargerGraphique();
     }
 
     private void chargerStatistiques() {
-        // Vous pouvez mettre à jour les labels avec des données réelles
-        // Exemple:
-        // totalReservationsLabel.setText(String.valueOf(....));
-    }
+        List<Publication> publications = publicationService.getAll();
 
-    private void chargerGraphique() {
-        XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Réservations 2026");
+        totalPublicationsLabel.setText(String.valueOf(publications.size()));
 
-        // Données d'exemple - à remplacer par vos vraies données
-        series.getData().add(new XYChart.Data<>("Jan", 120));
-        series.getData().add(new XYChart.Data<>("Fév", 150));
-        series.getData().add(new XYChart.Data<>("Mar", 180));
-        series.getData().add(new XYChart.Data<>("Avr", 210));
-        series.getData().add(new XYChart.Data<>("Mai", 250));
-        series.getData().add(new XYChart.Data<>("Juin", 300));
+        int totalUsers = utilisateurService.getAll().size();
+        totalUtilisateursLabel.setText(String.valueOf(totalUsers));
 
-        reservationsChart.getData().clear();
-        reservationsChart.getData().add(series);
+        int totalComments = publications.stream()
+                .mapToInt(p -> commentaireService.getByPublication(p.getId()).size())
+                .sum();
+        totalCommentairesLabel.setText(String.valueOf(totalComments));
+
+        int totalLikes = publications.stream().mapToInt(Publication::getLikes).sum();
+        totalLikesLabel.setText(String.valueOf(totalLikes));
     }
 }
