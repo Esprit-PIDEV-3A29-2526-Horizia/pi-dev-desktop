@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 20;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AddEventFormController">
+
+    <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Ajouter un événement" />
+
+    <Separator />
+
+    <GridPane hgap="15" vgap="15">
+        <columnConstraints>
+            <ColumnConstraints minWidth="120" />
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints minWidth="180" />
+        </columnConstraints>
+
+        <Label text="Titre :" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+        <TextField fx:id="titreField" promptText="Titre de l'événement" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+        <Label fx:id="titreError" text=" " GridPane.rowIndex="0" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Description :" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+        <TextArea fx:id="descriptionField" promptText="Description" prefRowCount="3" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+        <Label fx:id="descriptionError" text=" " GridPane.rowIndex="1" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Catégorie :" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+        <ComboBox fx:id="categorieCombo" promptText="Sélectionner" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+        <Label fx:id="categorieError" text=" " GridPane.rowIndex="2" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Lieu :" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+        <TextField fx:id="locationField" promptText="Lieu" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+        <Label fx:id="locationError" text=" " GridPane.rowIndex="3" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Date début :" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+        <DatePicker fx:id="dateDebutPicker" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+        <Label fx:id="dateDebutError" text=" " GridPane.rowIndex="4" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Date fin :" GridPane.rowIndex="5" GridPane.columnIndex="0" />
+        <DatePicker fx:id="dateFinPicker" GridPane.rowIndex="5" GridPane.columnIndex="1" />
+        <Label fx:id="dateFinError" text=" " GridPane.rowIndex="5" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Prix :" GridPane.rowIndex="6" GridPane.columnIndex="0" />
+        <TextField fx:id="prixField" promptText="Prix" GridPane.rowIndex="6" GridPane.columnIndex="1" />
+        <Label fx:id="prixError" text=" " GridPane.rowIndex="6" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Capacité max :" GridPane.rowIndex="7" GridPane.columnIndex="0" />
+        <Spinner fx:id="capaciteSpinner" initialValue="100" min="1" max="1000" GridPane.rowIndex="7" GridPane.columnIndex="1" />
+        <Label fx:id="capaciteError" text=" " GridPane.rowIndex="7" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+
+        <Label text="Image URL :" GridPane.rowIndex="8" GridPane.columnIndex="0" />
+        <TextField fx:id="imageUrlField" promptText="URL de l'image" GridPane.rowIndex="8" GridPane.columnIndex="1" />
+        <Label fx:id="imageError" text=" " GridPane.rowIndex="8" GridPane.columnIndex="2" style="-fx-font-size: 11px;" />
+    </GridPane>
+
+    <Region VBox.vgrow="ALWAYS" />
+
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button onAction="#handleCancel" style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-padding: 10 30; -fx-background-radius: 8; -fx-cursor: hand;" text="Annuler" />
+        <Button onAction="#handleSave" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-padding: 10 30; -fx-background-radius: 8; -fx-font-weight: bold; -fx-cursor: hand;" text="Enregistrer" />
+    </HBox>
+
+    <padding>
+        <Insets bottom="20" left="20" right="20" top="20" />
+    </padding>
+</VBox>

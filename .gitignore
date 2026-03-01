@@ -3,7 +3,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/gestion-event
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
@@ -36,4 +39,8 @@ build/
 .vscode/
 
 ### Mac OS ###
+<<<<<<< HEAD
 .DS_Storesrc/main/resources/config.properties
+=======
+.DS_Store
+>>>>>>> origin/gestion-event
