@@ -205,7 +205,7 @@ public class ForgotPasswordController {
                 javafx.application.Platform.runLater(() -> {
                     if (reset) {
                         showAlert("Succès", "✅ Votre mot de passe a été réinitialisé !");
-                        NavigationManager.loadView("/fxml/Login.fxml");
+                        NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
                     } else {
                         showMessage("❌ Échec de la réinitialisation. Code invalide ou expiré.", "error");
                         // Retour à l'étape 2
@@ -232,7 +232,7 @@ public class ForgotPasswordController {
      */
     @FXML
     private void handleBackToLogin() {
-        NavigationManager.loadView("/fxml/Login.fxml");
+        NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
     }
 
     @FXML

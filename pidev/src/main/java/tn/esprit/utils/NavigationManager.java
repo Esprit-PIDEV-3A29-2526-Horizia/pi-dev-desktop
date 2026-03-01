@@ -22,7 +22,7 @@ public class NavigationManager {
         windowHeight = height;
     }
 
-    public static void loadView(String fxmlPath) {
+    public static void loadView(String fxmlPath, String catalogue) {
         try {
             FXMLLoader loader = new FXMLLoader(NavigationManager.class.getResource(fxmlPath));
             Parent root = loader.load();

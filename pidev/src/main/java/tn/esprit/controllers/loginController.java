@@ -462,7 +462,7 @@ public class loginController {
             return;
         }
 
-        NavigationManager.loadView("/fxml/ForgotPassword.fxml");
+        NavigationManager.loadView("/fxml/ForgotPassword.fxml", "Catalogue");
     }
 
     @FXML

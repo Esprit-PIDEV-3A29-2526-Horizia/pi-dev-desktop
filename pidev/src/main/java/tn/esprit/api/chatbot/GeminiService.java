@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GeminiService {
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-    private final String apiKey;
+    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";    private final String apiKey;
     private final OkHttpClient client;
     private final VoyageService voyageService;
 

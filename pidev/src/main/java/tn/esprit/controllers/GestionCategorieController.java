@@ -16,7 +16,6 @@ import tn.esprit.entites.Categorie;
 import tn.esprit.services.CategorieService;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public class GestionCategorieController {
 
@@ -91,11 +90,11 @@ public class GestionCategorieController {
         listCategories.setItems(filteredData);
     }
 
-    @FXML void naviguerVoyages(ActionEvent event) { changerScene("/GestionVoyage.fxml", event); }
-    @FXML void naviguerCategories(ActionEvent event) { changerScene("/GestionCategorie.fxml", event); }
+    @FXML void naviguerVoyages(ActionEvent event) { changerScene("/fxml/GestionVoyage.fxml", event); }
+    @FXML void naviguerCategories(ActionEvent event) { changerScene("/fxml/GestionCategorie.fxml", event); }
     @FXML
     void naviguerReservations(ActionEvent event) {
-       changerScene("/GestionReservationsAdmin.fxml", event);
+       changerScene("/fxml/GestionReservationsAdmin.fxml", event);
     }
 
     private void changerScene(String fxmlPath, ActionEvent event) {

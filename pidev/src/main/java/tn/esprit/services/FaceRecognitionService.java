@@ -3,7 +3,6 @@ package tn.esprit.services;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_face.FaceRecognizer;
 import org.bytedeco.javacpp.IntPointer;
@@ -12,8 +11,6 @@ import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.RectVector;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_objdetect;
 // 🔴 AJOUTER CES IMPORTS STATIQUES
 import static org.bytedeco.opencv.global.opencv_core.CV_32SC1;
 import static org.bytedeco.opencv.global.opencv_imgproc.COLOR_BGR2GRAY;
@@ -23,8 +20,6 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.IMREAD_UNCHANGED;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FaceRecognitionService {
 
@@ -35,7 +30,7 @@ public class FaceRecognitionService {
     public FaceRecognitionService() {
         try {
             // Charger le fichier comme un flux
-            java.io.InputStream cascadeStream = getClass().getResourceAsStream("/haarcascade_frontalface_default.xml");
+            java.io.InputStream cascadeStream = getClass().getResourceAsStream("/fxml/haarcascade_frontalface_default.xml");
             if (cascadeStream == null) {
                 System.err.println("ERREUR: fichier haarcascade_frontalface_default.xml non trouvé!");
                 return;

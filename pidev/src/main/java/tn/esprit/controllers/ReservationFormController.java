@@ -21,7 +21,6 @@ import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.*;
 
-import javax.mail.MessagingException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -79,7 +78,7 @@ public class ReservationFormController {
         currentUser = SessionManager.getCurrentUser();
         if (currentUser == null) {
             showAlert("Erreur", "Vous devez être connecté pour faire une réservation");
-            NavigationManager.loadView("/fxml/Login.fxml");
+            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
             return;
         }
 
@@ -91,19 +90,19 @@ public class ReservationFormController {
                 selectedLogement = serviceLogement.rechercherParId(reservationToEdit.getId_l());
                 if (selectedLogement == null) {
                     showAlert("Erreur", "Logement introuvable.");
-                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
                     return;
                 }
             } catch (SQLException e) {
                 showAlert("Erreur", "Impossible de charger le logement.");
-                NavigationManager.loadView("/fxml/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
                 return;
             }
         } else {
             selectedLogement = SessionManager.getSelectedLogement();
             if (selectedLogement == null) {
                 showAlert("Erreur", "Aucun logement sélectionné.");
-                NavigationManager.loadView("/fxml/accueil.fxml");
+                NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue");
                 return;
             }
         }
@@ -123,10 +122,10 @@ public class ReservationFormController {
         setupListeners();
 
         confirmerBtn.setOnAction(e -> confirmerReservation());
-        accueilBtn.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+        accueilBtn.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
         annulerBtn.setOnAction(e -> {
             SessionManager.clearEditingReservation();
-            NavigationManager.loadView("/fxml/mesreservations.fxml");
+            NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
         });
 
         resetErrorLabels();
@@ -150,7 +149,7 @@ public class ReservationFormController {
             }
             if (userBox != null) {
                 userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
+                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml", "Catalogue"));
             }
         }
     }
@@ -171,9 +170,9 @@ public class ReservationFormController {
 
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
-            NavigationManager.loadView("/fxml/UserProfil.fxml");
+            NavigationManager.loadView("/fxml/UserProfil.fxml", "Catalogue");
         } else {
-            NavigationManager.loadView("/fxml/Login.fxml");
+            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
         }
     }
 
@@ -427,7 +426,7 @@ public class ReservationFormController {
         if (reservationToEdit != null) {
             try {
                 enregistrerReservation(reservationToEdit.getStatus(), modalite, null);
-                NavigationManager.loadView("/fxml/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml", modalite);
             } catch (SQLException e) {
                 e.printStackTrace();
                 showAlert("Erreur", "Erreur lors de la modification.");
@@ -440,7 +439,7 @@ public class ReservationFormController {
                 int reservationId = enregistrerReservation(Status.confirmée, modalite, null);
                 // Envoyer email de confirmation pour réservation sur place
                 envoyerEmailConfirmation(reservationId, modalite, Status.confirmée);
-                NavigationManager.loadView("/fxml/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/mesreservations.fxml", modalite);
             } catch (SQLException e) {
                 e.printStackTrace();
                 showAlert("Erreur", "Erreur lors de l'enregistrement.");
@@ -456,7 +455,7 @@ public class ReservationFormController {
         dialog.setHeaderText("Choisissez votre option de paiement");
 
         DialogPane dialogPane = dialog.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("/paiementstyle.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/fxml/paiementstyle.css").toExternalForm());
         dialogPane.getStyleClass().add("custom-dialog");
 
         Label content = new Label("Voulez-vous payer maintenant ou plus tard ?");
@@ -537,7 +536,7 @@ public class ReservationFormController {
 
                     showStyledAlert(Alert.AlertType.INFORMATION, "Paiement différé", null,
                             "⏳ Vous avez 24h pour finaliser votre paiement. \n Un email avec un lien de paiement vous a été envoyé.");
-                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
                 } catch (Exception e) {
                     e.printStackTrace();
                     showStyledAlert(Alert.AlertType.ERROR, "Erreur", null, "Erreur lors du traitement.");
@@ -580,7 +579,7 @@ public class ReservationFormController {
                     // Envoyer email de confirmation après paiement réussi
                     envoyerEmailConfirmation(reservationId, modalite, Status.confirmée);
                     showAlert("Succès", "✅ Paiement accepté. Réservation confirmée !");
-                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
                 } catch (SQLException e) {
                     e.printStackTrace();
                     showAlert("Erreur", "Erreur lors de l'enregistrement.");
@@ -590,7 +589,7 @@ public class ReservationFormController {
                 try {
                     enregistrerReservation(Status.annulée, modalite, null);
                     showAlert("Paiement annulé", "❌ Vous avez annulé le paiement. Réservation annulée.");
-                    NavigationManager.loadView("/fxml/mesreservations.fxml");
+                    NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
                 } catch (SQLException e) {
                     e.printStackTrace();
                     showAlert("Erreur", "Erreur lors de l'enregistrement.");
@@ -615,7 +614,7 @@ public class ReservationFormController {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.getDialogPane().getStylesheets().add(getClass().getResource("/paiementstyle.css").toExternalForm());
+        alert.getDialogPane().getStylesheets().add(getClass().getResource("/fxml/paiementstyle.css").toExternalForm());
         alert.showAndWait();
     }
 

@@ -289,7 +289,7 @@ public class ReserverVoyageController {
         try {
             exec.shutdownNow();
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CatalogueUser.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CatalogueUser.fxml"));
             Parent root = loader.load();
 
             if (lblTitre != null && lblTitre.getScene() != null) {

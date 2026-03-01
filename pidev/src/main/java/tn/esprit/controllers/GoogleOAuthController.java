@@ -238,7 +238,7 @@ public class GoogleOAuthController {
 
             if (user != null) {
                 // Rediriger vers l'accueil
-                NavigationManager.loadView("/fxml/accueil.fxml");
+                NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue");
                 System.out.println("✅ Utilisateur connecté via Google: " + email);
             }
 

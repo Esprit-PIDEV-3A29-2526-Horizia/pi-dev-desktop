@@ -176,7 +176,7 @@ public class VoyageCardUserController {
     private void handleReserver() {
         if (voyage == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ReserverVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ReserverVoyage.fxml"));
             Parent root = loader.load();
             ReserverVoyageController ctrl = loader.getController();
             if (ctrl != null) ctrl.initData(voyage);
@@ -192,7 +192,7 @@ public class VoyageCardUserController {
     private void handleDetails() {
         if (voyage == null) return;
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyageUser.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/DetailsVoyageUser.fxml"));
             Parent root = loader.load();
             DetailsVoyageUserController ctrl = loader.getController();
             if (ctrl != null) ctrl.initData(voyage);

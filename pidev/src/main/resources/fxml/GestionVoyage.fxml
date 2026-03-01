@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controllers.GestionVoyageController"
+      style="-fx-background-color: #F5F1E9;">
+
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <children>
+        <!-- ====== HEADER + SEARCH + BTN ====== -->
+        <HBox alignment="CENTER_LEFT" spacing="10.0"
+              style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+            <children>
+                <Label style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #23779C;"
+                       text="CATALOGUE DES VOYAGES"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <TextField fx:id="tfRecherche"
+                           onKeyReleased="#handleRecherche"
+                           prefWidth="280.0"
+                           promptText="Rechercher une destination..."
+                           style="-fx-background-radius: 15; -fx-border-color: #DACEB6; -fx-border-radius: 15;"/>
+
+                <Button onAction="#ouvrirFormulaireAjout"
+                        style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand;"
+                        text="+ Ajouter un voyage"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="comboTri"
+                              promptText="Trier par..."
+                              prefWidth="150"
+                              style="-fx-background-radius: 10;" />
+                </HBox>
+            </children>
+        </HBox>
+
+        <!-- ====== STATISTIQUES ====== -->
+        <HBox spacing="20.0">
+            <children>
+                <VBox prefWidth="210.0" spacing="6.0"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <children>
+                        <Label style="-fx-text-fill: #777;" text="Destinations actives"/>
+                        <Label fx:id="lblDestActive"
+                               style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #23779C;"
+                               text="0"/>
+                    </children>
+                </VBox>
+
+                <VBox prefWidth="210.0" spacing="6.0"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <children>
+                        <Label style="-fx-text-fill: #777;" text="Places totales"/>
+                        <Label fx:id="lblPlacesTotales"
+                               style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #23779C;"
+                               text="0"/>
+                    </children>
+                </VBox>
+
+                <VBox prefWidth="210.0" spacing="6.0"
+                      style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+                    <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                    <children>
+                        <Label style="-fx-text-fill: #777;" text="En promotion"/>
+                        <Label fx:id="lblPromo"
+                               style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #23779C;"
+                               text="0"/>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+
+        <!-- ====== LISTE DES VOYAGES ====== -->
+        <VBox spacing="10.0"
+              style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);"
+              VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+            <children>
+                <ScrollPane fitToWidth="true"
+                            style="-fx-background-color: transparent; -fx-background-insets: 0;"
+                            VBox.vgrow="ALWAYS">
+                    <content>
+                        <FlowPane fx:id="gridVoyages"
+                                  hgap="20.0"
+                                  vgap="20.0"
+                                  style="-fx-padding: 10;"/>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+    </children>
+</VBox>

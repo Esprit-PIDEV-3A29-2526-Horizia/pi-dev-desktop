@@ -86,15 +86,15 @@ public class UserProfilController {
         // Style du bouton actif (aucun sur cette page)
 
         if (btnAccueil != null) {
-            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
         }
 
         if (btnNosLogements != null) {
-            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
         }
 
         if (btnMesReservations != null) {
-            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml"));
+            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue"));
         }
 
         // Gestion de l'affichage utilisateur
@@ -207,12 +207,12 @@ public class UserProfilController {
 
     @FXML
     private void retourAccueil() {
-        NavigationManager.loadView("/fxml/accueil.fxml");
+        NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue");
     }
 
     @FXML
     private void voirMesReservations() {
-        NavigationManager.loadView("/fxml/mesreservations.fxml");
+        NavigationManager.loadView("/fxml/mesreservations.fxml", "Catalogue");
     }
 
     private void showAlert(String title, String message) {

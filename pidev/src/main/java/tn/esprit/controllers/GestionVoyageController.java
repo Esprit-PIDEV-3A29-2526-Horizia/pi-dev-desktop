@@ -88,7 +88,7 @@ public class GestionVoyageController implements Initializable {
 
         try {
             for (Voyage v : voyages) {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/VoyageCard.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VoyageCard.fxml"));
                 VBox card = loader.load();
                 VoyageCardController ctrl = loader.getController();
                 if (ctrl != null) {
@@ -126,11 +126,11 @@ public class GestionVoyageController implements Initializable {
     }
 
     @FXML private void naviguerCategories() {
-        changerScene("/GestionCategorie.fxml");
+        changerScene("/fxml/GestionCategorie.fxml");
     }
 
     @FXML private void naviguerReservations() {
-        changerScene("/GestionReservationsAdmin.fxml");
+        changerScene("/fxml/GestionReservationsAdmin.fxml");
     }
 
     private void changerScene(String fxml) {
@@ -147,7 +147,7 @@ public class GestionVoyageController implements Initializable {
     @FXML
     private void ouvrirFormulaireAjout() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AjouterVoyage.fxml"));
             Parent ajoutView = loader.load();
 
             AjouterVoyageController controller = loader.getController();
@@ -167,7 +167,7 @@ public class GestionVoyageController implements Initializable {
 
     public void ouvrirDetailsDansMemeFenetre(Voyage voyage) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/DetailsVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/DetailsVoyage.fxml"));
             Parent detailsView = loader.load();
 
             DetailsVoyageController controller = loader.getController();
@@ -191,7 +191,7 @@ public class GestionVoyageController implements Initializable {
 
         // Recharger la vue de la liste
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/GestionVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/GestionVoyage.fxml"));
             Parent root = loader.load();
 
             GestionVoyageController newController = loader.getController();

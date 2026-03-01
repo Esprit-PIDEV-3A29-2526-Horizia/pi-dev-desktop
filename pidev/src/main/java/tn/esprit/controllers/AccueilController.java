@@ -3,22 +3,16 @@ package tn.esprit.controllers;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
 import tn.esprit.services.GeminiService;
 import javafx.stage.Stage;
-import tn.esprit.entities.logement;
-import tn.esprit.entities.User;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
@@ -58,6 +52,9 @@ public class AccueilController {
     @FXML
     private Button btnRecommendations;
     @FXML private Button btnLogout;  // ← Ajoute ce champ
+    @FXML private Button btnVoyager; // ← Ajoutez ce champ
+    @FXML private VBox contentContainer; // Supposons que vous ayez un conteneur pour le contenu
+    @FXML private AnchorPane mainContentArea; // Ou votre zone de contenu principal
 
 
     private Servicelogement serviceLogement;
@@ -83,7 +80,7 @@ public class AccueilController {
         // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
             btnMesReservations.setVisible(true);
-            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/mesreservations.fxml"));
+            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/MesReservations.fxml", "Catalogue"));
         } else {
             btnMesReservations.setVisible(false);
         }
@@ -124,6 +121,12 @@ public class AccueilController {
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
         sortCombo.setOnAction(e -> trier());
+        if (btnVoyager != null) {
+            btnVoyager.setOnAction(e -> handleVoyager());
+            System.out.println("✅ Bouton Voyager configuré");
+        } else {
+            System.err.println("❌ btnVoyager est null! Vérifiez fx:id dans le FXML");
+        }
     }
 
 
@@ -149,7 +152,7 @@ public class AccueilController {
             }
             if (userBox != null) {
                 userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
+                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml", "Catalogue"));
             }
         }
     }
@@ -172,7 +175,7 @@ public class AccueilController {
             btnMesReservations.setVisible(true);
             btnMesReservations.setOnAction(e -> {
                 System.out.println("Navigation vers Mes Réservations");
-                NavigationManager.loadView("/fxml/mesreservations.fxml");
+                NavigationManager.loadView("/fxml/MesReservations.fxml", "Catalogue");
             });
         }
 
@@ -356,9 +359,9 @@ public class AccueilController {
             // Vérifier si l'utilisateur est connecté
             if (SessionManager.isLoggedIn()) {
                 SessionManager.setSelectedLogement(l);
-                NavigationManager.loadView("/fxml/ReservationForm.fxml");
+                NavigationManager.loadView("/fxml/ReservationForm.fxml", "Catalogue");
             } else {
-                NavigationManager.loadView("/fxml/Login.fxml");
+                NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
             }
         });
 
@@ -366,14 +369,7 @@ public class AccueilController {
         return card;
     }
 
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-    // AJOUTER ces méthodes dans AccueilController.java
+
 
     @FXML
     private void onUserBoxHover() {
@@ -436,10 +432,10 @@ public class AccueilController {
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
             System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
-            NavigationManager.loadView("/fxml/UserProfil.fxml");
+            NavigationManager.loadView("/fxml/UserProfil.fxml", "Catalogue");
         } else {
             System.out.println("Vous n'êtes pas connecté !");
-            NavigationManager.loadView("/fxml/Login.fxml");
+            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
         }
     }
 
@@ -467,4 +463,36 @@ public class AccueilController {
         }
     }
 
+
+
+    @FXML
+    private void handleVoyager() {
+        System.out.println("🔄 Chargement du catalogue des voyages");
+
+        // Chemin vers votre fichier CatalogueUser.fxml
+        String fxmlPath = "/fxml/CatalogueUser.fxml";
+
+        // Vérification que le fichier existe
+        java.net.URL resourceUrl = getClass().getResource(fxmlPath);
+
+        if (resourceUrl == null) {
+            System.err.println("❌ ERREUR: Fichier non trouvé: " + fxmlPath);
+            System.err.println("📁 Chemin absolu testé: " + getClass().getResource("/"));
+            showAlert("Erreur", "Fichier CatalogueUser.fxml introuvable!");
+            return;
+        }
+
+        System.out.println("✅ Fichier trouvé: " + resourceUrl);
+
+        // Utiliser NavigationManager pour charger la vue
+        NavigationManager.loadView(fxmlPath, "Catalogue");
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }

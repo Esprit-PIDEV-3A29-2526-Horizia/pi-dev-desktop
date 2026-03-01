@@ -154,10 +154,10 @@ public class GestionReservationsAdminController implements Initializable {
     }
 
     @FXML
-    private void naviguerCategories(ActionEvent event) { changerScene("/GestionCategorie.fxml", event); }
+    private void naviguerCategories(ActionEvent event) { changerScene("/fxml/GestionCategorie.fxml", event); }
 
     @FXML
-    private void naviguerVoyages(ActionEvent event) { changerScene("/GestionVoyage.fxml", event); }
+    private void naviguerVoyages(ActionEvent event) { changerScene("/fxml/GestionVoyage.fxml", event); }
 
     @FXML
     private void handleDeconnexion(ActionEvent event) { changerScene("/Login.fxml", event); }
@@ -173,5 +173,12 @@ public class GestionReservationsAdminController implements Initializable {
         } catch (IOException e) {
             System.err.println("Erreur de navigation : " + e.getMessage());
         }
+    }
+
+
+    public void handleReset(ActionEvent actionEvent) {
+    }
+
+    public void handleSearch(ActionEvent actionEvent) {
     }
 }

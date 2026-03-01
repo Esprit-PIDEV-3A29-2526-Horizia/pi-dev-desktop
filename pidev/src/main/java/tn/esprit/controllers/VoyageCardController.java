@@ -77,7 +77,7 @@ public class VoyageCardController {
         if (voyage == null || parentController == null) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AjouterVoyage.fxml"));
             Parent root = loader.load();
 
             AjouterVoyageController controller = loader.getController();

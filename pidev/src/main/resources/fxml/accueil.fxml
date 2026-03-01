@@ -24,7 +24,7 @@
                     <Button styleClass="nav-button" text="Accueil" />
                     <Button fx:id="btnNosLogements" styleClass="nav-button, nav-button-active" text="Nos Logements" />
                     <Button fx:id="btnMesReservations" styleClass="nav-button" text="Mes Réservations" />
-                    <Button styleClass="nav-button" text="Voyager" />
+                    <Button fx:id="btnVoyager" styleClass="nav-button" text="Voyager" onAction="#handleVoyager"/>
                 </HBox>
 
                 <Region HBox.hgrow="ALWAYS" />

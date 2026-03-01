@@ -80,10 +80,10 @@ public class MesReservationsController {
             btnMesReservationsNav.getStyleClass().add("nav-button-active");
         }
         if (btnNosLogements != null) {
-            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
         }
         if (btnAccueil != null) {
-            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml"));
+            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
         }
         if (SessionManager.isLoggedIn() && currentUser != null) {
             if (userNameLabel != null) {
@@ -101,7 +101,7 @@ public class MesReservationsController {
             }
             if (userBox != null) {
                 userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml"));
+                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml", "Catalogue"));
             }
         }
     }
@@ -354,7 +354,7 @@ public class MesReservationsController {
 
     private void modifierReservation(reservationlog r) {
         SessionManager.setEditingReservation(r);
-        NavigationManager.loadView("/fxml/ReservationForm.fxml");
+        NavigationManager.loadView("/fxml/ReservationForm.fxml", "Catalogue");
     }
 
     private void supprimerReservation(reservationlog r) {
@@ -403,7 +403,7 @@ public class MesReservationsController {
     }
     @FXML
     private void retourAccueil() {
-        NavigationManager.loadView("/fxml/accueil.fxml");
+        NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue");
     }
 
     private void showAlert(String title, String message) {
@@ -434,10 +434,10 @@ public class MesReservationsController {
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
             System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
-            NavigationManager.loadView("/fxml/UserProfil.fxml");
+            NavigationManager.loadView("/fxml/UserProfil.fxml", "Catalogue");
         } else {
             System.out.println("vous n'etes pas connécter ! ");
-            NavigationManager.loadView("/fxml/Login.fxml");
+            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
         }
     }
 }

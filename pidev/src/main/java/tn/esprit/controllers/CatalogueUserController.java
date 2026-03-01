@@ -26,8 +26,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
-import tn.esprit.entities.User;
-import tn.esprit.controllers.AccueilController;
+
 public class CatalogueUserController implements Initializable {
 
     @FXML private GridPane voyageGrid;
@@ -331,7 +330,7 @@ public class CatalogueUserController implements Initializable {
         int row = 0;
         for (Voyage v : voyages) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/VoyageCardUser.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VoyageCardUser.fxml"));
                 VBox card = loader.load();
                 VoyageCardUserController controller = loader.getController();
                 if (controller != null) {
@@ -365,7 +364,7 @@ public class CatalogueUserController implements Initializable {
         if (chatbotController != null) {
             // Si vous avez une méthode pour nettoyer, appelez-la ici
         }
-        changerScene(event, "/MesReservations.fxml", "Mes Réservations");
+        changerScene(event, "/fxml/MesReservations.fxml", "Mes Réservations");
     }
 
     @FXML
@@ -425,6 +424,20 @@ public class CatalogueUserController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setTitle("Accueil");
             stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @FXML
+    private void handleRetour() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
+            Parent accueilView = loader.load();
+
+            // Récupérer le BorderPane parent
+            BorderPane parentBorderPane = (BorderPane) voyageGrid.getScene().getRoot();
+            parentBorderPane.setCenter(accueilView);
+
         } catch (IOException e) {
             e.printStackTrace();
         }

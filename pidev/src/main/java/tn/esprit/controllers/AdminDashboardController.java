@@ -282,22 +282,25 @@ public class AdminDashboardController {
         }
     }
 
-    @FXML
-    private void showVoyages() {
-        System.out.println("=== Chargement de la gestion des voyages ===");
-        loadPage("/fxml/Voyages.fxml");
-    }
 
-    @FXML
-    private void showReservations() {
-        System.out.println("=== Chargement de la gestion des réservations ===");
-        loadPage("/fxml/Reservations.fxml");
-    }
 
     @FXML
     private void showlogement(ActionEvent event) {
         System.out.println("=== Chargement de la gestion des logements ===");
         loadPage("/fxml/Logements.fxml");
+    }
+    @FXML
+    private void showVoyages() {
+        System.out.println("=== Chargement de la gestion des voyages ===");
+        loadPage("/fxml/GestionVoyage.fxml");
+        setActiveButton(btnVoyages); // ← AJOUTER CETTE LIGNE pour mettre le bouton en surbrillance
+    }
+
+    @FXML
+    private void showReservations() {
+        System.out.println("=== Chargement de la gestion des réservations ===");
+        loadPage("/fxml/GestionReservationsAdmin.fxml");
+        setActiveButton(btnReservations); // ← AJOUTER CETTE LIGNE pour mettre le bouton en surbrillance
     }
 
     public static void setSelectedLogement(logement log) {

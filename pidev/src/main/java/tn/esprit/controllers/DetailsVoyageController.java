@@ -77,7 +77,7 @@ public class DetailsVoyageController {
         if (voyageActuel == null) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterVoyage.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/AjouterVoyage.fxml"));
             Parent modifView = loader.load();
 
             AjouterVoyageController controller = loader.getController();
