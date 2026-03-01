@@ -351,7 +351,7 @@ public class AdminController implements Initializable {
         }
     }
 
-    private VBox createAdminEventCard(Events event) {
+    /*private VBox createAdminEventCard(Events event) {
         VBox card = new VBox();
         card.setPrefWidth(280);
         card.setSpacing(12);
@@ -394,6 +394,143 @@ public class AdminController implements Initializable {
         Button deleteBtn = new Button("🗑️ Supprimer");
         deleteBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; " +
                 "-fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand;");
+        deleteBtn.setOnAction(e -> deleteEvent(event));
+
+        buttonBox.getChildren().addAll(editBtn, deleteBtn);
+
+        card.getChildren().addAll(title, category, location, dates, details, buttonBox);
+        return card;
+    }*/
+
+    private VBox createAdminEventCard(Events event) {
+        VBox card = new VBox();
+        card.setPrefWidth(280);
+        card.setSpacing(12);
+        card.setPadding(new Insets(15));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
+                "-fx-border-color: #DACEB6; -fx-border-radius: 15; -fx-border-width: 1;");
+
+        // Stocker l'ID pour les notifications
+        card.getProperties().put("id", event.getId_event());
+
+        Label title = new Label(event.getTitre());
+        title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        title.setWrapText(true);
+
+        Label category = new Label(event.getCategorie());
+        category.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
+                "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 12px;");
+
+        Label details = new Label(String.format("%.0f DT | %d/%d places",
+                event.getPrix(), event.getPlacesRestantes(), event.getCapaciteMax()));
+        details.setStyle("-fx-text-fill: #666; -fx-font-size: 14px;");
+
+        Label location = new Label("📍 " + (event.getLocation() != null ? event.getLocation() : "N/A"));
+        location.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        String dateText = "";
+        if (event.getDateDebut() != null) {
+            dateText = "📅 " + sdf.format(event.getDateDebut());
+        }
+        Label dates = new Label(dateText);
+        dates.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
+
+        // ===== BOUTONS AVEC LE NOUVEAU DESIGN =====
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        // Bouton Modifier - Style exact comme dans le CSS que tu as montré
+        Button editBtn = new Button("Modifier");
+        editBtn.setStyle(
+                "-fx-background-color: #fff0f0; " +
+                        "-fx-text-fill: #382b22; " +
+                        "-fx-font-weight: 600; " +
+                        "-fx-padding: 8 15; " +
+                        "-fx-border-color: #b18597; " +
+                        "-fx-border-width: 2px; " +
+                        "-fx-border-radius: 0.75em; " +
+                        "-fx-background-radius: 0.75em; " +
+                        "-fx-cursor: hand;"
+        );
+
+        // Effet hover
+        editBtn.setOnMouseEntered(e ->
+                editBtn.setStyle(
+                        "-fx-background-color: #ffe9e9; " +
+                                "-fx-text-fill: #382b22; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 8 15; " +
+                                "-fx-border-color: #b18597; " +
+                                "-fx-border-width: 2px; " +
+                                "-fx-border-radius: 0.75em; " +
+                                "-fx-background-radius: 0.75em; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-translate-y: -2px;"
+                )
+        );
+
+        editBtn.setOnMouseExited(e ->
+                editBtn.setStyle(
+                        "-fx-background-color: #fff0f0; " +
+                                "-fx-text-fill: #382b22; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 8 15; " +
+                                "-fx-border-color: #b18597; " +
+                                "-fx-border-width: 2px; " +
+                                "-fx-border-radius: 0.75em; " +
+                                "-fx-background-radius: 0.75em; " +
+                                "-fx-cursor: hand;"
+                )
+        );
+
+        editBtn.setOnAction(e -> openEditEventForm(event));
+
+        // Bouton Supprimer - Style adapté pour la suppression
+        Button deleteBtn = new Button("Supprimer");
+        deleteBtn.setStyle(
+                "-fx-background-color: #ffe3e3; " +
+                        "-fx-text-fill: #8b2c2c; " +
+                        "-fx-font-weight: 600; " +
+                        "-fx-padding: 8 15; " +
+                        "-fx-border-color: #c44b4b; " +
+                        "-fx-border-width: 2px; " +
+                        "-fx-border-radius: 0.75em; " +
+                        "-fx-background-radius: 0.75em; " +
+                        "-fx-cursor: hand;"
+        );
+
+        // Effet hover pour suppression
+        deleteBtn.setOnMouseEntered(e ->
+                deleteBtn.setStyle(
+                        "-fx-background-color: #ffd6d6; " +
+                                "-fx-text-fill: #8b2c2c; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 8 15; " +
+                                "-fx-border-color: #c44b4b; " +
+                                "-fx-border-width: 2px; " +
+                                "-fx-border-radius: 0.75em; " +
+                                "-fx-background-radius: 0.75em; " +
+                                "-fx-cursor: hand; " +
+                                "-fx-translate-y: -2px;"
+                )
+        );
+
+        deleteBtn.setOnMouseExited(e ->
+                deleteBtn.setStyle(
+                        "-fx-background-color: #ffe3e3; " +
+                                "-fx-text-fill: #8b2c2c; " +
+                                "-fx-font-weight: 600; " +
+                                "-fx-padding: 8 15; " +
+                                "-fx-border-color: #c44b4b; " +
+                                "-fx-border-width: 2px; " +
+                                "-fx-border-radius: 0.75em; " +
+                                "-fx-background-radius: 0.75em; " +
+                                "-fx-cursor: hand;"
+                )
+        );
+
         deleteBtn.setOnAction(e -> deleteEvent(event));
 
         buttonBox.getChildren().addAll(editBtn, deleteBtn);

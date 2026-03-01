@@ -31,6 +31,23 @@
                     <Label fx:id="datesLabel" style="-fx-text-fill: #666; -fx-font-size: 16px;" />
                 </HBox>
             </VBox>
+            <!-- Section Météo -->
+            <VBox fx:id="weatherBox" spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" prefWidth="1100" visible="false" managed="false">
+                <Label text="🌤️ Météo prévue" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />
+
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <ImageView fx:id="weatherIcon" fitWidth="50" fitHeight="50" />
+
+                    <VBox spacing="5">
+                        <Label fx:id="weatherLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                        <HBox spacing="15">
+                            <Label fx:id="tempLabel" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                            <Label fx:id="humidityLabel" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                            <Label fx:id="windLabel" style="-fx-font-size: 14px; -fx-text-fill: #666;" />
+                        </HBox>
+                    </VBox>
+                </HBox>
+            </VBox>
 
             <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20;" prefWidth="1100">
                 <Label text="Description" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" />

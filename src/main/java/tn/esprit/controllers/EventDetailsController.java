@@ -18,6 +18,11 @@ import tn.esprit.services.EmailService;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
 
+//weather
+import tn.esprit.services.WeatherService;
+import tn.esprit.services.WeatherService.WeatherInfo;
+
+
 import tn.esprit.services.RecommandationService;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -59,6 +64,16 @@ public class EventDetailsController implements Initializable {
     @FXML private RadioButton radioSimilarite;
     @FXML private RadioButton radioCollaboratif;
 
+    //weather
+    @FXML private VBox weatherBox;
+    @FXML private Label weatherLabel;
+    @FXML private ImageView weatherIcon;
+    @FXML private Label tempLabel;
+    @FXML private Label humidityLabel;
+    @FXML private Label windLabel;
+
+    private WeatherService weatherService;
+
     private RecommandationService recommandationService;
     private List<Events> allEvents;
 
@@ -73,6 +88,9 @@ public class EventDetailsController implements Initializable {
 
         recommandationService = new RecommandationService();
         loadAllEvents();
+
+        //weather
+        weatherService = new WeatherService();
     }
 
     public void setEvent(Events event) {
@@ -85,6 +103,7 @@ public class EventDetailsController implements Initializable {
         categoryLabel.setText(event.getCategorie());
         descriptionLabel.setText(event.getDescription() != null ? event.getDescription() : "Aucune description disponible");
         locationLabel.setText(event.getLocation() != null ? event.getLocation() : "Lieu non spécifié");
+        loadWeather(event.getLocation());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
         String dateText = "";
@@ -303,6 +322,61 @@ public class EventDetailsController implements Initializable {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir l'événement");
         }
+    }
+
+
+
+    //weather api
+    // In loadWeather method, add these debug lines:
+
+    private void loadWeather(String location) {
+        System.out.println("Loading weather for location: " + location); // DEBUG
+
+        if (location == null || location.isEmpty() || location.equals("Lieu non spécifié")) {
+            System.out.println("Location invalid, hiding weather box"); // DEBUG
+            weatherBox.setVisible(false);
+            return;
+        }
+
+        // Extraire la ville (prendre la première partie avant la virgule)
+        String city = location.split(",")[0].trim();
+        System.out.println("Extracted city: " + city); // DEBUG
+
+        new Thread(() -> {
+            try {
+                System.out.println("Calling weather API for: " + city); // DEBUG
+                WeatherInfo weather = weatherService.getWeatherForCity(city);
+                System.out.println("Weather API response received: " + weather); // DEBUG
+
+                javafx.application.Platform.runLater(() -> {
+                    try {
+                        // Afficher les infos
+                        weatherLabel.setText(weather.getDescription());
+                        tempLabel.setText(weather.getFormattedTemp());
+                        humidityLabel.setText("💧 " + weather.getHumidity() + "%");
+                        windLabel.setText("💨 " + String.format("%.0f km/h", weather.getWindSpeed() * 3.6));
+
+                        // Charger l'icône
+                        String iconUrl = weather.getIconUrl();
+                        System.out.println("Loading icon from: " + iconUrl); // DEBUG
+                        Image icon = new Image(iconUrl, 50, 50, true, true);
+                        weatherIcon.setImage(icon);
+
+                        weatherBox.setVisible(true);
+                        weatherBox.setManaged(true);
+                        System.out.println("Weather box should now be visible"); // DEBUG
+
+                    } catch (Exception e) {
+                        System.err.println("Error updating UI with weather data:");
+                        e.printStackTrace();
+                        weatherBox.setVisible(false);
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("Error in weather API thread:");
+                e.printStackTrace();
+            }
+        }).start();
     }
 
 }
