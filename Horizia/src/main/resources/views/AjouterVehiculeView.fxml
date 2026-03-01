@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.AjouterVehiculeController"
+            fitToWidth="true"
+            prefHeight="600"
+            maxHeight="600"
+            style="-fx-background-color: transparent; -fx-background: transparent;">
+
+    <VBox spacing="25"
+          style="-fx-background-color: linear-gradient(to bottom, #f5f7fa, #e8ecf1);"
+          prefWidth="650">
+
+        <padding>
+            <Insets top="30" right="40" bottom="30" left="40"/>
+        </padding>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--                          HEADER SECTION                          -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <VBox spacing="8" alignment="CENTER">
+            <Label text="🚙" style="-fx-font-size: 56px;"/>
+            <Label text="Ajouter un Nouveau Véhicule"
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <font>
+                    <Font name="System Bold" size="28"/>
+                </font>
+            </Label>
+            <Label text="Complétez toutes les informations du véhicule"
+                   style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #bdc3c7;"/>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--                     FORMULAIRE D'AJOUT                           -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <VBox spacing="25"
+              style="-fx-background-color: white;
+                 -fx-padding: 35;
+                 -fx-background-radius: 15;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 20, 0, 0, 5);">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- SECTION 1 : IDENTIFICATION DU VÉHICULE     -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VBox spacing="18">
+                <Label text="📋 Identification du Véhicule"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font>
+                        <Font name="System Bold" size="18"/>
+                    </font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <!-- Immatriculation -->
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Immatriculation *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtImmatriculation"
+                                   promptText="Ex: 123 TUN 456"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <!-- Marque -->
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Marque *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <ComboBox fx:id="comboMarque"
+                                  promptText="Sélectionnez une marque..."
+                                  maxWidth="Infinity"
+                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    </VBox>
+
+                    <!-- Modèle -->
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Modèle *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <ComboBox fx:id="comboModele"
+                                  promptText="Sélectionnez d'abord une marque..."
+                                  maxWidth="Infinity"
+                                  disable="true"
+                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    </VBox>
+
+                    <!-- Année -->
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="Année de fabrication *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtAnnee"
+                                   promptText="Ex: 2024"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <Separator/>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- SECTION 2 : CARACTÉRISTIQUES TECHNIQUES    -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VBox spacing="18">
+                <Label text="⚙️ Caractéristiques Techniques"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font>
+                        <Font name="System Bold" size="18"/>
+                    </font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <!-- Carburant -->
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Type de carburant *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <ComboBox fx:id="comboCarburant"
+                                  maxWidth="Infinity"
+                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    </VBox>
+
+                    <!-- Couleur -->
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Couleur"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtCouleur"
+                                   promptText="Ex: Blanc, Noir, Gris..."
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <!-- Kilométrage -->
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                        <Label text="Kilométrage actuel *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtKilometrage"
+                                   promptText="Ex: 15000"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <!-- État -->
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <Label text="État du véhicule *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <ComboBox fx:id="comboEtat"
+                                  maxWidth="Infinity"
+                                  style="-fx-font-size: 14px; -fx-padding: 8;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <Separator/>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- SECTION 3 : TARIFICATION ET MÉDIA          -->
+            <!-- ═══════════════════════════════════════════ -->
+            <VBox spacing="18">
+                <Label text="💰 Tarification et Média"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                    <font>
+                        <Font name="System Bold" size="18"/>
+                    </font>
+                </Label>
+
+                <GridPane hgap="20" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <!-- Prix par jour -->
+                    <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Prix par jour (TND) *"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtPrixParJour"
+                                   promptText="Ex: 120.000"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <!-- Photo URL -->
+                    <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="URL de la photo (optionnel)"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+                        <TextField fx:id="txtPhoto"
+                                   promptText="https://example.com/photo.jpg"
+                                   style="-fx-font-size: 14px; -fx-padding: 10;"/>
+                    </VBox>
+                </GridPane>
+            </VBox>
+
+            <!-- Message d'aide -->
+            <HBox spacing="10" alignment="CENTER_LEFT"
+                  style="-fx-background-color: #fff3cd;
+                     -fx-padding: 12;
+                     -fx-background-radius: 8;
+                     -fx-border-color: #ffc107;
+                     -fx-border-width: 1;
+                     -fx-border-radius: 8;">
+                <Label text="ℹ️" style="-fx-font-size: 18px;"/>
+                <Label text="Les champs marqués d'un astérisque (*) sont obligatoires"
+                       wrapText="true"
+                       style="-fx-font-size: 12px; -fx-text-fill: #856404; -fx-font-weight: bold;"
+                       HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Label d'erreur/succès -->
+            <Label fx:id="lblMessage"
+                   text=""
+                   wrapText="true"
+                   style="-fx-font-size: 13px;
+                      -fx-font-weight: bold;
+                      -fx-padding: 12;
+                      -fx-background-radius: 8;"
+                   visible="false"
+                   managed="false"/>
+        </VBox>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!--                      BOUTONS D'ACTION                            -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <HBox spacing="15" alignment="CENTER">
+
+            <!-- Bouton Annuler -->
+            <Button text="✖ Annuler"
+                    onAction="#annuler"
+                    prefWidth="200"
+                    style="-fx-background-color: #95a5a6;
+                       -fx-text-fill: white;
+                       -fx-font-size: 15px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 3);">
+                <font>
+                    <Font name="System Bold" size="15"/>
+                </font>
+            </Button>
+
+            <!-- Bouton Réinitialiser -->
+            <Button text="🔄 Réinitialiser"
+                    onAction="#reinitialiser"
+                    prefWidth="200"
+                    style="-fx-background-color: #3498db;
+                       -fx-text-fill: white;
+                       -fx-font-size: 15px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 3);">
+                <font>
+                    <Font name="System Bold" size="15"/>
+                </font>
+            </Button>
+
+            <!-- Bouton Ajouter -->
+            <Button fx:id="btnAjouter"
+                    text="✓ Ajouter le Véhicule"
+                    onAction="#ajouterVehicule"
+                    prefWidth="230"
+                    defaultButton="true"
+                    style="-fx-background-color: linear-gradient(to bottom, #27ae60, #229954);
+                       -fx-text-fill: white;
+                       -fx-font-size: 16px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 14 0;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(39,174,96,0.4), 12, 0, 0, 4);">
+                <font>
+                    <Font name="System Bold" size="16"/>
+                </font>
+            </Button>
+        </HBox>
+
+    </VBox>
+</ScrollPane>

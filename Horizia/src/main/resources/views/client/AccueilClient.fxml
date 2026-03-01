@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<VBox spacing="0"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.client.AccueilClientController"
+      style="-fx-background-color: #0a0f1e; -fx-pref-width: 1400; -fx-pref-height: 800;">
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  NAVBAR FIXE                                               -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <HBox alignment="CENTER_LEFT" spacing="0" minHeight="66" maxHeight="66"
+          style="-fx-background-color: #060a14;
+                 -fx-padding: 0 40 0 36;
+                 -fx-border-color: rgba(3,132,183,0.22);
+                 -fx-border-width: 0 0 1 0;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 14, 0, 0, 4);">
+
+        <!-- Logo -->
+        <HBox alignment="CENTER_LEFT" spacing="11">
+            <Label text="🚗" style="-fx-font-size: 28px;"/>
+            <VBox spacing="1">
+                <Label text="HORIZIA"
+                       style="-fx-font-size: 19px; -fx-font-weight: bold;
+                              -fx-text-fill: #0384b7; -fx-font-family: 'Arial';"/>
+                <Label text="Agence de Location de Voitures"
+                       style="-fx-font-size: 9px; -fx-text-fill: rgba(255,255,255,0.32);"/>
+            </VBox>
+        </HBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Liens de navigation -->
+        <HBox alignment="CENTER" spacing="2">
+
+            <Button text="🏠  Accueil" onAction="#scrollToTop"
+                    style="-fx-background-color: rgba(3,132,183,0.12);
+                           -fx-text-fill: #0384b7; -fx-font-size: 13px; -fx-font-weight: bold;
+                           -fx-cursor: hand; -fx-padding: 8 16 8 16; -fx-background-radius: 8;
+                           -fx-border-color: rgba(3,132,183,0.28); -fx-border-radius: 8;"/>
+
+            <Button text="🚘  Catalogue" onAction="#allerCatalogue"
+                    style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.72);
+                           -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 16 8 16;
+                           -fx-background-radius: 8;"/>
+
+            <Button text="📋  Mes Réservations" onAction="#allerMesReservations"
+                    style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.72);
+                           -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 16 8 16;
+                           -fx-background-radius: 8;"/>
+            <Button text="📅  Planning" onAction="#allerPlanning"
+                    style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.72);
+               -fx-font-size: 13px; -fx-cursor: hand; -fx-padding: 8 16 8 16;
+               -fx-background-radius: 8;"/>
+            <!-- Divider -->
+            <Separator orientation="VERTICAL" prefHeight="26"
+                       style="-fx-background-color: rgba(255,255,255,0.1);
+                              -fx-padding: 0 6 0 6;"/>
+
+            <!-- Stat véhicules dispo — badge live -->
+            <HBox alignment="CENTER" spacing="5"
+                  style="-fx-background-color: rgba(3,132,183,0.08);
+                         -fx-background-radius: 20; -fx-padding: 6 14 6 14;
+                         -fx-border-color: rgba(3,132,183,0.2); -fx-border-radius: 20;">
+                <Label text="🚗" style="-fx-font-size: 12px;"/>
+                <Label fx:id="lblStatVehicules" text="—"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0384b7;"/>
+                <Label text="dispo"
+                       style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.35);"/>
+            </HBox>
+        </HBox>
+    </HBox>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!--  CONTENU SCROLLABLE                                        -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: #0a0f1e; -fx-background: #0a0f1e;"
+                vbarPolicy="AS_NEEDED" hbarPolicy="NEVER">
+
+        <VBox spacing="0" style="-fx-background-color: #0a0f1e;">
+
+            <!-- ─────────────────────────────────────────────────── -->
+            <!-- HERO SECTION                                         -->
+            <!-- ─────────────────────────────────────────────────── -->
+            <VBox fx:id="heroSection" alignment="CENTER" spacing="24"
+                  style="-fx-background-color: linear-gradient(to bottom, #0d1829 0%, #0a0f1e 100%);
+                         -fx-padding: 62 80 62 80;">
+
+                <!-- Badge -->
+                <HBox alignment="CENTER">
+                    <Label text="✨   BIENVENUE CHEZ HORIZIA"
+                           style="-fx-background-color: rgba(3,132,183,0.11);
+                                  -fx-text-fill: #0384b7; -fx-font-size: 11px; -fx-font-weight: bold;
+                                  -fx-padding: 5 18 5 18; -fx-background-radius: 20;
+                                  -fx-border-color: rgba(3,132,183,0.32); -fx-border-radius: 20;"/>
+                </HBox>
+
+                <!-- Titre principal -->
+                <VBox alignment="CENTER" spacing="2">
+                    <Label text="Louez votre voiture idéale"
+                           style="-fx-font-size: 44px; -fx-font-weight: bold;
+                                  -fx-text-fill: white; -fx-font-family: 'Arial';"/>
+                    <Label text="en toute simplicité"
+                           style="-fx-font-size: 44px; -fx-font-weight: bold;
+                                  -fx-text-fill: #0384b7; -fx-font-family: 'Arial';"/>
+                </VBox>
+
+                <!-- Sous-titre -->
+                <Label text="Des centaines de véhicules disponibles, des prix transparents et une expérience 100% digitale."
+                       wrapText="true" maxWidth="540" textAlignment="CENTER"
+                       style="-fx-font-size: 14px; -fx-text-fill: rgba(255,255,255,0.52);"/>
+
+                <!-- ── BARRE DE RECHERCHE ─────────────────────── -->
+                <VBox alignment="CENTER" spacing="16" maxWidth="820"
+                      style="-fx-background-color: rgba(255,255,255,0.04);
+                             -fx-background-radius: 18; -fx-border-color: rgba(255,255,255,0.09);
+                             -fx-border-radius: 18; -fx-padding: 26 30 22 30;">
+
+                    <Label text="TROUVER UN VÉHICULE"
+                           style="-fx-font-size: 10px; -fx-font-weight: bold;
+                                  -fx-text-fill: rgba(255,255,255,0.38);"/>
+
+                    <!-- Champs de recherche -->
+                    <HBox alignment="BOTTOM_LEFT" spacing="10">
+
+                        <!-- Date début -->
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="📅  DATE DE DÉBUT"
+                                   style="-fx-font-size: 10px; -fx-font-weight: bold;
+                                          -fx-text-fill: rgba(255,255,255,0.4);"/>
+                            <DatePicker fx:id="dpDateDebut" promptText="jj/mm/aaaa"
+                                        prefWidth="185" prefHeight="40"
+                                        style="-fx-background-color: rgba(255,255,255,0.06);
+                                               -fx-background-radius: 10;
+                                               -fx-border-color: rgba(255,255,255,0.1);
+                                               -fx-border-radius: 10;"/>
+                        </VBox>
+
+                        <!-- Date fin -->
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="📅  DATE DE FIN"
+                                   style="-fx-font-size: 10px; -fx-font-weight: bold;
+                                          -fx-text-fill: rgba(255,255,255,0.4);"/>
+                            <DatePicker fx:id="dpDateFin" promptText="jj/mm/aaaa"
+                                        prefWidth="185" prefHeight="40"
+                                        style="-fx-background-color: rgba(255,255,255,0.06);
+                                               -fx-background-radius: 10;
+                                               -fx-border-color: rgba(255,255,255,0.1);
+                                               -fx-border-radius: 10;"/>
+                        </VBox>
+
+                        <!-- Type véhicule -->
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="🚗  TYPE"
+                                   style="-fx-font-size: 10px; -fx-font-weight: bold;
+                                          -fx-text-fill: rgba(255,255,255,0.4);"/>
+                            <ComboBox fx:id="cbTypeVehicule" promptText="Tous les types"
+                                      prefWidth="185" prefHeight="40"
+                                      style="-fx-background-color: rgba(255,255,255,0.06);
+                                             -fx-background-radius: 10;
+                                             -fx-border-color: rgba(255,255,255,0.1);
+                                             -fx-border-radius: 10;"/>
+                        </VBox>
+
+                        <!-- Bouton Rechercher -->
+                        <VBox spacing="5">
+                            <Label text=" " style="-fx-font-size: 10px;"/>
+                            <Button fx:id="btnRechercher" text="🔍  Rechercher"
+                                    onAction="#rechercherVoitures"
+                                    prefHeight="40"
+                                    style="-fx-background-color: #0384b7;
+                                           -fx-text-fill: white; -fx-font-weight: bold;
+                                           -fx-font-size: 13px; -fx-padding: 0 26 0 26;
+                                           -fx-background-radius: 10; -fx-cursor: hand;"/>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Lien voir tout -->
+                    <HBox alignment="CENTER_LEFT">
+                        <Button text="Voir tous les véhicules disponibles  →"
+                                onAction="#voirToutesLesVoitures"
+                                style="-fx-background-color: transparent;
+                                       -fx-text-fill: rgba(3,132,183,0.7);
+                                       -fx-font-size: 12px; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- ── STATISTIQUES ──────────────────────────── -->
+                <HBox alignment="CENTER" spacing="60" style="-fx-padding: 10 0 0 0;">
+
+                    <VBox alignment="CENTER" spacing="4">
+                        <Label fx:id="lblStatLocations" text="—"
+                               style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #f39c12;"/>
+                        <Label text="Locations actives"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.4);"/>
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="44"
+                               style="-fx-background-color: rgba(255,255,255,0.1);"/>
+
+                    <VBox alignment="CENTER" spacing="4">
+                        <Label text="100%"
+                               style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #27ae60;"/>
+                        <Label text="Digital &amp; rapide"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.4);"/>
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" prefHeight="44"
+                               style="-fx-background-color: rgba(255,255,255,0.1);"/>
+
+                    <VBox alignment="CENTER" spacing="4">
+                        <Label text="QR + Email"
+                               style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #0384b7;"/>
+                        <Label text="APIs intégrées"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.4);"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+
+            <!-- ─────────────────────────────────────────────────── -->
+            <!-- FONCTIONNALITÉS AVANCÉES                            -->
+            <!-- ─────────────────────────────────────────────────── -->
+            <VBox fx:id="featuresSection" spacing="26"
+                  style="-fx-background-color: #0d1829; -fx-padding: 50 80 50 80;">
+
+                <VBox alignment="CENTER" spacing="6">
+                    <Label text="Fonctionnalités Avancées"
+                           style="-fx-font-size: 27px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Deux APIs intégrées pour une expérience moderne"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.4);"/>
+                </VBox>
+
+                <HBox spacing="16" alignment="CENTER">
+
+                    <!-- QR Code -->
+                    <VBox spacing="13" alignment="TOP_CENTER" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: rgba(3,132,183,0.07);
+                                 -fx-border-color: rgba(3,132,183,0.2); -fx-border-radius: 14;
+                                 -fx-background-radius: 14; -fx-padding: 26 20 26 20;">
+                        <Label text="📱" style="-fx-font-size: 36px;"/>
+                        <Label text="QR Code Instantané"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Chaque réservation génère automatiquement un QR Code unique avec toutes vos informations."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.5);"/>
+                        <Label text="API ZXing"
+                               style="-fx-background-color: rgba(3,132,183,0.18); -fx-text-fill: #0384b7;
+                                      -fx-font-size: 10px; -fx-font-weight: bold;
+                                      -fx-padding: 4 12 4 12; -fx-background-radius: 10;"/>
+                    </VBox>
+
+                    <!-- Email -->
+                    <VBox spacing="13" alignment="TOP_CENTER" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: rgba(39,174,96,0.07);
+                                 -fx-border-color: rgba(39,174,96,0.2); -fx-border-radius: 14;
+                                 -fx-background-radius: 14; -fx-padding: 26 20 26 20;">
+                        <Label text="📧" style="-fx-font-size: 36px;"/>
+                        <Label text="Email de Confirmation"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Recevez un email HTML professionnel avec les détails complets de votre location."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.5);"/>
+                        <Label text="Gmail SMTP"
+                               style="-fx-background-color: rgba(39,174,96,0.18); -fx-text-fill: #27ae60;
+                                      -fx-font-size: 10px; -fx-font-weight: bold;
+                                      -fx-padding: 4 12 4 12; -fx-background-radius: 10;"/>
+                    </VBox>
+
+                    <!-- Planning -->
+                    <VBox spacing="13" alignment="TOP_CENTER" HBox.hgrow="ALWAYS"
+                          style="-fx-background-color: rgba(243,156,18,0.07);
+                                 -fx-border-color: rgba(243,156,18,0.2); -fx-border-radius: 14;
+                                 -fx-background-radius: 14; -fx-padding: 26 20 26 20;">
+                        <Label text="📅" style="-fx-font-size: 36px;"/>
+                        <Label text="Planning Interactif"
+                               style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Calendrier mensuel des disponibilités véhicules en temps réel pour optimiser votre séjour."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.5);"/>
+                        <Label text="Temps réel"
+                               style="-fx-background-color: rgba(243,156,18,0.18); -fx-text-fill: #f39c12;
+                                      -fx-font-size: 10px; -fx-font-weight: bold;
+                                      -fx-padding: 4 12 4 12; -fx-background-radius: 10;"/>
+                    </VBox>
+
+                </HBox>
+            </VBox>
+
+            <!-- ─────────────────────────────────────────────────── -->
+            <!-- COMMENT ÇA MARCHE                                   -->
+            <!-- ─────────────────────────────────────────────────── -->
+            <VBox spacing="26" style="-fx-background-color: #0a0f1e; -fx-padding: 50 80 50 80;">
+
+                <VBox alignment="CENTER" spacing="6">
+                    <Label text="Comment ça marche ?"
+                           style="-fx-font-size: 27px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label text="Réservez votre véhicule en 4 étapes simples"
+                           style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.4);"/>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER">
+
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="1"
+                               style="-fx-background-color: #0384b7; -fx-text-fill: white;
+                                      -fx-font-size: 17px; -fx-font-weight: bold;
+                                      -fx-pref-width: 44; -fx-pref-height: 44;
+                                      -fx-background-radius: 22; -fx-alignment: center;"/>
+                        <Label text="🔍" style="-fx-font-size: 24px;"/>
+                        <Label text="Choisissez"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Parcourez le catalogue et sélectionnez le véhicule idéal."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.44);"/>
+                    </VBox>
+
+                    <Label text="→" style="-fx-font-size: 20px; -fx-text-fill: rgba(255,255,255,0.14);"/>
+
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="2"
+                               style="-fx-background-color: #0384b7; -fx-text-fill: white;
+                                      -fx-font-size: 17px; -fx-font-weight: bold;
+                                      -fx-pref-width: 44; -fx-pref-height: 44;
+                                      -fx-background-radius: 22; -fx-alignment: center;"/>
+                        <Label text="📝" style="-fx-font-size: 24px;"/>
+                        <Label text="Réservez"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Remplissez le formulaire avec vos dates et informations personnelles."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.44);"/>
+                    </VBox>
+
+                    <Label text="→" style="-fx-font-size: 20px; -fx-text-fill: rgba(255,255,255,0.14);"/>
+
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="3"
+                               style="-fx-background-color: #0384b7; -fx-text-fill: white;
+                                      -fx-font-size: 17px; -fx-font-weight: bold;
+                                      -fx-pref-width: 44; -fx-pref-height: 44;
+                                      -fx-background-radius: 22; -fx-alignment: center;"/>
+                        <Label text="📱" style="-fx-font-size: 24px;"/>
+                        <Label text="QR Code + Email"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Un QR Code est généré et un email de confirmation envoyé instantanément."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.44);"/>
+                    </VBox>
+
+                    <Label text="→" style="-fx-font-size: 20px; -fx-text-fill: rgba(255,255,255,0.14);"/>
+
+                    <VBox spacing="10" alignment="CENTER" HBox.hgrow="ALWAYS">
+                        <Label text="4"
+                               style="-fx-background-color: #27ae60; -fx-text-fill: white;
+                                      -fx-font-size: 17px; -fx-font-weight: bold;
+                                      -fx-pref-width: 44; -fx-pref-height: 44;
+                                      -fx-background-radius: 22; -fx-alignment: center;"/>
+                        <Label text="🚗" style="-fx-font-size: 24px;"/>
+                        <Label text="Prenez la route !"
+                               style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Label text="Présentez votre QR Code en agence et partez en toute sérénité."
+                               wrapText="true" textAlignment="CENTER"
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.44);"/>
+                    </VBox>
+                </HBox>
+
+                <!-- CTA -->
+                <HBox alignment="CENTER" style="-fx-padding: 10 0 0 0;">
+                    <Button text="🚘   Commencer maintenant" onAction="#voirToutesLesVoitures"
+                            style="-fx-background-color: #0384b7; -fx-text-fill: white;
+                                   -fx-font-size: 15px; -fx-font-weight: bold;
+                                   -fx-padding: 14 42 14 42; -fx-background-radius: 30;
+                                   -fx-cursor: hand;"/>
+                </HBox>
+            </VBox>
+
+            <!-- ─────────────────────────────────────────────────── -->
+            <!-- FOOTER                                               -->
+            <!-- ─────────────────────────────────────────────────── -->
+            <HBox alignment="CENTER" spacing="24"
+                  style="-fx-background-color: #060a14; -fx-padding: 24 60 24 60;
+                         -fx-border-color: rgba(3,132,183,0.14); -fx-border-width: 1 0 0 0;">
+
+                <VBox spacing="3">
+                    <Label text="🚗  HORIZIA"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0384b7;"/>
+                    <Label text="Agence de Location de Voitures — Tunis, Tunisie"
+                           style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.26);"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label text="📞 +216 XX XXX XXX"
+                       style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.35);"/>
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.14);"/>
+                <Label text="© 2025 Horizia — Tous droits réservés"
+                       style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.22);"/>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+
+</VBox>

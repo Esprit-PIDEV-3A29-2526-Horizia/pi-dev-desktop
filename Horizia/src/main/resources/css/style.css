@@ -1,0 +1,170 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   HORIZIA - Styles pour la Sidebar (Version Intégration)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────
+   Couleurs Principales
+   ───────────────────────────────────────────────────────────────────── */
+* {
+    -fx-primary-color: #1a2332;
+    -fx-primary-dark: #0f1419;
+    -fx-accent-color: #4a90e2;
+    -fx-hover-color: #2c3454;
+    -fx-text-light: #ffffff;
+    -fx-text-muted: #b8c1d9;
+    -fx-text-disabled: #6b7280;
+    -fx-background-main: #f5f7fa;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Sidebar
+   ───────────────────────────────────────────────────────────────────── */
+.sidebar {
+    -fx-background-color: -fx-primary-color;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 2, 0);
+}
+
+.sidebar-header {
+    -fx-background-color: -fx-primary-dark;
+}
+
+.app-title {
+    -fx-text-fill: -fx-text-light;
+    -fx-font-weight: bold;
+    -fx-font-size: 24px;
+}
+
+.app-subtitle {
+    -fx-text-fill: -fx-text-muted;
+    -fx-font-size: 11px;
+}
+
+.sidebar-separator {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Menu de Navigation
+   ───────────────────────────────────────────────────────────────────── */
+.sidebar-menu {
+    -fx-background-color: transparent;
+}
+
+.menu-label {
+    -fx-text-fill: -fx-text-muted;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.7;
+    -fx-letter-spacing: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Boutons de la Sidebar
+   ───────────────────────────────────────────────────────────────────── */
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-light;
+    -fx-font-size: 13px;
+    -fx-font-weight: normal;
+    -fx-cursor: hand;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-alignment: center-left;
+    -fx-graphic-text-gap: 12px;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: -fx-hover-color;
+}
+
+/* Bouton actif (LOCATIONS - votre partie) */
+.sidebar-button-active {
+    -fx-background-color: -fx-accent-color;
+    -fx-font-weight: bold;
+}
+
+.sidebar-button-active:hover {
+    -fx-background-color: derive(-fx-accent-color, -10%);
+}
+
+/* Boutons désactivés (autres sections) */
+.sidebar-button-disabled {
+    -fx-text-fill: -fx-text-disabled;
+    -fx-opacity: 0.5;
+    -fx-cursor: default;
+}
+
+.sidebar-button-disabled:hover {
+    -fx-background-color: transparent;
+}
+
+.sidebar-button-disabled .menu-icon {
+    -fx-opacity: 0.5;
+}
+
+.menu-icon {
+    -fx-text-fill: -fx-text-light;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Info Utilisateur et Copyright (en bas)
+   ───────────────────────────────────────────────────────────────────── */
+.user-info {
+    -fx-background-color: -fx-primary-dark;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.user-email {
+    -fx-text-fill: -fx-text-muted;
+    -fx-font-size: 10px;
+}
+
+.copyright {
+    -fx-text-fill: rgba(255, 255, 255, 0.3);
+    -fx-font-size: 9px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Zone de Contenu Principal
+   ───────────────────────────────────────────────────────────────────── */
+.content-area {
+    -fx-background-color: -fx-background-main;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Scrollbar Personnalisée
+   ───────────────────────────────────────────────────────────────────── */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
