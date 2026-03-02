@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<AnchorPane prefHeight="900.0" prefWidth="1400.0" style="-fx-background-color: #F3F6FA;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.client.ClientPlanningController">
+
+    <children>
+        <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
+
+            <!-- TOP NAV -->
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Menu (centre) - CORRIGÉ -->
+                <HBox spacing="35" alignment="CENTER">
+                    <Button onAction="#retourAccueil" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
+                    <Button onAction="#allerCatalogue" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Catalogue" />
+                    <Button onAction="#allerMesReservations" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Mes Réservations" />
+                    <Button style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;" text="Planning" />
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- User chip (droite) -->
+                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
+                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                    <Label text="Client" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                </HBox>
+
+                <Button text="Déconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;" />
+            </HBox>
+
+            <!-- CONTENU PRINCIPAL -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                    <VBox spacing="25" style="-fx-padding: 25;">
+
+                        <!-- HERO - Titre -->
+                        <StackPane>
+                            <AnchorPane maxWidth="1200" prefHeight="100" style="-fx-background-color: #3D94CA; -fx-background-radius: 18; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                                <children>
+                                    <VBox spacing="5" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.topAnchor="25" AnchorPane.bottomAnchor="25" alignment="CENTER">
+                                        <Label text="📅 Planning des Disponibilités" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                                        <Label text="Consultez en temps réel les disponibilités des véhicules" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 14;" />
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </StackPane>
+
+                        <!-- SÉLECTION VÉHICULE -->
+                        <HBox spacing="20" alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="Sélectionner un véhicule :" style="-fx-text-fill: #1F2937; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                            <ComboBox fx:id="comboVehicule" prefWidth="400" prefHeight="40" style="-fx-background-color: #F9FAFB; -fx-background-radius: 20; -fx-border-color: #E5E7EB; -fx-border-radius: 20;" />
+                        </HBox>
+
+                        <!-- NAVIGATION MOIS -->
+                        <HBox spacing="20" alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Button text="◀" onAction="#moisPrecedent" prefHeight="40" prefWidth="60" style="-fx-background-color: #23779C; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;" />
+                            <Label fx:id="lblMoisAnnee" text="MARS 2026" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #23779C;" minWidth="250" alignment="CENTER" />
+                            <Button text="▶" onAction="#moisSuivant" prefHeight="40" prefWidth="60" style="-fx-background-color: #23779C; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;" />
+                            <Button text="📅 Aujourd'hui" onAction="#revenirAujourdhui" prefHeight="40" prefWidth="140" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;" />
+                        </HBox>
+
+                        <!-- CALENDRIER -->
+                        <VBox style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <GridPane fx:id="gridCalendrier" hgap="8" vgap="8" maxWidth="Infinity">
+                                <!-- Le calendrier sera rempli dynamiquement -->
+                            </GridPane>
+                        </VBox>
+
+                        <!-- LÉGENDE -->
+                        <HBox spacing="40" alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <HBox spacing="8" alignment="CENTER">
+                                <Rectangle width="20" height="20" fill="#FEE2E2" arcWidth="5" arcHeight="5" stroke="#EF4444" strokeWidth="1" />
+                                <Label text="Occupé" style="-fx-text-fill: #1F2937; -fx-font-size: 13px;" />
+                            </HBox>
+                            <HBox spacing="8" alignment="CENTER">
+                                <Rectangle width="20" height="20" fill="white" stroke="#CBD5E0" strokeWidth="1" arcWidth="5" arcHeight="5" />
+                                <Label text="Libre" style="-fx-text-fill: #1F2937; -fx-font-size: 13px;" />
+                            </HBox>
+                            <HBox spacing="8" alignment="CENTER">
+                                <Rectangle width="20" height="20" fill="#FEF3C7" arcWidth="5" arcHeight="5" stroke="#F59E0B" strokeWidth="1" />
+                                <Label text="Aujourd'hui" style="-fx-text-fill: #1F2937; -fx-font-size: 13px;" />
+                            </HBox>
+                        </HBox>
+
+                        <!-- MESSAGE INFO -->
+                        <HBox alignment="CENTER" style="-fx-padding: 5;">
+                            <Label fx:id="lblMessage" text="✓ Les périodes en rouge sont déjà réservées" style="-fx-text-fill: #6B7280; -fx-font-size: 13px; -fx-font-style: italic;" />
+                        </HBox>
+
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- FOOTER -->
+            <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <Label text="🚗 HORIZIA" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="Agence de Voyage — Tunis, Tunisie" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="📞 +216 53661445" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="© 2025 Horizia" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px;" />
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

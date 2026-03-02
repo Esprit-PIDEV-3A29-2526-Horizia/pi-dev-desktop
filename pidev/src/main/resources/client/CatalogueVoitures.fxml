@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="900.0" prefWidth="1400.0" style="-fx-background-color: #F3F6FA;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.client.CatalogueVoituresController">
+
+    <children>
+        <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
+
+            <!-- TOP NAV -->
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Menu (centre) - CORRIGÉ -->
+                <HBox spacing="35" alignment="CENTER">
+                    <Button onAction="#retourAccueil" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
+                    <Button style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;" text="Catalogue" />
+                    <Button onAction="#allerMesReservations" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Mes Réservations" />
+                    <Button onAction="#allerPlanning" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Planning" />
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- User chip (droite) -->
+                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
+                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                    <Label text="Client" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                </HBox>
+
+                <Button text="Déconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;" />
+            </HBox>
+
+            <!-- CONTENU PRINCIPAL -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                    <VBox spacing="25" style="-fx-padding: 25;">
+
+                        <!-- HERO - Titre -->
+                        <StackPane>
+                            <AnchorPane maxWidth="1200" prefHeight="120" style="-fx-background-color: #3D94CA; -fx-background-radius: 18; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                                <children>
+                                    <VBox spacing="5" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.topAnchor="30" AnchorPane.bottomAnchor="30" alignment="CENTER">
+                                        <Label text="🚗 Catalogue de Voitures" style="-fx-text-fill: white; -fx-font-size: 32; -fx-font-weight: bold;" />
+                                        <Label fx:id="lblNombreResultats" text="0 voiture(s) disponible(s)" style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 14;" />
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </StackPane>
+
+                        <!-- FILTRES -->
+                        <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 20; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="Filtres de recherche" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <!-- Recherche -->
+                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                    <Label text="Rechercher" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-weight: bold;" />
+                                    <TextField fx:id="txtRecherche" promptText="Modèle ou immatriculation..." prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18; -fx-padding: 0 14;" />
+                                </VBox>
+
+                                <!-- Carburant -->
+                                <VBox spacing="5">
+                                    <Label text="Carburant" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-weight: bold;" />
+                                    <ComboBox fx:id="cbCarburant" prefWidth="150" prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                </VBox>
+
+                                <!-- Tri -->
+                                <VBox spacing="5">
+                                    <Label text="Trier par" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-weight: bold;" />
+                                    <ComboBox fx:id="cbTri" prefWidth="170" prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                </VBox>
+
+                                <!-- Prix max -->
+                                <VBox spacing="5" prefWidth="250">
+                                    <HBox alignment="CENTER_LEFT" spacing="10">
+                                        <Label text="Prix max :" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-weight: bold;" />
+                                        <Label fx:id="lblPrixMax" text="300 TND/jour" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" />
+                                    </HBox>
+                                    <Slider fx:id="sliderPrixMax" min="0" max="300" value="300" showTickLabels="false" showTickMarks="false" />
+                                </VBox>
+
+                                <!-- Bouton réinitialiser -->
+                                <VBox alignment="BOTTOM_CENTER" spacing="5">
+                                    <Label text=" " style="-fx-font-size: 11px;" />
+                                    <Button text="↻ Réinitialiser" onAction="#reinitialiserFiltres" prefHeight="36" style="-fx-background-color: #EF4444; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 18; -fx-cursor: hand; -fx-padding: 0 16;" />
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- GRILLE DES VOITURES -->
+                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                            <FlowPane fx:id="flowPaneVoitures" hgap="25" vgap="25" alignment="TOP_CENTER" style="-fx-padding: 10;" />
+                        </ScrollPane>
+
+                        <!-- MESSAGE AUCUNE VOITURE -->
+                        <VBox fx:id="vboxAucuneVoiture" spacing="15" alignment="CENTER" visible="false" managed="false" style="-fx-padding: 60;">
+                            <Label text="🔍" style="-fx-font-size: 64px;" />
+                            <Label text="Aucune voiture trouvée" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Label text="Essayez de modifier vos critères de recherche" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                            <Button text="↻ Réinitialiser les filtres" onAction="#reinitialiserFiltres" prefHeight="40" prefWidth="200" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand;" />
+                        </VBox>
+
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- FOOTER -->
+            <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <Label text="🚗 HORIZIA" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="Agence de Voyage — Tunis, Tunisie" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="📞 +216 53661445" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="© 2025 Horizia" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px;" />
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

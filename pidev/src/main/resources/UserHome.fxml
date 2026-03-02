@@ -6,10 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -21,36 +18,7 @@
     <children>
         <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
 
-            <!-- TOP NAV -->
-            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
-                <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
-                    <image>
-                        <Image url="@images/LOGO.png" />
-                    </image>
-                </ImageView>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <!-- Menu (centre) -->
-                <HBox spacing="35" alignment="CENTER">
-                    <Button style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
-                    <Button style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;" text="Nos Événements" />
-                    <Button fx:id="myEventsBtn" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Mes Réservations" />
-                    <Button style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Contact" />
-                </HBox>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <!-- User chip (droite) -->
-                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
-                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                    <Label text="Utilisateur" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
-                </HBox>
-
-                <Button text="Déconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;" />
-            </HBox>
-
-            <!-- CONTENT -->
+            <!-- CONTENT (sans la barre de navigation) -->
             <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
                 <content>
                     <VBox spacing="18" style="-fx-padding: 26;">

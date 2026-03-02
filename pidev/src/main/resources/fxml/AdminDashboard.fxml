@@ -71,7 +71,10 @@
                                 style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
                         <Button fx:id="btnSettings" onAction="#showSettings" text="⚙️ Paramètres"
                                 style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
-
+                        <Button fx:id="btnEvenements" onAction="#showEvenements" text="📅 Gestion Événements"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
+                        <Button fx:id="btnLocationDashboard" onAction="#showLocationDashboard" text="🚗 Dashboard Location"
+                                style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />
                         <!-- Bouton Voyages - STYLE UNIFORMISÉ -->
                         <Button fx:id="btnVoyages" onAction="#showVoyages" text="✈️ Voyages"
                                 style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; -fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; -fx-pref-width: 220;" />

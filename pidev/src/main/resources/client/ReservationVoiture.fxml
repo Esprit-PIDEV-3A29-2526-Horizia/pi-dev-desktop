@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="900.0" prefWidth="1400.0" style="-fx-background-color: #F3F6FA;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.client.ReservationVoitureController">
+
+    <children>
+        <VBox AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0">
+
+            <!-- TOP NAV -->
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <ImageView fitHeight="50.0" fitWidth="150.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Menu (centre) - CORRIGÉ -->
+                <HBox spacing="35" alignment="CENTER">
+                    <Button onAction="#retourAccueil" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Accueil" />
+                    <Button onAction="#retourCatalogue" style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;" text="Catalogue" />
+                    <Button style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;" text="Réservation" />
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- User chip (droite) -->
+                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
+                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+                    <Label text="Client" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                </HBox>
+
+                <Button text="Déconnexion" style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 14; -fx-font-weight: bold; -fx-padding: 8 16; -fx-cursor: hand;" />
+            </HBox>
+
+            <!-- CONTENU PRINCIPAL -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <content>
+                    <VBox spacing="25" style="-fx-padding: 25;">
+
+                        <!-- HERO - Titre -->
+                        <StackPane>
+                            <AnchorPane maxWidth="1200" prefHeight="80" style="-fx-background-color: #3D94CA; -fx-background-radius: 18; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 8);">
+                                <children>
+                                    <VBox spacing="5" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="CENTER">
+                                        <Label text="📝 Réservation de Voiture" style="-fx-text-fill: white; -fx-font-size: 28; -fx-font-weight: bold;" />
+                                    </VBox>
+                                </children>
+                            </AnchorPane>
+                        </StackPane>
+
+                        <!-- SECTION 1 : Informations Véhicule -->
+                        <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="🚗 Voiture Sélectionnée" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #E5E7EB;" />
+
+                            <HBox spacing="20" alignment="CENTER_LEFT">
+                                <ImageView fx:id="imgVoiture" fitWidth="300" fitHeight="180" preserveRatio="true" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 8, 0, 0, 2); -fx-border-color: #E5E7EB; -fx-border-radius: 8;" />
+                                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="lblModele" text="Modèle" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <Label fx:id="lblCaracteristiques" text="Caractéristiques" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                                    <Separator prefWidth="200" style="-fx-background-color: #E5E7EB;" />
+                                    <HBox spacing="10" alignment="CENTER_LEFT">
+                                        <Label text="Prix :" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                                        <Label fx:id="lblPrixJour" text="0.00 TND/jour" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" />
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- SECTION 2 : Dates et Durée -->
+                        <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="📅 Période de Location" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #E5E7EB;" />
+
+                            <HBox spacing="30">
+                                <VBox spacing="8">
+                                    <Label text="Date de début *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <DatePicker fx:id="dpDateDebut" prefWidth="220" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label text="Heure :" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;" />
+                                        <Spinner fx:id="spHeureDebut" prefWidth="80" editable="true" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                        <Label text="h" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;" />
+                                    </HBox>
+                                </VBox>
+                                <VBox spacing="8">
+                                    <Label text="Date de retour *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <DatePicker fx:id="dpDateFin" prefWidth="220" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label text="Heure :" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;" />
+                                        <Spinner fx:id="spHeureFin" prefWidth="80" editable="true" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                        <Label text="h" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;" />
+                                    </HBox>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- SECTION 3 : Informations Client -->
+                        <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="👤 Vos Informations" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #E5E7EB;" />
+
+                            <GridPane hgap="20" vgap="15">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="50" />
+                                    <ColumnConstraints percentWidth="50" />
+                                </columnConstraints>
+
+                                <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <Label text="Nom complet *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <TextField fx:id="txtNomComplet" promptText="Ex: Ahmed Ben Salah" prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18; -fx-padding: 0 14;" />
+                                </VBox>
+
+                                <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <Label text="Téléphone *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <HBox spacing="10">
+                                        <ComboBox fx:id="comboPays" prefWidth="150" prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18;" />
+                                        <TextField fx:id="txtTelephone" promptText="98 123 456" prefHeight="36" HBox.hgrow="ALWAYS" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18; -fx-padding: 0 14;" />
+                                    </HBox>
+                                </VBox>
+
+                                <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <Label text="CIN / Passport *" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                    <TextField fx:id="txtCIN" promptText="12345678 ou AB123456" prefHeight="36" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18; -fx-padding: 0 14;" />
+                                </VBox>
+                            </GridPane>
+
+                            <VBox spacing="5">
+                                <Label text="Notes additionnelles (optionnel)" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                                <TextArea fx:id="txtNotes" promptText="Remarques, demandes spéciales..." prefRowCount="3" wrapText="true" style="-fx-background-color: #F9FAFB; -fx-background-radius: 18; -fx-border-color: #E5E7EB; -fx-border-radius: 18; -fx-padding: 10;" />
+                            </VBox>
+                        </VBox>
+
+                        <!-- SECTION 4 : Extras -->
+                        <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="🎁 Options supplémentaires" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #E5E7EB;" />
+
+                            <HBox spacing="30" alignment="CENTER_LEFT">
+                                <CheckBox fx:id="chkGPS" text="🛰️ GPS (5 TND/jour)" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" />
+                                <CheckBox fx:id="chkSiegeBebe" text="👶 Siège bébé (3 TND/jour)" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" />
+                                <CheckBox fx:id="chkAssurance" text="🛡️ Assurance complète (15 TND/jour)" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" />
+                            </HBox>
+                        </VBox>
+
+                        <!-- SECTION 5 : Récapitulatif -->
+                        <VBox spacing="15" style="-fx-background-color: linear-gradient(to right, #E8F0FE, #D9E8F5); -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <Label text="💰 Récapitulatif" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #CBD5E0;" />
+
+                            <GridPane hgap="20" vgap="12">
+                                <columnConstraints>
+                                    <ColumnConstraints percentWidth="70" />
+                                    <ColumnConstraints percentWidth="30" halignment="RIGHT" />
+                                </columnConstraints>
+
+                                <Label text="Durée de location :" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <Label fx:id="lblNbJours" text="0 jour(s)" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                <Label text="Prix de base :" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <Label fx:id="lblPrixBase" text="0.000 TND" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                <Label text="Extras :" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                <Label fx:id="lblMontantExtras" text="0.000 TND" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #3D94CA;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                <Separator GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" style="-fx-background-color: #CBD5E0;" />
+
+                                <Label text="Montant total :" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                <Label fx:id="lblMontantFinal" text="0.000 TND" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #27ae60;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                                <Separator GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2" style="-fx-background-color: #CBD5E0;" />
+
+                                <Label text="Avance à payer (30%) :" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+                                <Label fx:id="lblAvance" text="0.000 TND" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #E8B156;" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+                                <Label text="Reste à payer :" style="-fx-font-size: 14px; -fx-text-fill: #1F2937;" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+                                <Label fx:id="lblResteAPayer" text="0.000 TND" style="-fx-font-size: 14px; -fx-text-fill: #EF4444;" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                            </GridPane>
+                        </VBox>
+
+                        <!-- SECTION 6 : Conditions et Boutons -->
+                        <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 25; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);">
+                            <CheckBox fx:id="cbAccepteConditions" wrapText="true" text="J'accepte les conditions générales de location et je confirme l'exactitude des informations fournies *" style="-fx-font-size: 13px; -fx-text-fill: #1F2937;" />
+                            <Separator style="-fx-background-color: #E5E7EB;" />
+
+                            <HBox spacing="15" alignment="CENTER">
+                                <Button fx:id="btnAnnuler" text="✖ Annuler" onAction="#annulerReservation" prefWidth="200" prefHeight="45" style="-fx-background-color: #9CA3AF; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 23; -fx-cursor: hand; -fx-font-weight: bold;" />
+                                <Button fx:id="btnConfirmer" text="✓ Confirmer la Réservation" onAction="#confirmerReservation" prefWidth="250" prefHeight="45" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 23; -fx-cursor: hand; -fx-font-weight: bold;" />
+                            </HBox>
+
+                            <Label text="* Champs obligatoires" style="-fx-font-size: 11px; -fx-text-fill: #6B7280; -fx-font-style: italic;" />
+                        </VBox>
+
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <!-- FOOTER -->
+            <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #23779C; -fx-padding: 15 30;">
+                <Label text="🚗 HORIZIA" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="Agence de Voyage — Tunis, Tunisie" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="📞 +216 53661445" style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 12px;" />
+                <Label text="|" style="-fx-text-fill: rgba(255,255,255,0.3);" />
+                <Label text="© 2025 Horizia" style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 11px;" />
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

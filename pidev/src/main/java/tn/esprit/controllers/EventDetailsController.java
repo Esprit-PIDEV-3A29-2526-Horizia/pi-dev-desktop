@@ -10,30 +10,21 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
-import tn.esprit.services.EmailService;
+import tn.esprit.entities.User;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
-
-//weather
 import tn.esprit.services.WeatherService;
 import tn.esprit.services.WeatherService.WeatherInfo;
-
-//lastfm
 import tn.esprit.services.LastFmService;
 import tn.esprit.services.LastFmService.ArtistInfo;
 import tn.esprit.services.LastFmService.TrackInfo;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.ScrollPane;
-
-
 import tn.esprit.services.RecommandationService;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
+import tn.esprit.utils.EmailService;
+import tn.esprit.utils.SessionManager;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -72,7 +63,6 @@ public class EventDetailsController implements Initializable {
     @FXML private RadioButton radioSimilarite;
     @FXML private RadioButton radioCollaboratif;
 
-    //weather
     @FXML private VBox weatherBox;
     @FXML private Label weatherLabel;
     @FXML private ImageView weatherIcon;
@@ -80,7 +70,6 @@ public class EventDetailsController implements Initializable {
     @FXML private Label humidityLabel;
     @FXML private Label windLabel;
 
-    //lastfm
     @FXML private TabPane detailsTabPane;
     @FXML private Tab artistTab;
     @FXML private VBox artistInfoBox;
@@ -93,28 +82,24 @@ public class EventDetailsController implements Initializable {
     @FXML private Hyperlink artistLink;
 
     private LastFmService lastFmService;
-
     private WeatherService weatherService;
-
     private RecommandationService recommandationService;
     private List<Events> allEvents;
-
     private Events event;
     private ServiceEvent serviceEvent;
     private ServiceParticipation serviceParticipation;
+    private User currentUser;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
         serviceParticipation = new ServiceParticipation();
-
         recommandationService = new RecommandationService();
-        loadAllEvents();
-
-        //weather
         weatherService = new WeatherService();
-        //lastfm
         lastFmService = new LastFmService();
+
+        currentUser = SessionManager.getCurrentUser();
+        loadAllEvents();
     }
 
     public void setEvent(Events event) {
@@ -123,6 +108,8 @@ public class EventDetailsController implements Initializable {
     }
 
     private void displayEventDetails() {
+        if (event == null) return;
+
         titleLabel.setText(event.getTitre());
         categoryLabel.setText(event.getCategorie());
         descriptionLabel.setText(event.getDescription() != null ? event.getDescription() : "Aucune description disponible");
@@ -142,11 +129,10 @@ public class EventDetailsController implements Initializable {
         priceLabel.setText(String.format("%.0f DT", event.getPrix()));
         availableLabel.setText(String.valueOf(event.getPlacesRestantes()));
         capacityLabel.setText(String.valueOf(event.getCapaciteMax()));
-        // Si l'événement est un concert, charger les infos de l'artiste
+
         if (event.getCategorie().equalsIgnoreCase("Concert") ||
                 event.getCategorie().equalsIgnoreCase("Festival")) {
 
-            // Extract just the artist name from the title
             String artistName = extractArtistName(event.getTitre());
             System.out.println("🎤 Event title: " + event.getTitre());
             System.out.println("🎤 Extracted artist: " + artistName);
@@ -173,10 +159,11 @@ public class EventDetailsController implements Initializable {
     }
 
     private void loadEventImage() {
-        if (event.getImage_url() != null && !event.getImage_url().isEmpty()) {
+        if (event != null && event.getImage_url() != null && !event.getImage_url().isEmpty()) {
             try {
                 Image image = new Image(event.getImage_url(), 1100, 300, true, true);
                 eventImage.setImage(image);
+                imageContainer.getChildren().setAll(eventImage);
             } catch (Exception e) {
                 showImagePlaceholder();
             }
@@ -193,14 +180,16 @@ public class EventDetailsController implements Initializable {
     }
 
     private void setupBookingForm() {
+        if (currentUser != null) {
+            nomField.setText(currentUser.getNom() + " " + currentUser.getPrenom());
+            emailField.setText(currentUser.getEmail());
+        }
+
         SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, event.getPlacesRestantes(), 1);
         placesSpinner.setValueFactory(valueFactory);
 
-        placesSpinner.valueProperty().addListener((obs, old, val) -> {
-            updateTotalPrice();
-        });
-
+        placesSpinner.valueProperty().addListener((obs, old, val) -> updateTotalPrice());
         updateTotalPrice();
     }
 
@@ -254,14 +243,24 @@ public class EventDetailsController implements Initializable {
 
     @FXML
     private void handleBack() {
-        try{
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/UserHome.fxml"));
-            Parent root = fxmlLoader.load();
-            Stage stage = (Stage) titleLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("EventHub - Accueil");
-        }catch (Exception e){
+        try {
+            // Recharger la vue des événements
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserEvenements.fxml"));
+            Parent eventsView = loader.load();
+
+            // Passer l'utilisateur courant
+            UserController eventsController = loader.getController();
+            if (eventsController != null && currentUser != null) {
+                eventsController.setCurrentUser(currentUser);
+            }
+
+            // Remplacer le contenu de la même fenêtre
+            BorderPane mainPane = (BorderPane) titleLabel.getScene().getRoot();
+            mainPane.setCenter(eventsView);
+
+        } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible de revenir à la liste: " + e.getMessage());
         }
     }
 
@@ -273,7 +272,6 @@ public class EventDetailsController implements Initializable {
         alert.showAndWait();
     }
 
-    //recommendation
     private void loadAllEvents() {
         try {
             allEvents = serviceEvent.afficher();
@@ -350,10 +348,12 @@ public class EventDetailsController implements Initializable {
 
             EventDetailsController controller = loader.getController();
             controller.setEvent(event);
+            if (currentUser != null) {
+                controller.setCurrentUser(currentUser);
+            }
 
-            Stage stage = (Stage) titleLabel.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("Détails de l'événement - " + event.getTitre());
+            BorderPane mainPane = (BorderPane) titleLabel.getScene().getRoot();
+            mainPane.setCenter(root);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -361,47 +361,43 @@ public class EventDetailsController implements Initializable {
         }
     }
 
-
-
-    //weather api
-    // In loadWeather method, add these debug lines:
+    private void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 
     private void loadWeather(String location) {
-        System.out.println("Loading weather for location: " + location); // DEBUG
+        System.out.println("Loading weather for location: " + location);
 
         if (location == null || location.isEmpty() || location.equals("Lieu non spécifié")) {
-            System.out.println("Location invalid, hiding weather box"); // DEBUG
+            System.out.println("Location invalid, hiding weather box");
             weatherBox.setVisible(false);
             return;
         }
 
-        // Extraire la ville (prendre la première partie avant la virgule)
         String city = location.split(",")[0].trim();
-        System.out.println("Extracted city: " + city); // DEBUG
+        System.out.println("Extracted city: " + city);
 
         new Thread(() -> {
             try {
-                System.out.println("Calling weather API for: " + city); // DEBUG
+                System.out.println("Calling weather API for: " + city);
                 WeatherInfo weather = weatherService.getWeatherForCity(city);
-                System.out.println("Weather API response received: " + weather); // DEBUG
+                System.out.println("Weather API response received: " + weather);
 
                 javafx.application.Platform.runLater(() -> {
                     try {
-                        // Afficher les infos
                         weatherLabel.setText(weather.getDescription());
                         tempLabel.setText(weather.getFormattedTemp());
                         humidityLabel.setText("💧 " + weather.getHumidity() + "%");
                         windLabel.setText("💨 " + String.format("%.0f km/h", weather.getWindSpeed() * 3.6));
 
-                        // Charger l'icône
                         String iconUrl = weather.getIconUrl();
-                        System.out.println("Loading icon from: " + iconUrl); // DEBUG
+                        System.out.println("Loading icon from: " + iconUrl);
                         Image icon = new Image(iconUrl, 50, 50, true, true);
                         weatherIcon.setImage(icon);
 
                         weatherBox.setVisible(true);
                         weatherBox.setManaged(true);
-                        System.out.println("Weather box should now be visible"); // DEBUG
+                        System.out.println("Weather box should now be visible");
 
                     } catch (Exception e) {
                         System.err.println("Error updating UI with weather data:");
@@ -416,14 +412,12 @@ public class EventDetailsController implements Initializable {
         }).start();
     }
 
-    //lastfm
     private void loadArtistInfo(String artistName) {
         if (artistName == null || artistName.isEmpty()) {
             artistTab.setDisable(true);
             return;
         }
 
-        // Activer l'onglet
         artistTab.setDisable(false);
 
         new Thread(() -> {
@@ -432,7 +426,6 @@ public class EventDetailsController implements Initializable {
 
             javafx.application.Platform.runLater(() -> {
                 try {
-                    // Afficher les infos de l'artiste
                     artistNameLabel.setText(artist.getName());
                     artistBioLabel.setText(artist.getBio());
                     artistListenersLabel.setText("👥 " + artist.getFormattedListeners() + " auditeurs");
@@ -445,24 +438,13 @@ public class EventDetailsController implements Initializable {
                         }
                     });
 
-                    // Afficher les tags
-                    artistTagsBox.getChildren().clear();
-                    for (String tag : artist.getTags()) {
-                        Label tagLabel = new Label("#" + tag);
-                        tagLabel.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
-                                "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 11px;");
-                        artistTagsBox.getChildren().add(tagLabel);
-                    }
+                    updateArtistTags(artist.getTags());
 
-                    // Afficher l'image
                     if (artist.getImageUrl() != null && !artist.getImageUrl().isEmpty()) {
                         Image image = new Image(artist.getImageUrl(), 150, 150, true, true);
                         artistImageView.setImage(image);
                     }
-                    // Dans loadArtistInfo(), après avoir récupéré les tags
-                    updateArtistTags(artist.getTags());
 
-                    // Afficher les top titres
                     topTracksBox.getChildren().clear();
                     int rank = 1;
                     for (TrackInfo track : topTracks) {
@@ -495,6 +477,7 @@ public class EventDetailsController implements Initializable {
             });
         }).start();
     }
+
     private void updateArtistTags(List<String> tags) {
         artistTagsBox.getChildren().clear();
         if (tags == null || tags.isEmpty()) {
@@ -515,7 +498,6 @@ public class EventDetailsController implements Initializable {
     private String extractArtistName(String eventTitle) {
         if (eventTitle == null || eventTitle.isEmpty()) return "";
 
-        // Remove common concert/festival words (case insensitive)
         String artist = eventTitle
                 .replaceAll("(?i)concert", "")
                 .replaceAll("(?i)live", "")
@@ -532,5 +514,4 @@ public class EventDetailsController implements Initializable {
 
         return artist;
     }
-
 }

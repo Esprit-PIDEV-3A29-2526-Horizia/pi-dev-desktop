@@ -74,6 +74,25 @@ public class AdminDashboardController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private Button btnEvenements;
+
+    @FXML
+    private void showEvenements() {
+        System.out.println("=== Chargement de la gestion des événements ===");
+        loadPage("/AdminHome.fxml"); // ou le nom de votre fichier
+        setActiveButton(btnEvenements);
+    }
+    @FXML
+    private Button btnLocationDashboard;
+
+    @FXML
+    private void showLocationDashboard() {
+        System.out.println("=== Chargement du dashboard location ===");
+        loadPage("/DashboardView.fxml");
+        setActiveButton(btnLocationDashboard);
+    }
+
 
     public void updateStats(int total, int admins, int agents, int clients) {
         if (totalMembresLabel != null) totalMembresLabel.setText(String.valueOf(total));
@@ -242,17 +261,29 @@ public class AdminDashboardController {
     }
 
     private void setActiveButton(Button activeButton) {
-        if (btnDashboard != null) btnDashboard.getStyleClass().remove("active");
-        if (btnUsers != null) btnUsers.getStyleClass().remove("active");
-        if (btnProfils != null) btnProfils.getStyleClass().remove("active");
-        if (btnStats != null) btnStats.getStyleClass().remove("active");
-        if (btnSettings != null) btnSettings.getStyleClass().remove("active");
-        if (btnVoyages != null) btnVoyages.getStyleClass().remove("active");
-        if (btnReservations != null) btnReservations.getStyleClass().remove("active");
-        if (btnLogements != null) btnLogements.getStyleClass().remove("active");
+        String inactiveStyle = "-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-alignment: center-left; " +
+                "-fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; " +
+                "-fx-pref-width: 220;";
 
+        String activeStyle = "-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-alignment: center-left; " +
+                "-fx-padding: 12; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-size: 14px; " +
+                "-fx-pref-width: 220; -fx-font-weight: bold;";
+
+        // Réinitialiser tous les boutons
+        if (btnDashboard != null) btnDashboard.setStyle(inactiveStyle);
+        if (btnUsers != null) btnUsers.setStyle(inactiveStyle);
+        if (btnProfils != null) btnProfils.setStyle(inactiveStyle);
+        if (btnStats != null) btnStats.setStyle(inactiveStyle);
+        if (btnSettings != null) btnSettings.setStyle(inactiveStyle);
+        if (btnEvenements != null) btnEvenements.setStyle(inactiveStyle);
+        if (btnLocationDashboard != null) btnLocationDashboard.setStyle(inactiveStyle);
+        if (btnVoyages != null) btnVoyages.setStyle(inactiveStyle);
+        if (btnReservations != null) btnReservations.setStyle(inactiveStyle);
+        if (btnLogements != null) btnLogements.setStyle(inactiveStyle);
+
+        // Activer le bouton sélectionné
         if (activeButton != null) {
-            activeButton.getStyleClass().add("active");
+            activeButton.setStyle(activeStyle);
         }
     }
 

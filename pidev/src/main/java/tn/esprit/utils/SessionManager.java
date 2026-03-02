@@ -1,5 +1,6 @@
 package tn.esprit.utils;
 
+import tn.esprit.entities.Events;
 import tn.esprit.entities.reservationlog;
 import tn.esprit.entities.User;
 import tn.esprit.entities.logement;
@@ -8,6 +9,23 @@ public class SessionManager {
     private static User currentUser = null;
     private static logement selectedLogement = null;
     private static reservationlog editingReservation = null;
+    private static Events selectedEvent = null;
+
+    // ===== GESTION ÉVÉNEMENT SÉLECTIONNÉ =====
+
+    public static void setSelectedEvent(Events event) {
+        selectedEvent = event;
+        System.out.println("Événement sélectionné: " + (event != null ? event.getTitre() : "null"));
+    }
+
+    public static Events getSelectedEvent() {
+        return selectedEvent;
+    }
+
+    public static void clearSelectedEvent() {
+        selectedEvent = null;
+        System.out.println("Événement sélectionné effacé");
+    }
 
     // ===== GESTION UTILISATEUR =====
 
@@ -29,6 +47,7 @@ public class SessionManager {
         currentUser = null;
         selectedLogement = null;
         editingReservation = null;
+        selectedEvent = null;
     }
 
     public static boolean isAdmin() {
@@ -73,6 +92,7 @@ public class SessionManager {
         currentUser = null;
         selectedLogement = null;
         editingReservation = null;
+        selectedEvent = null;
         System.out.println("Session complètement effacée");
     }
 
@@ -107,6 +127,7 @@ public class SessionManager {
         System.out.println("Utilisateur connecté: " + (currentUser != null ? currentUser.getEmail() : "non connecté"));
         System.out.println("Logement sélectionné: " + (selectedLogement != null ? selectedLogement.getNom() : "aucun"));
         System.out.println("Réservation en édition: " + (editingReservation != null ? editingReservation.getId() : "aucune"));
+        System.out.println("Événement sélectionné: " + (selectedEvent != null ? selectedEvent.getTitre() : "aucun"));
         System.out.println("==========================\n");
     }
 }

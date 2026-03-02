@@ -9,78 +9,67 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.stage.Stage;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
 import tn.esprit.services.GeminiService;
-import javafx.stage.Stage;
 import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class AccueilController {
 
-    @FXML
-    private TextField searchField;
-    @FXML
-    private ComboBox<String> sortCombo;
-    @FXML
-    private Button allFilterBtn;
-    @FXML
-    private Button villaFilterBtn;
-    @FXML
-    private Button hotelFilterBtn;
-    @FXML
-    private Button appartFilterBtn;
-    @FXML
-    private FlowPane flowLogements;
-    @FXML
-    private Button btnNosLogements;
-    @FXML
-    private Button btnMesReservations;
-    @FXML
-    private HBox userBox;
-    @FXML
-    private Label userNameLabel;
-    @FXML
-    private Button btnRecommendations;
-    @FXML private Button btnLogout;  // ← Ajoute ce champ
-    @FXML private Button btnVoyager; // ← Ajoutez ce champ
-    @FXML private VBox contentContainer; // Supposons que vous ayez un conteneur pour le contenu
-    @FXML private AnchorPane mainContentArea; // Ou votre zone de contenu principal
+    @FXML private TextField searchField;
+    @FXML private Button btnEvenements;
+    @FXML private Button btnLocation;
+    @FXML private ComboBox<String> sortCombo;
+    @FXML private Button allFilterBtn;
+    @FXML private Button villaFilterBtn;
+    @FXML private Button hotelFilterBtn;
+    @FXML private Button appartFilterBtn;
+    @FXML private FlowPane flowLogements;
+    @FXML private Button btnNosLogements;
+    @FXML private Button btnAccueil;
+    @FXML private Button btnMesReservations;
+    @FXML private HBox userBox;
+    @FXML private Label userNameLabel;
+    @FXML private Button btnRecommendations;
+    @FXML private Button btnLogout;
+    @FXML private Button btnVoyager;
+    @FXML private VBox contentContainer;
+    @FXML private AnchorPane mainContentArea;
+    @FXML private Button btnVoirToutes;  // ✅ AJOUTER CETTE LIGNE
 
 
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
     private List<logement> logementsFiltres;
     private Button activeFilterBtn;
-    private User currentUser;  // <-- AJOUT: Variable pour stocker l'utilisateur courant
+    private User currentUser;
 
     @FXML
     public void initialize() {
         serviceLogement = new Servicelogement();
-
-        // Récupérer l'utilisateur connecté
         currentUser = SessionManager.getCurrentUser();
 
         btnNosLogements.getStyleClass().add("nav-button-active");
 
-        // Configuration du userBox (profil utilisateur)
         setupUserBox();
-        btnRecommendations.setOnAction(e -> chargerRecommandations());
 
+        if (btnRecommendations != null) {
+            btnRecommendations.setOnAction(e -> chargerRecommandations());
+        }
 
-        // Gestion du bouton Mes Réservations
         if (SessionManager.isLoggedIn()) {
             btnMesReservations.setVisible(true);
-            btnMesReservations.setOnAction(e -> NavigationManager.loadView("/fxml/MesReservations.fxml", "Catalogue"));
+            btnMesReservations.setOnAction(e ->
+                    NavigationManager.loadView("/fxml/MesReservations.fxml", "Mes Réservations"));
         } else {
             btnMesReservations.setVisible(false);
         }
@@ -121,69 +110,213 @@ public class AccueilController {
 
         searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
         sortCombo.setOnAction(e -> trier());
+
         if (btnVoyager != null) {
             btnVoyager.setOnAction(e -> handleVoyager());
             System.out.println("✅ Bouton Voyager configuré");
         } else {
             System.err.println("❌ btnVoyager est null! Vérifiez fx:id dans le FXML");
         }
+
+        if (btnEvenements != null) {
+            btnEvenements.setOnAction(e -> afficherEvenements());
+            System.out.println("✅ Bouton Événements configuré");
+        }
+
+        if (btnLocation != null) {
+            btnLocation.setOnAction(e -> afficherLocation());
+            System.out.println("✅ Bouton Location configuré");
+        }
+
+        if (btnLogout != null) {
+            btnLogout.setOnAction(e -> handleLogout());
+        }
     }
 
-
-    /**
-     * Configure la boîte utilisateur (affichage du nom et clic vers profil)
-     */
     private void setupUserBox() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
-            // Afficher le nom de l'utilisateur
             if (userNameLabel != null) {
                 userNameLabel.setText(currentUser.getPrenom() + " " + currentUser.getNom());
             }
-
-            // Configurer le clic pour ouvrir le profil
             if (userBox != null) {
                 userBox.setCursor(javafx.scene.Cursor.HAND);
                 userBox.setOnMouseClicked(e -> showUserProfile());
+                userBox.setOnMouseEntered(e -> onUserBoxHover());
+                userBox.setOnMouseExited(e -> onUserBoxExit());
             }
         } else {
-            // Utilisateur non connecté
             if (userNameLabel != null) {
                 userNameLabel.setText("Connexion");
             }
             if (userBox != null) {
                 userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml", "Catalogue"));
+                userBox.setOnMouseClicked(e -> NavigationManager.showLogin());
             }
         }
     }
 
+    @FXML
+    private void afficherEvenements() {
+        System.out.println("🔄 Chargement de la page des événements");
 
-    /**
-     * Reçoit l'utilisateur depuis LoginController
-     */
+        try {
+            // Vérifier où se trouve le fichier
+            String[] chemins = {"/UserHome.fxml", "/fxml/UserHome.fxml"};
+            URL resourceUrl = null;
+
+            for (String chemin : chemins) {
+                resourceUrl = getClass().getResource(chemin);
+                if (resourceUrl != null) {
+                    System.out.println("✅ Fichier trouvé: " + chemin);
+                    break;
+                }
+            }
+
+            if (resourceUrl == null) {
+                System.err.println("❌ Fichier UserHome.fxml introuvable!");
+                showAlert("Erreur", "Fichier des événements introuvable!");
+                return;
+            }
+
+            BorderPane mainPane = (BorderPane) btnEvenements.getScene().getRoot();
+
+            FXMLLoader loader = new FXMLLoader(resourceUrl);
+            AnchorPane evenementsView = loader.load();
+
+            UserController eventsController = loader.getController();
+            if (eventsController != null && currentUser != null) {
+                eventsController.setCurrentUser(currentUser);
+            }
+
+            mainPane.setCenter(evenementsView);
+            updateActiveNavButton(btnEvenements);
+
+            System.out.println("✅ Page des événements chargée avec succès");
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement événements: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page des événements.");
+        }
+    }
+
+    @FXML
+    private void afficherLocation() {
+        System.out.println("🔄 Chargement de la page de location de voitures");
+
+        try {
+            // ✅ Chemin correct : dossier client à la racine
+            String fxmlPath = "/client/AccueilClient.fxml";
+
+            // Vérifier que le fichier existe
+            URL resourceUrl = getClass().getResource(fxmlPath);
+
+            if (resourceUrl == null) {
+                System.err.println("❌ Fichier non trouvé: " + fxmlPath);
+
+                // Debug: lister les fichiers disponibles dans /client
+                System.out.println("📁 Fichiers disponibles dans /client:");
+                try {
+                    URL dirUrl = getClass().getResource("/client");
+                    if (dirUrl != null) {
+                        java.nio.file.Path path = java.nio.file.Paths.get(dirUrl.toURI());
+                        java.nio.file.Files.list(path).forEach(p ->
+                                System.out.println("  - " + p.getFileName())
+                        );
+                    } else {
+                        System.out.println("  Le dossier /client n'existe pas!");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                showAlert("Erreur", "Fichier de location introuvable!");
+                return;
+            }
+
+            BorderPane mainPane = (BorderPane) btnLocation.getScene().getRoot();
+
+            FXMLLoader loader = new FXMLLoader(resourceUrl);
+            AnchorPane locationView = loader.load();
+
+            Object controller = loader.getController();
+            if (controller != null && currentUser != null) {
+                try {
+                    controller.getClass().getMethod("setCurrentUser", User.class).invoke(controller, currentUser);
+                } catch (Exception e) {
+                    System.out.println("⚠️ Pas de méthode setCurrentUser dans le contrôleur de location");
+                }
+            }
+
+            mainPane.setCenter(locationView);
+            updateActiveNavButton(btnLocation);
+
+            System.out.println("✅ Page de location chargée avec succès");
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur chargement location: " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger la page de location.");
+        }
+    }
+    @FXML
+    private void voirToutesLesVoitures() {
+        try {
+            // ✅ Chemin correct vers le catalogue dans le dossier client
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/CatalogueVoitures.fxml"));
+            Parent catalogueView = loader.load();
+
+            BorderPane mainPane = (BorderPane) btnVoirToutes.getScene().getRoot();
+            mainPane.setCenter(catalogueView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void allerMesReservations() {
+        NavigationManager.loadView("/client/MesReservations.fxml", "Mes Réservations");
+    }
+
+    @FXML
+    private void allerPlanning() {
+        NavigationManager.loadView("/client/Planning.fxml", "Planning");
+    }
+    private void updateActiveNavButton(Button activeButton) {
+        Button[] navButtons = {btnAccueil, btnNosLogements, btnMesReservations, btnEvenements, btnLocation, btnVoyager};
+
+        for (Button btn : navButtons) {
+            if (btn != null) {
+                if (btn == activeButton) {
+                    btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;");
+                } else {
+                    btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;");
+                }
+            }
+        }
+    }
+
     public void setCurrentUser(User user) {
         this.currentUser = user;
         SessionManager.setCurrentUser(user);
 
-        // Mettre à jour l'affichage
         if (user != null && userNameLabel != null) {
             userNameLabel.setText(user.getPrenom() + " " + user.getNom());
         }
 
-        // Configurer le bouton Mes Réservations
         if (btnMesReservations != null) {
             btnMesReservations.setVisible(true);
             btnMesReservations.setOnAction(e -> {
                 System.out.println("Navigation vers Mes Réservations");
-                NavigationManager.loadView("/fxml/MesReservations.fxml", "Catalogue");
+                NavigationManager.loadView("/fxml/MesReservations.fxml", "Mes Réservations");
             });
         }
 
-        // Reconfigurer le userBox
         setupUserBox();
-
         System.out.println("Utilisateur connecté dans AccueilController: " + (user != null ? user.getEmail() : "null"));
     }
+
     private void setActiveFilter(Button newActiveBtn) {
         if (activeFilterBtn != null) {
             activeFilterBtn.getStyleClass().remove("filter-button-active");
@@ -258,6 +391,7 @@ public class AccueilController {
     }
 
     private void afficherLogements(List<logement> liste) {
+        if (flowLogements == null) return;
         flowLogements.getChildren().clear();
         for (logement l : liste) {
             flowLogements.getChildren().add(creerCarteLogement(l));
@@ -269,7 +403,6 @@ public class AccueilController {
         card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);");
         card.setPrefWidth(250);
 
-        // Image du logement
         ImageView imageView = new ImageView();
         imageView.setFitWidth(210);
         imageView.setFitHeight(150);
@@ -281,18 +414,15 @@ public class AccueilController {
                 if (imagePath.startsWith("http")) {
                     imageView.setImage(new Image(imagePath));
                 } else {
-                    // Essayer de charger depuis les resources
                     try {
                         Image img = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
                         imageView.setImage(img);
                     } catch (Exception e) {
-                        // Image par défaut
                         Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
                         imageView.setImage(defaultImg);
                     }
                 }
             } else {
-                // Image par défaut
                 Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
                 imageView.setImage(defaultImg);
             }
@@ -306,14 +436,12 @@ public class AccueilController {
         Label location = new Label("📍 " + l.getAdresse());
         location.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
 
-        // Badge Disponible et type
         HBox badgeBox = new HBox(10);
         badgeBox.setAlignment(Pos.CENTER_LEFT);
 
         Label typeBadge = new Label(l.getType());
         typeBadge.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 12; " +
                 "-fx-padding: 3 10; -fx-font-size: 11px; -fx-font-weight: bold;");
-
         badgeBox.getChildren().add(typeBadge);
 
         if (l.isDisponibilite()) {
@@ -323,7 +451,6 @@ public class AccueilController {
             badgeBox.getChildren().add(dispo);
         }
 
-        // Prix
         HBox priceBox = new HBox(5);
         priceBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -332,14 +459,11 @@ public class AccueilController {
 
         Label nuitLabel = new Label("/nuit");
         nuitLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
-
         priceBox.getChildren().addAll(price, nuitLabel);
 
-        // Équipement
         Label equipementLabel = new Label("⚙️ " + l.getEquipement());
         equipementLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f8c8d;");
 
-        // Bouton Réserver
         Button btn = new Button("Réserver");
         btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 25; " +
                 "-fx-padding: 10 0; -fx-font-weight: bold; -fx-font-size: 14px; -fx-cursor: hand;");
@@ -356,20 +480,17 @@ public class AccueilController {
         );
 
         btn.setOnAction(e -> {
-            // Vérifier si l'utilisateur est connecté
             if (SessionManager.isLoggedIn()) {
                 SessionManager.setSelectedLogement(l);
-                NavigationManager.loadView("/fxml/ReservationForm.fxml", "Catalogue");
+                NavigationManager.loadView("/fxml/ReservationForm.fxml", "Réservation");
             } else {
-                NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
+                NavigationManager.showLogin();
             }
         });
 
         card.getChildren().addAll(imageView, title, location, badgeBox, priceBox, equipementLabel, btn);
         return card;
     }
-
-
 
     @FXML
     private void onUserBoxHover() {
@@ -386,21 +507,20 @@ public class AccueilController {
                     "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
         }
     }
+
     private void chargerRecommandations() {
-        // Désactiver le bouton pendant le chargement
+        if (btnRecommendations == null) return;
+
         btnRecommendations.setDisable(true);
         btnRecommendations.setText("Chargement...");
 
-        // Lancer l'appel API dans un thread séparé pour ne pas bloquer l'UI
         new Thread(() -> {
             try {
                 GeminiService gemini = new GeminiService();
                 List<Map<String, Object>> recos = gemini.getRecommendations(currentUser, tousLesLogements);
 
-                // Récupérer les objets logement correspondants aux IDs recommandés
                 List<logement> logementsRecommandes = new ArrayList<>();
                 for (Map<String, Object> reco : recos) {
-                    // L'ID peut être retourné comme Double selon le parsing Gson
                     Number idNumber = (Number) reco.get("id_logement");
                     int id = idNumber.intValue();
 
@@ -410,7 +530,6 @@ public class AccueilController {
                             .ifPresent(logementsRecommandes::add);
                 }
 
-                // Mettre à jour l'UI sur le thread JavaFX
                 javafx.application.Platform.runLater(() -> {
                     afficherLogements(logementsRecommandes);
                     btnRecommendations.setDisable(false);
@@ -432,59 +551,39 @@ public class AccueilController {
     private void showUserProfile() {
         if (SessionManager.isLoggedIn() && currentUser != null) {
             System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
-            NavigationManager.loadView("/fxml/UserProfil.fxml", "Catalogue");
+            NavigationManager.loadView("/fxml/UserProfil.fxml", "Mon Profil");
         } else {
             System.out.println("Vous n'êtes pas connecté !");
-            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
+            NavigationManager.showLogin();
         }
     }
 
-
-
-    // 🔴 NOUVELLE MÉTHODE DE DÉCONNEXION
     @FXML
     private void handleLogout() {
         try {
-            // Retourner à l'écran de login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = (Stage) btnLogout.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Connexion - Système de Réservation");
-            stage.centerOnScreen();
-            stage.show();
-
+            SessionManager.logout();
+            NavigationManager.showLogin();
             System.out.println("✅ Déconnexion réussie");
-
         } catch (Exception e) {
             System.err.println("❌ Erreur lors de la déconnexion: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-
-
     @FXML
     private void handleVoyager() {
         System.out.println("🔄 Chargement du catalogue des voyages");
 
-        // Chemin vers votre fichier CatalogueUser.fxml
         String fxmlPath = "/fxml/CatalogueUser.fxml";
-
-        // Vérification que le fichier existe
         java.net.URL resourceUrl = getClass().getResource(fxmlPath);
 
         if (resourceUrl == null) {
             System.err.println("❌ ERREUR: Fichier non trouvé: " + fxmlPath);
-            System.err.println("📁 Chemin absolu testé: " + getClass().getResource("/"));
             showAlert("Erreur", "Fichier CatalogueUser.fxml introuvable!");
             return;
         }
 
         System.out.println("✅ Fichier trouvé: " + resourceUrl);
-
-        // Utiliser NavigationManager pour charger la vue
         NavigationManager.loadView(fxmlPath, "Catalogue");
     }
 

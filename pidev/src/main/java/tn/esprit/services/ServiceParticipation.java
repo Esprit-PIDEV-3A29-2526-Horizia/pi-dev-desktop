@@ -99,7 +99,7 @@ public class ServiceParticipation implements IService<Participation> {
         );
     }
 
-    @Override
+
     public void updatePlaces(int id_event, int Places_Restantes) throws SQLException {
         // This method is for events, not participations
     }
@@ -124,7 +124,7 @@ public class ServiceParticipation implements IService<Participation> {
         return participations;
     }
 
-    @Override
+
     public List<Participation> rechercher(String keyword) throws SQLException {
         List<Participation> participations = new ArrayList<>();
         String sql = "SELECT * FROM participation WHERE statut LIKE ? OR id_event LIKE ?";
@@ -146,7 +146,7 @@ public class ServiceParticipation implements IService<Participation> {
         return participations;
     }
 
-    @Override
+
     public List<Participation> trier(String column, String order) throws SQLException {
         List<Participation> participations = new ArrayList<>();
         List<String> allowedColumns = List.of("id_participation","id_event","nombre_places","montant_total","statut","date_participation");

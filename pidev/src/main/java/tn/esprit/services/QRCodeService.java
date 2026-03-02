@@ -12,6 +12,8 @@ import tn.esprit.entities.Participation;
 import java.awt.image.BufferedImage;
 import java.text.SimpleDateFormat;
 
+import static tn.esprit.utils.QRCodeService.*;
+
 public class QRCodeService {
 
     public static Image generateQRCode(Participation participation) {
@@ -43,6 +45,20 @@ public class QRCodeService {
 
         } catch (WriterException e) {
             e.printStackTrace();
+            return null;
+        }
+    }
+    public static Image genererQRCodeLocation(int locationId, String nomClient,
+                                              String vehicule, String dateDebut,
+                                              String dateFin) {
+        String contenu = buildQRContent(locationId, nomClient, vehicule, dateDebut, dateFin);
+        try {
+            BufferedImage qrImage = genererQRCodeImage(contenu);
+            BufferedImage qrFinal = ajouterCadreHorizia(qrImage, locationId);
+            // FIX : conversion sans SwingFXUtils
+            return bufferedImageToFXImage(qrFinal);
+        } catch (WriterException e) {
+            System.err.println("[QRCodeService] Erreur génération QR : " + e.getMessage());
             return null;
         }
     }

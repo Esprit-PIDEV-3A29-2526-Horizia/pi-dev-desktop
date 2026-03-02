@@ -123,7 +123,7 @@ public class ServiceEvent implements IService<Events> {
         return events;
     }
 
-    @Override
+
     public List<Events> rechercher(String keyword) throws SQLException {
         List<Events> events = new ArrayList<>();
         String sql = "SELECT * FROM events WHERE titre LIKE ? OR categorie LIKE ?";
@@ -153,7 +153,7 @@ public class ServiceEvent implements IService<Events> {
         return events;
     }
 
-    @Override
+
     public List<Events> trier(String column, String order) throws SQLException {
         List<Events> events = new ArrayList<>();
         List<String> allowedColumns = List.of("id_event","titre","categorie","date_debut","date_fin","prix","capacite_max","places_restantes");
@@ -185,7 +185,7 @@ public class ServiceEvent implements IService<Events> {
         return events;
     }
 
-    @Override
+
     public void updatePlaces(int id_event, int Places_Restantes) throws SQLException{
         String sql = "UPDATE events SET places_restantes = ? WHERE id_event= ? ";
         PreparedStatement ps = connection.prepareStatement(sql);

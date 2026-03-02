@@ -15,9 +15,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
+import tn.esprit.entities.User;
 import tn.esprit.services.RefreshService;
 import tn.esprit.services.ServiceEvent;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -33,12 +35,14 @@ public class UserController implements Initializable {
     @FXML private Button concertFilterBtn;
     @FXML private Button spectacleFilterBtn;
     @FXML private Button conferenceFilterBtn;
+    @FXML private Button btnRetour;
 
     private ServiceEvent serviceEvent;
     private List<Events> allEvents;
     private String currentCategory = "Tous";
     private Timer timer = new Timer(true);
     private TimerTask searchTask;
+    private User currentUser;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -46,25 +50,18 @@ public class UserController implements Initializable {
         sortCombo.getItems().addAll("Titre", "Prix", "Date", "Places");
 
         setupCategoryFilters();
-        myEventsBtn.setOnAction(e -> navigateToMyEvents());
+
+        if (myEventsBtn != null) {
+            myEventsBtn.setOnAction(e -> navigateToMyEvents());
+        }
+
         loadEvents();
 
-        // Search functionality
-        /*searchField.textProperty().addListener((obs, old, newVal) -> {
-            if (newVal.isEmpty()) {
-                filterByCategory(currentCategory);
-            } else {
-                filterEvents(newVal);
-            }
-        });*/
-        // Dans initialize(), remplace le listener par celui-ci :
         searchField.textProperty().addListener((obs, old, newVal) -> {
-            // Annule la recherche précédente
             if (searchTask != null) {
                 searchTask.cancel();
             }
 
-            // Crée une nouvelle tâche avec délai
             searchTask = new TimerTask() {
                 @Override
                 public void run() {
@@ -77,15 +74,38 @@ public class UserController implements Initializable {
                     });
                 }
             };
-
-            // Délai de 300ms avant de lancer la recherche
             timer.schedule(searchTask, 300);
         });
 
-        // Sort functionality
         sortCombo.setOnAction(e -> sortEvents());
 
         RefreshService.setUserController(this);
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("👤 Utilisateur reçu dans UserController: " +
+                (user != null ? user.getEmail() : "non connecté"));
+    }
+
+    @FXML
+    private void handleRetour() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
+            BorderPane accueilView = loader.load();
+
+            AccueilController accueilController = loader.getController();
+            if (accueilController != null && currentUser != null) {
+                accueilController.setCurrentUser(currentUser);
+            }
+
+            BorderPane mainPane = (BorderPane) btnRetour.getScene().getRoot();
+            mainPane.setCenter(accueilView);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de revenir à l'accueil: " + e.getMessage());
+        }
     }
 
     private void setupCategoryFilters() {
@@ -116,6 +136,7 @@ public class UserController implements Initializable {
             displayEvents(allEvents);
         } catch (SQLException e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger les événements: " + e.getMessage());
         }
     }
 
@@ -130,24 +151,9 @@ public class UserController implements Initializable {
         }
     }
 
-    /*private void filterEvents(String keyword) {
-        try {
-            List<Events> filtered = serviceEvent.rechercher(keyword);
-            // Apply category filter if not "Tous"
-            if (!currentCategory.equals("Tous")) {
-                filtered = filtered.stream()
-                        .filter(e -> e.getCategorie().equalsIgnoreCase(currentCategory))
-                        .toList();
-            }
-            displayEvents(filtered);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }*/
     private void filterEvents(String keyword) {
         try {
             List<Events> filtered = serviceEvent.rechercher(keyword);
-            // Apply category filter if not "Tous"
             if (!currentCategory.equals("Tous")) {
                 filtered = filtered.stream()
                         .filter(e -> e.getCategorie().equalsIgnoreCase(currentCategory))
@@ -173,7 +179,6 @@ public class UserController implements Initializable {
 
         try {
             List<Events> sorted = serviceEvent.trier(column, "ASC");
-            // Apply category filter
             if (!currentCategory.equals("Tous")) {
                 sorted = sorted.stream()
                         .filter(e -> e.getCategorie().equalsIgnoreCase(currentCategory))
@@ -186,6 +191,8 @@ public class UserController implements Initializable {
     }
 
     private void displayEvents(List<Events> events) {
+        if (flowEvents == null) return;
+
         flowEvents.getChildren().clear();
         for (Events event : events) {
             flowEvents.getChildren().add(createEventCard(event));
@@ -201,13 +208,11 @@ public class UserController implements Initializable {
                 "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); " +
                 "-fx-border-color: #DACEB6; -fx-border-radius: 20; -fx-border-width: 1;");
 
-        // Image container with fixed size and clip
         StackPane imageContainer = new StackPane();
         imageContainer.setPrefWidth(280);
         imageContainer.setPrefHeight(180);
         imageContainer.setStyle("-fx-background-color: #f0f0f0; -fx-background-radius: 15;");
 
-        // Create a clip to ensure image fits within rounded corners
         Rectangle clip = new Rectangle(280, 180);
         clip.setArcWidth(15);
         clip.setArcHeight(15);
@@ -230,17 +235,14 @@ public class UserController implements Initializable {
             addImagePlaceholder(imageContainer);
         }
 
-        // Category badge
         Label category = new Label(event.getCategorie());
         category.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
                 "-fx-background-radius: 15; -fx-padding: 5 15; -fx-font-size: 12px; -fx-font-weight: bold;");
 
-        // Title
         Label title = new Label(event.getTitre());
         title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
         title.setWrapText(true);
 
-        // Date and location
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         String dateText = "";
         if (event.getDateDebut() != null) {
@@ -255,7 +257,6 @@ public class UserController implements Initializable {
         Label location = new Label("📍 " + (event.getLocation() != null ? event.getLocation() : "À déterminer"));
         location.setStyle("-fx-text-fill: #666; -fx-font-size: 13px;");
 
-        // Price and availability
         HBox priceBox = new HBox(15);
         priceBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -268,7 +269,6 @@ public class UserController implements Initializable {
 
         priceBox.getChildren().addAll(price, available);
 
-        // Progress bar for places
         ProgressBar progressBar = new ProgressBar();
         double progress = 1.0 - ((double) event.getPlacesRestantes() / event.getCapaciteMax());
         progressBar.setProgress(progress);
@@ -283,7 +283,6 @@ public class UserController implements Initializable {
         total.setStyle("-fx-text-fill: #999; -fx-font-size: 11px;");
         progressLabels.getChildren().addAll(filled, total);
 
-        // Details button - now opens a new page instead of showing form in card
         Button detailsBtn = new Button("Voir détails");
         detailsBtn.setMaxWidth(Double.MAX_VALUE);
         detailsBtn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: black; -fx-font-size: 16px; " +
@@ -295,7 +294,6 @@ public class UserController implements Initializable {
             detailsBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; " +
                     "-fx-font-weight: bold; -fx-padding: 12; -fx-background-radius: 12;");
         } else {
-            //detailsBtn.setOnAction(e -> openEventDetails(event));\
             detailsBtn.setOnAction(e -> navigateToEventDetails(event));
         }
 
@@ -310,91 +308,6 @@ public class UserController implements Initializable {
         container.getChildren().add(placeholder);
     }
 
-    private void openEventDetails(Events event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
-            Parent root = loader.load();
-
-            EventDetailsController controller = loader.getController();
-            controller.setEvent(event);
-
-            // REPLACE current scene instead of opening new window
-            Stage stage = (Stage) flowEvents.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("Détails de l'événement");
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir les détails de l'événement");
-        }
-    }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    @FXML
-    private void handleSearch() {
-        String keyword = searchField.getText();
-        if (!keyword.isEmpty()) {
-            filterEvents(keyword);
-        } else {
-            if (currentCategory.equals("Tous")) {
-                displayEvents(allEvents);
-            } else {
-                filterByCategory(currentCategory);
-            }
-        }
-    }
-
-   /* private void navigateToMyEvents() {
-        try{
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) flowEvents.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("EventHub - Mes réservations");
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }*/
-   private void navigateToMyEvents() {
-       try{
-           FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
-           Parent root = loader.load();
-           Stage stage = (Stage) flowEvents.getScene().getWindow();
-
-           // FORCE the size
-           Scene scene = new Scene(root, 1200, 700);
-           stage.setScene(scene);
-           stage.setWidth(1200);
-           stage.setHeight(700);
-           stage.setTitle("EventHub - Mes réservations");
-
-       }catch(Exception e){
-           e.printStackTrace();
-       }
-   }
-
-    /*private void navigateToEventDetails(Events event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/EventDetails.fxml"));
-            Parent root = loader.load();
-            EventDetailsController controller = loader.getController();
-            controller.setEvent(event);
-
-            Stage stage = (Stage) flowEvents.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700)); // This sets full size
-            stage.setTitle("Détails de l'événement");
-        }catch (Exception e){
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir les détails");
-        }
-    }*/
     private void navigateToEventDetails(Events event) {
         try {
             System.out.println("Tentative de chargement de EventDetails.fxml");
@@ -404,15 +317,40 @@ public class UserController implements Initializable {
 
             EventDetailsController controller = loader.getController();
             controller.setEvent(event);
+            if (currentUser != null) {
+                // Si EventDetailsController a besoin de l'utilisateur, ajoutez cette méthode
+                // controller.setCurrentUser(currentUser);
+            }
 
-            Stage stage = (Stage) flowEvents.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle("Détails de l'événement");
+            BorderPane mainPane = (BorderPane) flowEvents.getScene().getRoot();
+            mainPane.setCenter(root);
 
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir les détails: " + e.getMessage());
         }
+    }
+
+    private void navigateToMyEvents() {
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
+            Parent root = loader.load();
+
+            BorderPane mainPane = (BorderPane) flowEvents.getScene().getRoot();
+            mainPane.setCenter(root);
+
+        } catch(Exception e){
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir Mes réservations");
+        }
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public void refreshEvents(){

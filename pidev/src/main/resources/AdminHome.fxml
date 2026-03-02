@@ -13,7 +13,6 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -21,210 +20,177 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.chart.*?>
 <?import javafx.scene.text.Font?>
-
 <?import javafx.scene.control.Separator?>
-<BorderPane prefHeight="700" prefWidth="1200" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AdminController">
 
-    <left>
-        <VBox prefWidth="260" spacing="18" style="-fx-background-color:#1a2634;">
-            <padding><Insets bottom="18" left="18" right="18" top="22" /></padding>
+<?import javafx.scene.layout.GridPane?>
+<VBox prefHeight="700" prefWidth="980" spacing="20" style="-fx-background-color: #F6F7FB; -fx-padding: 20;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AdminController">
 
-            <HBox alignment="CENTER" spacing="10">
-                <ImageView fitHeight="60.0" fitWidth="200.0" preserveRatio="true">
-                    <image><Image url="@images/LOGO.png" /></image>
-                </ImageView>
-            </HBox>
+    <!-- TOP BAR AVEC NOTIFICATIONS -->
+    <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: white; -fx-padding: 10 20; -fx-background-radius: 15; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 5);">
+        <Region HBox.hgrow="ALWAYS" />
 
-            <Region prefHeight="8" />
-            <Label style="-fx-text-fill:#9AA5B5; -fx-font-size:12; -fx-font-weight:700;" text="ADMIN MENU" />
+        <!-- 🔔 NOTIFICATIONS -->
+        <StackPane>
+            <Button fx:id="notificationBtn" style="-fx-background-color: transparent; -fx-cursor: hand;" text="🔔">
+                <font>
+                    <Font size="20.0" />
+                </font>
+            </Button>
+            <Label fx:id="notificationBadge" text="0" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-font-size: 11; -fx-font-weight: bold;" StackPane.alignment="TOP_RIGHT" />
+        </StackPane>
 
-            <Button fx:id="btnDashboard" maxWidth="1.7976931348623157E308" style="-fx-background-color:#2d9cdb; -fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand;" text="📊  Dashboard" />
-            <Button fx:id="btnEvents" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📅  Gestion Événements" />
-            <Button fx:id="btnParticipations" maxWidth="1.7976931348623157E308" style="-fx-background-color:transparent; -fx-text-fill:#E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;" text="📋  Participations" />
-            <Button fx:id="btnCalendar" maxWidth="1.7976931348623157E308"
-                    style="-fx-background-color: transparent; -fx-text-fill: #E5E7EB; -fx-font-size:13; -fx-font-weight:800; -fx-background-radius:10; -fx-padding:12 14; -fx-cursor:hand; -fx-border-color:#3a4758; -fx-border-radius:10; -fx-border-width:1;"
-                    text="📅  Calendrier" />
+        <!-- Profil admin -->
+        <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
+            <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
+            <Label text="Admin" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+        </HBox>
+    </HBox>
 
-            <Region VBox.vgrow="ALWAYS" />
+    <!-- TAB PANE PRINCIPAL -->
+    <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
 
-            <VBox spacing="6" style="-fx-background-color:#0f1a28; -fx-background-radius:12; -fx-padding:15;">
-                <Label style="-fx-text-fill:white; -fx-font-size:13; -fx-font-weight:800;" text="Administrateur" />
-                <Label style="-fx-text-fill:#9AA5B5; -fx-font-size:11;" text="Connecté en tant qu'admin" wrapText="true" />
-            </VBox>
-            <Label style="-fx-text-fill:#6B7280; -fx-font-size:11;" text="© EventHub Admin 2026" />
-        </VBox>
-    </left>
+        <!-- DASHBOARD TAB -->
+        <Tab text="Dashboard">
+            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+                <VBox spacing="25" style="-fx-padding: 10;">
 
-    <center>
-        <VBox>
-            <!-- TOP BAR AVEC NOTIFICATIONS -->
-            <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: white; -fx-padding: 10 20; -fx-border-color: #DACEB6; -fx-border-width: 0 0 1 0;">
-                <Region HBox.hgrow="ALWAYS" />
+                    <!-- Header avec titre et boutons -->
+                    <HBox alignment="CENTER_LEFT" spacing="20">
+                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📊 Tableau de bord" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button text="🔄 Rafraîchir" onAction="#refreshDashboard"
+                                style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                        <Button text="🔄 Réindexer" onAction="#reindexer"
+                                style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
+                    </HBox>
 
-                <!-- 🔔 NOTIFICATIONS -->
-                <StackPane>
-                    <Button fx:id="notificationBtn" style="-fx-background-color: transparent; -fx-cursor: hand;" text="🔔">
-                        <font>
-                            <Font size="20.0" />
-                        </font>
-                    </Button>
-                    <Label fx:id="notificationBadge" text="0" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-font-size: 11; -fx-font-weight: bold;" StackPane.alignment="TOP_RIGHT" />
-                </StackPane>
+                    <!-- KPIs Cards -->
+                    <GridPane hgap="20" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="25" />
+                            <ColumnConstraints percentWidth="25" />
+                            <ColumnConstraints percentWidth="25" />
+                            <ColumnConstraints percentWidth="25" />
+                        </columnConstraints>
 
-                <!-- Profil admin -->
-                <HBox spacing="10" alignment="CENTER" style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 6 16;">
-                    <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 16px;" />
-                    <Label text="Admin" style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
-                </HBox>
-            </HBox>
-
-            <!-- TAB PANE PRINCIPAL -->
-            <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-
-                <!-- DASHBOARD TAB -->
-                <Tab text="Dashboard">
-                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
-                        <VBox spacing="25" style="-fx-padding: 25;">
-
-                            <!-- Header avec titre et boutons -->
-                            <HBox alignment="CENTER_LEFT" spacing="20">
-                                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📊 Tableau de bord" />
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button text="🔄 Rafraîchir" onAction="#refreshDashboard"
-                                        style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
-                                <Button text="🔄 Réindexer" onAction="#reindexer"
-                                        style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
-                            </HBox>
-
-                            <!-- KPIs Cards -->
-                            <GridPane hgap="20" vgap="20">
-                                <columnConstraints>
-                                    <ColumnConstraints percentWidth="25" />
-                                    <ColumnConstraints percentWidth="25" />
-                                    <ColumnConstraints percentWidth="25" />
-                                    <ColumnConstraints percentWidth="25" />
-                                </columnConstraints>
-
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="0">
-                                    <Label style="-fx-text-fill: #6B7280;" text="📅 Total événements" />
-                                    <Label fx:id="totalEventsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="0" />
-                                </VBox>
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="1">
-                                    <Label style="-fx-text-fill: #6B7280;" text="🎟️ Places totales" />
-                                    <Label fx:id="totalPlacesLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #3D94CA;" text="0" />
-                                </VBox>
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="2">
-                                    <Label style="-fx-text-fill: #6B7280;" text="📊 Participations" />
-                                    <Label fx:id="totalParticipationsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #81AE8D;" text="0" />
-                                </VBox>
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="3">
-                                    <Label style="-fx-text-fill: #6B7280;" text="📈 Taux remplissage" />
-                                    <Label fx:id="fillRateLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #E8B156;" text="0%" />
-                                </VBox>
-                            </GridPane>
-
-                            <!-- Première ligne de graphiques -->
-                            <HBox spacing="15">
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📈 Évolution des réservations" />
-                                    <LineChart fx:id="evolutionChart" prefHeight="250">
-                                        <xAxis>
-                                            <CategoryAxis label="Date" />
-                                        </xAxis>
-                                        <yAxis>
-                                            <NumberAxis label="Réservations" />
-                                        </yAxis>
-                                    </LineChart>
-                                </VBox>
-
-                                <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" HBox.hgrow="ALWAYS">
-                                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="🥧 Catégories d'événements" />
-                                    <PieChart fx:id="categoriesChart" prefHeight="250" />
-                                </VBox>
-                            </HBox>
-
-                            <!-- Deuxième ligne -->
-                            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;">
-                                <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📊 Top 5 événements (taux de remplissage)" />
-                                <BarChart fx:id="topEventsChart" prefHeight="250">
-                                    <xAxis>
-                                        <CategoryAxis label="Événement" />
-                                    </xAxis>
-                                    <yAxis>
-                                        <NumberAxis label="Taux (%)" upperBound="100" />
-                                    </yAxis>
-                                </BarChart>
-                            </VBox>
-
-                            <!-- Événements populaires -->
-                            <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;">
-                                <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="🔥 Événements populaires" />
-                                <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background-color: transparent;">
-                                    <HBox fx:id="eventsContainer" spacing="15" />
-                                </ScrollPane>
-                            </VBox>
-
-                            <!-- Événements récents -->
-                            <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Événements récents" />
-                            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" prefHeight="200">
-                                <FlowPane fx:id="recentEventsFlow" hgap="15" vgap="15" prefWrapLength="900" />
-                            </ScrollPane>
-
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="0">
+                            <Label style="-fx-text-fill: #6B7280;" text="📅 Total événements" />
+                            <Label fx:id="totalEventsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="0" />
                         </VBox>
-                    </ScrollPane>
-                </Tab>
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="1">
+                            <Label style="-fx-text-fill: #6B7280;" text="🎟️ Places totales" />
+                            <Label fx:id="totalPlacesLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #3D94CA;" text="0" />
+                        </VBox>
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="2">
+                            <Label style="-fx-text-fill: #6B7280;" text="📊 Participations" />
+                            <Label fx:id="totalParticipationsLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #81AE8D;" text="0" />
+                        </VBox>
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 14, 0, 0, 6);" GridPane.columnIndex="3">
+                            <Label style="-fx-text-fill: #6B7280;" text="📈 Taux remplissage" />
+                            <Label fx:id="fillRateLabel" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #E8B156;" text="0%" />
+                        </VBox>
+                    </GridPane>
 
-                <!-- GESTION ÉVÉNEMENTS TAB AVEC NOTIFICATIONS INTÉGRÉES -->
-                <Tab text="Gestion Événements">
-                    <SplitPane dividerPositions="0.7" orientation="HORIZONTAL">
-                        <!-- Partie gauche : événements -->
-                        <VBox spacing="20" style="-fx-padding: 25;">
-                            <HBox spacing="15" alignment="CENTER_LEFT">
-                                <TextField fx:id="adminSearchField" promptText="Rechercher un événement..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
-                                <Button onAction="#handleAdminSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
-                                <ComboBox fx:id="adminSortCombo" promptText="Trier par" style="-fx-background-radius: 20; -fx-pref-width: 150;" />
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button onAction="#openAddEventForm" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Nouvel événement" />
-                            </HBox>
-
-                            <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                                <FlowPane fx:id="adminFlowEvents" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
-                            </ScrollPane>
+                    <!-- Première ligne de graphiques -->
+                    <HBox spacing="15">
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📈 Évolution des réservations" />
+                            <LineChart fx:id="evolutionChart" prefHeight="250">
+                                <xAxis>
+                                    <CategoryAxis label="Date" />
+                                </xAxis>
+                                <yAxis>
+                                    <NumberAxis label="Réservations" />
+                                </yAxis>
+                            </LineChart>
                         </VBox>
 
-                        <!-- Partie droite : NOTIFICATIONS -->
-                        <VBox spacing="15" style="-fx-padding: 25; -fx-background-color: #f9f9f9;">
-                            <HBox alignment="CENTER_LEFT" spacing="10">
-                                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📋 Notifications" />
-                                <Region HBox.hgrow="ALWAYS" />
-                                <Button text="Tout marquer lu" onAction="#markAllNotificationsRead" style="-fx-background-color: transparent; -fx-text-fill: #3D94CA; -fx-cursor: hand;" />
-                            </HBox>
-
-                            <Separator />
-
-                            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
-                                <VBox fx:id="notificationsContainer" spacing="5" />
-                            </ScrollPane>
+                        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;" HBox.hgrow="ALWAYS">
+                            <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="🥧 Catégories d'événements" />
+                            <PieChart fx:id="categoriesChart" prefHeight="250" />
                         </VBox>
-                    </SplitPane>
-                </Tab>
+                    </HBox>
 
-                <!-- PARTICIPATIONS TAB -->
-                <Tab text="Participations">
-                    <VBox spacing="20" style="-fx-padding: 25;">
-                        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Liste des participations" />
+                    <!-- Deuxième ligne -->
+                    <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;">
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📊 Top 5 événements (taux de remplissage)" />
+                        <BarChart fx:id="topEventsChart" prefHeight="250">
+                            <xAxis>
+                                <CategoryAxis label="Événement" />
+                            </xAxis>
+                            <yAxis>
+                                <NumberAxis label="Taux (%)" upperBound="100" />
+                            </yAxis>
+                        </BarChart>
+                    </VBox>
 
-                        <HBox spacing="15" alignment="CENTER_LEFT">
-                            <TextField fx:id="participationSearchField" promptText="Rechercher une participation..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
-                            <Button onAction="#handleParticipationSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
-                        </HBox>
-
-                        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
-                            <FlowPane fx:id="participationsFlow" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
+                    <!-- Événements populaires -->
+                    <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15;">
+                        <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="🔥 Événements populaires" />
+                        <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background-color: transparent;">
+                            <HBox fx:id="eventsContainer" spacing="15" />
                         </ScrollPane>
                     </VBox>
-                </Tab>
-            </TabPane>
-        </VBox>
-    </center>
-</BorderPane>
+
+                    <!-- Événements récents -->
+                    <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Événements récents" />
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" prefHeight="200">
+                        <FlowPane fx:id="recentEventsFlow" hgap="15" vgap="15" prefWrapLength="900" />
+                    </ScrollPane>
+
+                </VBox>
+            </ScrollPane>
+        </Tab>
+
+        <!-- GESTION ÉVÉNEMENTS TAB AVEC NOTIFICATIONS INTÉGRÉES -->
+        <Tab text="Gestion Événements">
+            <SplitPane dividerPositions="0.7" orientation="HORIZONTAL">
+                <!-- Partie gauche : événements -->
+                <VBox spacing="20" style="-fx-padding: 10;">
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <TextField fx:id="adminSearchField" promptText="Rechercher un événement..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
+                        <Button onAction="#handleAdminSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
+                        <ComboBox fx:id="adminSortCombo" promptText="Trier par" style="-fx-background-radius: 20; -fx-pref-width: 150;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#openAddEventForm" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-font-weight: bold; -fx-cursor: hand;" text="+ Nouvel événement" />
+                    </HBox>
+
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                        <FlowPane fx:id="adminFlowEvents" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
+                    </ScrollPane>
+                </VBox>
+
+                <!-- Partie droite : NOTIFICATIONS -->
+                <VBox spacing="15" style="-fx-padding: 10; -fx-background-color: #f9f9f9; -fx-background-radius: 15;">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="📋 Notifications" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button text="Tout marquer lu" onAction="#markAllNotificationsRead" style="-fx-background-color: transparent; -fx-text-fill: #3D94CA; -fx-cursor: hand;" />
+                    </HBox>
+
+                    <Separator />
+
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                        <VBox fx:id="notificationsContainer" spacing="5" />
+                    </ScrollPane>
+                </VBox>
+            </SplitPane>
+        </Tab>
+
+        <!-- PARTICIPATIONS TAB -->
+        <Tab text="Participations">
+            <VBox spacing="20" style="-fx-padding: 10;">
+                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #23779C;" text="Liste des participations" />
+
+                <HBox spacing="15" alignment="CENTER_LEFT">
+                    <TextField fx:id="participationSearchField" promptText="Rechercher une participation..." style="-fx-background-radius: 20; -fx-pref-width: 300; -fx-padding: 10 15;" />
+                    <Button onAction="#handleParticipationSearch" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 10 20; -fx-cursor: hand;" text="Rechercher" />
+                </HBox>
+
+                <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                    <FlowPane fx:id="participationsFlow" hgap="20" vgap="20" prefWrapLength="900" style="-fx-padding: 5;" />
+                </ScrollPane>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>
