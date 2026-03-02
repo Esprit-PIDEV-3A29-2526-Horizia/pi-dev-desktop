@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import tn.esprit.backend.entities.Categorie;
 import tn.esprit.backend.entities.Publication;
 import tn.esprit.backend.services.PublicationService;
+import tn.esprit.backend.utils.ApiClient; // Import du client API gratuit
 import tn.esprit.backend.utils.Session;
 import tn.esprit.frontend.admin.AdminDashboardController;
 import tn.esprit.frontend.user.UserMainController;
@@ -85,8 +86,12 @@ public class AjouterPublicationController implements Initializable {
         annulerBtn.setOnAction(e -> goBack());
         parcourirBtn.setOnAction(e -> choisirImage());
         enregistrerBtn.setOnAction(e -> enregistrer());
-        if (btnGenererIA != null) btnGenererIA.setOnAction(e -> genererDescriptionIA());
-        if (btnTraduire != null) btnTraduire.setOnAction(e -> traduireDescription());
+        if (btnGenererIA != null) {
+            btnGenererIA.setOnAction(e -> genererDescriptionIA());
+        }
+        if (btnTraduire != null) {
+            btnTraduire.setOnAction(e -> traduireDescription());
+        }
     }
 
     private void setupValidation() {
@@ -177,6 +182,7 @@ public class AjouterPublicationController implements Initializable {
             }
         }
 
+        // Ajouter la localisation au début de la description (optionnel)
         if (!villeField.getText().trim().isEmpty() || !paysField.getText().trim().isEmpty()) {
             String location = "";
             if (!villeField.getText().trim().isEmpty()) location += villeField.getText().trim();
@@ -221,27 +227,89 @@ public class AjouterPublicationController implements Initializable {
         }
     }
 
-    // --- Fonctions IA (optionnelles) ---
+    // ===== Fonctionnalités IA (via ApiClient) =====
+
     private void genererDescriptionIA() {
-        // Implémentez votre logique IA ici
-        showAlert("Info", "Fonctionnalité IA à implémenter.");
+        String titre = titreField.getText().trim();
+        String categorie = categorieCombo.getValue();
+
+        if (titre.isEmpty()) {
+            showAlert("Attention", "Veuillez d'abord saisir un titre.");
+            titreField.requestFocus();
+            return;
+        }
+        if (categorie == null || categorie.isEmpty()) {
+            showAlert("Attention", "Veuillez sélectionner une catégorie.");
+            categorieCombo.requestFocus();
+            return;
+        }
+
+        btnGenererIA.setDisable(true);
+        btnGenererIA.setText("⏳ Génération...");
+
+        new Thread(() -> {
+            String description = null;
+            try {
+                description = ApiClient.genererDescriptionIA(titre, categorie);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            final String desc = description;
+            javafx.application.Platform.runLater(() -> {
+                btnGenererIA.setDisable(false);
+                btnGenererIA.setText("🤖 Générer description");
+                if (desc != null && !desc.isEmpty()) {
+                    descriptionArea.setText(desc);
+                    showAlert("Succès", "Description générée !");
+                } else {
+                    showAlert("Erreur", "Échec de la génération.");
+                }
+            });
+        }).start();
     }
 
     private void traduireDescription() {
-        // Implémentez votre logique de traduction ici
-        showAlert("Info", "Fonctionnalité traduction à implémenter.");
+        String texte = descriptionArea.getText().trim();
+        if (texte.isEmpty()) {
+            showAlert("Attention", "Veuillez d'abord saisir une description.");
+            descriptionArea.requestFocus();
+            return;
+        }
+
+        btnTraduire.setDisable(true);
+        btnTraduire.setText("⏳ Traduction...");
+
+        new Thread(() -> {
+            String traduit = null;
+            try {
+                traduit = ApiClient.traduire(texte, "fr", "en");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            final String result = traduit;
+            javafx.application.Platform.runLater(() -> {
+                btnTraduire.setDisable(false);
+                btnTraduire.setText("🌐 Traduire");
+                if (result != null && !result.isEmpty()) {
+                    descriptionArea.setText(result);
+                    showAlert("Succès", "Traduction effectuée.");
+                } else {
+                    showAlert("Erreur", "Échec de la traduction.");
+                }
+            });
+        }).start();
     }
+
+    // ===== Fin IA =====
 
     private void goBack() {
         System.out.println("=== goBack() appelé ===");
         try {
-            // 1. Si on est en mode admin
             if (AdminDashboardController.getInstance() != null) {
                 System.out.println("→ Retour vers admin");
                 AdminDashboardController.getInstance().showPublications();
                 return;
             }
-            // 2. Si on est en mode utilisateur
             if (UserMainController.getInstance() != null) {
                 System.out.println("→ Retour vers user");
                 UserMainController.getInstance().showPublications();
@@ -251,7 +319,6 @@ public class AjouterPublicationController implements Initializable {
             e.printStackTrace();
         }
 
-        // 3. Fallback : chercher le contentPane dans la scène
         try {
             System.out.println("→ Tentative de retour via lookup #contentPane");
             StackPane contentPane = (StackPane) annulerBtn.getScene().lookup("#contentPane");
@@ -267,7 +334,6 @@ public class AjouterPublicationController implements Initializable {
             ex.printStackTrace();
         }
 
-        // 4. Dernier recours : recharger tout le dashboard admin
         try {
             System.out.println("→ Rechargement complet du dashboard admin");
             Parent root = FXMLLoader.load(getClass().getResource("/views/admin/admin_dashboard.fxml"));

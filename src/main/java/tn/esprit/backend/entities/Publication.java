@@ -56,4 +56,3 @@ public class Publication {
         return titre != null && titre.length() > max ? titre.substring(0, max) + "..." : titre;
     }
 }
-

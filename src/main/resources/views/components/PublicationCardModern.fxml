@@ -23,12 +23,12 @@
         <ImageView fx:id="imageView" fitWidth="320" fitHeight="200"
                    preserveRatio="true" style="-fx-background-radius: 16;"/>
 
-        <!-- Category Badge -->
+        <!-- Category Badge (corrigé : suppression du second style) -->
         <Label fx:id="categorieBadge" text="🏖️ Plage"
                style="-fx-background-color: rgba(59, 130, 246, 0.9); -fx-text-fill: white;
                       -fx-padding: 6 14; -fx-background-radius: 20; -fx-font-weight: bold;
                       -fx-font-size: 11;"
-               StackPane.alignment="TOP_LEFT" style="-fx-margin: 12 0 0 12;">
+               StackPane.alignment="TOP_LEFT">
             <StackPane.margin>
                 <Insets top="12" left="12"/>
             </StackPane.margin>
@@ -88,5 +88,4 @@
                            -fx-font-size: 14;"/>
         </HBox>
     </VBox>
-
 </VBox>

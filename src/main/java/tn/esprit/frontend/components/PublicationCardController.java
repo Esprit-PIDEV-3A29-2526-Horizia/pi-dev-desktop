@@ -152,4 +152,15 @@ public class PublicationCardController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+    @FXML
+    private void modifier() {
+        // Logique pour modifier la publication
+        System.out.println("Modifier la publication");
+    }
+
+    @FXML
+    private void supprimer() {
+        // Logique pour supprimer la publication
+        System.out.println("Supprimer la publication");
+    }
 }
