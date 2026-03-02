@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class Dashboardcontroller implements Initializable {
+public class DashboardController implements Initializable {
 
     // ─── Labels statistiques ──────────────────────────────────────
     @FXML private Label lblModeleTopNom;

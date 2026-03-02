@@ -126,6 +126,27 @@
                             <Label fx:id="totalClientsLabel" text="0" style="-fx-text-fill: #10B981; -fx-font-weight: bold;" />
                         </HBox>
                     </VBox>
+                    <!-- Dans la VBox des statistiques, après les clients -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="📰" style="-fx-font-size:16px;" />
+                        <Label text="Publications:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="totalPublicationsLabel" text="0" style="-fx-text-fill: #3b82f6; -fx-font-weight: bold;" />
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="💬" style="-fx-font-size:16px;" />
+                        <Label text="Commentaires:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="totalCommentairesLabel" text="0" style="-fx-text-fill: #f59e0b; -fx-font-weight: bold;" />
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="❤️" style="-fx-font-size:16px;" />
+                        <Label text="Likes:" style="-fx-text-fill: #E5E7EB; -fx-font-size: 12px;" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="totalLikesLabel" text="0" style="-fx-text-fill: #ef4444; -fx-font-weight: bold;" />
+                    </HBox>
 
                     <!-- Espace flexible -->
                     <Region VBox.vgrow="ALWAYS" />

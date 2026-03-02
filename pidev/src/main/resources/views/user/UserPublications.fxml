@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="800" prefWidth="1250" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.frontend.user.UserPublicationsController" stylesheets="@../../style.css">
+
+    <!-- Barre de navigation supérieure (identique à l'accueil) -->
+    <top>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1A3C5A; -fx-padding: 15 40;">
+                <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
+                    <image>
+                        <Image url="@/image/logo.png" />
+                    </image>
+                </ImageView>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <HBox spacing="30" alignment="CENTER">
+                    <Button fx:id="btnAccueil" styleClass="nav-button" text="Accueil" onAction="#retourAccueil" />
+                    <Button fx:id="btnNosLogements" styleClass="nav-button" text="Nos Logements" onAction="#afficherLogements" />
+                    <Button fx:id="btnMesReservations" styleClass="nav-button" text="Mes Réservations" onAction="#voirMesReservations" />
+                    <Button fx:id="btnEvenements"
+                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"
+                            text="Nos Événements"
+                            onAction="#afficherEvenements"/>
+                    <Button fx:id="btnLocation"
+                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"
+                            text="🚗 Location"
+                            onAction="#afficherLocation"/>
+                    <Button fx:id="btnVoyager" styleClass="nav-button" text="Nos Voyages" onAction="#afficherVoyager"/>
+                    <Button fx:id="btnpublication" styleClass="nav-button" text="Mes publications" onAction="#afficherPublications"/>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <HBox fx:id="userBox" spacing="12" alignment="CENTER"
+                      style="-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;"
+                      onMouseEntered="#onUserBoxHover"
+                      onMouseExited="#onUserBoxExit"
+                      onMouseClicked="#showUserProfile">
+                    <Label fx:id="userIconLabel" text="👤" style="-fx-text-fill: white; -fx-font-size: 16;" />
+                    <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                </HBox>
+
+                <Button fx:id="btnLogout" styleClass="logout-button" onAction="#handleLogout">
+                    <graphic>
+                        <Label text="🚪" style="-fx-font-size: 16;"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Se déconnecter" />
+                    </tooltip>
+                </Button>
+            </HBox>
+            <Region prefHeight="4" style="-fx-background-color: #2ECC71;" />
+        </VBox>
+    </top>
+
+    <!-- Contenu principal (mes publications) -->
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="30" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
+
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="📝 Mes publications" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                    <HBox HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnAjouter" text="➕ Nouvelle publication"
+                            style="-fx-background-color: #22c55e; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <!-- Statistiques personnelles -->
+                <HBox spacing="20">
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);" HBox.hgrow="ALWAYS">
+                        <Label text="📊 Total" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="totalLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                    </VBox>
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);" HBox.hgrow="ALWAYS">
+                        <Label text="❤️ Likes" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="likesLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                    </VBox>
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);" HBox.hgrow="ALWAYS">
+                        <Label text="💬 Commentaires" style="-fx-text-fill: #64748b;"/>
+                        <Label fx:id="commentsLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Grille de mes publications -->
+                <FlowPane fx:id="itemsGrid" hgap="20" vgap="20" style="-fx-padding: 10 0;" />
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

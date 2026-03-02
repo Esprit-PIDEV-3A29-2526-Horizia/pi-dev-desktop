@@ -1,7 +1,9 @@
+.idea/
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
 
 models/
 src/main/java/tn/esprit/utils/StripeService.java
@@ -40,8 +42,14 @@ build/
 ### VS Code ###
 .vscode/
 
+
 ### Mac OS ###
 
 .DS_Storep
 .DS_Store
 
+# Windows
+desktop.ini
+### Mac OS ###
+.DS_Store
+openai.api.key=VOTRE_CLE_API_OPENAI_ICI

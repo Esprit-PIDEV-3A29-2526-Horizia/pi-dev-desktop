@@ -45,7 +45,8 @@ public class AccueilController {
     @FXML private VBox contentContainer;
     @FXML private AnchorPane mainContentArea;
     @FXML private Button btnVoirToutes;  // ✅ AJOUTER CETTE LIGNE
-
+    @FXML private Button btnpublication;
+    @FXML private Button btnActualités;
 
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
@@ -278,7 +279,14 @@ public class AccueilController {
     private void allerMesReservations() {
         NavigationManager.loadView("/client/MesReservations.fxml", "Mes Réservations");
     }
-
+    @FXML
+    private void handlepublication() {
+        NavigationManager.loadView("/views/user/UserPublications.fxml", "Mes Réservations");
+    }
+    @FXML
+    private void handleActualités() {
+        NavigationManager.loadView("/views/user/UserAccueilController.fxml", "Mes Réservations");
+    }
     @FXML
     private void allerPlanning() {
         NavigationManager.loadView("/client/Planning.fxml", "Planning");

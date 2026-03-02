@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.frontend.admin.AdminPublicationsController"
+            style="-fx-background-color: #f8fafc;">
+
+    <top>
+        <VBox spacing="20" style="-fx-padding: 25 30 15 30;">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="📰 Gestion des Publications"
+                       style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnAjouter" text="➕ Nouvelle Publication"
+                        style="-fx-background-color: #22c55e; -fx-text-fill: white;
+                               -fx-font-weight: bold; -fx-background-radius: 8;
+                               -fx-padding: 12 25; -fx-cursor: hand;" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;">
+            <FlowPane fx:id="publicationsGrid"
+                      hgap="20" vgap="20"
+                      style="-fx-padding: 20;"/>
+        </ScrollPane>
+    </center>
+</BorderPane>
