@@ -91,3 +91,87 @@
     -fx-font-weight: bold;
     -fx-text-fill: -fx-primary-color;
 }
+
+/* ===== CORRECTION DES BOUTONS ===== */
+
+/* Police pour TOUS les boutons avec émojis */
+#likeButton, #commentairesBtn, #favoriBtn, #modifierBtn, #supprimerBtn {
+    -fx-font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Arial", "sans-serif";
+}
+
+/* Dimensions des boutons d'action (Like, Commentaire, Favori) */
+#likeButton, #commentairesBtn, #favoriBtn {
+    -fx-min-width: 42px;
+    -fx-pref-width: 42px;
+    -fx-max-width: 42px;
+    -fx-min-height: 35px;
+    -fx-pref-height: 35px;
+    -fx-font-size: 16px;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+/* Dimensions des boutons admin (Modifier, Supprimer) */
+#modifierBtn, #supprimerBtn {
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
+    -fx-max-width: 40px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+/* Style spécifique pour Modifier */
+#modifierBtn {
+    -fx-background-color: #f59e0b;
+    -fx-text-fill: white;
+}
+
+#modifierBtn:hover {
+    -fx-background-color: #e67e22;
+}
+
+/* Style spécifique pour Supprimer */
+#supprimerBtn {
+    -fx-background-color: #ef4444;
+    -fx-text-fill: white;
+}
+
+#supprimerBtn:hover {
+    -fx-background-color: #c0392b;
+}
+
+/* Labels */
+#likesLabel {
+    -fx-min-width: 25px;
+    -fx-pref-width: 25px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ef4444;
+}
+
+/* Forcer l'affichage des boutons */
+.button {
+    -fx-min-width: 35px;
+    -fx-min-height: 32px;
+}
+
+/* Effet hover pour les boutons d'action */
+#likeButton:hover, #commentairesBtn:hover {
+    -fx-opacity: 0.7;
+}
+
+/* Favori sur l'image */
+#favoriBtn {
+    -fx-background-color: rgba(0,0,0,0.5);
+    -fx-background-radius: 20;
+    -fx-text-fill: #f59e0b;
+}
+
+#favoriBtn:hover {
+    -fx-background-color: rgba(0,0,0,0.7);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}

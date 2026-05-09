@@ -19,7 +19,6 @@ import tn.esprit.backend.utils.Session;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class AdminDashboardController implements Initializable {
@@ -32,6 +31,7 @@ public class AdminDashboardController implements Initializable {
     @FXML private Button btnReservations;
     @FXML private Button btnLogements;
     @FXML private Button btnPublications;
+    @FXML private Button btnCommentaires;
     @FXML private Button btnUtilisateurs;
     @FXML private Button btnStatistiques;
     @FXML private Button btnChat;
@@ -93,19 +93,21 @@ public class AdminDashboardController implements Initializable {
     @FXML public void showVoyages()   { loadView("/views/admin/admin_voyages.fxml"); }
     @FXML public void showReservations() { loadView("/views/admin/admin_reservations.fxml"); }
     @FXML public void showLogements() { loadView("/views/admin/admin_logements.fxml"); }
-    @FXML public void showPublications() { loadView("/views/admin/GestionPublications.fxml"); }
+    @FXML public void showPublications() {
+        currentView = null;
+        loadView("/views/admin/GestionPublications.fxml");
+    }
+    @FXML public void showCommentaires() { loadView("/views/admin/GestionCommentaires.fxml"); }
     @FXML public void showUtilisateurs() { loadView("/views/admin/admin_utilisateurs.fxml"); }
     @FXML public void showStatistiques() { loadView("/views/admin/admin_statistiques.fxml"); }
     @FXML public void showChat() { loadView("/views/chat/ChatView.fxml"); }
 
-    // ✅ Méthodes pour l'ajout et la modification des publications
     public void openAddPublicationModal() {
         try {
             SelectedItem.clear();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/common/AjouterPublication.fxml"));
             Node form = loader.load();
             contentPane.getChildren().setAll(form);
-            // 🔥 Forcer le rechargement lors du retour en changeant la valeur de currentView
             currentView = "modal";
         } catch (IOException e) {
             e.printStackTrace();

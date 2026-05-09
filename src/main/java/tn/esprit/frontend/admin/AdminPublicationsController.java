@@ -11,6 +11,7 @@ import tn.esprit.backend.entities.Publication;
 import tn.esprit.backend.services.PublicationService;
 import tn.esprit.backend.utils.SelectedItem;
 import tn.esprit.backend.utils.Session;
+import tn.esprit.frontend.common.ModifierPublicationsController;
 import tn.esprit.frontend.components.PublicationCardController;
 
 import java.io.IOException;
@@ -46,9 +47,7 @@ public class AdminPublicationsController implements Initializable {
         sortCombo.getItems().addAll("Plus récents", "Plus anciens", "Plus aimés", "A-Z");
         sortCombo.setValue("Plus récents");
         sortCombo.setOnAction(e -> appliquerFiltres());
-
         searchField.textProperty().addListener((obs, old, val) -> appliquerFiltres());
-
         btnAjouter.setOnAction(e -> ajouterPublication());
 
         btnTous.setOnAction(e -> setFilter(btnTous, Categorie.TOUS));
@@ -59,7 +58,6 @@ public class AdminPublicationsController implements Initializable {
         btnCampagne.setOnAction(e -> setFilter(btnCampagne, Categorie.CAMPAGNE));
 
         chargerDonnees();
-
         activeFilterBtn = btnTous;
         setFilter(btnTous, Categorie.TOUS);
     }
@@ -112,8 +110,7 @@ public class AdminPublicationsController implements Initializable {
         publicationsGrid.getChildren().clear();
         for (Publication p : publications) {
             try {
-                VBox card = createAdminCard(p);
-                publicationsGrid.getChildren().add(card);
+                publicationsGrid.getChildren().add(createAdminCard(p));
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Erreur création carte", e);
             }
@@ -121,15 +118,20 @@ public class AdminPublicationsController implements Initializable {
     }
 
     private VBox createAdminCard(Publication p) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/components/PublicationCard.fxml"));
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/views/components/PublicationCard.fxml")
+        );
         VBox card = loader.load();
 
         PublicationCardController controller = loader.getController();
+
+        // ✅ MODE ADMIN BACKEND AVANT setPublication()
+        controller.setAdminBackendMode();
         controller.setPublication(p);
-        controller.setAdminMode(true);
 
         controller.setOnEditCallback(publication -> {
             SelectedItem.setCurrentPublication(publication);
+            ModifierPublicationsController.setReturnToUser(false);
             AdminDashboardController.getInstance().openEditPublicationModal(publication);
         });
 
@@ -161,20 +163,24 @@ public class AdminPublicationsController implements Initializable {
         AdminDashboardController.getInstance().openAddPublicationModal();
     }
 
-    @FXML public void filtrerTous() { setFilter(btnTous, Categorie.TOUS); }
-    @FXML public void filtrerPlage() { setFilter(btnPlage, Categorie.PLAGE); }
+    @FXML public void filtrerTous()     { setFilter(btnTous,     Categorie.TOUS);     }
+    @FXML public void filtrerPlage()    { setFilter(btnPlage,    Categorie.PLAGE);    }
     @FXML public void filtrerMontagne() { setFilter(btnMontagne, Categorie.MONTAGNE); }
-    @FXML public void filtrerVille() { setFilter(btnVille, Categorie.VILLE); }
-    @FXML public void filtrerDesert() { setFilter(btnDesert, Categorie.DESERT); }
+    @FXML public void filtrerVille()    { setFilter(btnVille,    Categorie.VILLE);    }
+    @FXML public void filtrerDesert()   { setFilter(btnDesert,   Categorie.DESERT);   }
     @FXML public void filtrerCampagne() { setFilter(btnCampagne, Categorie.CAMPAGNE); }
 
     private void setFilter(Button btn, Categorie cat) {
         if (activeFilterBtn != null) {
-            activeFilterBtn.setStyle("-fx-background-color: white; -fx-text-fill: #334155; " +
-                    "-fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-background-radius: 25;");
+            activeFilterBtn.setStyle(
+                    "-fx-background-color: white; -fx-text-fill: #334155; " +
+                            "-fx-border-color: #e2e8f0; -fx-border-radius: 25; -fx-background-radius: 25;"
+            );
         }
-        btn.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; " +
-                "-fx-background-radius: 25; -fx-padding: 8 20;");
+        btn.setStyle(
+                "-fx-background-color: #3b82f6; -fx-text-fill: white; " +
+                        "-fx-background-radius: 25; -fx-padding: 8 20;"
+        );
         activeFilterBtn = btn;
         currentCategorie = cat;
         appliquerFiltres();

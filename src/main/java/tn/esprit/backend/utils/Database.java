@@ -10,7 +10,7 @@ public class Database {
     private Connection cnx;
 
     // ParamÃ¨tres de connexion - MODIFIEZ SELON VOTRE CONFIG
-    private final String URL = "jdbc:mysql://localhost:3306/horizia";
+    private final String URL = "jdbc:mysql://localhost:3306/horozia";
     private final String USER = "root";
     private final String PASSWORD = "";
 

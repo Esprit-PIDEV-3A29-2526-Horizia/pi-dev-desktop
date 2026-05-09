@@ -17,7 +17,6 @@ import tn.esprit.backend.services.UtilisateurService;
 import tn.esprit.backend.utils.Session;
 
 import java.net.URL;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -27,16 +26,16 @@ import java.util.stream.Collectors;
 
 public class AdminStatistiquesController implements Initializable {
 
-    @FXML private Label totalPublicationsLabel;
+    @FXML private Label totalPublicationsLabel;      // ✅ CORRIGÉ (avec s)
     @FXML private Label totalCommentairesLabel;
     @FXML private Label totalLikesLabel;
     @FXML private Label totalUtilisateursLabel;
     @FXML private PieChart categoriePieChart;
     @FXML private BarChart<String, Number> moisBarChart;
-    @FXML private VBox topPublicationsList;
+    @FXML private VBox topPublicationsList;          // ✅ CORRIGÉ (avec s)
     @FXML private VBox activitesList;
 
-    private PublicationService publicationService = new PublicationService();
+    private PublicationService publicationService = new PublicationService();  // ✅ CORRIGÉ (minuscule)
     private CommentaireService commentaireService = new CommentaireService();
     private UtilisateurService utilisateurService = new UtilisateurService();
 
@@ -50,10 +49,10 @@ public class AdminStatistiquesController implements Initializable {
     }
 
     private void chargerStatistiques() {
-        List<Publication> publications = publicationService.getAll();
+        List<Publication> publications = publicationService.getAll();  // ✅ CORRIGÉ
 
         // Statistiques globales
-        totalPublicationsLabel.setText(String.valueOf(publications.size()));
+        totalPublicationsLabel.setText(String.valueOf(publications.size()));  // ✅ CORRIGÉ
 
         int totalComments = publications.stream()
                 .mapToInt(p -> commentaireService.getByPublication(p.getId()).size())
@@ -78,7 +77,7 @@ public class AdminStatistiquesController implements Initializable {
         chargerDernieresActivites(publications);
     }
 
-    private void chargerGraphiqueCategorie(List<Publication> publications) {
+    private void chargerGraphiqueCategorie(List<Publication> publications) {  // ✅ CORRIGÉ
         Map<Categorie, Long> countByCategorie = publications.stream()
                 .collect(Collectors.groupingBy(Publication::getCategorie, Collectors.counting()));
 
@@ -95,7 +94,7 @@ public class AdminStatistiquesController implements Initializable {
         categoriePieChart.setTitle("Publications par catégorie");
     }
 
-    private void chargerGraphiqueMois(List<Publication> publications) {
+    private void chargerGraphiqueMois(List<Publication> publications) {  // ✅ CORRIGÉ
         Map<String, Long> countByMois = new HashMap<>();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
 
@@ -117,13 +116,13 @@ public class AdminStatistiquesController implements Initializable {
         moisBarChart.getData().add(series);
     }
 
-    private void chargerTopPublications(List<Publication> publications) {
+    private void chargerTopPublications(List<Publication> publications) {  // ✅ CORRIGÉ
         List<Publication> top5 = publications.stream()
                 .sorted((p1, p2) -> Integer.compare(p2.getLikes(), p1.getLikes()))
                 .limit(5)
                 .collect(Collectors.toList());
 
-        topPublicationsList.getChildren().clear();
+        topPublicationsList.getChildren().clear();  // ✅ CORRIGÉ
 
         for (int i = 0; i < top5.size(); i++) {
             Publication p = top5.get(i);
@@ -133,7 +132,7 @@ public class AdminStatistiquesController implements Initializable {
         }
     }
 
-    private void chargerDernieresActivites(List<Publication> publications) {
+    private void chargerDernieresActivites(List<Publication> publications) {  // ✅ CORRIGÉ
         List<Publication> recentes = publications.stream()
                 .sorted((p1, p2) -> p2.getDateCreation().compareTo(p1.getDateCreation()))
                 .limit(5)

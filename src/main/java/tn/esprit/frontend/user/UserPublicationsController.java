@@ -12,6 +12,7 @@ import tn.esprit.backend.services.PublicationService;
 import tn.esprit.backend.utils.SelectedItem;
 import tn.esprit.backend.utils.Session;
 import tn.esprit.frontend.components.PublicationCardController;
+import tn.esprit.frontend.common.ModifierPublicationsController;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,13 +34,10 @@ public class UserPublicationsController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         if (!Session.estConnecte()) return;
-
         chargerPublications();
-
-        btnAjouter.setOnAction(e -> {
-            // Charger le formulaire d'ajout dans le contentPane utilisateur
-            UserMainController.getInstance().loadView("/views/common/AjouterPublication.fxml");
-        });
+        btnAjouter.setOnAction(e ->
+                UserMainController.getInstance().loadView("/views/common/AjouterPublication.fxml")
+        );
     }
 
     private void chargerPublications() {
@@ -49,8 +47,11 @@ public class UserPublicationsController implements Initializable {
                 .toList();
 
         totalLabel.setText(String.valueOf(mesPublications.size()));
-        int totalLikes = mesPublications.stream().mapToInt(Publication::getLikes).sum();
+
+        int totalLikes = mesPublications.stream()
+                .mapToInt(Publication::getLikes).sum();
         likesLabel.setText(String.valueOf(totalLikes));
+
         int totalComments = mesPublications.stream()
                 .mapToInt(p -> commentaireService.getByPublication(p.getId()).size())
                 .sum();
@@ -63,7 +64,7 @@ public class UserPublicationsController implements Initializable {
         itemsGrid.getChildren().clear();
         for (Publication p : publications) {
             try {
-                VBox card = createCard(p);
+                VBox card = creerCarte(p);
                 itemsGrid.getChildren().add(card);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -71,47 +72,37 @@ public class UserPublicationsController implements Initializable {
         }
     }
 
-    private VBox createCard(Publication p) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/components/PublicationCard.fxml"));
+    private VBox creerCarte(Publication p) throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/views/components/PublicationCard.fxml")
+        );
         VBox card = loader.load();
 
         PublicationCardController controller = loader.getController();
         controller.setPublication(p);
-        controller.setAdminMode(true); // Mode édition pour ses propres publications
+        controller.setAdminMode(true); // montre les boutons Modifier / Supprimer
 
         controller.setOnEditCallback(publication -> {
             SelectedItem.setCurrentPublication(publication);
-            // Rediriger vers le formulaire de modification (commun)
+            // ✅ Indique au formulaire de retourner à "Mes publications"
+            ModifierPublicationsController.setReturnToUser(true);
             UserMainController.getInstance().loadView("/views/common/ModifierPublication.fxml");
         });
 
         controller.setOnDeleteCallback(publication -> {
-            supprimerPublication(publication);
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setContentText("Supprimer \"" + publication.getTitre() + "\" ?");
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                try {
+                    publicationService.supprimer(publication.getId());
+                    chargerPublications();
+                    new Alert(Alert.AlertType.INFORMATION, "Publication supprimée !").showAndWait();
+                } catch (Exception e) {
+                    new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+                }
+            }
         });
 
         return card;
-    }
-
-    private void supprimerPublication(Publication p) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setContentText("Supprimer \"" + p.getTitre() + "\" ?");
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try {
-                publicationService.supprimer(p.getId());
-                chargerPublications();
-                showAlert("Succès", "Publication supprimée !");
-            } catch (Exception e) {
-                showAlert("Erreur", e.getMessage());
-            }
-        }
-    }
-
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(
-                title.equals("Succès") ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR
-        );
-        alert.setTitle(title);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 }

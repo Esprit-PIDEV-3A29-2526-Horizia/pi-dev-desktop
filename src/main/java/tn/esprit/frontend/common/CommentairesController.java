@@ -49,7 +49,6 @@ public class CommentairesController implements Initializable {
         System.out.println("✅ Publication chargée : " + publication.getTitre() + " (ID " + publication.getId() + ")");
         publicationInfoLabel.setText("Publication: " + publication.getTitre());
 
-        // Si l'utilisateur est connecté, pré-remplir le champ auteur
         if (Session.estConnecte()) {
             System.out.println("👤 Utilisateur connecté : " + Session.getUtilisateur().getNomComplet());
             auteurField.setText(Session.getUtilisateur().getNomComplet());
@@ -58,14 +57,12 @@ public class CommentairesController implements Initializable {
             System.out.println("⚠️ Utilisateur non connecté, le champ auteur est libre.");
         }
 
-        // Initialiser le choix de langue (pour Vosk on utilise le français par défaut)
         langueCombo.getItems().addAll("Français", "English", "العربية");
         langueCombo.setValue("Français");
 
         ajouterBtn.setOnAction(e -> ajouterCommentaire());
         retourBtn.setOnAction(e -> retour());
 
-        // Bouton de reconnaissance vocale avec Vosk
         voiceInputBtn.setOnAction(e -> {
             voiceInputBtn.setDisable(true);
             voiceInputBtn.setText("🔴 Enregistrement (5s)... parlez !");
@@ -211,6 +208,7 @@ public class CommentairesController implements Initializable {
         if (UserMainController.getInstance() != null) {
             UserMainController.getInstance().loadView("/views/user/UserExplorer.fxml");
         } else if (AdminDashboardController.getInstance() != null) {
+            // ✅ CORRIGÉ : GestionPublications.fxml au lieu de Gestionpublication.fxml
             AdminDashboardController.getInstance().loadView("/views/admin/GestionPublications.fxml");
         }
     }

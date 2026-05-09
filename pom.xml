@@ -17,7 +17,6 @@
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
 
-    <!-- Repository pour Vosk -->
     <repositories>
         <repository>
             <id>alphacephei</id>
@@ -98,7 +97,7 @@
             <version>4.5.14</version>
         </dependency>
 
-        <!-- ORMLite pour SQLite -->
+        <!-- ORMLite -->
         <dependency>
             <groupId>com.j256.ormlite</groupId>
             <artifactId>ormlite-jdbc</artifactId>
@@ -110,19 +109,32 @@
             <version>3.44.1.0</version>
         </dependency>
 
-        <!-- Jackson pour JSON -->
+        <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
         </dependency>
 
-        <!-- Vosk pour reconnaissance vocale hors ligne -->
+        <!-- Vosk -->
         <dependency>
             <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
             <version>0.3.45</version>
         </dependency>
+
+        <!-- ✅ IKONLI — icones FontAwesome pour JavaFX -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -136,7 +148,6 @@
         </resources>
 
         <plugins>
-            <!-- Plugin JavaFX -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -146,7 +157,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

@@ -32,7 +32,7 @@ public class UserMainController implements Initializable {
     @FXML private Button btnProfil;
     @FXML private Button btnModeAdmin;
     @FXML private Button btnDeconnexion;
-    @FXML private Button btnChat;   // important
+    @FXML private Button btnChat;
 
     private static UserMainController instance;
 
@@ -56,7 +56,7 @@ public class UserMainController implements Initializable {
         btnProfil.setOnAction(e -> showProfil());
         btnModeAdmin.setOnAction(e -> switchToAdmin());
         btnDeconnexion.setOnAction(e -> deconnecter());
-        btnChat.setOnAction(e -> showChat());  // action du chat
+        btnChat.setOnAction(e -> showChat());
         searchBtn.setOnAction(e -> rechercher());
         searchField.setOnAction(e -> rechercher());
 

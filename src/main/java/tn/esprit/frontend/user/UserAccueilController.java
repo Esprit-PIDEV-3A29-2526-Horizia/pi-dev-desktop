@@ -22,13 +22,13 @@ public class UserAccueilController implements Initializable {
     @FXML private Button searchBtn;
     @FXML private FlowPane itemsGrid;
 
-    private PublicationService publicationService = new PublicationService();
-    private List<Publication> allPublications;
+    private PublicationService PublicationService = new PublicationService();
+    private List<Publication> allpublication;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        allPublications = publicationService.getAll();
-        afficherPublications(allPublications);
+        allpublication = PublicationService.getAll();
+        afficherpublication(allpublication);
 
         searchField.textProperty().addListener((obs, old, val) -> filtrer());
         searchBtn.setOnAction(e -> filtrer());
@@ -37,19 +37,19 @@ public class UserAccueilController implements Initializable {
     private void filtrer() {
         String recherche = searchField.getText().toLowerCase().trim();
         if (recherche.isEmpty()) {
-            afficherPublications(allPublications);
+            afficherpublication(allpublication);
             return;
         }
-        List<Publication> filtrees = allPublications.stream()
+        List<Publication> filtrees = allpublication.stream()
                 .filter(p -> p.getTitre().toLowerCase().contains(recherche) ||
                         p.getDescription().toLowerCase().contains(recherche))
                 .collect(Collectors.toList());
-        afficherPublications(filtrees);
+        afficherpublication(filtrees);
     }
 
-    private void afficherPublications(List<Publication> publications) {
+    private void afficherpublication(List<Publication> publication) {
         itemsGrid.getChildren().clear();
-        for (Publication p : publications) {
+        for (Publication p : publication) {
             VBox card = createCard(p);
             itemsGrid.getChildren().add(card);
         }

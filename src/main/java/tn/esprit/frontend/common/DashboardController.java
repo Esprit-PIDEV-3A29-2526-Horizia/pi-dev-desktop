@@ -41,8 +41,8 @@ public class DashboardController implements Initializable {
     }
 
     @FXML
-    public void showPublications() {
-        loadView("/views/common/Publications.fxml");
+    public void showpublication() {
+        loadView("/views/common/publication.fxml");
     }
 
     @FXML
@@ -79,11 +79,11 @@ public class DashboardController implements Initializable {
         }
     }
 
-    public void refreshPublications() {
+    public void refreshpublication() {
         if (currentController instanceof PublicationsController) {
             ((PublicationsController) currentController).refresh();
         } else {
-            showPublications();
+            showpublication();
         }
     }
 

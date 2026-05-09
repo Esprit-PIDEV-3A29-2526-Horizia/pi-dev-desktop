@@ -30,10 +30,10 @@ public class AdminDashboardStyleController implements Initializable {
     @FXML private Button searchBtn;
     @FXML private Button btnTous, btnPlage, btnMontagne, btnVille;
 
-    private PublicationService publicationService = new PublicationService();
+    private PublicationService PublicationService = new PublicationService();
     private UtilisateurService utilisateurService = new UtilisateurService();
     private CommentaireService commentaireService = new CommentaireService();
-    private List<Publication> allPublications;
+    private List<Publication> allpublication;
     private Categorie currentCategorie = Categorie.TOUS;
     private Button activeFilterBtn;
 
@@ -45,12 +45,12 @@ public class AdminDashboardStyleController implements Initializable {
         }
 
         // Charger les données
-        allPublications = publicationService.getAll();
+        allpublication = PublicationService.getAll();
 
         // Statistiques
-        totalPubsLabel.setText(String.valueOf(allPublications.size()));
+        totalPubsLabel.setText(String.valueOf(allpublication.size()));
         totalUsersLabel.setText(String.valueOf(utilisateurService.getAll().size()));
-        int totalComments = allPublications.stream()
+        int totalComments = allpublication.stream()
                 .mapToInt(p -> commentaireService.getByPublication(p.getId()).size())
                 .sum();
         totalCommentsLabel.setText(String.valueOf(totalComments));
@@ -75,9 +75,9 @@ public class AdminDashboardStyleController implements Initializable {
     }
 
     private void appliquerFiltres() {
-        if (allPublications == null) return;
+        if (allpublication == null) return;
 
-        List<Publication> filtered = allPublications;
+        List<Publication> filtered = allpublication;
 
         // Filtre catégorie
         if (currentCategorie != Categorie.TOUS) {
@@ -113,12 +113,12 @@ public class AdminDashboardStyleController implements Initializable {
             }
         }
 
-        afficherPublications(filtered);
+        afficherpublication(filtered);
     }
 
-    private void afficherPublications(List<Publication> publications) {
+    private void afficherpublication(List<Publication> publication) {
         itemsGrid.getChildren().clear();
-        for (Publication p : publications) {
+        for (Publication p : publication) {
             VBox card = createCard(p);
             itemsGrid.getChildren().add(card);
         }

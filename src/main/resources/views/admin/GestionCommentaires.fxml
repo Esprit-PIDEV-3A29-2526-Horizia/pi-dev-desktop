@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20" style="-fx-background-color: #f8fafc; -fx-padding: 30;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.frontend.admin.AdminCommentairesController">
+
+    <Label text="💬 Gestion des Commentaires"
+           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher par contenu ou auteur..."
+                   HBox.hgrow="ALWAYS"
+                   style="-fx-padding: 12; -fx-background-radius: 10; -fx-border-color: #e2e8f0; -fx-border-radius: 10;"/>
+        <Button fx:id="searchBtn" text="Rechercher"
+                style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 12 25; -fx-cursor: hand;"/>
+        <Button fx:id="refreshBtn" text="⟳ Actualiser"
+                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 12 25; -fx-cursor: hand;"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <FlowPane fx:id="commentairesContainer" hgap="15" vgap="15"
+                  style="-fx-padding: 10;"/>
+    </ScrollPane>
+
+</VBox>

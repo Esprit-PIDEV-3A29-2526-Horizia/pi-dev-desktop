@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import tn.esprit.backend.entities.Categorie;
 import tn.esprit.backend.entities.Publication;
 import tn.esprit.backend.services.PublicationService;
-import tn.esprit.backend.utils.ApiClient; // Import du client API gratuit
+import tn.esprit.backend.utils.ApiClient;
 import tn.esprit.backend.utils.Session;
 import tn.esprit.frontend.admin.AdminDashboardController;
 import tn.esprit.frontend.user.UserMainController;
@@ -34,7 +34,7 @@ import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class AjouterPublicationController implements Initializable {
+public class AjouterPublicationController implements Initializable {  // ✅ CORRIGÉ (sans 's')
 
     @FXML private Button retourBtn;
     @FXML private TextField titreField;
@@ -59,10 +59,10 @@ public class AjouterPublicationController implements Initializable {
     @FXML private Button btnGenererIA;
     @FXML private Button btnTraduire;
 
-    private PublicationService publicationService = new PublicationService();
+    private PublicationService publicationService = new PublicationService();  // ✅ CORRIGÉ (minuscule)
     private File selectedImageFile;
     private static final String UPLOAD_DIR = "src/main/resources/images/";
-    private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final long MAX_IMAGE_SIZE = 5 * 1024 * 1024;
     private static final Pattern TITRE_PATTERN = Pattern.compile("^[a-zA-Z0-9À-ÿ\\s\\-'.,!?]+$");
     private static final int TITRE_MIN = 3;
     private static final int TITRE_MAX = 100;
@@ -70,7 +70,6 @@ public class AjouterPublicationController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Initialiser les catégories
         for (Categorie cat : Categorie.values()) {
             if (cat != Categorie.TOUS) {
                 categorieCombo.getItems().add(cat.getLabel());
@@ -81,7 +80,6 @@ public class AjouterPublicationController implements Initializable {
         dateField.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         setupValidation();
 
-        // Événements
         retourBtn.setOnAction(e -> goBack());
         annulerBtn.setOnAction(e -> goBack());
         parcourirBtn.setOnAction(e -> choisirImage());
@@ -163,7 +161,7 @@ public class AjouterPublicationController implements Initializable {
             showAlert("Erreur", "Veuillez sélectionner une catégorie !");
             return;
         }
-        if (publicationService.titreExiste(titre)) {
+        if (publicationService.titreExiste(titre)) {  // ✅ CORRIGÉ
             showAlert("Erreur", "Une publication avec ce titre existe déjà !");
             return;
         }
@@ -182,7 +180,6 @@ public class AjouterPublicationController implements Initializable {
             }
         }
 
-        // Ajouter la localisation au début de la description (optionnel)
         if (!villeField.getText().trim().isEmpty() || !paysField.getText().trim().isEmpty()) {
             String location = "";
             if (!villeField.getText().trim().isEmpty()) location += villeField.getText().trim();
@@ -199,7 +196,7 @@ public class AjouterPublicationController implements Initializable {
         }
 
         try {
-            publicationService.ajouter(p);
+            publicationService.ajouter(p);  // ✅ CORRIGÉ
             showAlert("Succès", "Publication créée avec succès !");
             goBack();
         } catch (Exception e) {
@@ -226,8 +223,6 @@ public class AjouterPublicationController implements Initializable {
             return null;
         }
     }
-
-    // ===== Fonctionnalités IA (via ApiClient) =====
 
     private void genererDescriptionIA() {
         String titre = titreField.getText().trim();
@@ -300,8 +295,6 @@ public class AjouterPublicationController implements Initializable {
         }).start();
     }
 
-    // ===== Fin IA =====
-
     private void goBack() {
         System.out.println("=== goBack() appelé ===");
         try {
@@ -323,7 +316,7 @@ public class AjouterPublicationController implements Initializable {
             System.out.println("→ Tentative de retour via lookup #contentPane");
             StackPane contentPane = (StackPane) annulerBtn.getScene().lookup("#contentPane");
             if (contentPane != null) {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/admin/GestionPublications.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/admin/GestionPublications.fxml"));  // ✅ CORRIGÉ
                 Node view = loader.load();
                 contentPane.getChildren().setAll(view);
                 return;

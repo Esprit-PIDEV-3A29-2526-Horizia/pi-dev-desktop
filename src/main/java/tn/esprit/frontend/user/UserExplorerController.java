@@ -1,6 +1,7 @@
 package tn.esprit.frontend.user;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -9,7 +10,9 @@ import tn.esprit.backend.entities.Categorie;
 import tn.esprit.backend.entities.Publication;
 import tn.esprit.backend.services.PublicationService;
 import tn.esprit.backend.utils.Session;
+import tn.esprit.frontend.components.PublicationCardController;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -35,7 +38,6 @@ public class UserExplorerController implements Initializable {
         sortCombo.setValue("Plus récents");
         sortCombo.setOnAction(e -> appliquerFiltres());
 
-        // Écoute du champ de recherche et du bouton
         searchField.textProperty().addListener((obs, old, val) -> appliquerFiltres());
         searchBtn.setOnAction(e -> appliquerFiltres());
 
@@ -54,14 +56,12 @@ public class UserExplorerController implements Initializable {
         if (allPublications == null) return;
         List<Publication> filtered = allPublications;
 
-        // Filtre catégorie
         if (currentCategorie != Categorie.TOUS) {
             filtered = filtered.stream()
                     .filter(p -> p.getCategorie() == currentCategorie)
                     .collect(Collectors.toList());
         }
 
-        // Filtre recherche
         String search = searchField.getText().toLowerCase().trim();
         if (!search.isEmpty()) {
             filtered = filtered.stream()
@@ -71,7 +71,6 @@ public class UserExplorerController implements Initializable {
                     .collect(Collectors.toList());
         }
 
-        // Tri
         String sortType = sortCombo.getValue();
         if (sortType != null) {
             switch (sortType) {
@@ -95,31 +94,24 @@ public class UserExplorerController implements Initializable {
     private void afficherPublications(List<Publication> publications) {
         itemsGrid.getChildren().clear();
         for (Publication p : publications) {
-            VBox card = createCard(p);
-            itemsGrid.getChildren().add(card);
+            try {
+                VBox card = createCard(p);
+                itemsGrid.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private VBox createCard(Publication p) {
-        VBox card = new VBox(10);
-        card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 15; " +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2); -fx-border-color: #e2e8f0; -fx-border-radius: 15;");
-        card.setPrefWidth(280);
+    // ✅ Utilisation de PublicationCard.fxml avec adminMode=false
+    private VBox createCard(Publication p) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/components/PublicationCard.fxml"));
+        VBox card = loader.load();
 
-        Label title = new Label(p.getTitre());
-        title.setStyle("-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
-        title.setWrapText(true);
+        PublicationCardController controller = loader.getController();
+        controller.setPublication(p);
+        controller.setAdminMode(false);  // Cache Modifier et Supprimer
 
-        Label category = new Label(p.getCategorie().getLabel());
-        category.setStyle("-fx-text-fill: #3b82f6; -fx-font-size: 14;");
-
-        Label author = new Label("Par " + (p.getAuteur() != null ? p.getAuteur() : "Anonyme"));
-        author.setStyle("-fx-text-fill: #64748b; -fx-font-size: 13;");
-
-        Label likes = new Label("♥ " + p.getLikes());
-        likes.setStyle("-fx-text-fill: #ef4444;");
-
-        card.getChildren().addAll(title, category, author, likes);
         return card;
     }
 

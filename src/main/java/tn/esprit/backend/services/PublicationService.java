@@ -20,7 +20,7 @@ public class PublicationService {
     }
 
     public void ajouter(Publication p) throws SQLException {
-        String sql = "INSERT INTO publications (titre, description, image, categorie, utilisateur_id, auteur, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO publication (titre, description, image, categorie, utilisateur_id, auteur, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pst.setString(1, p.getTitre());
@@ -43,7 +43,7 @@ public class PublicationService {
 
     public List<Publication> getAll() {
         List<Publication> list = new ArrayList<>();
-        String sql = "SELECT * FROM publications ORDER BY date_creation DESC";
+        String sql = "SELECT * FROM publication ORDER BY date_creation DESC";
 
         try (Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -58,7 +58,7 @@ public class PublicationService {
     }
 
     public Publication getById(int id) {
-        String sql = "SELECT * FROM publications WHERE id = ?";
+        String sql = "SELECT * FROM publication WHERE id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
@@ -72,7 +72,7 @@ public class PublicationService {
     }
 
     public void modifier(Publication p) throws SQLException {
-        String sql = "UPDATE publications SET titre=?, description=?, image=?, categorie=? WHERE id=?";
+        String sql = "UPDATE publication SET titre=?, description=?, image=?, categorie=? WHERE id=?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, p.getTitre());
             pst.setString(2, p.getDescription());
@@ -85,7 +85,7 @@ public class PublicationService {
     }
 
     public void supprimer(int id) throws SQLException {
-        String sql = "DELETE FROM publications WHERE id = ?";
+        String sql = "DELETE FROM publication WHERE id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, id);
             pst.executeUpdate();
@@ -94,7 +94,7 @@ public class PublicationService {
     }
 
     public void incrementerLikes(int id) {
-        String sql = "UPDATE publications SET likes = likes + 1 WHERE id = ?";
+        String sql = "UPDATE publication SET likes = likes + 1 WHERE id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, id);
             pst.executeUpdate();
@@ -108,7 +108,7 @@ public class PublicationService {
     }
 
     public boolean titreExiste(String titre, int excludeId) {
-        String sql = "SELECT COUNT(*) FROM publications WHERE titre = ? AND id != ?";
+        String sql = "SELECT COUNT(*) FROM publication WHERE titre = ? AND id != ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, titre);
             pst.setInt(2, excludeId);
@@ -120,6 +120,36 @@ public class PublicationService {
         return false;
     }
 
+    public List<Publication> getByUtilisateur(int utilisateurId) {
+        List<Publication> list = new ArrayList<>();
+        String sql = "SELECT * FROM publication WHERE utilisateur_id = ? ORDER BY date_creation DESC";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, utilisateurId);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSet(rs));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "❌ Erreur getByUtilisateur", e);
+        }
+        return list;
+    }
+
+    public List<Publication> getByCategorie(Categorie categorie) {
+        List<Publication> list = new ArrayList<>();
+        String sql = "SELECT * FROM publication WHERE categorie = ? ORDER BY date_creation DESC";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, categorie.name());
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                list.add(mapResultSet(rs));
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "❌ Erreur getByCategorie", e);
+        }
+        return list;
+    }
+
     // Méthode publique pour mapper un ResultSet vers Publication
     public Publication mapResultSet(ResultSet rs) throws SQLException {
         Publication p = new Publication();
@@ -128,7 +158,8 @@ public class PublicationService {
         p.setDescription(rs.getString("description"));
         p.setImage(rs.getString("image"));
         String catStr = rs.getString("categorie");
-        p.setCategorie(catStr != null ? Categorie.valueOf(catStr) : Categorie.TOUS);
+        // ✅ CORRIGÉ : Utilise fromString() au lieu de valueOf()
+        p.setCategorie(Categorie.fromString(catStr));
         p.setUtilisateurId(rs.getInt("utilisateur_id"));
         p.setAuteur(rs.getString("auteur"));
         p.setLikes(rs.getInt("likes"));

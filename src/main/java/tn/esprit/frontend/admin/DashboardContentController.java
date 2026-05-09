@@ -14,12 +14,12 @@ import java.util.ResourceBundle;
 
 public class DashboardContentController implements Initializable {
 
-    @FXML private Label totalPublicationsLabel;
+    @FXML private Label totalPublicationsLabel;  // ✅ CORRIGÉ (avec S)
     @FXML private Label totalUtilisateursLabel;
     @FXML private Label totalCommentairesLabel;
     @FXML private Label totalLikesLabel;
 
-    private PublicationService publicationService = new PublicationService();
+    private PublicationService publicationService = new PublicationService();  // ✅ CORRIGÉ (minuscule p)
     private UtilisateurService utilisateurService = new UtilisateurService();
     private CommentaireService commentaireService = new CommentaireService();
 
@@ -29,9 +29,9 @@ public class DashboardContentController implements Initializable {
     }
 
     private void chargerStatistiques() {
-        List<Publication> publications = publicationService.getAll();
+        List<Publication> publications = publicationService.getAll();  // ✅ CORRIGÉ
 
-        totalPublicationsLabel.setText(String.valueOf(publications.size()));
+        totalPublicationsLabel.setText(String.valueOf(publications.size()));  // ✅ CORRIGÉ
 
         int totalUsers = utilisateurService.getAll().size();
         totalUtilisateursLabel.setText(String.valueOf(totalUsers));

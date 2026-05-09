@@ -25,15 +25,35 @@ public class CommentaireCardController {
         this.commentaire = commentaire;
         auteurLabel.setText(commentaire.getAuteur());
         contenuLabel.setText(commentaire.getContenu());
-        dateLabel.setText(commentaire.getDateCreation().toString());
+
+        // Formater la date pour éviter les problèmes d'affichage
+        if (commentaire.getDateCreation() != null) {
+            dateLabel.setText(commentaire.getDateCreation().toLocalDate().toString());
+        } else {
+            dateLabel.setText("");
+        }
     }
 
     public void setParentController(CommentairesController controller) {
         this.parentController = controller;
         boolean peutAgir = Session.estConnecte() &&
                 (Session.getUtilisateur().getId() == commentaire.getUtilisateurId() || Session.estAdmin());
+
         modifierBtn.setVisible(peutAgir);
+        modifierBtn.setManaged(peutAgir);
         supprimerBtn.setVisible(peutAgir);
+        supprimerBtn.setManaged(peutAgir);
+
+        // ✅ Ajouter des largeurs minimales pour éviter les "..."
+        if (modifierBtn != null) {
+            modifierBtn.setMinWidth(70);
+            modifierBtn.setPrefWidth(70);
+        }
+        if (supprimerBtn != null) {
+            supprimerBtn.setMinWidth(70);
+            supprimerBtn.setPrefWidth(70);
+        }
+
         modifierBtn.setOnAction(e -> parentController.modifierCommentaire(commentaire));
         supprimerBtn.setOnAction(e -> parentController.supprimerCommentaire(commentaire));
     }
