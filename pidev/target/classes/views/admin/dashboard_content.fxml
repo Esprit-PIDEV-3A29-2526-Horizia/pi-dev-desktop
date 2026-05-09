@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f5f7fa;"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.frontend.admin.DashboardContentController"
+      stylesheets="@/css/dashboard.css">
+
+    <!-- Titre -->
+    <Label text="Dashboard" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+
+    <!-- Cartes de statistiques -->
+    <GridPane hgap="20" vgap="20">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="25" />
+            <ColumnConstraints percentWidth="25" />
+            <ColumnConstraints percentWidth="25" />
+            <ColumnConstraints percentWidth="25" />
+        </columnConstraints>
+
+        <!-- Carte Publications -->
+        <VBox styleClass="stat-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label text="📰" styleClass="stat-icon"/>
+            <Label text="Publications" styleClass="stat-label"/>
+            <Label fx:id="totalPublicationsLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Carte Utilisateurs -->
+        <VBox styleClass="stat-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <Label text="👥" styleClass="stat-icon"/>
+            <Label text="Utilisateurs" styleClass="stat-label"/>
+            <Label fx:id="totalUtilisateursLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Carte Commentaires -->
+        <VBox styleClass="stat-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+            <Label text="💬" styleClass="stat-icon"/>
+            <Label text="Commentaires" styleClass="stat-label"/>
+            <Label fx:id="totalCommentairesLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Carte Likes -->
+        <VBox styleClass="stat-card" GridPane.columnIndex="3" GridPane.rowIndex="0">
+            <Label text="❤️" styleClass="stat-icon"/>
+            <Label text="Likes" styleClass="stat-label"/>
+            <Label fx:id="totalLikesLabel" text="0" styleClass="stat-value"/>
+        </VBox>
+    </GridPane>
+
+    <!-- Petit conseil -->
+    <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+        <Label text="💡" style="-fx-font-size: 20px;"/>
+        <Label text="Utilisez le menu de gauche pour naviguer entre les sections." style="-fx-text-fill: #64748b;"/>
+    </HBox>
+</VBox>
