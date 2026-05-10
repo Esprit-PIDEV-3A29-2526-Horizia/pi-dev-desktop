@@ -19,6 +19,9 @@ import tn.esprit.entites.Voyage;
 import tn.esprit.services.VoyageService;
 import tn.esprit.utils.Config;
 import tn.esprit.entities.User;
+import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
+
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
@@ -29,28 +32,20 @@ import java.util.stream.Collectors;
 
 public class CatalogueUserController implements Initializable {
 
+    @FXML private NavbarController navbarController;
     @FXML private GridPane voyageGrid;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> comboTri;
-
     @FXML private Button btnTous;
     @FXML private Button btnTunisie;
     @FXML private Button btnEurope;
     @FXML private Button btnPromos;
+
     private User currentUser;
-    @FXML
-    private Button btnUser;
-    @FXML
-    private Button btnLogout;
-
-
-    @FXML private AnchorPane rootPane; // On va ajouter ce champ
-
     private final VoyageService vs = new VoyageService();
     private List<Voyage> listeOriginale = new ArrayList<>();
     private static final int NB_COLONNES = 3;
 
-    // NOUVEAU : Chatbot
     private ChatbotController chatbotController;
 
     private enum Filtre { TOUS, TUNISIE, EUROPE, PROMOS }
@@ -64,8 +59,18 @@ public class CatalogueUserController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        currentUser = SessionManager.getCurrentUser();
+
+        System.out.println("🔍 CatalogueUserController - Utilisateur: " +
+                (currentUser != null ? currentUser.getEmail() : "null"));
+
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+        }
+
         listeOriginale = vs.afficher();
         if (listeOriginale == null) listeOriginale = new ArrayList<>();
+
         if (comboTri != null) {
             comboTri.getItems().setAll(
                     "Prix : Croissant",
@@ -77,11 +82,14 @@ public class CatalogueUserController implements Initializable {
             comboTri.setValue("Prix : Croissant");
             comboTri.setOnAction(e -> appliquerTout());
         }
+
         if (searchField != null) {
             searchField.textProperty().addListener((obs, o, n) -> appliquerTout());
         }
+
         setChipActive(btnTous);
         appliquerTout();
+
         javafx.application.Platform.runLater(() -> {
             initialiserChatbot();
         });
@@ -107,6 +115,7 @@ public class CatalogueUserController implements Initializable {
             e.printStackTrace();
         }
     }
+
     private void attendreSceneEtAjouterChatbot() {
         Timer timer = new Timer(true);
         timer.schedule(new TimerTask() {
@@ -128,9 +137,8 @@ public class CatalogueUserController implements Initializable {
         }, 0, 500);
     }
 
-
     @FXML private void filtrerTous()   { filtreActif = Filtre.TOUS;   setChipActive(btnTous);   appliquerTout(); }
-    @FXML private void filtrerTunisie(){ filtreActif = Filtre.TUNISIE;setChipActive(btnTunisie);appliquerTout(); }
+    @FXML private void filtrerTunisie(){ filtreActif = Filtre.TUNISIE; setChipActive(btnTunisie); appliquerTout(); }
     @FXML private void filtrerEurope() { filtreActif = Filtre.EUROPE; setChipActive(btnEurope); appliquerTout(); }
     @FXML private void filtrerPromos() { filtreActif = Filtre.PROMOS; setChipActive(btnPromos); appliquerTout(); }
 
@@ -167,131 +175,17 @@ public class CatalogueUserController implements Initializable {
         String titre = safeLower(v.getTitre());
         return switch (filtreActif) {
             case TOUS -> true;
-
-            case TUNISIE -> containsAny(dest,
-                    "tunis", "sfax", "sousse", "kairouan", "bizerte", "gabès", "ariana",
+            case TUNISIE -> containsAny(dest, "tunis", "sfax", "sousse", "kairouan", "bizerte", "gabès", "ariana",
                     "gafsa", "kasserine", "médnine", "ben arous", "monastir", "mahdia",
                     "hammamet", "nabeul", "djerba", "tozeur", "douz", "tabarka", "ain draham",
-                    "sidi bou said", "carthage", "la marsa", "gammarth", "el jem", "dougga",
-                    "korbous", "kelibia", "haouaria", "rafraf", "zarzis", "midoun", "ajim",
-                    "kerkennah", "karkannah", "port el kantaoui", "yasmine hammamet",
-                    "nefta", "degache", "chott el jerid", "kebili", "tataouine", "beja",
-                    "jendouba", "siliana", "zaghouan", "seliana"
-            )
-                    || containsAny(titre, "tunisie", "tunisia", "djerba", "hammamet", "sousse",
-                    "tozeur", "monastir", "bizerte", "tabarka", "nabeul", "carthage");
-
-            case EUROPE -> containsAny(dest,
-                    // FRANCE
-                    "paris", "lyon", "marseille", "toulouse", "nice", "strasbourg", "bordeaux",
-                    "cannes", "antibes", "saint-tropez", "avignon", "biarritz", "carcassonne",
-                    "annecy", "corse", "ajaccio", "bastia",
-
-                    // ESPAGNE
-                    "madrid", "barcelone", "valence", "séville", "malaga", "majorque", "ibiza",
-                    "tenerife", "lanzarote", "costa brava", "costa del sol",
-
-                    // ITALIE
-                    "rome", "milan", "venise", "florence", "naples", "turin", "pise", "sienne",
-                    "pompei", "sorrente", "amalfi", "cinque terre", "sicile", "sardaigne",
-
-                    // ROYAUME-UNI
-                    "londres", "london", "manchester", "liverpool", "edimbourg", "glasgow",
-                    "cambridge", "oxford", "bath", "belfast",
-
-                    // ALLEMAGNE
-                    "berlin", "hambourg", "munich", "cologne", "francfort", "stuttgart",
-                    "dresde", "heidelberg", "fribourg",
-
-                    // PORTUGAL
-                    "lisbonne", "porto", "faro", "madeira", "madère", "albufeira", "sintra",
-
-                    // PAYS-BAS
-                    "amsterdam", "rotterdam", "la haye", "maastricht", "delft", "giethoorn",
-
-                    // BELGIQUE
-                    "bruxelles", "anvers", "gand", "bruges", "liège", "namur", "waterloo",
-
-                    // SUISSE
-                    "zurich", "genève", "bâle", "berne", "lausanne", "interlaken", "zermatt",
-                    "lugano", "lucerne", "montreux","suisse",
-
-                    // AUTRICHE
-                    "vienne", "salzbourg", "innsbruck", "graz", "hallstatt", "zell am see",
-
-                    // GRÈCE
-                    "athènes", "thessalonique", "crète", "chania", "mykonos", "santorin",
-                    "rhodes", "corfou", "paros", "naxos", "zakynthos", "olympia", "delphes","gréce",
-
-                    // CROATIE
-                    "zagreb", "split", "dubrovnik", "zadar", "pula", "hvar", "korcula",
-                    "rovinj", "porec",
-
-                    // RÉP. TCHÈQUE
-                    "prague", "brno", "cesky krumlov", "karlovy vary",
-
-                    // HONGRIE
-                    "budapest", "debrecen", "pecs", "eger", "balaton", "siofok", "szentendre",
-
-                    // POLOGNE
-                    "varsovie", "cracovie", "wroclaw", "gdansk", "zakopane", "auschwitz",
-
-                    // SUÈDE
-                    "stockholm", "gothenburg", "malmö", "uppsala", "kiruna", "gotland",
-
-                    // DANEMARK
-                    "copenhague", "aarhus", "odense", "roskilde", "bornholm",
-
-                    // FINLANDE
-                    "helsinki", "tampere", "turku", "rovaniemi", "laponie",
-
-                    // NORVÈGE
-                    "oslo", "bergen", "stavanger", "tromsø", "lofoten", "geiranger", "fjord",
-
-                    // IRLANDE
-                    "dublin", "cork", "galway", "killarney", "falaises de moher",
-
-                    // ISLANDE
-                    "reykjavik", "blue lagoon", "geysir", "gullfoss", "jökulsárlón",
-
-                    // MALTE
-                    "malte", "valletta", "gozo", "mdina", "blue lagoon malta",
-
-                    // AUTRES PAYS
-                    "luxembourg", "monaco", "monte-carlo", "andorre", "vaduz", "saint-marin",
-                    "san marino", "liechtenstein", "lituanie", "lettonie", "estonie",
-                    "slovaquie", "slovénie", "bulgarie", "roumanie", "serbie", "croatie",
-                    "bosnie", "monténégro", "albanie", "macédoine", "kosovo"
-            )
-                    || titre.contains("europe") || titre.contains("europ")
-                    || titre.contains("europe") || titre.contains("europ");
-
+                    "sidi bou said", "carthage", "la marsa", "gammarth", "el jem", "dougga")
+                    || containsAny(titre, "tunisie", "tunisia", "djerba", "hammamet", "sousse");
+            case EUROPE -> containsAny(dest, "paris", "lyon", "marseille", "nice", "londres", "rome", "milan",
+                    "venise", "barcelone", "madrid", "berlin", "munich", "amsterdam", "bruxelles",
+                    "vienne", "prague", "budapest", "athènes", "lisbonne", "porto", "stockholm",
+                    "copenhague", "oslo", "helsinki", "dublin", "reykjavik", "europe");
             case PROMOS -> v.getPrix() <= 2000;
         };
-    }
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-        System.out.println("✅ Utilisateur reçu dans CatalogueUser: " + user.getEmail());
-    }
-
-    // 🔴 AJOUTE CETTE MÉTHODE
-    private void updateUserInfo() {
-        try {
-            if (currentUser != null) {
-                // Chercher le bouton utilisateur dans la scène
-                String nomComplet = (currentUser.getPrenom() != null ? currentUser.getPrenom() + " " : "")
-                        + (currentUser.getNom() != null ? currentUser.getNom() : "");
-
-                // Mettre à jour le bouton "Utilisateur" si possible
-                // Pour l'instant, on affiche juste dans la console
-                System.out.println("✅ Utilisateur connecté dans CatalogueUser: " + currentUser.getEmail());
-
-                // Optionnel : tu pourrais chercher le bouton utilisateur par son ID
-                // et modifier son texte
-            }
-        } catch (Exception e) {
-            System.err.println("❌ Erreur updateUserInfo: " + e.getMessage());
-        }
     }
 
     private boolean containsAny(String text, String... keys) {
@@ -359,87 +253,24 @@ public class CatalogueUserController implements Initializable {
     }
 
     @FXML
-    private void afficherHistorique(ActionEvent event) {
-        // Arrêter proprement le chatbot avant de changer de scène
-        if (chatbotController != null) {
-            // Si vous avez une méthode pour nettoyer, appelez-la ici
-        }
-        changerScene(event, "/fxml/MesReservations.fxml", "Mes Réservations");
-    }
-
-    @FXML
-    private void handleDeconnexion(ActionEvent event) {
-        executor.shutdownNow();
-        changerScene(event, "/Login.fxml", "Connexion");
-    }
-
-    private void changerScene(ActionEvent event, String fxmlPath, String title) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle(title);
-            stage.centerOnScreen();
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    @FXML
     private void handleLogout() {
         try {
-            // Nettoyer les ressources
             if (executor != null) {
                 executor.shutdownNow();
             }
-
-            // Charger la page de login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-            Parent root = loader.load();
-
-            // Obtenir la fenêtre actuelle
-            Stage stage = (Stage) voyageGrid.getScene().getWindow();
-
-            // Changer la scène
-            stage.setScene(new Scene(root));
-            stage.setTitle("Connexion - Système de Réservation");
-            stage.centerOnScreen();
-            stage.show();
-
+            NavigationManager.showLogin();
             System.out.println("✅ Déconnexion réussie");
-
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.err.println("❌ Erreur lors de la déconnexion: " + e.getMessage());
         }
     }
-    @FXML
-    private Button btnAccueil;
 
-    @FXML
-    private void handleAccueil() {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/accueil.fxml"));
-            Stage stage = (Stage) btnAccueil.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Accueil");
-            stage.centerOnScreen();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
         }
-    }
-    @FXML
-    private void handleRetour() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
-            Parent accueilView = loader.load();
-
-            // Récupérer le BorderPane parent
-            BorderPane parentBorderPane = (BorderPane) voyageGrid.getScene().getRoot();
-            parentBorderPane.setCenter(accueilView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("✅ Utilisateur reçu dans CatalogueUser: " + user.getEmail());
     }
 }

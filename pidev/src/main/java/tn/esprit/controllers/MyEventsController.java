@@ -14,9 +14,12 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
+import tn.esprit.entities.User;
 import tn.esprit.services.QRCodeService;
 import tn.esprit.services.ServiceEvent;
 import tn.esprit.services.ServiceParticipation;
+import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -27,46 +30,45 @@ import java.util.ResourceBundle;
 
 public class MyEventsController implements Initializable {
 
+    @FXML private NavbarController navbarController;
     @FXML private FlowPane myEventsFlow;
-    @FXML private Button homeBtn;
-    @FXML private Button eventsBtn;
-    @FXML private Button myEventsBtn;
 
     private ServiceEvent serviceEvent;
     private ServiceParticipation serviceParticipation;
     private List<Participation> allParticipations;
     private List<Events> allEvents;
+    private User currentUser;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         serviceEvent = new ServiceEvent();
         serviceParticipation = new ServiceParticipation();
 
-        setupNavigation();
-        loadData();
-    }
+        currentUser = SessionManager.getCurrentUser();
 
-    private void setupNavigation() {
-        homeBtn.setOnAction(e -> navigateTo("/UserHome.fxml", "EventHub - Accueil"));
-        eventsBtn.setOnAction(e -> navigateTo("/UserHome.fxml", "EventHub - Accueil"));
-    }
-
-    private void navigateTo(String fxml, String title) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
-            Parent root = loader.load();
-            Stage stage = (Stage) homeBtn.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
-            stage.setTitle(title);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+            navbarController.setActiveReservations();
         }
+
+        System.out.println("🔍 MyEventsController - Utilisateur: " +
+                (currentUser != null ? currentUser.getEmail() : "null"));
+
+        loadData();
     }
 
     private void loadData() {
         try {
             allEvents = serviceEvent.afficher();
-            allParticipations = serviceParticipation.afficher();
+
+            // Filtrer les participations par user_id
+            if (currentUser != null) {
+                allParticipations = serviceParticipation.getParticipationsByUserId(currentUser.getId());
+            } else {
+                allParticipations = serviceParticipation.afficher();
+            }
+
+            System.out.println("📋 Nombre de participations pour l'utilisateur: " + allParticipations.size());
             displayMyEvents();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,8 +78,8 @@ public class MyEventsController implements Initializable {
     private void displayMyEvents() {
         myEventsFlow.getChildren().clear();
 
-        if (allParticipations.isEmpty()) {
-            Label noEvents = new Label("Vous n'avez aucune réservation");
+        if (allParticipations == null || allParticipations.isEmpty()) {
+            Label noEvents = new Label("Vous n'avez aucune réservation d'événement");
             noEvents.setStyle("-fx-font-size: 18px; -fx-text-fill: #666; -fx-padding: 50;");
             myEventsFlow.getChildren().add(noEvents);
             return;
@@ -92,6 +94,7 @@ public class MyEventsController implements Initializable {
     }
 
     private Events findEventById(int id) {
+        if (allEvents == null) return null;
         for (Events e : allEvents) {
             if (e.getId_event() == id) {
                 return e;
@@ -117,19 +120,32 @@ public class MyEventsController implements Initializable {
         category.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #23779C; " +
                 "-fx-background-radius: 12; -fx-padding: 3 10; -fx-font-size: 12px;");
 
-        Label places = new Label("📋 " + participation.getNombrePlaces() + " place(s) réservée(s)");
+        Label places = new Label("📋 " + participation.getNombre_places() + " place(s) réservée(s)");
         places.setStyle("-fx-text-fill: #666;");
 
-        Label total = new Label(String.format("💰 %.0f DT", participation.getMontantTotal()));
+        Label total = new Label(String.format("💰 %.0f DT", participation.getMontant_total()));
         total.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 20px; -fx-font-weight: bold;");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Label date = new Label("📅 Réservé le " + sdf.format(participation.getDateParticipation()));
+        Label date = new Label("📅 Réservé le " + sdf.format(participation.getDate_participation()));
         date.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
 
         Label status = new Label(participation.getStatut());
         status.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; " +
                 "-fx-padding: 5 15; -fx-background-radius: 15; -fx-font-size: 12px;");
+
+        // Afficher les informations snapshot si disponibles
+        VBox snapshotBox = new VBox(5);
+        snapshotBox.setVisible(false);
+        snapshotBox.setManaged(false);
+
+        if (participation.getNom_snapshot() != null && !participation.getNom_snapshot().isEmpty()) {
+            Label snapshotInfo = new Label("👤 Réservé par: " + participation.getPrenom_snapshot() + " " + participation.getNom_snapshot());
+            snapshotInfo.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
+            snapshotBox.getChildren().add(snapshotInfo);
+            snapshotBox.setVisible(true);
+            snapshotBox.setManaged(true);
+        }
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
@@ -164,7 +180,7 @@ public class MyEventsController implements Initializable {
         viewBtn.setMaxWidth(Double.MAX_VALUE);
         viewBtn.setOnAction(e -> navigateToEventDetails(event));
 
-        card.getChildren().addAll(title, category, places, total, date, status, buttonBox, viewBtn);
+        card.getChildren().addAll(title, category, places, total, date, status, snapshotBox, buttonBox, viewBtn);
         return card;
     }
 
@@ -188,7 +204,7 @@ public class MyEventsController implements Initializable {
             info.setStyle("-fx-text-fill: #666; -fx-font-size: 12px;");
 
             Label reservationInfo = new Label(String.format("Réservation #%d - %d place(s)",
-                    participation.getId_participation(), participation.getNombrePlaces()));
+                    participation.getId_participation(), participation.getNombre_places()));
             reservationInfo.setStyle("-fx-text-fill: #23779C; -fx-font-weight: bold; -fx-font-size: 14px;");
 
             content.getChildren().addAll(reservationInfo, qrView, info);
@@ -214,11 +230,11 @@ public class MyEventsController implements Initializable {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        int maxPlaces = event.getPlacesRestantes() + participation.getNombrePlaces();
-        Spinner<Integer> placesSpinner = new Spinner<>(1, maxPlaces, participation.getNombrePlaces());
+        int maxPlaces = event.getPlacesRestantes() + participation.getNombre_places();
+        Spinner<Integer> placesSpinner = new Spinner<>(1, maxPlaces, participation.getNombre_places());
         placesSpinner.setEditable(true);
 
-        Label totalLabel = new Label(String.format("%.0f DT", participation.getNombrePlaces() * event.getPrix()));
+        Label totalLabel = new Label(String.format("%.0f DT", participation.getNombre_places() * event.getPrix()));
 
         placesSpinner.valueProperty().addListener((obs, old, val) -> {
             totalLabel.setText(String.format("%.0f DT", val * event.getPrix()));
@@ -234,12 +250,12 @@ public class MyEventsController implements Initializable {
         dialog.showAndWait().ifPresent(response -> {
             if (response == saveButtonType) {
                 try {
-                    int oldPlaces = participation.getNombrePlaces();
+                    int oldPlaces = participation.getNombre_places();
                     int newPlaces = placesSpinner.getValue();
 
                     if (newPlaces != oldPlaces) {
-                        participation.setNombrePlaces(newPlaces);
-                        participation.setMontantTotal((float) (newPlaces * event.getPrix()));
+                        participation.setNombre_places(newPlaces);
+                        participation.setMontant_total(newPlaces * event.getPrix());
 
                         int placesDiff = oldPlaces - newPlaces;
                         int newEventPlaces = event.getPlacesRestantes() + placesDiff;
@@ -268,7 +284,7 @@ public class MyEventsController implements Initializable {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                int newPlaces = event.getPlacesRestantes() + participation.getNombrePlaces();
+                int newPlaces = event.getPlacesRestantes() + participation.getNombre_places();
                 serviceEvent.updatePlaces(event.getId_event(), newPlaces);
 
                 serviceParticipation.supprimer(participation.getId_participation());
@@ -291,9 +307,13 @@ public class MyEventsController implements Initializable {
 
             EventDetailsController controller = loader.getController();
             controller.setEvent(event);
+            if (currentUser != null) {
+                controller.setCurrentUser(currentUser);
+            }
 
             Stage stage = (Stage) myEventsFlow.getScene().getWindow();
-            stage.setScene(new Scene(root, 1200, 700));
+            Scene scene = new Scene(root, 1200, 700);
+            stage.setScene(scene);
             stage.setTitle("Détails de l'événement");
 
         } catch (Exception e) {

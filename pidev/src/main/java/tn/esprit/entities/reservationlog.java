@@ -9,21 +9,18 @@ public class reservationlog {
     private Date date_debut;
     private Date date_fin;
     private float montant;
-    private Status status;  // Changed from Enum to Status
+    private Status status;
     private String modalite;
     private Date dateLimitePaiement;
     private String trackingId;
+    private int adultes;
+    private int enfants;
+    private int nombreChambres;
+    private String modeReservation;
+    private String repartitionChambres;
+    private Date createdAt;
 
-    public String getTrackingId() {
-        return trackingId;
-    }
-
-    public void setTrackingId(String trackingId) {
-        this.trackingId = trackingId;
-    }
-    public Date getDateLimitePaiement() { return dateLimitePaiement; }
-    public void setDateLimitePaiement(Date dateLimitePaiement) { this.dateLimitePaiement = dateLimitePaiement; }
-    // Constructor
+    // Constructeur complet
     public reservationlog(int id_l, int idc, Date date_debut, Date date_fin, float montant, Status status, String modalite) {
         this.id_l = id_l;
         this.idc = idc;
@@ -34,11 +31,11 @@ public class reservationlog {
         this.modalite = modalite;
     }
 
-    // Default constructor
+    // Constructeur par défaut
     public reservationlog() {
     }
 
-    // Getters and setters
+    // Getters et Setters
     public int getId() {
         return id;
     }
@@ -87,11 +84,11 @@ public class reservationlog {
         this.montant = montant;
     }
 
-    public Status getStatus() {  // Changed return type to Status
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {  // Changed parameter type to Status
+    public void setStatus(Status status) {
         this.status = status;
     }
 
@@ -101,6 +98,70 @@ public class reservationlog {
 
     public void setModalite(String modalite) {
         this.modalite = modalite;
+    }
+
+    public Date getDateLimitePaiement() {
+        return dateLimitePaiement;
+    }
+
+    public void setDateLimitePaiement(Date dateLimitePaiement) {
+        this.dateLimitePaiement = dateLimitePaiement;
+    }
+
+    public String getTrackingId() {
+        return trackingId;
+    }
+
+    public void setTrackingId(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public int getAdultes() {
+        return adultes;
+    }
+
+    public void setAdultes(int adultes) {
+        this.adultes = adultes;
+    }
+
+    public int getEnfants() {
+        return enfants;
+    }
+
+    public void setEnfants(int enfants) {
+        this.enfants = enfants;
+    }
+
+    public int getNombreChambres() {
+        return nombreChambres;
+    }
+
+    public void setNombreChambres(int nombreChambres) {
+        this.nombreChambres = nombreChambres;
+    }
+
+    public String getModeReservation() {
+        return modeReservation;
+    }
+
+    public void setModeReservation(String modeReservation) {
+        this.modeReservation = modeReservation;
+    }
+
+    public String getRepartitionChambres() {
+        return repartitionChambres;
+    }
+
+    public void setRepartitionChambres(String repartitionChambres) {
+        this.repartitionChambres = repartitionChambres;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Override
@@ -114,6 +175,14 @@ public class reservationlog {
                 ", montant=" + montant +
                 ", status=" + status +
                 ", modalite='" + modalite + '\'' +
+                ", adultes=" + adultes +
+                ", enfants=" + enfants +
+                ", nombreChambres=" + nombreChambres +
+                ", modeReservation='" + modeReservation + '\'' +
+                ", repartitionChambres='" + repartitionChambres + '\'' +
+                ", dateLimitePaiement=" + dateLimitePaiement +
+                ", trackingId='" + trackingId + '\'' +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

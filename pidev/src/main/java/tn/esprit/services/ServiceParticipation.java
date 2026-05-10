@@ -17,31 +17,33 @@ public class ServiceParticipation implements IService<Participation> {
 
     @Override
     public void ajouter(Participation p) throws SQLException {
-        String sql = "INSERT INTO `participation`(`id_event`, `nombre_places`, `montant_total`, `statut`, `date_participation`) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `participation`(`id_event`, `user_id`, `nombre_places`, `montant_total`, `statut`, `date_participation`, `email_snapshot`, `nom_snapshot`, `prenom_snapshot`, `telephone_snapshot`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         ps.setInt(1, p.getId_event());
-        ps.setInt(2, p.getNombrePlaces());
-        ps.setFloat(3, p.getMontantTotal());
-        ps.setString(4, p.getStatut());
-        ps.setTimestamp(5, p.getDateParticipation());
+        ps.setInt(2, p.getUser_id());
+        ps.setInt(3, p.getNombre_places());
+        ps.setDouble(4, p.getMontant_total());
+        ps.setString(5, p.getStatut());
+        ps.setTimestamp(6, p.getDate_participation());
+        ps.setString(7, p.getEmail_snapshot());
+        ps.setString(8, p.getNom_snapshot());
+        ps.setString(9, p.getPrenom_snapshot());
+        ps.setString(10, p.getTelephone_snapshot());
 
         ps.executeUpdate();
 
-        // Récupérer l'ID généré
         ResultSet rs = ps.getGeneratedKeys();
         if (rs.next()) {
             p.setId_participation(rs.getInt(1));
         }
 
         System.out.println("✅ Participation ajoutée avec succès!");
-
         RefreshService.refreshAll();
 
-        // Notification avec l'ID de l'événement concerné
         NotificationService.getInstance().addNotification(
                 "Nouvelle réservation",
-                p.getNombrePlaces() + " place(s) réservée(s) pour l'événement #" + p.getId_event(),
+                p.getNombre_places() + " place(s) réservée(s) pour l'événement #" + p.getId_event(),
                 NotificationService.NotificationType.SUCCESS,
                 p.getId_event(),
                 "event"
@@ -50,13 +52,17 @@ public class ServiceParticipation implements IService<Participation> {
 
     @Override
     public void modifier(Participation p) throws SQLException {
-        String sql = "UPDATE `participation` SET `nombre_places`=?, `montant_total`=?, `statut`=? WHERE id_participation=?";
+        String sql = "UPDATE `participation` SET `nombre_places`=?, `montant_total`=?, `statut`=?, `email_snapshot`=?, `nom_snapshot`=?, `prenom_snapshot`=?, `telephone_snapshot`=? WHERE id_participation=?";
 
         PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setInt(1, p.getNombrePlaces());
-        ps.setDouble(2, p.getMontantTotal());
+        ps.setInt(1, p.getNombre_places());
+        ps.setDouble(2, p.getMontant_total());
         ps.setString(3, p.getStatut());
-        ps.setInt(4, p.getId_participation());
+        ps.setString(4, p.getEmail_snapshot());
+        ps.setString(5, p.getNom_snapshot());
+        ps.setString(6, p.getPrenom_snapshot());
+        ps.setString(7, p.getTelephone_snapshot());
+        ps.setInt(8, p.getId_participation());
 
         ps.executeUpdate();
 
@@ -73,7 +79,6 @@ public class ServiceParticipation implements IService<Participation> {
 
     @Override
     public void supprimer(int id) throws SQLException {
-        // Récupérer l'ID de l'événement avant de supprimer
         int eventId = -1;
         String selectSql = "SELECT id_event FROM participation WHERE id_participation = ?";
         PreparedStatement selectPs = connection.prepareStatement(selectSql);
@@ -99,11 +104,6 @@ public class ServiceParticipation implements IService<Participation> {
         );
     }
 
-
-    public void updatePlaces(int id_event, int Places_Restantes) throws SQLException {
-        // This method is for events, not participations
-    }
-
     @Override
     public List<Participation> afficher() throws SQLException {
         List<Participation> participations = new ArrayList<>();
@@ -115,41 +115,75 @@ public class ServiceParticipation implements IService<Participation> {
             Participation p = new Participation();
             p.setId_participation(rs.getInt("id_participation"));
             p.setId_event(rs.getInt("id_event"));
-            p.setNombrePlaces(rs.getInt("nombre_places"));
-            p.setMontantTotal(rs.getFloat("montant_total"));
+            p.setUser_id(rs.getInt("user_id"));
+            p.setNombre_places(rs.getInt("nombre_places"));
+            p.setMontant_total(rs.getDouble("montant_total"));
             p.setStatut(rs.getString("statut"));
-            p.setDateParticipation(rs.getTimestamp("date_participation"));
+            p.setDate_participation(rs.getTimestamp("date_participation"));
+            p.setEmail_snapshot(rs.getString("email_snapshot"));
+            p.setNom_snapshot(rs.getString("nom_snapshot"));
+            p.setPrenom_snapshot(rs.getString("prenom_snapshot"));
+            p.setTelephone_snapshot(rs.getString("telephone_snapshot"));
             participations.add(p);
         }
         return participations;
     }
 
-
-    public List<Participation> rechercher(String keyword) throws SQLException {
+    public List<Participation> getParticipationsByUserId(int userId) throws SQLException {
         List<Participation> participations = new ArrayList<>();
-        String sql = "SELECT * FROM participation WHERE statut LIKE ? OR id_event LIKE ?";
+        String sql = "SELECT * FROM participation WHERE user_id = ?";
         PreparedStatement ps = connection.prepareStatement(sql);
-        ps.setString(1, "%" + keyword + "%");
-        ps.setString(2, "%" + keyword + "%");
+        ps.setInt(1, userId);
         ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             Participation p = new Participation();
             p.setId_participation(rs.getInt("id_participation"));
             p.setId_event(rs.getInt("id_event"));
-            p.setNombrePlaces(rs.getInt("nombre_places"));
-            p.setMontantTotal(rs.getFloat("montant_total"));
+            p.setUser_id(rs.getInt("user_id"));
+            p.setNombre_places(rs.getInt("nombre_places"));
+            p.setMontant_total(rs.getDouble("montant_total"));
             p.setStatut(rs.getString("statut"));
-            p.setDateParticipation(rs.getTimestamp("date_participation"));
+            p.setDate_participation(rs.getTimestamp("date_participation"));
+            p.setEmail_snapshot(rs.getString("email_snapshot"));
+            p.setNom_snapshot(rs.getString("nom_snapshot"));
+            p.setPrenom_snapshot(rs.getString("prenom_snapshot"));
+            p.setTelephone_snapshot(rs.getString("telephone_snapshot"));
             participations.add(p);
         }
         return participations;
     }
 
+    public List<Participation> rechercher(String keyword) throws SQLException {
+        List<Participation> participations = new ArrayList<>();
+        String sql = "SELECT * FROM participation WHERE statut LIKE ? OR id_event LIKE ? OR email_snapshot LIKE ?";
+        PreparedStatement ps = connection.prepareStatement(sql);
+        ps.setString(1, "%" + keyword + "%");
+        ps.setString(2, "%" + keyword + "%");
+        ps.setString(3, "%" + keyword + "%");
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            Participation p = new Participation();
+            p.setId_participation(rs.getInt("id_participation"));
+            p.setId_event(rs.getInt("id_event"));
+            p.setUser_id(rs.getInt("user_id"));
+            p.setNombre_places(rs.getInt("nombre_places"));
+            p.setMontant_total(rs.getDouble("montant_total"));
+            p.setStatut(rs.getString("statut"));
+            p.setDate_participation(rs.getTimestamp("date_participation"));
+            p.setEmail_snapshot(rs.getString("email_snapshot"));
+            p.setNom_snapshot(rs.getString("nom_snapshot"));
+            p.setPrenom_snapshot(rs.getString("prenom_snapshot"));
+            p.setTelephone_snapshot(rs.getString("telephone_snapshot"));
+            participations.add(p);
+        }
+        return participations;
+    }
 
     public List<Participation> trier(String column, String order) throws SQLException {
         List<Participation> participations = new ArrayList<>();
-        List<String> allowedColumns = List.of("id_participation","id_event","nombre_places","montant_total","statut","date_participation");
+        List<String> allowedColumns = List.of("id_participation", "id_event", "user_id", "nombre_places", "montant_total", "statut", "date_participation");
         if (!allowedColumns.contains(column)) column = "id_participation";
         if (!order.equalsIgnoreCase("ASC") && !order.equalsIgnoreCase("DESC")) order = "ASC";
 
@@ -161,10 +195,15 @@ public class ServiceParticipation implements IService<Participation> {
             Participation p = new Participation();
             p.setId_participation(rs.getInt("id_participation"));
             p.setId_event(rs.getInt("id_event"));
-            p.setNombrePlaces(rs.getInt("nombre_places"));
-            p.setMontantTotal(rs.getFloat("montant_total"));
+            p.setUser_id(rs.getInt("user_id"));
+            p.setNombre_places(rs.getInt("nombre_places"));
+            p.setMontant_total(rs.getDouble("montant_total"));
             p.setStatut(rs.getString("statut"));
-            p.setDateParticipation(rs.getTimestamp("date_participation"));
+            p.setDate_participation(rs.getTimestamp("date_participation"));
+            p.setEmail_snapshot(rs.getString("email_snapshot"));
+            p.setNom_snapshot(rs.getString("nom_snapshot"));
+            p.setPrenom_snapshot(rs.getString("prenom_snapshot"));
+            p.setTelephone_snapshot(rs.getString("telephone_snapshot"));
             participations.add(p);
         }
         return participations;

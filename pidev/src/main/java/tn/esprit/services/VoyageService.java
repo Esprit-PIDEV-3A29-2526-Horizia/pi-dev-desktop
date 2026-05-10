@@ -11,9 +11,11 @@ import java.util.List;
 public class VoyageService implements IService<Voyage> {
 
     private final Connection cnx;
+
     public VoyageService() {
         cnx = MyDataBase.getInstance().getMyConnection();
     }
+
     @Override
     public void ajouter(Voyage v) {
         String sql = "INSERT INTO voyage (titre, destination, description, prix, date_depart, date_retour, image_url, id_categorie, places_total, places_restantes) " +
@@ -35,6 +37,7 @@ public class VoyageService implements IService<Voyage> {
             System.err.println("Erreur lors de l'ajout voyage : " + e.getMessage());
         }
     }
+
     @Override
     public void modifier(Voyage v) {
         String sql = "UPDATE voyage SET titre=?, destination=?, description=?, prix=?, date_depart=?, date_retour=?, image_url=?, id_categorie=?, places_total=?, places_restantes=? " +
@@ -57,10 +60,10 @@ public class VoyageService implements IService<Voyage> {
             System.err.println("Erreur lors de la modification voyage : " + e.getMessage());
         }
     }
+
     @Override
     public void supprimer(int id) {
         String sql = "DELETE FROM voyage WHERE id=?";
-
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -69,6 +72,7 @@ public class VoyageService implements IService<Voyage> {
             System.err.println("Erreur lors de la suppression voyage : " + e.getMessage());
         }
     }
+
     @Override
     public List<Voyage> afficher() {
         List<Voyage> voyages = new ArrayList<>();
@@ -83,6 +87,7 @@ public class VoyageService implements IService<Voyage> {
         }
         return voyages;
     }
+
     public Voyage getById(int id) {
         String sql = "SELECT * FROM voyage WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -98,47 +103,96 @@ public class VoyageService implements IService<Voyage> {
         return null;
     }
 
+    // NOUVELLE MÉTHODE : Mettre à jour les places restantes
+    public boolean mettreAJourPlaces(int voyageId, int nouvellesPlaces) {
+        String sql = "UPDATE voyage SET places_restantes = ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, nouvellesPlaces);
+            ps.setInt(2, voyageId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Erreur mise à jour places : " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Méthode pour décrémenter les places
+    public boolean decrementerPlaces(int voyageId, int nombre) {
+        String sql = "UPDATE voyage SET places_restantes = places_restantes - ? WHERE id = ? AND places_restantes >= ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, nombre);
+            ps.setInt(2, voyageId);
+            ps.setInt(3, nombre);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Erreur décrémentation places : " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Méthode pour incrémenter les places (annulation)
+    public boolean incrementerPlaces(int voyageId, int nombre) {
+        String sql = "UPDATE voyage SET places_restantes = places_restantes + ? WHERE id = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, nombre);
+            ps.setInt(2, voyageId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Erreur incrémentation places : " + e.getMessage());
+            return false;
+        }
+    }
+
     public List<Voyage> rechercherStream(String keyword) {
         String k = (keyword == null) ? "" : keyword.trim().toLowerCase();
         return afficher().stream()
                 .filter(v -> containsIgnoreCase(v.getTitre(), k) || containsIgnoreCase(v.getDestination(), k))
                 .toList();
     }
+
     public List<Voyage> trierParPrixAscStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingDouble(Voyage::getPrix))
                 .toList();
     }
+
     public List<Voyage> trierParPrixDescStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingDouble(Voyage::getPrix).reversed())
                 .toList();
     }
+
     public List<Voyage> trierParDestinationAZStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparing(v -> safeStr(v.getDestination()).toLowerCase()))
                 .toList();
     }
+
     public List<Voyage> trierParPlacesRestantesDescStream(List<Voyage> base) {
         return safeList(base).stream()
                 .sorted(Comparator.comparingInt(Voyage::getPlaces_restantes).reversed())
                 .toList();
     }
+
     public List<Voyage> filtrerParCategorieStream(List<Voyage> base, int idCategorie) {
         return safeList(base).stream()
                 .filter(v -> v.getId_categorie() == idCategorie)
                 .toList();
     }
+
     private boolean containsIgnoreCase(String text, String keywordLower) {
         if (keywordLower == null || keywordLower.isBlank()) return true;
         return safeStr(text).toLowerCase().contains(keywordLower);
     }
+
     private String safeStr(String s) {
         return (s == null) ? "" : s;
     }
+
     private List<Voyage> safeList(List<Voyage> list) {
         return (list == null) ? List.of() : list;
     }
+
     private Voyage mapperVoyage(ResultSet rs) throws SQLException {
         Voyage v = new Voyage();
         v.setId(rs.getInt("id"));

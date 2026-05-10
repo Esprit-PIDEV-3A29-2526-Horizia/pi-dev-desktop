@@ -18,10 +18,7 @@ import tn.esprit.entities.Status;
 import tn.esprit.entities.User;
 import tn.esprit.services.Servicereservationlog;
 import tn.esprit.services.Servicelogement;
-import tn.esprit.utils.EmailService;
-import tn.esprit.utils.NavigationManager;
-import tn.esprit.utils.SessionManager;
-import tn.esprit.utils.QRCodeGenerator;
+import tn.esprit.utils.*;
 
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -32,28 +29,15 @@ import java.util.stream.Collectors;
 
 public class MesReservationsController {
 
-    @FXML
-    private TextField searchField;
-    @FXML
-    private ComboBox<Status> filterStatusCombo;
-    @FXML
-    private Button btnRechercher;
-    @FXML
-    private Button btnReset;
-    @FXML
-    private FlowPane flowReservations;
-    @FXML
-    private Label emptyMessage;
-    @FXML
-    private HBox userBox;
-    @FXML
-    private Label userNameLabel;
-    @FXML
-    private Button btnAccueil;
-    @FXML
-    private Button btnNosLogements;
-    @FXML
-    private Button btnMesReservationsNav;
+    // Navbar partagée (injectée automatiquement)
+    @FXML private NavbarController navbarController;
+
+    @FXML private TextField searchField;
+    @FXML private ComboBox<Status> filterStatusCombo;
+    @FXML private Button btnRechercher;
+    @FXML private Button btnReset;
+    @FXML private FlowPane flowReservations;
+    @FXML private Label emptyMessage;
 
     private Servicereservationlog serviceReservation = new Servicereservationlog();
     private Servicelogement serviceLogement = new Servicelogement();
@@ -63,60 +47,47 @@ public class MesReservationsController {
     @FXML
     public void initialize() {
         currentUser = SessionManager.getCurrentUser();
-        setupNavigationAndUser();
+
+        // Mettre à jour la navbar
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+            // Mettre "Mes Réservations" comme actif dans la navbar
+            navbarController.setActiveReservations();
+        }
+
+        // Configuration du filtre
         filterStatusCombo.getItems().addAll(Status.values());
         filterStatusCombo.setPromptText("Tous les statuts");
+
+        // Chargement des réservations
         chargerReservations();
+
+        // Écouteurs
         btnRechercher.setOnAction(e -> filtrerReservations());
         btnReset.setOnAction(e -> resetFiltres());
         searchField.textProperty().addListener((obs, oldVal, newVal) -> filtrerReservations());
         filterStatusCombo.valueProperty().addListener((obs, oldVal, newVal) -> filtrerReservations());
+
         System.out.println("MesReservationsController initialisé pour l'utilisateur: " +
                 (currentUser != null ? currentUser.getEmail() : "non connecté"));
-    }
-
-    private void setupNavigationAndUser() {
-        if (btnMesReservationsNav != null) {
-            btnMesReservationsNav.getStyleClass().add("nav-button-active");
-        }
-        if (btnNosLogements != null) {
-            btnNosLogements.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
-        }
-        if (btnAccueil != null) {
-            btnAccueil.setOnAction(e -> NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue"));
-        }
-        if (SessionManager.isLoggedIn() && currentUser != null) {
-            if (userNameLabel != null) {
-                userNameLabel.setText(currentUser.getPrenom() + " " + currentUser.getNom());
-            }
-            if (userBox != null) {
-                userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> showUserProfile());
-                userBox.setOnMouseEntered(e -> onUserBoxHover());
-                userBox.setOnMouseExited(e -> onUserBoxExit());
-            }
-        } else {
-            if (userNameLabel != null) {
-                userNameLabel.setText("Connexion");
-            }
-            if (userBox != null) {
-                userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.loadView("/fxml/Login.fxml", "Catalogue"));
-            }
-        }
     }
 
     private void chargerReservations() {
         try {
             List<reservationlog> toutes = serviceReservation.afficher();
-            int clientId = (SessionManager.isLoggedIn() && currentUser != null) ? currentUser.getId() : 14;
-            int finalClientId = clientId;
-            List<reservationlog> duClient = toutes.stream()
-                    .filter(r -> r.getIdc() == finalClientId)
-                    .collect(Collectors.toList());
-            reservationsList.setAll(duClient);
-            afficherReservations(reservationsList);
-            System.out.println("Réservations chargées: " + duClient.size() + " pour le client ID " + clientId);
+            if (currentUser != null) {
+                int clientId = currentUser.getId();
+                List<reservationlog> duClient = toutes.stream()
+                        .filter(r -> r.getIdc() == clientId)
+                        .collect(Collectors.toList());
+                reservationsList.setAll(duClient);
+                afficherReservations(reservationsList);
+                System.out.println("Réservations chargées: " + duClient.size() + " pour le client ID " + clientId);
+            } else {
+                reservationsList.clear();
+                afficherReservations(reservationsList);
+                System.out.println("Aucun utilisateur connecté");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible de charger les réservations : " + e.getMessage());
@@ -179,12 +150,14 @@ public class MesReservationsController {
         Label lblMontant = new Label("💰 " + r.getMontant() + " DT");
         lblMontant.setStyle("-fx-text-fill: #E8B156; -fx-font-size: 16; -fx-font-weight: bold;");
 
-        Label lblStatut = new Label(r.getStatus().toString());
+        // Affichage du statut
+        Label lblStatut = new Label(getStatusLabel(r.getStatus()));
         String statusColor;
         switch (r.getStatus()) {
             case confirmée: statusColor = "#81AE8D"; break;
             case en_attente: statusColor = "#E8B156"; break;
-            case terminée: statusColor = "#e74c3c"; break;
+            case annulée: statusColor = "#e74c3c"; break;
+            case expirée: statusColor = "#7f8c8d"; break;
             default: statusColor = "#7f8c8d";
         }
         lblStatut.setStyle("-fx-background-color: " + statusColor + "; -fx-text-fill: white; " +
@@ -196,35 +169,130 @@ public class MesReservationsController {
 
         Button btnModifier = new Button("Modifier");
         btnModifier.setStyle("-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
-        btnModifier.setOnAction(e -> modifierReservation(r));
 
         Button btnSupprimer = new Button("Supprimer");
         btnSupprimer.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
-        btnSupprimer.setOnAction(e -> supprimerReservation(r));
+
+        // Bouton Payer (pour les réservations en ligne en attente)
+        Button btnPayer = null;
+        if ("En ligne".equals(r.getModalite()) && r.getStatus() == Status.en_attente && r.getDateLimitePaiement() != null) {
+            btnPayer = new Button("💳 Payer");
+            btnPayer.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
+            btnPayer.setOnAction(e -> effectuerPaiement(r));
+        }
 
         // Bouton QR conditionnel
         Button btnQR = null;
         if ("Sur place".equals(r.getModalite()) ||
                 ("En ligne".equals(r.getModalite()) && r.getStatus() == Status.confirmée)) {
-            btnQR = new Button("QR Code");
+            btnQR = new Button("📱 QR Code");
             btnQR.setStyle("-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand; -fx-font-weight: bold;");
             btnQR.setOnAction(e -> afficherQRCode(r));
         }
 
-        if (r.getStatus() == Status.terminée) {
-            btnModifier.setVisible(false);
-            btnSupprimer.setVisible(false);
+        // Désactiver modifier/supprimer pour les réservations expirées ou annulées
+        if (r.getStatus() == Status.annulée || r.getStatus() == Status.expirée) {
+            btnModifier.setDisable(true);
+            btnModifier.setOpacity(0.5);
+            btnSupprimer.setDisable(true);
+            btnSupprimer.setOpacity(0.5);
+        } else {
+            btnModifier.setOnAction(e -> modifierReservation(r));
+            btnSupprimer.setOnAction(e -> supprimerReservation(r));
         }
 
+        if (btnPayer != null) {
+            actions.getChildren().add(btnPayer);
+        }
         if (btnQR != null) {
             actions.getChildren().add(btnQR);
         }
         actions.getChildren().addAll(btnModifier, btnSupprimer);
 
+        // Afficher la date limite de paiement si présente
         VBox infoBox = new VBox(5);
         infoBox.getChildren().addAll(lblNom, lblAdresse, lblDates, lblMontant, lblStatut);
+
+        if (r.getDateLimitePaiement() != null && r.getStatus() == Status.en_attente) {
+            SimpleDateFormat sdfLimite = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+            Label lblDateLimite = new Label("⏰ Paiement avant: " + sdfLimite.format(r.getDateLimitePaiement()));
+            lblDateLimite.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 11px;");
+            infoBox.getChildren().add(lblDateLimite);
+        }
+
         card.getChildren().addAll(infoBox, actions);
         return card;
+    }
+
+    private String getStatusLabel(Status status) {
+        switch (status) {
+            case confirmée: return "Confirmée";
+            case en_attente: return "En attente";
+            case annulée: return "Annulée";
+            case expirée: return "Expirée";
+            default: return status.toString();
+        }
+    }
+
+    private void effectuerPaiement(reservationlog r) {
+        try {
+            double montant = r.getMontant();
+            long montantCentimes = Math.round(montant * 100);
+            String currency = "eur";
+
+            String successUrl = "http://localhost:8080/api/payment/success?reservationId=" + r.getId();
+            String cancelUrl = "http://localhost:8080/api/payment/cancel?reservationId=" + r.getId();
+
+            String checkoutUrl = StripeService.createCheckoutSession(montantCentimes, currency, successUrl, cancelUrl);
+            ouvrirPagePaiement(checkoutUrl, r.getId());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de lancer le paiement : " + e.getMessage());
+        }
+    }
+
+    private void ouvrirPagePaiement(String checkoutUrl, int reservationId) {
+        Stage stage = new Stage();
+        stage.setTitle("Paiement sécurisé - Stripe");
+        stage.setResizable(false);
+
+        javafx.scene.web.WebView webView = new javafx.scene.web.WebView();
+        javafx.scene.web.WebEngine engine = webView.getEngine();
+        engine.setJavaScriptEnabled(true);
+
+        engine.locationProperty().addListener((obs, oldUrl, newUrl) -> {
+            if (newUrl != null && newUrl.contains("payment/success")) {
+                stage.close();
+                mettreAJourStatutReservation(reservationId, Status.confirmée);
+                showAlert("Succès", "✅ Paiement accepté ! Réservation confirmée.");
+                chargerReservations();
+            } else if (newUrl != null && newUrl.contains("payment/cancel")) {
+                stage.close();
+                showAlert("Information", "Paiement annulé. Vous pouvez payer plus tard.");
+            }
+        });
+
+        engine.load(checkoutUrl);
+
+        VBox root = new VBox(webView);
+        VBox.setVgrow(webView, Priority.ALWAYS);
+
+        Scene scene = new Scene(root, 900, 700);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void mettreAJourStatutReservation(int reservationId, Status nouveauStatut) {
+        try {
+            reservationlog reservation = serviceReservation.rechercherParId(reservationId);
+            if (reservation != null) {
+                reservation.setStatus(nouveauStatut);
+                serviceReservation.modifier(reservation);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void afficherQRCode(reservationlog r) {
@@ -245,7 +313,6 @@ public class MesReservationsController {
                 qrContent.append("🏧 Paiement: À régler sur place");
             }
 
-            // Générer l'image QR pour affichage (utiliser QRCodeGenerator)
             Image qrImage = QRCodeGenerator.generateQRCode(qrContent.toString(), 300, 300);
 
             Stage stage = new Stage();
@@ -256,28 +323,13 @@ public class MesReservationsController {
             imageView.setFitWidth(300);
             imageView.setFitHeight(300);
             imageView.setPreserveRatio(true);
-            imageView.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5); -fx-background-radius: 15;");
 
             Label lblInfo = new Label("Scannez ce code pour voir les détails");
             lblInfo.setStyle("-fx-font-size: 14px; -fx-text-fill: #1A3C5A; -fx-font-weight: bold;");
 
             Button btnEmailPDF = new Button("📧 Envoyer par email (PDF)");
-            btnEmailPDF.setStyle(
-                    "-fx-background-color: #1A3C5A; " +
-                            "-fx-text-fill: white; " +
-                            "-fx-background-radius: 25; " +
-                            "-fx-padding: 12 25; " +
-                            "-fx-cursor: hand; " +
-                            "-fx-font-weight: bold; " +
-                            "-fx-font-size: 14px; " +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"
-            );
-            btnEmailPDF.setOnMouseEntered(e ->
-                    btnEmailPDF.setStyle(btnEmailPDF.getStyle() + "-fx-background-color: #2C7AA0;")
-            );
-            btnEmailPDF.setOnMouseExited(e ->
-                    btnEmailPDF.setStyle(btnEmailPDF.getStyle().replace("-fx-background-color: #2C7AA0;", "-fx-background-color: #1A3C5A;"))
-            );            btnEmailPDF.setOnAction(e -> {
+            btnEmailPDF.setStyle("-fx-background-color: #1A3C5A; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 14px;");
+            btnEmailPDF.setOnAction(e -> {
                 try {
                     String adresse = getAdresseLogement(r.getId_l());
                     EmailService.sendReservationEmailWithPDF(
@@ -301,6 +353,7 @@ public class MesReservationsController {
                     showAlert("Erreur", "Impossible d'envoyer l'email : " + ex.getMessage());
                 }
             });
+
             VBox vbox = new VBox(15, imageView, lblInfo, btnEmailPDF);
             vbox.setAlignment(Pos.CENTER);
             vbox.setStyle("-fx-padding: 25; -fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);");
@@ -322,6 +375,16 @@ public class MesReservationsController {
         } catch (SQLException e) {
             e.printStackTrace();
             return "Erreur";
+        }
+    }
+
+    private String getAdresseLogement(int idLogement) {
+        try {
+            logement log = serviceLogement.rechercherParId(idLogement);
+            return log != null ? log.getAdresse() : "";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
@@ -354,7 +417,7 @@ public class MesReservationsController {
 
     private void modifierReservation(reservationlog r) {
         SessionManager.setEditingReservation(r);
-        NavigationManager.loadView("/fxml/ReservationForm.fxml", "Catalogue");
+        NavigationManager.loadView("/fxml/ReservationForm.fxml", "Modification réservation");
     }
 
     private void supprimerReservation(reservationlog r) {
@@ -365,13 +428,11 @@ public class MesReservationsController {
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             try {
                 String nomLogement = getNomLogement(r.getId_l());
-                double montant = r.getMontant();
                 String dates = new SimpleDateFormat("dd/MM/yyyy").format(r.getDate_debut()) + " au " +
                         new SimpleDateFormat("dd/MM/yyyy").format(r.getDate_fin());
 
                 serviceReservation.supprimer(r.getId());
 
-                // Envoyer email d'annulation stylisé
                 try {
                     EmailService.sendCancellationEmail(
                             currentUser.getEmail(),
@@ -379,7 +440,7 @@ public class MesReservationsController {
                             currentUser.getPrenom(),
                             nomLogement,
                             dates,
-                            montant
+                            r.getMontant()
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -392,19 +453,6 @@ public class MesReservationsController {
             }
         }
     }
-    private String getAdresseLogement(int idLogement) {
-        try {
-            logement log = serviceLogement.rechercherParId(idLogement);
-            return log != null ? log.getAdresse() : "";
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "";
-        }
-    }
-    @FXML
-    private void retourAccueil() {
-        NavigationManager.loadView("/fxml/accueil.fxml", "Catalogue");
-    }
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -412,32 +460,5 @@ public class MesReservationsController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    @FXML
-    private void onUserBoxHover() {
-        if (userBox != null) {
-            userBox.setStyle("-fx-background-color: #2C7AA0; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
-                    "-fx-scale-x: 1.05; -fx-scale-y: 1.05; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
-        }
-    }
-
-    @FXML
-    private void onUserBoxExit() {
-        if (userBox != null) {
-            userBox.setStyle("-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
-                    "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
-        }
-    }
-
-    @FXML
-    private void showUserProfile() {
-        if (SessionManager.isLoggedIn() && currentUser != null) {
-            System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
-            NavigationManager.loadView("/fxml/UserProfil.fxml", "Catalogue");
-        } else {
-            System.out.println("vous n'etes pas connécter ! ");
-            NavigationManager.loadView("/fxml/Login.fxml", "Catalogue");
-        }
     }
 }

@@ -27,11 +27,20 @@ import java.util.ResourceBundle;
 public class GestionReservationsAdminController implements Initializable {
 
     @FXML private VBox containerToutesReservations;
+    @FXML private Button btnCategories;
+    @FXML private Button btnVoyages;
+    @FXML private Button btnDeconnexion;
+
     private final ReservationService rs = new ReservationService();
+    private AdminDashboardController dashboardController;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         rafraichirListe();
+    }
+
+    public void setDashboardController(AdminDashboardController controller) {
+        this.dashboardController = controller;
     }
 
     private void rafraichirListe() {
@@ -40,19 +49,17 @@ public class GestionReservationsAdminController implements Initializable {
         containerToutesReservations.getChildren().clear();
 
         List<Reservation> reservations = rs.getAllReservations();
-        if (reservations != null) {
+        if (reservations != null && !reservations.isEmpty()) {
             for (Reservation res : reservations) {
                 containerToutesReservations.getChildren().add(creerLigne(res));
             }
+        } else {
+            Label emptyLabel = new Label("Aucune réservation trouvée");
+            emptyLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 14px; -fx-padding: 20;");
+            containerToutesReservations.getChildren().add(emptyLabel);
         }
     }
-    private AdminDashboardController dashboardController;
 
-    public void setDashboardController(AdminDashboardController controller) {
-        this.dashboardController = controller;
-    }
-
-    // ===== Helpers statut =====
     private String normalizeStatut(String s) {
         if (s == null || s.isBlank()) return "EN_ATTENTE";
         return s.trim().toUpperCase(Locale.ROOT);
@@ -76,44 +83,48 @@ public class GestionReservationsAdminController implements Initializable {
     }
 
     private HBox creerLigne(Reservation res) {
-
         HBox ligne = new HBox();
         ligne.setStyle("-fx-background-color: white; -fx-border-color: #F1F5F9; -fx-border-width: 0 0 1 0; -fx-padding: 15;");
 
         GridPane grid = new GridPane();
         grid.prefWidthProperty().bind(ligne.widthProperty());
 
-        ColumnConstraints col1 = new ColumnConstraints(); col1.setPercentWidth(25);
-        ColumnConstraints col2 = new ColumnConstraints(); col2.setPercentWidth(25);
-        ColumnConstraints col3 = new ColumnConstraints(); col3.setPercentWidth(15); col3.setHalignment(HPos.CENTER);
+        ColumnConstraints col1 = new ColumnConstraints(); col1.setPercentWidth(20);
+        ColumnConstraints col2 = new ColumnConstraints(); col2.setPercentWidth(15);
+        ColumnConstraints col3 = new ColumnConstraints(); col3.setPercentWidth(10); col3.setHalignment(HPos.CENTER);
         ColumnConstraints col4 = new ColumnConstraints(); col4.setPercentWidth(15); col4.setHalignment(HPos.CENTER);
         ColumnConstraints col5 = new ColumnConstraints(); col5.setPercentWidth(20); col5.setHalignment(HPos.CENTER);
-        grid.getColumnConstraints().addAll(col1, col2, col3, col4, col5);
+        ColumnConstraints col6 = new ColumnConstraints(); col6.setPercentWidth(20); col6.setHalignment(HPos.CENTER);
+        grid.getColumnConstraints().addAll(col1, col2, col3, col4, col5, col6);
 
         // 1) Destination
         Label lblDest = new Label(res.getDestination() != null ? res.getDestination() : "");
         lblDest.setStyle("-fx-font-weight: bold; -fx-text-fill: #1E293B;");
         grid.add(lblDest, 0, 0);
 
-        // 2) User
-        Label lblUser = new Label("ID: " + res.getIdUser());
+        // 2) User ID
+        Label lblUser = new Label("ID: " + res.getId_user());
         lblUser.setStyle("-fx-font-weight: bold; -fx-text-fill: #475569;");
         grid.add(lblUser, 1, 0);
 
-        // 3) Places
+        // 3) Places totales
         Label lblPlaces = new Label(String.valueOf(res.getNbr_personnes()));
         lblPlaces.setStyle("-fx-font-weight: bold; -fx-text-fill: #1E293B;");
         grid.add(lblPlaces, 2, 0);
+
+        // 3b) Répartition adultes/enfants
+        Label lblRepartition = new Label(res.getNb_adultes() + "A / " + res.getNb_enfants() + "E");
+        lblRepartition.setStyle("-fx-text-fill: #64748B; -fx-font-size: 11px;");
+        grid.add(lblRepartition, 3, 0);
 
         // 4) Statut (chip)
         String statutDb = normalizeStatut(res.getStatut());
         Label lblStatut = new Label(labelStatut(statutDb));
         lblStatut.setStyle(styleChipStatut(statutDb));
-        grid.add(lblStatut, 3, 0);
+        grid.add(lblStatut, 4, 0);
 
-        // 5) Action (bouton toujours présent, grisé si confirmée/annulée)
+        // 5) Action
         Button btnConfirmer = new Button("Confirmer");
-
         boolean dejaConfirmee = statutDb.equals("CONFIRMEE");
         boolean annulee = statutDb.equals("ANNULEE");
 
@@ -140,27 +151,31 @@ public class GestionReservationsAdminController implements Initializable {
                 -fx-font-weight: bold;
                 -fx-cursor: hand;
                 """);
-
             btnConfirmer.setOnAction(e -> {
                 rs.confirmerReservation(res.getId());
                 rafraichirListe();
             });
         }
-
-        grid.add(btnConfirmer, 4, 0);
+        grid.add(btnConfirmer, 5, 0);
 
         ligne.getChildren().add(grid);
         return ligne;
     }
 
     @FXML
-    private void naviguerCategories(ActionEvent event) { changerScene("/fxml/GestionCategorie.fxml", event); }
+    private void naviguerCategories(ActionEvent event) {
+        changerScene("/fxml/GestionCategorie.fxml", event);
+    }
 
     @FXML
-    private void naviguerVoyages(ActionEvent event) { changerScene("/fxml/GestionVoyage.fxml", event); }
+    private void naviguerVoyages(ActionEvent event) {
+        changerScene("/fxml/GestionVoyage.fxml", event);
+    }
 
     @FXML
-    private void handleDeconnexion(ActionEvent event) { changerScene("/Login.fxml", event); }
+    private void handleDeconnexion(ActionEvent event) {
+        changerScene("/Login.fxml", event);
+    }
 
     private void changerScene(String fxml, ActionEvent event) {
         try {
@@ -175,10 +190,12 @@ public class GestionReservationsAdminController implements Initializable {
         }
     }
 
-
     public void handleReset(ActionEvent actionEvent) {
+        rafraichirListe();
     }
 
     public void handleSearch(ActionEvent actionEvent) {
+        // Implémenter la recherche si besoin
+        rafraichirListe();
     }
 }

@@ -15,6 +15,7 @@ import tn.esprit.services.AuthService;
 import tn.esprit.services.FaceRecognitionService;
 import tn.esprit.utils.EmailService;
 import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -37,10 +38,9 @@ public class loginController {
     private AuthService authService = new AuthService();
     private FaceRecognitionService faceService;
     private boolean faceServiceAvailable = false;
-    // 🔴 NOUVELLES VARIABLES
     private int failedAttempts = 0;
     private static final int MAX_FAILED_ATTEMPTS = 3;
-    private Webcam securityWebcam;  // Webcam pour la capture de sécurité
+    private Webcam securityWebcam;
 
     @FXML
     public void initialize() {
@@ -140,27 +140,25 @@ public class loginController {
         }
     }
 
-
     private void handleSuccessfulLogin(User user) {
-        String userType = user.getType();
+        // 🔴 CRUCIAL : Sauvegarder l'utilisateur dans SessionManager
+        SessionManager.setCurrentUser(user);
+        System.out.println("✅ Utilisateur sauvegardé dans SessionManager: " + user.getEmail());
+
+        String userType = user.getProfil() != null ? user.getProfil().getType() : "CLIENT";
 
         if ("ADMIN".equals(userType)) {
             showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
             redirectToAdminDashboard(user);
-        } else if ("CLIENT".equals(userType)) {
+        } else {
             showMessage("Connexion réussie ! Bienvenue " + user.getNom(), "success");
             if (faceServiceAvailable) {
                 proposeFaceRegistration(user);
             } else {
                 redirectToAccueilClient(user);
             }
-        } else {
-            showMessage("Type d'utilisateur inconnu", "error");
-            btnLogin.setDisable(false);
-            btnLogin.setText("Se connecter");
         }
     }
-
 
     private void proposeFaceRegistration(User user) {
         boolean hasFace = authService.hasFaceRegistered(user.getId());
@@ -217,10 +215,8 @@ public class loginController {
         failedAttempts++;
         System.out.println("⚠️ Tentative échouée #" + failedAttempts + " pour: " + email);
 
-        // 🔴 SI 3 ÉCHECS, DÉCLENCHER LA CAPTURE
         if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
             captureIntruder(email);
-            // Réinitialiser le compteur après capture
             failedAttempts = 0;
         }
 
@@ -246,7 +242,6 @@ public class loginController {
 
         new Thread(() -> {
             try {
-                // Initialiser la webcam
                 securityWebcam = Webcam.getDefault();
                 if (securityWebcam == null) {
                     System.err.println("❌ Impossible d'initialiser la webcam de sécurité");
@@ -254,31 +249,21 @@ public class loginController {
                 }
 
                 securityWebcam.open();
-
-                // Attendre que la webcam s'initialise
                 Thread.sleep(1000);
-
-                // Capturer l'image
                 java.awt.image.BufferedImage bufferedImage = securityWebcam.getImage();
 
                 if (bufferedImage != null) {
-                    // Sauvegarder l'image
                     String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
                     String filename = "intruder_" + email.replace("@", "_") + "_" + timestamp + ".jpg";
                     String filepath = "data/intruders/" + filename;
 
-                    // Créer le dossier si nécessaire
                     java.nio.file.Files.createDirectories(java.nio.file.Paths.get("data/intruders"));
-
-                    // Sauvegarder l'image
                     javax.imageio.ImageIO.write(bufferedImage, "jpg", new java.io.File(filepath));
                     System.out.println("✅ Image sauvegardée: " + filepath);
 
-                    // Envoyer l'email à l'admin
                     sendIntruderAlert(email, filepath);
                 }
 
-                // Fermer la webcam
                 securityWebcam.close();
 
             } catch (Exception e) {
@@ -287,12 +272,12 @@ public class loginController {
             }
         }).start();
     }
+
     private void sendIntruderAlert(String email, String imagePath) {
         try {
-            String adminEmail = "khalilbenlahmer@gmail.com";
+            String adminEmail = "admin@example.com";
             String subject = "🚨 ALERTE SÉCURITÉ - Tentatives de connexion suspectes";
 
-            // Corps du message pour l'admin
             StringBuilder adminBody = new StringBuilder();
             adminBody.append("<h2>🚨 Alerte de sécurité</h2>");
             adminBody.append("<p><strong>3 tentatives de connexion échouées</strong> ont été détectées.</p>");
@@ -301,14 +286,11 @@ public class loginController {
             adminBody.append("<p><strong>IP/Machine :</strong> ").append(java.net.InetAddress.getLocalHost().getHostName()).append("</p>");
             adminBody.append("<p>Une capture de la personne a été jointe à cet email.</p>");
 
-            // Envoyer l'email à l'admin avec la photo
             EmailService.sendEmail(adminEmail, subject + " - ADMIN", adminBody.toString(), imagePath);
 
-            // 🔴 VÉRIFIER SI L'EMAIL EXISTE DANS LA BASE
             boolean emailExists = authService.checkEmailExists(email);
 
             if (emailExists) {
-                // Envoyer une alerte à l'utilisateur concerné
                 String userSubject = "🔐 ALERTE - Tentatives de connexion sur votre compte";
                 String userBody = "🔐 ALERTE DE SÉCURITÉ\n" +
                         "=====================\n\n" +
@@ -320,10 +302,8 @@ public class loginController {
                         "- Changer immédiatement votre mot de passe\n" +
                         "- Activer la reconnaissance faciale\n" +
                         "- Contacter l'administrateur\n\n" +
-                        "Si vous êtes à l'origine de ces tentatives, ignorez cet email.\n\n" +
                         "Cordialement,\n" +
                         "L'équipe de sécurité";
-                // Envoyer sans photo à l'utilisateur (pour ne pas l'effrayer avec sa propre photo 😅)
                 EmailService.sendEmail(email, userSubject, userBody.toString(), null);
 
                 System.out.println("✅ Alertes envoyées à l'admin et à l'utilisateur: " + email);
@@ -339,19 +319,21 @@ public class loginController {
 
     private void redirectToAccueilClient(User user) {
         try {
-            System.out.println("Redirection vers l'accueil client pour: " + user.getEmail());
+            System.out.println("Redirection vers l'accueil client (CatalogueUser) pour: " + user.getEmail());
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CatalogueUser.fxml"));
             Parent root = loader.load();
 
-            AccueilController accueilController = loader.getController();
-            if (accueilController != null) {
-                accueilController.setCurrentUser(user);
+            CatalogueUserController catalogueController = loader.getController();
+            if (catalogueController != null) {
+                catalogueController.setCurrentUser(user);
             }
+
+            NavbarController.refreshNavbar();
 
             Stage stage = (Stage) txtEmail.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Accueil");
+            stage.setTitle("Accueil - Catalogue des voyages");
             stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();
@@ -359,31 +341,6 @@ public class loginController {
         } catch (IOException e) {
             showMessage("Erreur de redirection vers l'accueil: " + e.getMessage(), "error");
             e.printStackTrace();
-            tryFallbackToUserFrontEnd(user);
-        }
-    }
-
-    private void tryFallbackToUserFrontEnd(User user) {
-        try {
-            System.out.println("Fallback vers UserFrontEnd.fxml");
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserFrontEnd.fxml"));
-            Parent root = loader.load();
-
-            UserFrontEndController controller = loader.getController();
-            controller.setCurrentUser(user);
-
-            Stage stage = (Stage) txtEmail.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Interface Utilisateur");
-            stage.setMaximized(true);
-            stage.centerOnScreen();
-
-        } catch (IOException ex) {
-            showMessage("Erreur critique: impossible de charger l'interface", "error");
-            ex.printStackTrace();
-            btnLogin.setDisable(false);
-            btnLogin.setText("Se connecter");
         }
     }
 
@@ -452,17 +409,7 @@ public class loginController {
     @FXML
     private void handleForgotPassword() {
         System.out.println("🔐 Redirection vers la page de réinitialisation de mot de passe");
-
-        // Vérifier si le fichier existe
-        java.net.URL url = getClass().getResource("/fxml/ForgotPassword.fxml");
-        System.out.println("URL du fichier: " + url);
-
-        if (url == null) {
-            showMessage("Fichier ForgotPassword.fxml non trouvé!", "error");
-            return;
-        }
-
-        NavigationManager.loadView("/fxml/ForgotPassword.fxml", "Catalogue");
+        NavigationManager.loadView("/fxml/ForgotPassword.fxml", "Mot de passe oublié");
     }
 
     @FXML

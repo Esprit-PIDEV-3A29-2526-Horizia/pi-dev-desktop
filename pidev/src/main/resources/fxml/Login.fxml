@@ -3,191 +3,182 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
-<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.shape.SVGPath?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.Region?>
-<AnchorPane prefHeight="700.0" prefWidth="1200.0" style="-fx-background-color: linear-gradient(to bottom right, #1e3c72, #2a5298);" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.loginController">
+<AnchorPane prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.loginController">
+
+    <style>
+        -fx-background-image: url("/images/bg_5.jpg");
+        -fx-background-size: cover;
+        -fx-background-position: center;
+    </style>
+
     <children>
-        <!-- Carte de login centrale -->
-        <AnchorPane layoutX="250.0" layoutY="100.0" prefHeight="550.0" prefWidth="400.0" style="-fx-background-color: white; -fx-background-radius: 20;">
+
+        <!-- Overlay noir -->
+        <AnchorPane prefHeight="800.0" prefWidth="1300.0" style="-fx-background-color: rgba(0,0,0,0.55);" />
+
+        <!-- Carte de login verre (glassmorphism) -->
+        <AnchorPane layoutX="440.0" layoutY="120.0" prefHeight="560.0" prefWidth="420.0"
+                    style="-fx-background-color: rgba(255,255,255,0.12); -fx-background-radius: 32; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 30, 0, 0, 10); -fx-border-color: rgba(255,255,255,0.25); -fx-border-radius: 32; -fx-border-width: 1.5;">
             <effect>
-                <DropShadow blurType="GAUSSIAN" height="30.0" radius="15.0" width="30.0">
+                <DropShadow blurType="GAUSSIAN" height="40.0" radius="20.0" width="40.0">
                     <color>
                         <Color opacity="0.3" />
                     </color>
                 </DropShadow>
             </effect>
+        </AnchorPane>
 
+        <!-- Contenu de la carte -->
+        <VBox layoutX="470.0" layoutY="150.0" prefWidth="360.0" spacing="24.0" alignment="TOP_CENTER">
             <children>
-                <!-- Logo / Icône admin -->
-                <ImageView fitHeight="80.0" fitWidth="80.0" layoutX="160.0" layoutY="30.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@/images/admin-avatar.jpg" />                    </image>
-                </ImageView>
-                <!-- Titre -->
-                <Label layoutX="165.0" layoutY="120.0" text="Login" textFill="#333333">
-                    <font>
-                        <Font name="System Bold" size="22.0" />
-                    </font>
-                </Label>
 
-                <!-- Sous-titre -->
-                <Label alignment="CENTER" layoutX="100.0" layoutY="150.0" prefWidth="200.0" text="Connectez-vous pour gérer votre plateforme" textAlignment="CENTER" textFill="#666666" wrapText="true">
-                    <font>
-                        <Font size="13.0" />
-                    </font>
-                </Label>
+                <!-- Logo et titre -->
+                <VBox alignment="CENTER" spacing="16.0">
+                    <children>
+                        <!-- Logo circulaire -->
+                        <StackPane prefHeight="85.0" prefWidth="85.0"
+                                   style="-fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #ff6b35, #ff8c42); -fx-background-radius: 42.5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 12, 0, 0, 3); -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 42.5; -fx-border-width: 2;">
+                            <ImageView fitHeight="50.0" fitWidth="50.0" preserveRatio="true">
+                                <Image url="@/images/logo.png" />
+                            </ImageView>
+                        </StackPane>
+
+                        <Label text="Horizia" textFill="WHITE"
+                               style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-letter-spacing: -0.5px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0, 0, 1);" />
+
+                        <Label text="Connectez-vous pour continuer l'aventure" textFill="rgba(255,255,255,0.85)"
+                               style="-fx-font-size: 14px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);" />
+                    </children>
+                </VBox>
+
+                <!-- Séparateur fin -->
+                <Separator prefWidth="200.0" style="-fx-background-color: rgba(255,255,255,0.2);" />
 
                 <!-- Formulaire -->
-                <VBox layoutX="50.0" layoutY="200.0" prefHeight="150.0" prefWidth="300.0" spacing="20.0">
+                <VBox spacing="20.0">
                     <children>
                         <!-- Champ Email -->
-                        <VBox spacing="5.0">
-                            <Label text="Email administrateur" textFill="#333333">
-                                <font>
-                                    <Font name="System Bold" size="12.0" />
-                                </font>
-                            </Label>
-                            <TextField fx:id="txtEmail" promptText="admin@exemple.com" style="-fx-background-color: #f5f5f5; -fx-background-radius: 10; -fx-padding: 10;">
-                                <font>
-                                    <Font size="14.0" />
-                                </font>
-                            </TextField>
+                        <VBox spacing="8.0">
+                            <Label text="Adresse email" textFill="WHITE"
+                                   style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+                            <TextField fx:id="txtEmail" promptText="exemple@email.com"
+                                       style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 16; -fx-padding: 14 18; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 16; -fx-border-width: 1; -fx-text-fill: white; -fx-font-size: 14px; -fx-prompt-text-fill: rgba(255,255,255,0.5);" />
                         </VBox>
 
                         <!-- Champ Mot de passe -->
-                        <VBox spacing="5.0">
-                            <Label text="Mot de passe" textFill="#333333">
-                                <font>
-                                    <Font name="System Bold" size="12.0" />
-                                </font>
-                            </Label>
-                            <PasswordField fx:id="txtPassword" promptText="••••••••" style="-fx-background-color: #f5f5f5; -fx-background-radius: 10; -fx-padding: 10;">
-                                <font>
-                                    <Font size="14.0" />
-                                </font>
-                            </PasswordField>
+                        <VBox spacing="8.0">
+                            <Label text="Mot de passe" textFill="WHITE"
+                                   style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+                            <PasswordField fx:id="txtPassword" promptText="Entrez votre mot de passe"
+                                           style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 16; -fx-padding: 14 18; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 16; -fx-border-width: 1; -fx-text-fill: white; -fx-font-size: 14px; -fx-prompt-text-fill: rgba(255,255,255,0.5);" />
                         </VBox>
                     </children>
                 </VBox>
 
-                <!-- Bouton Connexion standard -->
-                <Button fx:id="btnLogin" layoutX="50.0" layoutY="330.0" mnemonicParsing="false" onAction="#handleLogin" prefHeight="45.0" prefWidth="300.0" style="-fx-background-color: #2a5298; -fx-background-radius: 25;" text="Se connecter" textFill="white">
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                    <font>
-                        <Font name="System Bold" size="16.0" />
-                    </font>
-                </Button>
-
-                <!-- NOUVEAU : Bouton Face ID (avec un ID unique) -->
-                <Button fx:id="btnFaceLogin" layoutX="50.0" layoutY="385.0"
-                        mnemonicParsing="false" onAction="#handleFaceLogin"
-                        prefHeight="40.0" prefWidth="300.0"
-                        style="-fx-background-color: #4CAF50; -fx-background-radius: 25;"
-                        text="📷 Se connecter avec Face ID" textFill="white">
-                    <cursor>
-                        <Cursor fx:constant="HAND" />
-                    </cursor>
-                    <font>
-                        <Font name="System Bold" size="14.0" />
-                    </font>
-                </Button>
-
-                <!-- Liens combinés : Inscription + Mot de passe oublié -->
-                <HBox alignment="CENTER" layoutX="50.0" layoutY="440.0" prefWidth="300.0" spacing="15.0">
+                <!-- Options : Se souvenir de moi + Mot de passe oublié -->
+                <HBox alignment="CENTER" spacing="10.0">
                     <children>
-                        <!-- Lien Inscription -->
-                        <HBox spacing="5.0" alignment="CENTER">
-                            <Label text="Pas encore de compte ?" textFill="#666666" />
-                            <Hyperlink onAction="#goToSignUp" text="S'inscrire" textFill="#2a5298" underline="true">
-                                <cursor>
-                                    <Cursor fx:constant="HAND" />
-                                </cursor>
-                            </Hyperlink>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" HBox.hgrow="ALWAYS">
+                            <CheckBox text="Se souvenir de moi"
+                                      style="-fx-text-fill: rgba(255,255,255,0.85); -fx-font-size: 12px;" />
                         </HBox>
-
-                        <!-- Séparateur vertical -->
-                        <Label text="|" textFill="#cccccc" />
-
-                        <!-- Lien Mot de passe oublié -->
-                        <Hyperlink fx:id="forgotPasswordLink"
-                                   text="Mot de passe oublié ?"
+                        <Hyperlink fx:id="forgotPasswordLink" text="Mot de passe oublié ?"
                                    onAction="#handleForgotPassword"
-                                   textFill="#2a5298"
-                                   underline="true">
-                            <font>
-                                <Font size="12.0" />
-                            </font>
-                            <cursor>
-                                <Cursor fx:constant="HAND" />
-                            </cursor>
-                        </Hyperlink>
+                                   textFill="#ff8c42" underline="false"
+                                   style="-fx-font-size: 12px; -fx-font-weight: bold;" />
                     </children>
-                    <Button fx:id="btnGoogleLogin" onAction="#handleGoogleLogin"
-                            style="-fx-background-color: white; -fx-background-radius: 25; -fx-text-fill: #757575; -fx-border-color: #dadce0; -fx-border-radius: 25; -fx-padding: 8 15;"
-                            prefHeight="40.0" prefWidth="300.0">
-                        <graphic>
-                            <StackPane>
-                                <!-- SVG de Google intégré directement -->
-                                <Region style="-fx-min-width: 20; -fx-min-height: 20; -fx-max-width: 20; -fx-max-height: 20;">
-                                    <shape>
-                                        <SVGPath content="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335" />
-                                        <SVGPath content="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4" />
-                                        <SVGPath content="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05" />
-                                        <SVGPath content="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853" />
-                                    </shape>
-                                </Region>
-                            </StackPane>
-                        </graphic>
-                        <text>
-                            Se connecter avec Google
-                        </text>
-                    </Button>
                 </HBox>
 
-                <!-- Message d'erreur -->
-                <Label fx:id="lblMessage" alignment="CENTER" layoutX="50.0" layoutY="480.0" prefWidth="300.0" textFill="RED" wrapText="true" />
-            </children>
-        </AnchorPane>
+                <!-- Bouton Se connecter -->
+                <Button fx:id="btnLogin" mnemonicParsing="false"
+                        onAction="#handleLogin" prefHeight="52.0" maxWidth="Infinity"
+                        style="-fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #ff6b35, #ff8c42); -fx-background-radius: 28; -fx-effect: dropshadow(gaussian, rgba(255,107,53,0.4), 12, 0, 0, 3);"
+                        text="SE CONNECTER" textFill="white">
+                    <font>
+                        <Font name="System Bold" size="15.0" />
+                    </font>
+                </Button>
 
-        <!-- Partie droite avec logo -->
-        <AnchorPane layoutX="650.0" layoutY="100.0" prefHeight="400.0" prefWidth="200.0">
-            <children>
-                <!-- Rectangle décoratif -->
-                <Rectangle arcHeight="20.0" arcWidth="20.0" fill="#ffffff20" height="150.0" layoutX="25.0" layoutY="100.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="2.0" width="150.0" />
-
-                <!-- Logo centré -->
-                <ImageView fitHeight="350.0" fitWidth="200.0" layoutX="0.0" layoutY="100.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@/images/logo.png" />
-                    </image>
-                </ImageView>
-
-                <!-- Texte sous le logo -->
-                <Label alignment="CENTER" layoutX="20.0" layoutY="260.0" prefWidth="160.0"
-                       text="Gérez vos membres et profils en toute simplicité"
-                       textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                <!-- Bouton Face ID -->
+                <Button fx:id="btnFaceLogin" mnemonicParsing="false"
+                        onAction="#handleFaceLogin" prefHeight="46.0" maxWidth="Infinity"
+                        style="-fx-background-color: rgba(255,255,255,0.1); -fx-background-radius: 28; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 28; -fx-border-width: 1;"
+                        text="📷 Reconnaissance faciale" textFill="white">
                     <font>
                         <Font size="14.0" />
                     </font>
-                </Label>
+                </Button>
+
+                <!-- Séparateur "ou" -->
+                <HBox alignment="CENTER" spacing="12.0">
+                    <children>
+                        <Separator prefWidth="135.0" style="-fx-background-color: rgba(255,255,255,0.2);" />
+                        <Label text="ou" textFill="rgba(255,255,255,0.6)" style="-fx-font-size: 12px; -fx-font-weight: bold;" />
+                        <Separator prefWidth="135.0" style="-fx-background-color: rgba(255,255,255,0.2);" />
+                    </children>
+                </HBox>
+
+                <!-- Boutons sociaux -->
+                <HBox spacing="15.0">
+                    <children>
+                        <Button fx:id="btnGoogleLogin" onAction="#handleGoogleLogin" prefHeight="46.0" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                                style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 28; -fx-border-color: rgba(255,255,255,0.3); -fx-border-radius: 28; -fx-border-width: 1;"
+                                text="Google">
+                            <font>
+                                <Font size="13.0" />
+                            </font>
+                            <graphic>
+                                <StackPane>
+                                    <Region style="-fx-min-width: 18; -fx-min-height: 18;">
+                                        <shape>
+                                            <SVGPath content="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335" />
+                                            <SVGPath content="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4" />
+                                            <SVGPath content="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05" />
+                                            <SVGPath content="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853" />
+                                        </shape>
+                                    </Region>
+                                </StackPane>
+                            </graphic>
+                        </Button>
+                    </children>
+                </HBox>
+
+                <!-- Lien d'inscription -->
+                <HBox alignment="CENTER" spacing="8.0" style="-fx-padding: 8 0 0 0;">
+                    <children>
+                        <Label text="Nouveau voyageur ?" textFill="rgba(255,255,255,0.8)"
+                               style="-fx-font-size: 13px;" />
+                        <Hyperlink onAction="#goToSignUp" text="Créer un compte"
+                                   textFill="#ff8c42" underline="false"
+                                   style="-fx-font-size: 13px; -fx-font-weight: bold;" />
+                    </children>
+                </HBox>
+
+                <!-- Message d'erreur -->
+                <Label fx:id="lblMessage" alignment="CENTER" maxWidth="Infinity"
+                       textFill="#ff8c42" wrapText="true"
+                       style="-fx-font-size: 12px;" visible="false" />
+
             </children>
-        </AnchorPane>
+        </VBox>
+
     </children>
 </AnchorPane>

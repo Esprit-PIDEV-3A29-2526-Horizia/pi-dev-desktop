@@ -2,7 +2,6 @@ package tn.esprit.services;
 
 import tn.esprit.entities.Location;
 import tn.esprit.utils.MyDataBase;
-import tn.esprit.utils.MyDataBase;
 
 import java.sql.*;
 import java.time.LocalDate;

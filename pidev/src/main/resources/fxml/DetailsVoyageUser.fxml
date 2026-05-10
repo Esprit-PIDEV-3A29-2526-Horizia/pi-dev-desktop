@@ -6,110 +6,114 @@
 <?import javafx.scene.layout.*?>
 
 <BorderPane prefWidth="1200" prefHeight="720"
-            xmlns="http://javafx.com/javafx/17"
+            xmlns="http://javafx.com/javafx/20.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="tn.esprit.controllers.DetailsVoyageUserController"
             stylesheets="@../details.css"
             styleClass="page">
 
-    <!-- TOP -->
+    <!-- Barre de navigation partagée -->
     <top>
-        <HBox styleClass="topbar">
-            <padding><Insets left="24" right="24" top="14" bottom="14"/></padding>
-            <Button text="← Retour au catalogue"
-                    onAction="#retourCatalogue"
-                    styleClass="linkBtn"/>
-        </HBox>
+        <fx:include fx:id="navbar" source="Navbar.fxml" />
     </top>
 
     <!-- CENTER -->
     <center>
-        <HBox spacing="28" styleClass="content">
-            <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <HBox spacing="28" styleClass="content">
+                <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
 
-            <!-- LEFT CARD -->
-            <VBox spacing="18" HBox.hgrow="ALWAYS" styleClass="card">
-                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
+                <!-- LEFT CARD -->
+                <VBox spacing="18" HBox.hgrow="ALWAYS" styleClass="card">
+                    <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
 
-                <HBox alignment="CENTER_LEFT">
-                    <Label fx:id="lblTitre" text="Voyage à SYDNEY" styleClass="title"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="badgeStatus" text="DISPONIBLE" styleClass="badgeGreen"/>
-                </HBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="lblTitre" text="Voyage à SYDNEY" styleClass="title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="badgeStatus" text="DISPONIBLE" styleClass="badgeGreen"/>
+                    </HBox>
 
-                <!-- IMAGE -->
-                <StackPane styleClass="imageContainer">
-                    <ImageView fx:id="imgVoyage"
-                               fitHeight="300"
-                               preserveRatio="true"/>
-                    <Label fx:id="imageBadge"
-                           text="SYDNEY"
-                           styleClass="imageBadge"/>
-                </StackPane>
+                    <!-- IMAGE -->
+                    <StackPane styleClass="imageContainer">
+                        <ImageView fx:id="imgVoyage"
+                                   fitHeight="300"
+                                   preserveRatio="true"/>
+                        <Label fx:id="imageBadge"
+                               text="SYDNEY"
+                               styleClass="imageBadge"/>
+                    </StackPane>
 
-                <!-- INFOS -->
-                <HBox spacing="14">
-                    <Label fx:id="lblDates" styleClass="chip infoChip"/>
-                    <Label fx:id="lblPrix" styleClass="chip priceChip"/>
-                    <Label fx:id="lblPlaces" styleClass="chip placesChip"/>
-                </HBox>
+                    <!-- INFOS -->
+                    <HBox spacing="14">
+                        <Label fx:id="lblDates" styleClass="chip infoChip"/>
+                        <Label fx:id="lblPrix" styleClass="chip priceChip"/>
+                        <Label fx:id="lblPlaces" styleClass="chip placesChip"/>
+                    </HBox>
 
-                <Separator/>
+                    <Separator/>
 
-                <Label text="Découvre ta destination" styleClass="subtitle"/>
-                <Label fx:id="lblDescription"
-                       wrapText="true"
-                       styleClass="paragraph"/>
-            </VBox>
-
-            <!-- RIGHT CARD -->
-            <VBox spacing="18" prefWidth="360" styleClass="card">
-                <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
-
-                <Label text="Finaliser ma réservation" styleClass="titleSmall"/>
-
-                <VBox spacing="8">
-                    <Label text="Combien de personnes ?" styleClass="label"/>
-                    <Spinner fx:id="spNbPersonnes" prefHeight="40"/>
+                    <Label text="Découvre ta destination" styleClass="subtitle"/>
+                    <Label fx:id="lblDescription"
+                           wrapText="true"
+                           styleClass="paragraph"/>
                 </VBox>
 
-                <Separator/>
+                <!-- RIGHT CARD -->
+                <VBox spacing="18" prefWidth="380" styleClass="card">
+                    <padding><Insets top="22" right="22" bottom="22" left="22"/></padding>
 
-                <GridPane hgap="10" vgap="10">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="ALWAYS"/>
-                        <ColumnConstraints halignment="RIGHT"/>
-                    </columnConstraints>
+                    <Label text="Finaliser ma réservation" styleClass="titleSmall"/>
+
+                    <!-- Nombre de personnes total -->
+                    <VBox spacing="8">
+                        <Label text="Nombre de personnes" styleClass="label"/>
+                        <Spinner fx:id="spNbPersonnes" prefHeight="40" editable="false"/>
+                        <Label fx:id="errorPersonnes" style="-fx-text-fill: red; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+
+                    <!-- Répartition adultes/enfants -->
+                    <VBox spacing="8">
+                        <Label text="Répartition" styleClass="label"/>
+                        <HBox spacing="15">
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Adultes" style="-fx-text-fill: #1A3C5A; -fx-font-size: 13px;"/>
+                                <Spinner fx:id="spAdultes" prefHeight="40" prefWidth="140" editable="false"/>
+                            </VBox>
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Enfants" style="-fx-text-fill: #1A3C5A; -fx-font-size: 13px;"/>
+                                <Spinner fx:id="spEnfants" prefHeight="40" prefWidth="140" editable="false"/>
+                            </VBox>
+                        </HBox>
+                        <Label fx:id="errorRepartition" style="-fx-text-fill: red; -fx-font-size: 11px;" visible="false" managed="false"/>
+                    </VBox>
+
+                    <Separator/>
 
                     <VBox spacing="14" styleClass="summaryBox">
-
                         <HBox>
                             <Label text="Prix unitaire" styleClass="muted"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Label fx:id="lblPrixUnitaire" styleClass="value"/>
                         </HBox>
 
-                        <Separator/>
-
                         <HBox>
                             <Label text="Total à payer" styleClass="totalLabel"/>
                             <Region HBox.hgrow="ALWAYS"/>
                             <Label fx:id="lblTotal" styleClass="totalValue"/>
                         </HBox>
-
                     </VBox>
-                </GridPane>
 
-                <Button text="Confirmer la réservation"
-                        onAction="#confirmerReservation"
-                        prefHeight="46"
-                        maxWidth="9999"
-                        styleClass="primaryBtn"/>
-                <Separator/>
+                    <Button text="Confirmer la réservation"
+                            onAction="#confirmerReservation"
+                            prefHeight="46"
+                            maxWidth="9999"
+                            styleClass="primaryBtn"/>
+                    <Separator/>
 
-                <Label text="Paiement sécurisé • Annulation selon conditions"
-                       styleClass="hint"/>
-            </VBox>
-        </HBox>
+                    <Label text="Paiement sécurisé • Annulation selon conditions"
+                           styleClass="hint"/>
+                </VBox>
+            </HBox>
+        </ScrollPane>
     </center>
 </BorderPane>

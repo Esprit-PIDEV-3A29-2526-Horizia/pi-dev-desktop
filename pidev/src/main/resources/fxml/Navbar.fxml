@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/20.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.NavbarController"
+            minHeight="65" prefHeight="65" maxHeight="65">
+
+    <VBox AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0"
+          AnchorPane.topAnchor="0.0">
+
+        <HBox alignment="CENTER_LEFT"
+              spacing="10"
+              minHeight="62" prefHeight="62" maxHeight="62"
+              style="-fx-background-color: #1A3C5A; -fx-padding: 0 20;">
+
+            <!-- Logo -->
+            <ImageView fitHeight="36" fitWidth="100" preserveRatio="true">
+                <Image url="@/image/logo.png" />
+            </ImageView>
+
+            <Region HBox.hgrow="ALWAYS" minWidth="10" maxWidth="40" />
+
+            <!-- Boutons de navigation -->
+            <HBox spacing="6" alignment="CENTER" HBox.hgrow="ALWAYS">
+
+                <Button fx:id="btnAccueil"
+                        text="Accueil"
+                        prefWidth="110" prefHeight="34"
+                        minWidth="90"   minHeight="34"
+                        maxWidth="130"  maxHeight="34" />
+
+                <Button fx:id="btnNosLogements"
+                        text="Nos Logements"
+                        prefWidth="130" prefHeight="34"
+                        minWidth="110"  minHeight="34"
+                        maxWidth="150"  maxHeight="34" />
+
+                <MenuButton fx:id="menuReservations"
+                            text="Réservations"
+                            prefWidth="120" prefHeight="34"
+                            minWidth="100"  minHeight="34"
+                            maxWidth="140"  maxHeight="34">
+                    <items>
+                        <MenuItem fx:id="menuVoirReservations" text="Mes réservations de logement" />
+                        <MenuItem fx:id="menuHistorique"       text="Mes réservations de voyage" />
+                        <MenuItem fx:id="menuEvenementReservations" text="Mes réservations d'événements" />
+                    </items>
+                </MenuButton>
+
+                <Button fx:id="btnEvenements"
+                        text="Événements"
+                        prefWidth="110" prefHeight="34"
+                        minWidth="90"   minHeight="34"
+                        maxWidth="130"  maxHeight="34" />
+
+                <Button fx:id="btnLocation"
+                        text="Location"
+                        prefWidth="110" prefHeight="34"
+                        minWidth="90"   minHeight="34"
+                        maxWidth="130"  maxHeight="34" />
+
+                <!-- Publications devient un MenuButton avec 3 options -->
+                <MenuButton fx:id="menuPublications"
+                            text="Publications"
+                            prefWidth="130" prefHeight="34"
+                            minWidth="110"  minHeight="34"
+                            maxWidth="150"  maxHeight="34">
+                    <items>
+                        <MenuItem fx:id="menuExplorerPublications" text="🔍 Explorer" />
+                        <MenuItem fx:id="menuMesPublications" text="📝 Mes publications" />
+                        <MenuItem fx:id="menuMesFavoris" text="⭐ Mes favoris" />
+                        <SeparatorMenuItem />
+                        <MenuItem fx:id="menuAjouterPublication" text="➕ Ajouter une publication" />
+                    </items>
+                </MenuButton>
+
+                <Button fx:id="btnContact"
+                        text="Contact"
+                        prefWidth="90"  prefHeight="34"
+                        minWidth="70"   minHeight="34"
+                        maxWidth="110"  maxHeight="34" />
+
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS" minWidth="10" maxWidth="40" />
+
+            <!-- User + Logout -->
+            <HBox spacing="8" alignment="CENTER" HBox.hgrow="NEVER">
+
+                <HBox fx:id="userBox"
+                      spacing="6" alignment="CENTER"
+                      prefHeight="34" minHeight="34" maxHeight="34"
+                      style="-fx-background-color: #3D94CA; -fx-background-radius: 20; -fx-padding: 0 14; -fx-cursor: hand;">
+                    <Label fx:id="userIconLabel" text="👤"
+                           style="-fx-text-fill: white; -fx-font-size: 13;" />
+                    <Label fx:id="userNameLabel" text="Connexion"
+                           style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12;"
+                           maxWidth="120" />
+                </HBox>
+
+                <Button fx:id="btnLogout"
+                        text="Déconnexion"
+                        visible="false" managed="false"
+                        prefHeight="34" minHeight="34" maxHeight="34"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 17; -fx-padding: 0 14; -fx-cursor: hand; -fx-font-size: 12; -fx-font-weight: bold;" />
+            </HBox>
+
+        </HBox>
+
+        <!-- Barre verte décorative -->
+        <Region prefHeight="3" minHeight="3" maxHeight="3"
+                style="-fx-background-color: #2ECC71;" />
+    </VBox>
+</AnchorPane>

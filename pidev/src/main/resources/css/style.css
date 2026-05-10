@@ -168,3 +168,38 @@
 .scroll-bar:horizontal .thumb:hover {
     -fx-background-color: rgba(255, 255, 255, 0.3);
 }
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}
+
+.nav-button:hover {
+    -fx-text-fill: #2ECC71;
+}
+
+.nav-button-active {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2ECC71;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.filter-button {
+    -fx-background-color: #81AE8D;
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}
+
+.filter-button-active {
+    -fx-background-color: #23779C;
+    -fx-text-fill: white;
+    -fx-background-radius: 25;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}

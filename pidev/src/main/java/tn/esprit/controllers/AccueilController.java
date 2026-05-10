@@ -1,15 +1,12 @@
 package tn.esprit.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
 import tn.esprit.entities.logement;
 import tn.esprit.entities.User;
 import tn.esprit.services.GeminiService;
@@ -17,35 +14,24 @@ import tn.esprit.services.Servicelogement;
 import tn.esprit.utils.NavigationManager;
 import tn.esprit.utils.SessionManager;
 
-import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class AccueilController {
 
+    // Éléments de la navbar (inclus via fx:include)
+    @FXML private NavbarController navbarController;
+
+    // Éléments du contenu principal
     @FXML private TextField searchField;
-    @FXML private Button btnEvenements;
-    @FXML private Button btnLocation;
     @FXML private ComboBox<String> sortCombo;
     @FXML private Button allFilterBtn;
     @FXML private Button villaFilterBtn;
     @FXML private Button hotelFilterBtn;
     @FXML private Button appartFilterBtn;
     @FXML private FlowPane flowLogements;
-    @FXML private Button btnNosLogements;
-    @FXML private Button btnAccueil;
-    @FXML private Button btnMesReservations;
-    @FXML private HBox userBox;
-    @FXML private Label userNameLabel;
     @FXML private Button btnRecommendations;
-    @FXML private Button btnLogout;
-    @FXML private Button btnVoyager;
-    @FXML private VBox contentContainer;
-    @FXML private AnchorPane mainContentArea;
-    @FXML private Button btnVoirToutes;  // ✅ AJOUTER CETTE LIGNE
-
 
     private Servicelogement serviceLogement;
     private List<logement> tousLesLogements;
@@ -55,266 +41,101 @@ public class AccueilController {
 
     @FXML
     public void initialize() {
+        System.out.println("Initialisation de AccueilController...");
+
         serviceLogement = new Servicelogement();
         currentUser = SessionManager.getCurrentUser();
 
-        btnNosLogements.getStyleClass().add("nav-button-active");
+        // Afficher les informations de l'utilisateur connecté
+        if (currentUser != null) {
+            System.out.println("Utilisateur connecté: " + currentUser.getEmail());
+        }
 
-        setupUserBox();
+        // Configuration des filtres
+        setupFilters();
 
+        // Configuration de la recherche et du tri
+        setupSearchAndSort();
+
+        // Chargement des logements
+        chargerLogements();
+
+        // Configuration des recommandations
         if (btnRecommendations != null) {
             btnRecommendations.setOnAction(e -> chargerRecommandations());
         }
 
-        if (SessionManager.isLoggedIn()) {
-            btnMesReservations.setVisible(true);
-            btnMesReservations.setOnAction(e ->
-                    NavigationManager.loadView("/fxml/MesReservations.fxml", "Mes Réservations"));
-        } else {
-            btnMesReservations.setVisible(false);
+        if (navbarController != null) {
+            navbarController.setActiveNosLogements();
         }
+    }
 
-        sortCombo.getItems().addAll("Prix croissant", "Prix décroissant");
-
-        try {
-            tousLesLogements = serviceLogement.afficher();
-            logementsFiltres = new ArrayList<>(tousLesLogements);
-            loadLogements();
-        } catch (SQLException e) {
-            showAlert("Erreur de chargement", "Impossible de charger les logements : " + e.getMessage());
-            e.printStackTrace();
-        }
-
+    private void setupFilters() {
         activeFilterBtn = allFilterBtn;
 
-        allFilterBtn.setOnAction(e -> {
-            setActiveFilter(allFilterBtn);
-            logementsFiltres = new ArrayList<>(tousLesLogements);
-            appliquerRechercheEtTri();
-        });
-
-        villaFilterBtn.setOnAction(e -> {
-            setActiveFilter(villaFilterBtn);
-            filtrerParType("Villa");
-        });
-
-        hotelFilterBtn.setOnAction(e -> {
-            setActiveFilter(hotelFilterBtn);
-            filtrerParType("Hôtel");
-        });
-
-        appartFilterBtn.setOnAction(e -> {
-            setActiveFilter(appartFilterBtn);
-            filtrerParType("Appartement");
-        });
-
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
-        sortCombo.setOnAction(e -> trier());
-
-        if (btnVoyager != null) {
-            btnVoyager.setOnAction(e -> handleVoyager());
-            System.out.println("✅ Bouton Voyager configuré");
-        } else {
-            System.err.println("❌ btnVoyager est null! Vérifiez fx:id dans le FXML");
-        }
-
-        if (btnEvenements != null) {
-            btnEvenements.setOnAction(e -> afficherEvenements());
-            System.out.println("✅ Bouton Événements configuré");
-        }
-
-        if (btnLocation != null) {
-            btnLocation.setOnAction(e -> afficherLocation());
-            System.out.println("✅ Bouton Location configuré");
-        }
-
-        if (btnLogout != null) {
-            btnLogout.setOnAction(e -> handleLogout());
-        }
-    }
-
-    private void setupUserBox() {
-        if (SessionManager.isLoggedIn() && currentUser != null) {
-            if (userNameLabel != null) {
-                userNameLabel.setText(currentUser.getPrenom() + " " + currentUser.getNom());
-            }
-            if (userBox != null) {
-                userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> showUserProfile());
-                userBox.setOnMouseEntered(e -> onUserBoxHover());
-                userBox.setOnMouseExited(e -> onUserBoxExit());
-            }
-        } else {
-            if (userNameLabel != null) {
-                userNameLabel.setText("Connexion");
-            }
-            if (userBox != null) {
-                userBox.setCursor(javafx.scene.Cursor.HAND);
-                userBox.setOnMouseClicked(e -> NavigationManager.showLogin());
-            }
-        }
-    }
-
-    @FXML
-    private void afficherEvenements() {
-        System.out.println("🔄 Chargement de la page des événements");
-
-        try {
-            // Vérifier où se trouve le fichier
-            String[] chemins = {"/UserHome.fxml", "/fxml/UserHome.fxml"};
-            URL resourceUrl = null;
-
-            for (String chemin : chemins) {
-                resourceUrl = getClass().getResource(chemin);
-                if (resourceUrl != null) {
-                    System.out.println("✅ Fichier trouvé: " + chemin);
-                    break;
+        if (allFilterBtn != null) {
+            allFilterBtn.setOnAction(e -> {
+                setActiveFilter(allFilterBtn);
+                if (tousLesLogements != null) {
+                    logementsFiltres = new ArrayList<>(tousLesLogements);
+                    appliquerRechercheEtTri();
                 }
-            }
-
-            if (resourceUrl == null) {
-                System.err.println("❌ Fichier UserHome.fxml introuvable!");
-                showAlert("Erreur", "Fichier des événements introuvable!");
-                return;
-            }
-
-            BorderPane mainPane = (BorderPane) btnEvenements.getScene().getRoot();
-
-            FXMLLoader loader = new FXMLLoader(resourceUrl);
-            AnchorPane evenementsView = loader.load();
-
-            UserController eventsController = loader.getController();
-            if (eventsController != null && currentUser != null) {
-                eventsController.setCurrentUser(currentUser);
-            }
-
-            mainPane.setCenter(evenementsView);
-            updateActiveNavButton(btnEvenements);
-
-            System.out.println("✅ Page des événements chargée avec succès");
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement événements: " + e.getMessage());
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la page des événements.");
-        }
-    }
-
-    @FXML
-    private void afficherLocation() {
-        System.out.println("🔄 Chargement de la page de location de voitures");
-
-        try {
-            // ✅ Chemin correct : dossier client à la racine
-            String fxmlPath = "/client/AccueilClient.fxml";
-
-            // Vérifier que le fichier existe
-            URL resourceUrl = getClass().getResource(fxmlPath);
-
-            if (resourceUrl == null) {
-                System.err.println("❌ Fichier non trouvé: " + fxmlPath);
-
-                // Debug: lister les fichiers disponibles dans /client
-                System.out.println("📁 Fichiers disponibles dans /client:");
-                try {
-                    URL dirUrl = getClass().getResource("/client");
-                    if (dirUrl != null) {
-                        java.nio.file.Path path = java.nio.file.Paths.get(dirUrl.toURI());
-                        java.nio.file.Files.list(path).forEach(p ->
-                                System.out.println("  - " + p.getFileName())
-                        );
-                    } else {
-                        System.out.println("  Le dossier /client n'existe pas!");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                showAlert("Erreur", "Fichier de location introuvable!");
-                return;
-            }
-
-            BorderPane mainPane = (BorderPane) btnLocation.getScene().getRoot();
-
-            FXMLLoader loader = new FXMLLoader(resourceUrl);
-            AnchorPane locationView = loader.load();
-
-            Object controller = loader.getController();
-            if (controller != null && currentUser != null) {
-                try {
-                    controller.getClass().getMethod("setCurrentUser", User.class).invoke(controller, currentUser);
-                } catch (Exception e) {
-                    System.out.println("⚠️ Pas de méthode setCurrentUser dans le contrôleur de location");
-                }
-            }
-
-            mainPane.setCenter(locationView);
-            updateActiveNavButton(btnLocation);
-
-            System.out.println("✅ Page de location chargée avec succès");
-
-        } catch (IOException e) {
-            System.err.println("❌ Erreur chargement location: " + e.getMessage());
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de charger la page de location.");
-        }
-    }
-    @FXML
-    private void voirToutesLesVoitures() {
-        try {
-            // ✅ Chemin correct vers le catalogue dans le dossier client
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/client/CatalogueVoitures.fxml"));
-            Parent catalogueView = loader.load();
-
-            BorderPane mainPane = (BorderPane) btnVoirToutes.getScene().getRoot();
-            mainPane.setCenter(catalogueView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void allerMesReservations() {
-        NavigationManager.loadView("/client/MesReservations.fxml", "Mes Réservations");
-    }
-
-    @FXML
-    private void allerPlanning() {
-        NavigationManager.loadView("/client/Planning.fxml", "Planning");
-    }
-    private void updateActiveNavButton(Button activeButton) {
-        Button[] navButtons = {btnAccueil, btnNosLogements, btnMesReservations, btnEvenements, btnLocation, btnVoyager};
-
-        for (Button btn : navButtons) {
-            if (btn != null) {
-                if (btn == activeButton) {
-                    btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;");
-                } else {
-                    btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;");
-                }
-            }
-        }
-    }
-
-    public void setCurrentUser(User user) {
-        this.currentUser = user;
-        SessionManager.setCurrentUser(user);
-
-        if (user != null && userNameLabel != null) {
-            userNameLabel.setText(user.getPrenom() + " " + user.getNom());
-        }
-
-        if (btnMesReservations != null) {
-            btnMesReservations.setVisible(true);
-            btnMesReservations.setOnAction(e -> {
-                System.out.println("Navigation vers Mes Réservations");
-                NavigationManager.loadView("/fxml/MesReservations.fxml", "Mes Réservations");
             });
         }
 
-        setupUserBox();
-        System.out.println("Utilisateur connecté dans AccueilController: " + (user != null ? user.getEmail() : "null"));
+        if (villaFilterBtn != null) {
+            villaFilterBtn.setOnAction(e -> {
+                setActiveFilter(villaFilterBtn);
+                filtrerParType("Villa");
+            });
+        }
+
+        if (hotelFilterBtn != null) {
+            hotelFilterBtn.setOnAction(e -> {
+                setActiveFilter(hotelFilterBtn);
+                filtrerParType("Hôtel");
+            });
+        }
+
+        if (appartFilterBtn != null) {
+            appartFilterBtn.setOnAction(e -> {
+                setActiveFilter(appartFilterBtn);
+                filtrerParType("Appartement");
+            });
+        }
+    }
+
+    private void setupSearchAndSort() {
+        if (sortCombo != null) {
+            sortCombo.getItems().addAll("Prix croissant", "Prix décroissant");
+            sortCombo.setOnAction(e -> trier());
+        }
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> rechercher(newVal));
+        }
+    }
+
+    private void chargerLogements() {
+        try {
+            tousLesLogements = serviceLogement.afficher();
+            if (tousLesLogements != null && !tousLesLogements.isEmpty()) {
+                logementsFiltres = new ArrayList<>(tousLesLogements);
+                afficherLogements(logementsFiltres);
+                System.out.println("Logements chargés: " + tousLesLogements.size());
+            } else {
+                System.out.println("Aucun logement trouvé");
+                if (flowLogements != null) {
+                    flowLogements.getChildren().clear();
+                    Label noDataLabel = new Label("Aucun logement disponible");
+                    noDataLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
+                    flowLogements.getChildren().add(noDataLabel);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors du chargement des logements: " + e.getMessage());
+            showAlert("Erreur de chargement", "Impossible de charger les logements : " + e.getMessage());
+        }
     }
 
     private void setActiveFilter(Button newActiveBtn) {
@@ -323,18 +144,16 @@ public class AccueilController {
             activeFilterBtn.getStyleClass().add("filter-button");
         }
         activeFilterBtn = newActiveBtn;
-        activeFilterBtn.getStyleClass().remove("filter-button");
-        activeFilterBtn.getStyleClass().add("filter-button-active");
-    }
-
-    private void loadLogements() {
-        afficherLogements(tousLesLogements);
+        if (activeFilterBtn != null) {
+            activeFilterBtn.getStyleClass().remove("filter-button");
+            activeFilterBtn.getStyleClass().add("filter-button-active");
+        }
     }
 
     private void filtrerParType(String type) {
         if (tousLesLogements == null) return;
         logementsFiltres = tousLesLogements.stream()
-                .filter(l -> l.getType().equalsIgnoreCase(type))
+                .filter(l -> l.getType() != null && l.getType().equalsIgnoreCase(type))
                 .collect(Collectors.toList());
         appliquerRechercheEtTri();
     }
@@ -349,8 +168,8 @@ public class AccueilController {
 
         String recherche = texte.toLowerCase();
         List<logement> resultat = logementsFiltres.stream()
-                .filter(l -> l.getNom().toLowerCase().contains(recherche) ||
-                        l.getAdresse().toLowerCase().contains(recherche))
+                .filter(l -> (l.getNom() != null && l.getNom().toLowerCase().contains(recherche)) ||
+                        (l.getAdresse() != null && l.getAdresse().toLowerCase().contains(recherche)))
                 .collect(Collectors.toList());
         afficherLogements(resultat);
     }
@@ -381,9 +200,13 @@ public class AccueilController {
     }
 
     private void appliquerRechercheEtTri() {
-        String texte = searchField.getText();
-        if (texte != null && !texte.trim().isEmpty()) {
-            rechercher(texte);
+        if (searchField != null) {
+            String texte = searchField.getText();
+            if (texte != null && !texte.trim().isEmpty()) {
+                rechercher(texte);
+            } else {
+                afficherLogements(logementsFiltres);
+            }
         } else {
             afficherLogements(logementsFiltres);
         }
@@ -392,49 +215,90 @@ public class AccueilController {
 
     private void afficherLogements(List<logement> liste) {
         if (flowLogements == null) return;
-        flowLogements.getChildren().clear();
-        for (logement l : liste) {
-            flowLogements.getChildren().add(creerCarteLogement(l));
-        }
+
+        Platform.runLater(() -> {
+            flowLogements.getChildren().clear();
+
+            if (liste == null || liste.isEmpty()) {
+                Label noDataLabel = new Label("Aucun logement trouvé");
+                noDataLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: #666;");
+                flowLogements.getChildren().add(noDataLabel);
+                return;
+            }
+
+            for (logement l : liste) {
+                flowLogements.getChildren().add(creerCarteLogement(l));
+            }
+        });
     }
 
     private VBox creerCarteLogement(logement l) {
         VBox card = new VBox(10);
         card.setStyle("-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);");
-        card.setPrefWidth(250);
+        card.setPrefWidth(280);
+        card.setMaxWidth(280);
+        card.setMinWidth(280);
+
+        // Conteneur pour l'image avec taille fixe
+        StackPane imageContainer = new StackPane();
+        imageContainer.setPrefWidth(240);
+        imageContainer.setPrefHeight(160);
+        imageContainer.setMinWidth(240);
+        imageContainer.setMinHeight(160);
+        imageContainer.setMaxWidth(240);
+        imageContainer.setMaxHeight(160);
+        imageContainer.setStyle("-fx-background-radius: 10; -fx-background-color: #f0f0f0;");
 
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(210);
-        imageView.setFitHeight(150);
-        imageView.setPreserveRatio(true);
+        imageView.setFitWidth(240);
+        imageView.setFitHeight(160);
+        imageView.setPreserveRatio(false); // Important: false pour forcer la taille exacte
+        imageView.setStyle("-fx-background-radius: 10;");
 
+        // Centrer l'image dans le conteneur
+        imageContainer.getChildren().add(imageView);
+
+        // Chargement de l'image
         try {
             String imagePath = l.getImage();
+            Image img = null;
+
             if (imagePath != null && !imagePath.isEmpty()) {
                 if (imagePath.startsWith("http")) {
-                    imageView.setImage(new Image(imagePath));
+                    img = new Image(imagePath, 240, 160, false, true);
                 } else {
                     try {
-                        Image img = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
-                        imageView.setImage(img);
+                        img = new Image(getClass().getResourceAsStream(imagePath), 240, 160, false, true);
                     } catch (Exception e) {
-                        Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
-                        imageView.setImage(defaultImg);
+                        System.err.println("Image non trouvée: " + imagePath);
                     }
                 }
-            } else {
-                Image defaultImg = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/default.jpg")));
-                imageView.setImage(defaultImg);
             }
+
+            if (img == null) {
+                try {
+                    img = new Image(getClass().getResourceAsStream("/images/default.jpg"), 240, 160, false, true);
+                } catch (Exception e) {
+                    // Image par défaut simple
+                    img = new Image("https://via.placeholder.com/240x160?text=No+Image", 240, 160, false, true);
+                }
+            }
+            imageView.setImage(img);
         } catch (Exception e) {
-            System.err.println("Erreur chargement image pour " + l.getNom() + " : " + e.getMessage());
+            System.err.println("Erreur chargement image: " + e.getMessage());
+            // Image par défaut en cas d'erreur
+            imageView.setImage(new Image("https://via.placeholder.com/240x160?text=No+Image", 240, 160, false, true));
         }
 
         Label title = new Label(l.getNom());
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
+        title.setWrapText(true);
+        title.setMaxWidth(240);
 
         Label location = new Label("📍 " + l.getAdresse());
         location.setStyle("-fx-font-size: 13px; -fx-text-fill: #666;");
+        location.setWrapText(true);
+        location.setMaxWidth(240);
 
         HBox badgeBox = new HBox(10);
         badgeBox.setAlignment(Pos.CENTER_LEFT);
@@ -461,8 +325,10 @@ public class AccueilController {
         nuitLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666;");
         priceBox.getChildren().addAll(price, nuitLabel);
 
-        Label equipementLabel = new Label("⚙️ " + l.getEquipement());
+        Label equipementLabel = new Label("⚙️ " + (l.getEquipement() != null && !l.getEquipement().isEmpty() ? l.getEquipement() : "Équipements standard"));
         equipementLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f8c8d;");
+        equipementLabel.setWrapText(true);
+        equipementLabel.setMaxWidth(240);
 
         Button btn = new Button("Réserver");
         btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 25; " +
@@ -481,35 +347,33 @@ public class AccueilController {
 
         btn.setOnAction(e -> {
             if (SessionManager.isLoggedIn()) {
-                SessionManager.setSelectedLogement(l);
-                NavigationManager.loadView("/fxml/ReservationForm.fxml", "Réservation");
+                if (l.isDisponibilite()) {
+                    SessionManager.setSelectedLogement(l);
+                    NavigationManager.loadView("/fxml/ReservationForm.fxml", "Réservation");
+                } else {
+                    showAlert("Indisponible", "Ce logement n'est pas disponible pour le moment.");
+                }
             } else {
                 NavigationManager.showLogin();
             }
         });
 
-        card.getChildren().addAll(imageView, title, location, badgeBox, priceBox, equipementLabel, btn);
+        card.getChildren().addAll(imageContainer, title, location, badgeBox, priceBox, equipementLabel, btn);
         return card;
-    }
-
-    @FXML
-    private void onUserBoxHover() {
-        if (userBox != null) {
-            userBox.setStyle("-fx-background-color: #2C7AA0; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
-                    "-fx-scale-x: 1.05; -fx-scale-y: 1.05; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);");
-        }
-    }
-
-    @FXML
-    private void onUserBoxExit() {
-        if (userBox != null) {
-            userBox.setStyle("-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand; " +
-                    "-fx-scale-x: 1.0; -fx-scale-y: 1.0; -fx-effect: null;");
-        }
     }
 
     private void chargerRecommandations() {
         if (btnRecommendations == null) return;
+
+        if (!SessionManager.isLoggedIn()) {
+            showAlert("Connexion requise", "Veuillez vous connecter pour obtenir des recommandations personnalisées.");
+            return;
+        }
+
+        if (tousLesLogements == null || tousLesLogements.isEmpty()) {
+            showAlert("Information", "Aucun logement disponible pour les recommandations.");
+            return;
+        }
 
         btnRecommendations.setDisable(true);
         btnRecommendations.setText("Chargement...");
@@ -530,15 +394,19 @@ public class AccueilController {
                             .ifPresent(logementsRecommandes::add);
                 }
 
-                javafx.application.Platform.runLater(() -> {
-                    afficherLogements(logementsRecommandes);
+                Platform.runLater(() -> {
+                    if (!logementsRecommandes.isEmpty()) {
+                        afficherLogements(logementsRecommandes);
+                    } else {
+                        showAlert("Recommandations", "Aucune recommandation disponible pour le moment.");
+                    }
                     btnRecommendations.setDisable(false);
                     btnRecommendations.setText("Recommandations pour vous");
                 });
 
             } catch (Exception e) {
                 e.printStackTrace();
-                javafx.application.Platform.runLater(() -> {
+                Platform.runLater(() -> {
                     showAlert("Erreur", "Impossible d'obtenir des recommandations pour le moment.");
                     btnRecommendations.setDisable(false);
                     btnRecommendations.setText("Recommandations pour vous");
@@ -547,48 +415,26 @@ public class AccueilController {
         }).start();
     }
 
-    @FXML
-    private void showUserProfile() {
-        if (SessionManager.isLoggedIn() && currentUser != null) {
-            System.out.println("Ouverture du profil pour: " + currentUser.getEmail());
-            NavigationManager.loadView("/fxml/UserProfil.fxml", "Mon Profil");
-        } else {
-            System.out.println("Vous n'êtes pas connecté !");
-            NavigationManager.showLogin();
+    private void voirToutesLesOffres() {
+        if (tousLesLogements != null) {
+            afficherLogements(tousLesLogements);
+            if (allFilterBtn != null) {
+                setActiveFilter(allFilterBtn);
+            }
+            if (searchField != null) {
+                searchField.clear();
+            }
         }
     }
 
-    @FXML
-    private void handleLogout() {
-        try {
-            SessionManager.logout();
-            NavigationManager.showLogin();
-            System.out.println("✅ Déconnexion réussie");
-        } catch (Exception e) {
-            System.err.println("❌ Erreur lors de la déconnexion: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void handleVoyager() {
-        System.out.println("🔄 Chargement du catalogue des voyages");
-
-        String fxmlPath = "/fxml/CatalogueUser.fxml";
-        java.net.URL resourceUrl = getClass().getResource(fxmlPath);
-
-        if (resourceUrl == null) {
-            System.err.println("❌ ERREUR: Fichier non trouvé: " + fxmlPath);
-            showAlert("Erreur", "Fichier CatalogueUser.fxml introuvable!");
-            return;
-        }
-
-        System.out.println("✅ Fichier trouvé: " + resourceUrl);
-        NavigationManager.loadView(fxmlPath, "Catalogue");
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        SessionManager.setCurrentUser(user);
+        System.out.println("Utilisateur mis à jour: " + (user != null ? user.getEmail() : "null"));
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

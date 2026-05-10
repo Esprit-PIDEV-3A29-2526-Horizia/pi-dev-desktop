@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="800" prefWidth="1300" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.CommentairesController">
+
+    <!-- NAVBAR PARTAGÉE -->
+    <top>
+        <fx:include fx:id="navbar" source="/fxml/Navbar.fxml" />
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox spacing="20" style="-fx-padding: 30; -fx-background-color: #f8fafc;">
+
+                <!-- Section Héro -->
+                <VBox alignment="CENTER" spacing="15"
+                      style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 40;">
+                    <Label text="💬 Commentaires"
+                           textFill="WHITE"
+                           style="-fx-font-size: 36; -fx-font-weight: bold;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
+                    <Label text="Partagez votre avis et interagissez avec la communauté"
+                           textFill="#DACEB6"
+                           style="-fx-font-size: 17;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
+                </VBox>
+
+                <!-- Titre de la publication -->
+                <Label fx:id="publicationInfoLabel" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #23779C;"/>
+
+                <!-- Formulaire d'ajout de commentaire -->
+                <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 10;">
+                    <Label text="Ajouter un commentaire" style="-fx-font-weight: bold; -fx-text-fill: #1A3C5A;"/>
+                    <TextField fx:id="auteurField" promptText="Votre nom" style="-fx-background-radius: 8; -fx-padding: 10;"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextArea fx:id="contenuField" promptText="Votre commentaire..." wrapText="true" prefRowCount="3" HBox.hgrow="ALWAYS" style="-fx-background-radius: 8; -fx-padding: 10;"/>
+                        <ComboBox fx:id="langueCombo" prefWidth="100" promptText="Langue" style="-fx-background-radius: 8;"/>
+                        <Button fx:id="voiceInputBtn" text="🎤" style="-fx-background-radius: 20; -fx-cursor: hand; -fx-background-color: #3b82f6; -fx-text-fill: white;"/>
+                    </HBox>
+
+                    <Button fx:id="ajouterBtn" text="Publier" style="-fx-background-color: #81AE8D; -fx-text-fill: white; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 10; -fx-font-weight: bold;"/>
+                </VBox>
+
+                <!-- Liste des commentaires -->
+                <VBox fx:id="commentairesContainer" spacing="10"/>
+
+                <!-- Bouton retour -->
+                <Button fx:id="retourBtn" text="← Retour" style="-fx-background-color: #DACEB6; -fx-text-fill: #1A3C5A; -fx-cursor: hand; -fx-background-radius: 20; -fx-padding: 10; -fx-font-weight: bold;"/>
+
+                <!-- Conteneur pour la WebView de reconnaissance vocale (invisible) -->
+                <StackPane fx:id="webViewContainer" prefWidth="0" prefHeight="0" />
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

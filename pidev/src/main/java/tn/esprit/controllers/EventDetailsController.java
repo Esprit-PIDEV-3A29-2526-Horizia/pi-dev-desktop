@@ -6,12 +6,10 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.Participation;
 import tn.esprit.entities.User;
@@ -105,6 +103,12 @@ public class EventDetailsController implements Initializable {
     public void setEvent(Events event) {
         this.event = event;
         displayEventDetails();
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        System.out.println("✅ Utilisateur reçu dans EventDetailsController: " +
+                (user != null ? user.getEmail() : "null"));
     }
 
     private void displayEventDetails() {
@@ -211,10 +215,15 @@ public class EventDetailsController implements Initializable {
 
             Participation p = new Participation();
             p.setId_event(event.getId_event());
-            p.setNombrePlaces(places);
-            p.setMontantTotal((float) (places * event.getPrix()));
+            p.setUser_id(currentUser != null ? currentUser.getId() : 0);
+            p.setNombre_places(places);
+            p.setMontant_total(places * event.getPrix());
             p.setStatut("Confirmée");
-            p.setDateParticipation(new Timestamp(System.currentTimeMillis()));
+            p.setDate_participation(new Timestamp(System.currentTimeMillis()));
+            p.setEmail_snapshot(emailField.getText());
+            p.setNom_snapshot(currentUser != null ? currentUser.getNom() : "");
+            p.setPrenom_snapshot(currentUser != null ? currentUser.getPrenom() : "");
+            p.setTelephone_snapshot(telephoneField.getText());
 
             serviceParticipation.ajouter(p);
 
@@ -244,17 +253,14 @@ public class EventDetailsController implements Initializable {
     @FXML
     private void handleBack() {
         try {
-            // Recharger la vue des événements
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserEvenements.fxml"));
             Parent eventsView = loader.load();
 
-            // Passer l'utilisateur courant
             UserController eventsController = loader.getController();
             if (eventsController != null && currentUser != null) {
                 eventsController.setCurrentUser(currentUser);
             }
 
-            // Remplacer le contenu de la même fenêtre
             BorderPane mainPane = (BorderPane) titleLabel.getScene().getRoot();
             mainPane.setCenter(eventsView);
 
@@ -361,27 +367,17 @@ public class EventDetailsController implements Initializable {
         }
     }
 
-    private void setCurrentUser(User user) {
-        this.currentUser = user;
-    }
-
     private void loadWeather(String location) {
-        System.out.println("Loading weather for location: " + location);
-
         if (location == null || location.isEmpty() || location.equals("Lieu non spécifié")) {
-            System.out.println("Location invalid, hiding weather box");
             weatherBox.setVisible(false);
             return;
         }
 
         String city = location.split(",")[0].trim();
-        System.out.println("Extracted city: " + city);
 
         new Thread(() -> {
             try {
-                System.out.println("Calling weather API for: " + city);
                 WeatherInfo weather = weatherService.getWeatherForCity(city);
-                System.out.println("Weather API response received: " + weather);
 
                 javafx.application.Platform.runLater(() -> {
                     try {
@@ -390,24 +386,18 @@ public class EventDetailsController implements Initializable {
                         humidityLabel.setText("💧 " + weather.getHumidity() + "%");
                         windLabel.setText("💨 " + String.format("%.0f km/h", weather.getWindSpeed() * 3.6));
 
-                        String iconUrl = weather.getIconUrl();
-                        System.out.println("Loading icon from: " + iconUrl);
-                        Image icon = new Image(iconUrl, 50, 50, true, true);
+                        Image icon = new Image(weather.getIconUrl(), 50, 50, true, true);
                         weatherIcon.setImage(icon);
 
                         weatherBox.setVisible(true);
                         weatherBox.setManaged(true);
-                        System.out.println("Weather box should now be visible");
 
                     } catch (Exception e) {
-                        System.err.println("Error updating UI with weather data:");
-                        e.printStackTrace();
                         weatherBox.setVisible(false);
                     }
                 });
             } catch (Exception e) {
-                System.err.println("Error in weather API thread:");
-                e.printStackTrace();
+                System.err.println("Error in weather API thread: " + e.getMessage());
             }
         }).start();
     }

@@ -11,27 +11,31 @@ import tn.esprit.entities.User;
 import java.io.IOException;
 
 public class NavigationManager {
+
     private static Stage primaryStage;
-    private static int windowWidth = 1200;
-    private static int windowHeight = 700;
     private static User currentUser;
+
+    // ──────────────────────────────────────────
+    //  Initialisation
+    // ──────────────────────────────────────────
 
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
-        primaryStage.setResizable(false);
-        primaryStage.setTitle("Horiza - Application");
+        primaryStage.setResizable(true);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(600);
+        primaryStage.setTitle("Horizia - Application");
         System.out.println("✅ NavigationManager initialisé");
     }
 
+    /** Conservé pour rétrocompatibilité — la taille est gérée par setMaximized */
     public static void setDimensions(int width, int height) {
-        windowWidth = width;
-        windowHeight = height;
-        if (primaryStage != null && primaryStage.getScene() != null) {
-            primaryStage.setWidth(width);
-            primaryStage.setHeight(height);
-            primaryStage.centerOnScreen();
-        }
+        // no-op : on utilise le plein écran désormais
     }
+
+    // ──────────────────────────────────────────
+    //  Utilisateur
+    // ──────────────────────────────────────────
 
     public static void setCurrentUser(User user) {
         currentUser = user;
@@ -41,12 +45,16 @@ public class NavigationManager {
         return currentUser;
     }
 
+    // ──────────────────────────────────────────
+    //  Raccourcis de navigation
+    // ──────────────────────────────────────────
+
     public static void showLogin() {
         loadView("/fxml/Login.fxml", "Connexion");
     }
 
     public static void showUserAccueil() {
-        loadView("/fxml/accueil.fxml", "Accueil");
+        loadView("/fxml/CatalogueUser.fxml", "Accueil");
     }
 
     public static void showAdminDashboard() {
@@ -65,66 +73,101 @@ public class NavigationManager {
         loadView("/fxml/UserEvenements.fxml", "Nos Événements");
     }
 
+    public static void logout() {
+        currentUser = null;
+        showLogin();
+    }
+
+    // ──────────────────────────────────────────
+    //  Méthode principale de navigation
+    // ──────────────────────────────────────────
+
     public static void loadView(String fxmlPath, String title) {
         try {
-            System.out.println("🔄 Navigation vers: " + fxmlPath + " (" + title + ")");
+            System.out.println("🔄 Navigation vers: " + fxmlPath);
 
             if (primaryStage == null) {
-                System.err.println("❌ primaryStage est null! Appelez setPrimaryStage() d'abord");
+                System.err.println("❌ primaryStage est null!");
                 return;
             }
 
-            // Vérifier que le fichier existe
             if (NavigationManager.class.getResource(fxmlPath) == null) {
                 System.err.println("❌ Fichier introuvable: " + fxmlPath);
                 return;
             }
 
-            FXMLLoader loader = new FXMLLoader(NavigationManager.class.getResource(fxmlPath));
+            // ✅ Mémoriser l'état AVANT de toucher quoi que ce soit
+            final boolean wasMaximized = primaryStage.isMaximized();
+            final double savedWidth    = primaryStage.getWidth();
+            final double savedHeight   = primaryStage.getHeight();
+
+            FXMLLoader loader = new FXMLLoader(
+                    NavigationManager.class.getResource(fxmlPath));
             Parent newRoot = loader.load();
 
-            // Passer l'utilisateur au contrôleur s'il implémente UserAware
+            // Injection utilisateur si le controller le supporte
             Object controller = loader.getController();
             if (controller instanceof UserAware && currentUser != null) {
                 ((UserAware) controller).setCurrentUser(currentUser);
-                System.out.println("✅ User injecté dans " + controller.getClass().getSimpleName());
+                System.out.println("✅ User injecté dans "
+                        + controller.getClass().getSimpleName());
             }
 
-            // Animation de transition
-            if (primaryStage.getScene() != null) {
-                Parent oldRoot = primaryStage.getScene().getRoot();
+            Scene scene = primaryStage.getScene();
 
-                FadeTransition fadeOut = new FadeTransition(Duration.millis(200), oldRoot);
-                fadeOut.setFromValue(1);
-                fadeOut.setToValue(0);
+            if (scene != null) {
+                // ✅ Réutiliser la scène existante : évite tout redimensionnement
+                Parent oldRoot = scene.getRoot();
+
+                FadeTransition fadeOut = new FadeTransition(
+                        Duration.millis(150), oldRoot);
+                fadeOut.setFromValue(1.0);
+                fadeOut.setToValue(0.0);
 
                 fadeOut.setOnFinished(e -> {
-                    primaryStage.setScene(new Scene(newRoot, windowWidth, windowHeight));
-                    primaryStage.setTitle("Horiza - " + title);
-                    primaryStage.centerOnScreen();
+                    // Swap du contenu sans recréer la scène
+                    scene.setRoot(newRoot);
+                    primaryStage.setTitle("Horizia - " + title);
 
-                    FadeTransition fadeIn = new FadeTransition(Duration.millis(200), newRoot);
-                    fadeIn.setFromValue(0);
-                    fadeIn.setToValue(1);
+                    // ✅ Restaurer l'état maximisé
+                    if (wasMaximized) {
+                        primaryStage.setMaximized(false);
+                        primaryStage.setMaximized(true);
+                    } else {
+                        primaryStage.setWidth(savedWidth);
+                        primaryStage.setHeight(savedHeight);
+                    }
+
+                    FadeTransition fadeIn = new FadeTransition(
+                            Duration.millis(150), newRoot);
+                    fadeIn.setFromValue(0.0);
+                    fadeIn.setToValue(1.0);
                     fadeIn.play();
                 });
 
                 fadeOut.play();
+
             } else {
-                // Premier chargement
-                primaryStage.setScene(new Scene(newRoot, windowWidth, windowHeight));
-                primaryStage.setTitle("Horiza - " + title);
-                primaryStage.centerOnScreen();
+                // Premier chargement (ne devrait pas arriver après MainFX)
+                Scene newScene = new Scene(newRoot);
+                primaryStage.setScene(newScene);
+                primaryStage.setTitle("Horizia - " + title);
+                primaryStage.setMaximized(true);
                 primaryStage.show();
             }
 
             System.out.println("✅ Vue chargée: " + fxmlPath);
 
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement " + fxmlPath + ": " + e.getMessage());
+            System.err.println("❌ Erreur chargement " + fxmlPath
+                    + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+    // ──────────────────────────────────────────
+    //  Chargement avec accès au controller
+    // ──────────────────────────────────────────
 
     public static FXMLLoader loadViewWithController(String fxmlPath) {
         try {
@@ -133,24 +176,48 @@ public class NavigationManager {
                 return null;
             }
 
-            FXMLLoader loader = new FXMLLoader(NavigationManager.class.getResource(fxmlPath));
+            if (NavigationManager.class.getResource(fxmlPath) == null) {
+                System.err.println("❌ Fichier introuvable: " + fxmlPath);
+                return null;
+            }
+
+            final boolean wasMaximized = primaryStage.isMaximized();
+            final double savedWidth    = primaryStage.getWidth();
+            final double savedHeight   = primaryStage.getHeight();
+
+            FXMLLoader loader = new FXMLLoader(
+                    NavigationManager.class.getResource(fxmlPath));
             Parent root = loader.load();
 
-            primaryStage.setScene(new Scene(root, windowWidth, windowHeight));
-            primaryStage.centerOnScreen();
-            primaryStage.show();
+            Scene scene = primaryStage.getScene();
+            if (scene != null) {
+                scene.setRoot(root);
+            } else {
+                primaryStage.setScene(new Scene(root));
+            }
 
+            primaryStage.setTitle("Horizia");
+
+            if (wasMaximized) {
+                primaryStage.setMaximized(false);
+                primaryStage.setMaximized(true);
+            } else {
+                primaryStage.setWidth(savedWidth);
+                primaryStage.setHeight(savedHeight);
+            }
+
+            primaryStage.show();
             return loader;
 
         } catch (IOException e) {
-            System.err.println("❌ Erreur chargement " + fxmlPath + ": " + e.getMessage());
+            System.err.println("❌ Erreur chargement " + fxmlPath
+                    + ": " + e.getMessage());
             e.printStackTrace();
             return null;
         }
     }
 
-    public static void logout() {
-        currentUser = null;
-        showLogin();
+    public static Stage getPrimaryStage() {
+        return primaryStage;
     }
 }

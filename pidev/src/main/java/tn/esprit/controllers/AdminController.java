@@ -208,7 +208,7 @@ public class AdminController implements Initializable {
 
         Map<String, Long> reservationsParJour = allParticipations.stream()
                 .collect(Collectors.groupingBy(
-                        p -> new SimpleDateFormat("dd/MM").format(p.getDateParticipation()),
+                        p -> new SimpleDateFormat("dd/MM").format(p.getDate_participation()),
                         Collectors.counting()
                 ));
 
@@ -569,14 +569,14 @@ public class AdminController implements Initializable {
         eventLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #23779C;");
         eventLabel.setWrapText(true);
 
-        Label placesLabel = new Label("📋 " + p.getNombrePlaces() + " place(s)");
+        Label placesLabel = new Label("📋 " + p.getNombre_places() + " place(s)");
         placesLabel.setStyle("-fx-text-fill: #666;");
 
-        Label totalLabel = new Label(String.format("💰 %.0f DT", p.getMontantTotal()));
+        Label totalLabel = new Label(String.format("💰 %.0f DT", p.getMontant_total()));
         totalLabel.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 18px; -fx-font-weight: bold;");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Label dateLabel = new Label("📅 " + sdf.format(p.getDateParticipation()));
+        Label dateLabel = new Label("📅 " + sdf.format(p.getDate_participation()));
         dateLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 11px;");
 
         Button detailsBtn = new Button("👤 Détails participant");
@@ -612,14 +612,14 @@ public class AdminController implements Initializable {
         Label eventInfo = new Label("📌 " + eventTitle);
         eventInfo.setStyle("-fx-font-weight: bold; -fx-text-fill: #23779C; -fx-font-size: 16px;");
 
-        Label placesInfo = new Label("📋 Places réservées: " + p.getNombrePlaces());
+        Label placesInfo = new Label("📋 Places réservées: " + p.getNombre_places());
         placesInfo.setStyle("-fx-text-fill: #666;");
 
-        Label totalInfo = new Label("💰 Montant total: " + String.format("%.0f DT", p.getMontantTotal()));
+        Label totalInfo = new Label("💰 Montant total: " + String.format("%.0f DT", p.getMontant_total()));
         totalInfo.setStyle("-fx-text-fill: #81AE8D; -fx-font-size: 16px; -fx-font-weight: bold;");
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        Label dateInfo = new Label("📅 Date: " + sdf.format(p.getDateParticipation()));
+        Label dateInfo = new Label("📅 Date: " + sdf.format(p.getDate_participation()));
         dateInfo.setStyle("-fx-text-fill: #666;");
 
         Label noteLabel = new Label("ℹ️ Les détails utilisateur seront disponibles après intégration avec le module Utilisateurs");

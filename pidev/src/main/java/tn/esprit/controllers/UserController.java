@@ -7,17 +7,17 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import tn.esprit.entities.Events;
 import tn.esprit.entities.User;
 import tn.esprit.services.RefreshService;
 import tn.esprit.services.ServiceEvent;
+import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
@@ -27,11 +27,13 @@ import java.util.*;
 
 public class UserController implements Initializable {
 
+    // Navbar partagée
+    @FXML private NavbarController navbarController;
+
     @FXML private FlowPane flowEvents;
     @FXML private TextField searchField;
     @FXML private ComboBox<String> sortCombo;
     @FXML private Button allFilterBtn;
-    @FXML private Button myEventsBtn;
     @FXML private Button concertFilterBtn;
     @FXML private Button spectacleFilterBtn;
     @FXML private Button conferenceFilterBtn;
@@ -46,14 +48,23 @@ public class UserController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Récupérer l'utilisateur connecté
+        currentUser = SessionManager.getCurrentUser();
+
+        // Mettre à jour la navbar
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+            // Activer le bouton "Événements" dans la navbar
+            navbarController.setActiveEvenements();
+        }
+
+        System.out.println("🔍 UserController - Utilisateur: " +
+                (currentUser != null ? currentUser.getEmail() : "null"));
+
         serviceEvent = new ServiceEvent();
         sortCombo.getItems().addAll("Titre", "Prix", "Date", "Places");
 
         setupCategoryFilters();
-
-        if (myEventsBtn != null) {
-            myEventsBtn.setOnAction(e -> navigateToMyEvents());
-        }
 
         loadEvents();
 
@@ -84,28 +95,11 @@ public class UserController implements Initializable {
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+        }
         System.out.println("👤 Utilisateur reçu dans UserController: " +
                 (user != null ? user.getEmail() : "non connecté"));
-    }
-
-    @FXML
-    private void handleRetour() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/accueil.fxml"));
-            BorderPane accueilView = loader.load();
-
-            AccueilController accueilController = loader.getController();
-            if (accueilController != null && currentUser != null) {
-                accueilController.setCurrentUser(currentUser);
-            }
-
-            BorderPane mainPane = (BorderPane) btnRetour.getScene().getRoot();
-            mainPane.setCenter(accueilView);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible de revenir à l'accueil: " + e.getMessage());
-        }
     }
 
     private void setupCategoryFilters() {
@@ -194,8 +188,14 @@ public class UserController implements Initializable {
         if (flowEvents == null) return;
 
         flowEvents.getChildren().clear();
-        for (Events event : events) {
-            flowEvents.getChildren().add(createEventCard(event));
+        if (events != null && !events.isEmpty()) {
+            for (Events event : events) {
+                flowEvents.getChildren().add(createEventCard(event));
+            }
+        } else {
+            Label emptyLabel = new Label("Aucun événement trouvé");
+            emptyLabel.setStyle("-fx-text-fill: #666; -fx-font-size: 16px;");
+            flowEvents.getChildren().add(emptyLabel);
         }
     }
 
@@ -318,8 +318,7 @@ public class UserController implements Initializable {
             EventDetailsController controller = loader.getController();
             controller.setEvent(event);
             if (currentUser != null) {
-                // Si EventDetailsController a besoin de l'utilisateur, ajoutez cette méthode
-                // controller.setCurrentUser(currentUser);
+                controller.setCurrentUser(currentUser);
             }
 
             BorderPane mainPane = (BorderPane) flowEvents.getScene().getRoot();
@@ -328,20 +327,6 @@ public class UserController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Erreur", "Impossible d'ouvrir les détails: " + e.getMessage());
-        }
-    }
-
-    private void navigateToMyEvents() {
-        try{
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MyEvents.fxml"));
-            Parent root = loader.load();
-
-            BorderPane mainPane = (BorderPane) flowEvents.getScene().getRoot();
-            mainPane.setCenter(root);
-
-        } catch(Exception e){
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir Mes réservations");
         }
     }
 

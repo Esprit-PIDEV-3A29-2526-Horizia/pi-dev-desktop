@@ -31,7 +31,7 @@ public class SessionManager {
 
     public static void setCurrentUser(User user) {
         currentUser = user;
-        System.out.println("Utilisateur connecté: " + (user != null ? user.getEmail() : "null"));
+        System.out.println("✅ Utilisateur connecté: " + (user != null ? user.getEmail() : "null"));
     }
 
     public static User getCurrentUser() {
@@ -39,7 +39,9 @@ public class SessionManager {
     }
 
     public static boolean isLoggedIn() {
-        return currentUser != null;
+        boolean loggedIn = currentUser != null;
+        System.out.println("🔍 isLoggedIn: " + loggedIn + (loggedIn ? " - User: " + currentUser.getEmail() : ""));
+        return loggedIn;
     }
 
     public static void logout() {
@@ -51,7 +53,9 @@ public class SessionManager {
     }
 
     public static boolean isAdmin() {
-        return currentUser != null && currentUser.getProfil_id() == 1;
+        boolean admin = currentUser != null && currentUser.getProfil() != null && currentUser.getProfil().getId() == 1;
+        System.out.println("🔍 isAdmin: " + admin);
+        return admin;
     }
 
     // ===== GESTION LOGEMENT SÉLECTIONNÉ =====
@@ -104,24 +108,28 @@ public class SessionManager {
         testUser.setNom("Test");
         testUser.setPrenom("User");
         testUser.setEmail("test@example.com");
-        testUser.setProfil_id(2);
         setCurrentUser(testUser);
         System.out.println("🧪 Utilisateur de test connecté: " + testUser.getEmail());
     }
 
-    public static void setTestAdminUser() {
-        User adminUser = new User();
-        adminUser.setId(1);
-        adminUser.setNom("Admin");
-        adminUser.setPrenom("Test");
-        adminUser.setEmail("admin@example.com");
-        adminUser.setProfil_id(1);
-        setCurrentUser(adminUser);
-        System.out.println("🧪 Admin de test connecté: " + adminUser.getEmail());
+    // ===== MÉTHODES UTILITAIRES =====
+// Ajoutez ces méthodes à votre SessionManager.java existant
+
+    public static boolean estAdmin() {
+        return isAdmin();
     }
 
-    // ===== MÉTHODES UTILITAIRES =====
+    public static boolean estConnecte() {
+        return isLoggedIn();
+    }
 
+    public static User getUtilisateur() {
+        return getCurrentUser();
+    }
+
+    public static void deconnecter() {
+        logout();
+    }
     public static void printSessionStatus() {
         System.out.println("\n=== ÉTAT DE LA SESSION ===");
         System.out.println("Utilisateur connecté: " + (currentUser != null ? currentUser.getEmail() : "non connecté"));

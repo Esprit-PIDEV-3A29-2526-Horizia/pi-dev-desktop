@@ -1,98 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.effect.DropShadow?>
 
-<BorderPane prefHeight="800" prefWidth="1250" style="-fx-background-color:#F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.AccueilController" stylesheets="@../style.css">
+<BorderPane fx:id="rootPane"
+            prefHeight="800" prefWidth="1250"
+            style="-fx-background-color:#F6F7FB;"
+            xmlns="http://javafx.com/javafx/20.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tn.esprit.controllers.AccueilController"
+            stylesheets="@../style.css">
 
-    <!-- Barre de navigation supérieure -->
     <top>
-        <VBox>
-            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #1A3C5A; -fx-padding: 15 40;">
-                <ImageView fitHeight="45.0" fitWidth="140.0" preserveRatio="true">
-                    <image>
-                        <Image url="@/image/logo.png" />
-                    </image>
-                </ImageView>
-
-                <Region HBox.hgrow="ALWAYS" />
-
-                <HBox spacing="30" alignment="CENTER">
-                    <Button styleClass="nav-button" text="Accueil" />
-                    <Button fx:id="btnNosLogements" styleClass="nav-button, nav-button-active" text="Nos Logements" />
-                    <Button fx:id="btnMesReservations" styleClass="nav-button" text="Mes Réservations" />
-                    <Button fx:id="btnEvenements"
-                            style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: bold; -fx-background-radius: 14; -fx-padding: 6 14; -fx-cursor: hand;"
-                            text="Nos Événements"
-                            onAction="#afficherEvenements"/>
-                    <Button fx:id="btnLocation"
-                            style="-fx-background-color: transparent; -fx-text-fill: #D1D5DB; -fx-font-size: 14; -fx-font-weight: bold; -fx-cursor: hand;"
-                            text="🚗 Location"
-                            onAction="#afficherLocation"/>
-                    <Button fx:id="btnVoyager" styleClass="nav-button" text="Voyager" onAction="#handleVoyager"/>
-                </HBox>
-
-                <Region HBox.hgrow="ALWAYS" />
-
-                <HBox fx:id="userBox" spacing="12" alignment="CENTER"
-                      style="-fx-background-color: #3D94CA; -fx-background-radius: 25; -fx-padding: 8 20; -fx-cursor: hand;"
-                      onMouseEntered="#onUserBoxHover"
-                      onMouseExited="#onUserBoxExit"
-                      onMouseClicked="#showUserProfile">
-                    <Label fx:id="userIconLabel" text="👤" style="-fx-text-fill: white; -fx-font-size: 16;" />
-                    <Label fx:id="userNameLabel" text="Utilisateur" style="-fx-text-fill: white; -fx-font-weight: bold;" />
-                </HBox>
-                <!-- 🔴 NOUVEAU BOUTON DE DÉCONNEXION -->
-                <Button fx:id="btnLogout" styleClass="logout-button" onAction="#handleLogout">
-                    <graphic>
-                        <Label text="🚪" style="-fx-font-size: 16;"/>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Se déconnecter" />
-                    </tooltip>
-                </Button>
-            </HBox>
-            <Region prefHeight="4" style="-fx-background-color: #2ECC71;" />
-        </VBox>
+        <fx:include fx:id="navbar" source="Navbar.fxml" />
     </top>
 
-    <!-- Contenu principal -->
     <center>
-        <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
-            <VBox spacing="35" style="-fx-padding: 30;">
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="false"
+                    style="-fx-background-color: transparent; -fx-background: transparent;"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED">
+
+            <VBox spacing="35" fillWidth="true">
+                <padding><Insets top="30" right="30" bottom="30" left="30" /></padding>
 
                 <!-- Section Héro -->
-                <VBox alignment="CENTER" spacing="15" style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 50;">
+                <VBox alignment="CENTER" spacing="15"
+                      style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 50;">
                     <effect><DropShadow color="#00000022" radius="15" offsetY="5"/></effect>
-                    <Label text="Trouvez votre refuge idéal" textFill="WHITE" style="-fx-font-size: 38; -fx-font-weight: bold;" />
-                    <Label text="Villas de luxe, appartements cosy et hôtels de charme" textFill="#DACEB6" style="-fx-font-size: 18;" />
 
-                    <Region prefHeight="20"/>
+                    <Label text="Trouvez votre refuge idéal"
+                           textFill="WHITE"
+                           style="-fx-font-size: 36; -fx-font-weight: bold;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
 
-                    <HBox alignment="CENTER" spacing="15">
-                        <HBox alignment="CENTER_LEFT" spacing="10" prefWidth="450" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 10 20;">
-                            <Label text="🔍" style="-fx-font-size: 18;"/>
-                            <TextField fx:id="searchField" promptText="Où voulez-vous aller ?" style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS" />
-                            <Button fx:id="btnRecommendations" text="Recommandations pour vous" styleClass="filter-button" />
+                    <Label text="Villas de luxe, appartements cosy et hôtels de charme"
+                           textFill="#DACEB6"
+                           style="-fx-font-size: 17;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
+
+                    <Region prefHeight="15" />
+
+                    <!-- Barre de recherche responsive -->
+                    <HBox alignment="CENTER" spacing="12" fillHeight="true">
+                        <HBox.margin><Insets left="20" right="20" /></HBox.margin>
+
+                        <HBox alignment="CENTER_LEFT"
+                              spacing="10"
+                              HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 10 20;">
+                            <Label text="🔍" style="-fx-font-size: 16;"/>
+                            <TextField fx:id="searchField"
+                                       promptText="Où voulez-vous aller ?"
+                                       style="-fx-background-color: transparent; -fx-font-size: 14;"
+                                       HBox.hgrow="ALWAYS" />
                         </HBox>
 
-                        <ComboBox fx:id="sortCombo" prefWidth="180" promptText="Trier par Prix" style="-fx-background-color: white; -fx-background-radius: 30; -fx-padding: 5;"/>
+                        <ComboBox fx:id="sortCombo"
+                                  prefWidth="170"
+                                  promptText="Trier par Prix"
+                                  style="-fx-background-color: white; -fx-background-radius: 30;" />
+
+                        <Button fx:id="btnRecommendations"
+                                text="✨ Recommandations"
+                                styleClass="filter-button" />
                     </HBox>
                 </VBox>
 
                 <!-- Filtres par catégorie -->
-                <HBox alignment="CENTER" spacing="15">
-                    <Button fx:id="allFilterBtn" styleClass="filter-button-active" text="Tous" />
-                    <Button fx:id="villaFilterBtn" styleClass="filter-button" text="Villas" />
-                    <Button fx:id="hotelFilterBtn" styleClass="filter-button" text="Hôtels" />
-                    <Button fx:id="appartFilterBtn" styleClass="filter-button" text="Apparts" />
+                <HBox alignment="CENTER" spacing="12">
+                    <Button fx:id="allFilterBtn"   styleClass="filter-button-active" text="Tous" />
+                    <Button fx:id="villaFilterBtn"  styleClass="filter-button"        text="Villas" />
+                    <Button fx:id="hotelFilterBtn"  styleClass="filter-button"        text="Hôtels" />
+                    <Button fx:id="appartFilterBtn" styleClass="filter-button"        text="Appartements" />
                 </HBox>
 
-                <!-- Grille des logements (FlowPane) -->
-                <FlowPane fx:id="flowLogements" hgap="30" vgap="30" alignment="CENTER" />
+                <!-- Grille des logements — s'adapte à la largeur -->
+                <FlowPane fx:id="flowLogements"
+                          hgap="25"
+                          vgap="25"
+                          alignment="CENTER"
+                          prefWrapLength="1200" />
+
+                <!-- Bouton centré -->
+
 
             </VBox>
         </ScrollPane>

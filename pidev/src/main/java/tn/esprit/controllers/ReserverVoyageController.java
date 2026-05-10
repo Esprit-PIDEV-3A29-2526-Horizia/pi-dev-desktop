@@ -2,17 +2,18 @@ package tn.esprit.controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import tn.esprit.api.exchange.ExchangeRateService;
 import tn.esprit.entites.Voyage;
 import tn.esprit.services.ReservationService;
+import tn.esprit.services.VoyageService;
 import tn.esprit.utils.Config;
+import tn.esprit.utils.NavigationManager;
+import tn.esprit.utils.SessionManager;
+import tn.esprit.entities.User;
 
-import java.io.IOException;
 import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,35 +23,39 @@ import java.util.concurrent.Executors;
 
 public class ReserverVoyageController {
 
-    // --- FXML (TON FXML ACTUEL) ---
-    @FXML private ImageView imgVoyage;          // ✅ dans ton FXML
-    @FXML private Label lblTitre;              // ✅ destination affichée ici (TOZEUR)
+    // --- Navbar partagée ---
+    @FXML private NavbarController navbarController;
+
+    // --- FXML ---
+    @FXML private ImageView imgVoyage;
+    @FXML private Label lblTitre;
     @FXML private Label lblDescription;
-
     @FXML private Spinner<Integer> spinnerPlaces;
-
-    @FXML private Label lblPrixUnitaire;       // DT
-    @FXML private Label lblPrixTotal;          // DT
+    @FXML private Spinner<Integer> spinnerAdultes;
+    @FXML private Spinner<Integer> spinnerEnfants;
+    @FXML private Label lblPrixUnitaire;
+    @FXML private Label lblPrixTotal;
     @FXML private ChoiceBox<String> cbCurrency;
     @FXML private Label lblPrixUnitaireFx;
     @FXML private Label lblPrixTotalFx;
     @FXML private Label lblRateInfo;
-
     @FXML private Label lblAIStatus;
+    @FXML private Label errorPersonnes;
+    @FXML private Label errorRepartition;
 
     private Voyage selectedVoyage;
     private final ReservationService rs = new ReservationService();
+    private final VoyageService vs = new VoyageService();
+    private User currentUser;
 
     private final ExchangeRateService exchangeService =
             new ExchangeRateService(Config.get("exchange.apiKey"));
 
     private final ExecutorService exec = Executors.newSingleThreadExecutor();
 
-    private double tndToCurrencyRate = -1; // 1 TND -> currency
+    private double tndToCurrencyRate = -1;
     private String currentCurrency = "EUR";
     private ZonedDateTime lastUpdated = null;
-
-    private final int CURRENT_USER_ID = 1;
 
     // =========================
     // INIT
@@ -58,8 +63,13 @@ public class ReserverVoyageController {
     public void initData(Voyage v) {
         if (v == null) return;
         this.selectedVoyage = v;
+        this.currentUser = SessionManager.getCurrentUser();
 
-        // ✅ destination dans lblTitre (car ton FXML n'a pas lblDestination)
+        // Mettre à jour la navbar
+        if (navbarController != null) {
+            navbarController.updateUserInfo();
+        }
+
         if (lblTitre != null) {
             lblTitre.setText(safe(v.getDestination()).toUpperCase());
         }
@@ -68,48 +78,140 @@ public class ReserverVoyageController {
             lblDescription.setText(safe(v.getDescription()));
         }
 
-        // ✅ image
         if (imgVoyage != null) {
             loadImageSmart(v.getImage_url());
         }
 
-        // Prix unitaire DT
         if (lblPrixUnitaire != null) {
             lblPrixUnitaire.setText(String.format(Locale.US, "%.1f DT", v.getPrix()));
         }
 
-        // Spinner init
-        int max = Math.max(1, v.getPlaces_restantes());
+        // Configurer les spinners
+        int maxPlaces = Math.max(1, v.getPlaces_restantes());
+
         if (spinnerPlaces != null) {
-            spinnerPlaces.setDisable(max <= 0);
-            spinnerPlaces.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, max, 1));
+            spinnerPlaces.setDisable(maxPlaces <= 0);
+            spinnerPlaces.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, maxPlaces, 1));
         }
 
-        // Multi devises
+        if (spinnerAdultes != null) {
+            spinnerAdultes.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxPlaces, 1));
+        }
+
+        if (spinnerEnfants != null) {
+            spinnerEnfants.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, maxPlaces, 0));
+        }
+
         initCurrencyUI();
 
-        // Totaux init
         int nb = (spinnerPlaces != null && spinnerPlaces.getValue() != null) ? spinnerPlaces.getValue() : 1;
         mettreAJourPrixDT(nb);
 
-        // Listener spinner
+        // Listeners
         if (spinnerPlaces != null) {
             spinnerPlaces.valueProperty().addListener((obs, oldVal, newVal) -> {
                 if (newVal != null) {
+                    ajusterRepartition(newVal);
                     mettreAJourPrixDT(newVal);
                     mettreAJourPrixFX(newVal);
+                    validerSaisie();
                 }
             });
         }
 
-        // placeholders + load rate
+        if (spinnerAdultes != null) {
+            spinnerAdultes.valueProperty().addListener((obs, oldVal, newVal) -> {
+                verifierCoherence();
+                calculerTotal();
+                validerSaisie();
+            });
+        }
+
+        if (spinnerEnfants != null) {
+            spinnerEnfants.valueProperty().addListener((obs, oldVal, newVal) -> {
+                verifierCoherence();
+                calculerTotal();
+                validerSaisie();
+            });
+        }
+
         initFxPlaceholders();
         loadRateAsync(currentCurrency);
     }
 
-    // =========================
-    // CURRENCY
-    // =========================
+    private void ajusterRepartition(int totalPersonnes) {
+        int adultesActuels = spinnerAdultes != null ? spinnerAdultes.getValue() : 1;
+        int enfantsActuels = spinnerEnfants != null ? spinnerEnfants.getValue() : 0;
+        int sommeActuelle = adultesActuels + enfantsActuels;
+
+        if (sommeActuelle > totalPersonnes) {
+            int difference = sommeActuelle - totalPersonnes;
+            int nouveauxEnfants = Math.max(0, enfantsActuels - difference);
+            if (spinnerEnfants != null) {
+                spinnerEnfants.getValueFactory().setValue(nouveauxEnfants);
+            }
+
+            int nouvelleSomme = adultesActuels + nouveauxEnfants;
+            if (nouvelleSomme > totalPersonnes) {
+                int nouveauxAdultes = Math.max(1, adultesActuels - (nouvelleSomme - totalPersonnes));
+                if (spinnerAdultes != null) {
+                    spinnerAdultes.getValueFactory().setValue(nouveauxAdultes);
+                }
+            }
+        } else if (sommeActuelle < totalPersonnes && totalPersonnes > 0) {
+            int difference = totalPersonnes - sommeActuelle;
+            if (spinnerAdultes != null) {
+                spinnerAdultes.getValueFactory().setValue(adultesActuels + difference);
+            }
+        }
+    }
+
+    private void verifierCoherence() {
+        int adultes = spinnerAdultes != null ? spinnerAdultes.getValue() : 1;
+        int enfants = spinnerEnfants != null ? spinnerEnfants.getValue() : 0;
+        int total = adultes + enfants;
+        int maxPlaces = selectedVoyage != null ? selectedVoyage.getPlaces_restantes() : 0;
+
+        if (total > maxPlaces) {
+            int difference = total - maxPlaces;
+            if (enfants >= difference) {
+                if (spinnerEnfants != null) {
+                    spinnerEnfants.getValueFactory().setValue(enfants - difference);
+                }
+            } else {
+                if (spinnerEnfants != null) {
+                    spinnerEnfants.getValueFactory().setValue(0);
+                }
+                if (spinnerAdultes != null) {
+                    spinnerAdultes.getValueFactory().setValue(maxPlaces);
+                }
+            }
+        }
+
+        int nouveauTotal = (spinnerAdultes != null ? spinnerAdultes.getValue() : 1) +
+                (spinnerEnfants != null ? spinnerEnfants.getValue() : 0);
+        if (spinnerPlaces != null && nouveauTotal != spinnerPlaces.getValue()) {
+            spinnerPlaces.getValueFactory().setValue(nouveauTotal);
+        }
+    }
+
+    private void calculerTotal() {
+        if (selectedVoyage == null) return;
+
+        int adultes = spinnerAdultes != null ? spinnerAdultes.getValue() : 1;
+        int enfants = spinnerEnfants != null ? spinnerEnfants.getValue() : 0;
+        int totalPersonnes = adultes + enfants;
+        double prixUnitaire = selectedVoyage.getPrix();
+        double total = totalPersonnes * prixUnitaire;
+
+        if (lblPrixTotal != null) {
+            lblPrixTotal.setText(String.format(Locale.US, "%.0f DT", total));
+        }
+        if (spinnerPlaces != null) {
+            spinnerPlaces.getValueFactory().setValue(totalPersonnes);
+        }
+    }
+
     private void initCurrencyUI() {
         if (cbCurrency == null) return;
 
@@ -129,9 +231,6 @@ public class ReserverVoyageController {
         });
     }
 
-    // =========================
-    // PRICES
-    // =========================
     private void mettreAJourPrixDT(int nb) {
         if (selectedVoyage == null) return;
         double total = nb * selectedVoyage.getPrix();
@@ -209,35 +308,28 @@ public class ReserverVoyageController {
         ));
     }
 
-    // =========================
-    // IMAGE (SMART)
-    // =========================
     private void loadImageSmart(String path) {
         try {
             if (path != null && !path.isBlank()) {
                 String p = path.trim();
 
-                // http(s)
                 if (p.startsWith("http://") || p.startsWith("https://")) {
                     imgVoyage.setImage(new Image(p, true));
                     return;
                 }
 
-                // file:C:/... -> file:/C:/...
                 if (p.startsWith("file:C:/") || p.startsWith("file:D:/") || p.startsWith("file:E:/")) {
                     p = "file:/" + p.substring("file:".length());
                     imgVoyage.setImage(new Image(p, true));
                     return;
                 }
 
-                // C:\... -> file:/C:/...
                 if (p.matches("^[A-Za-z]:\\\\.*")) {
                     p = "file:/" + p.replace("\\", "/");
                     imgVoyage.setImage(new Image(p, true));
                     return;
                 }
 
-                // file:/...
                 if (p.startsWith("file:/")) {
                     imgVoyage.setImage(new Image(p, true));
                     return;
@@ -252,6 +344,54 @@ public class ReserverVoyageController {
         else imgVoyage.setImage(null);
     }
 
+    private boolean validerSaisie() {
+        boolean isValid = true;
+
+        if (errorPersonnes != null) {
+            errorPersonnes.setVisible(false);
+            errorPersonnes.setText("");
+        }
+        if (errorRepartition != null) {
+            errorRepartition.setVisible(false);
+            errorRepartition.setText("");
+        }
+
+        if (selectedVoyage == null) {
+            return false;
+        }
+
+        int adultes = spinnerAdultes != null ? spinnerAdultes.getValue() : 1;
+        int enfants = spinnerEnfants != null ? spinnerEnfants.getValue() : 0;
+        int totalPersonnes = adultes + enfants;
+        int maxPlaces = selectedVoyage.getPlaces_restantes();
+
+        if (totalPersonnes < 1) {
+            if (errorPersonnes != null) {
+                errorPersonnes.setText("Au moins 1 personne est requise");
+                errorPersonnes.setVisible(true);
+            }
+            isValid = false;
+        }
+
+        if (adultes < 1 && totalPersonnes > 0) {
+            if (errorRepartition != null) {
+                errorRepartition.setText("Au moins 1 adulte est requis pour le voyage");
+                errorRepartition.setVisible(true);
+            }
+            isValid = false;
+        }
+
+        if (totalPersonnes > maxPlaces) {
+            if (errorPersonnes != null) {
+                errorPersonnes.setText("Maximum " + maxPlaces + " personnes disponibles");
+                errorPersonnes.setVisible(true);
+            }
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
     private String safe(String s) {
         return (s == null) ? "" : s;
     }
@@ -261,45 +401,83 @@ public class ReserverVoyageController {
     // =========================
     @FXML
     void confirmerReservation() {
+        // Valider la saisie
+        if (!validerSaisie()) {
+            showAlert("Erreur de saisie", "Veuillez corriger les erreurs avant de confirmer.", Alert.AlertType.ERROR);
+            return;
+        }
+
         try {
             if (selectedVoyage == null) {
-                new Alert(Alert.AlertType.ERROR, "Aucun voyage sélectionné.").showAndWait();
-                return;
-            }
-            if (spinnerPlaces == null || spinnerPlaces.getValue() == null) {
-                new Alert(Alert.AlertType.ERROR, "Nombre de personnes invalide.").showAndWait();
+                showAlert("Erreur", "Aucun voyage sélectionné.", Alert.AlertType.ERROR);
                 return;
             }
 
-            int nbr = spinnerPlaces.getValue();
+            if (currentUser == null) {
+                showAlert("Connexion requise", "Veuillez vous connecter pour effectuer une réservation.", Alert.AlertType.ERROR);
+                NavigationManager.showLogin();
+                return;
+            }
 
-            rs.effectuerReservation(selectedVoyage.getId(), CURRENT_USER_ID, nbr);
+            int adultes = spinnerAdultes != null ? spinnerAdultes.getValue() : 1;
+            int enfants = spinnerEnfants != null ? spinnerEnfants.getValue() : 0;
+            int totalPersonnes = adultes + enfants;
 
-            new Alert(Alert.AlertType.INFORMATION, "Réservation envoyée (EN_ATTENTE).").showAndWait();
-            retour();
+            if (totalPersonnes > selectedVoyage.getPlaces_restantes()) {
+                showAlert("Erreur", "Nombre de personnes supérieur aux places disponibles (" + selectedVoyage.getPlaces_restantes() + ")", Alert.AlertType.ERROR);
+                return;
+            }
+
+            double prixTotal = totalPersonnes * selectedVoyage.getPrix();
+
+            // Utiliser la méthode avec tous les paramètres (adultes et enfants)
+            boolean success = rs.effectuerReservation(
+                    selectedVoyage.getId(),
+                    currentUser.getId(),
+                    totalPersonnes,
+                    adultes,
+                    enfants,
+                    prixTotal
+            );
+
+            if (success) {
+                // Mettre à jour les places restantes dans l'objet voyage
+                selectedVoyage.setPlaces_restantes(selectedVoyage.getPlaces_restantes() - totalPersonnes);
+
+                showAlert("Succès", "✅ Réservation confirmée !\n\n" +
+                                "Détails:\n" +
+                                "Voyage: " + selectedVoyage.getDestination() + "\n" +
+                                "Adultes: " + adultes + "\n" +
+                                "Enfants: " + enfants + "\n" +
+                                "Total personnes: " + totalPersonnes + "\n" +
+                                "Total: " + String.format("%.0f", prixTotal) + " DT",
+                        Alert.AlertType.INFORMATION);
+                NavigationManager.loadView("/fxml/MesReservationsvoy.fxml", "Mes Réservations");
+            } else {
+                showAlert("Erreur", "Impossible d'effectuer la réservation.", Alert.AlertType.ERROR);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "Erreur : " + e.getMessage()).showAndWait();
+            showAlert("Erreur", "Erreur : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
     @FXML
     private void retour() {
-        try {
-            exec.shutdownNow();
+        exec.shutdownNow();
+        NavigationManager.loadView("/fxml/CatalogueUser.fxml", "Catalogue");
+    }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/CatalogueUser.fxml"));
-            Parent root = loader.load();
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
 
-            if (lblTitre != null && lblTitre.getScene() != null) {
-                lblTitre.getScene().setRoot(root);
-            } else if (imgVoyage != null && imgVoyage.getScene() != null) {
-                imgVoyage.getScene().setRoot(root);
-            }
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 14px;");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        alert.showAndWait();
     }
 }

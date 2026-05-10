@@ -9,45 +9,33 @@ import tn.esprit.utils.NavigationManager;
 
 public class MainFX extends Application {
 
-    // ✅ Dimensions FIXES pour toute l'application
-    private static final int WINDOW_WIDTH = 1200;
-    private static final int WINDOW_HEIGHT = 700;
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
-            // ÉTAPE 1: Initialiser le NavigationManager avec la stage principale
             NavigationManager.setPrimaryStage(primaryStage);
-            NavigationManager.setDimensions(WINDOW_WIDTH, WINDOW_HEIGHT);
-            System.out.println("NavigationManager initialisé avec succès");
 
-            // ÉTAPE 2: Charger la page de login
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
-
-            // Vérifier que le fichier existe
             if (getClass().getResource("/fxml/Login.fxml") == null) {
-                System.err.println("ERREUR: Fichier Login.fxml introuvable!");
-                System.err.println("Chemin vérifié: /fxml/Login.fxml");
+                System.err.println("❌ ERREUR: Login.fxml introuvable!");
                 return;
             }
 
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             Parent root = loader.load();
 
-            // ÉTAPE 3: Configurer la scène avec dimensions FIXES
-            Scene scene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
-
-            // ❌ INTERDIRE le redimensionnement
-            primaryStage.setResizable(false);
-
-            primaryStage.setTitle("Système de Réservation");
+            Scene scene = new Scene(root);
             primaryStage.setScene(scene);
+            primaryStage.setTitle("Horizia - Connexion");
+            primaryStage.setResizable(true);
+            primaryStage.setMinWidth(900);
+            primaryStage.setMinHeight(600);
             primaryStage.centerOnScreen();
+            primaryStage.setMaximized(true);
             primaryStage.show();
 
-            System.out.println("Application démarrée avec succès");
+            System.out.println("✅ Application démarrée");
 
         } catch (Exception e) {
-            System.err.println("Erreur au démarrage de l'application:");
+            System.err.println("❌ Erreur démarrage: " + e.getMessage());
             e.printStackTrace();
         }
     }
