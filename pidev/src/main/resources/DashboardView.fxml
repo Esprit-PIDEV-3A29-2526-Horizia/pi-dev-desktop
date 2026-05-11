@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <?import java.net.URL?>
-<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.Dashboardcontroller">
+<ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.DashboardController">
     <stylesheets>
         <URL value="@/css/dashboard.css" />
     </stylesheets>

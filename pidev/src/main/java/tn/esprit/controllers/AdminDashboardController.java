@@ -26,6 +26,7 @@ public class AdminDashboardController {
     @FXML private AnchorPane contentArea;
     @FXML private StackPane contentPane;
     @FXML private ScrollPane mainScrollPane;
+
     // Labels pour les statistiques
     @FXML private Label totalMembresLabel;
     @FXML private Label totalAdminsLabel;
@@ -39,10 +40,27 @@ public class AdminDashboardController {
     @FXML private Button btnSettings;
     @FXML private Button btnVoyages;
     @FXML private Button btnReservations;
+    @FXML private Button btncatalogue;
     @FXML private Button btnLogements;
+    @FXML private Button btnEvenements;
+    @FXML private Button btnLocationDashboard;
+    @FXML private Button btnPublications;
+    @FXML private Button btnCommentaires;
+
     private User currentUser;
     private Serviceuser serviceUser = new Serviceuser();
     private static logement selectedLogement;
+
+    // Instance unique du controller
+    private static AdminDashboardController instance;
+
+    public AdminDashboardController() {
+        instance = this;
+    }
+
+    public static AdminDashboardController getInstance() {
+        return instance;
+    }
 
     @FXML
     public void initialize() {
@@ -74,17 +92,13 @@ public class AdminDashboardController {
             e.printStackTrace();
         }
     }
-    @FXML
-    private Button btnEvenements;
 
     @FXML
     private void showEvenements() {
         System.out.println("=== Chargement de la gestion des événements ===");
-        loadPage("/AdminHome.fxml"); // ou le nom de votre fichier
+        loadPage("/AdminHome.fxml");
         setActiveButton(btnEvenements);
     }
-    @FXML
-    private Button btnLocationDashboard;
 
     @FXML
     private void showLocationDashboard() {
@@ -92,7 +106,6 @@ public class AdminDashboardController {
         loadPage("/DashboardView.fxml");
         setActiveButton(btnLocationDashboard);
     }
-
 
     public void updateStats(int total, int admins, int agents, int clients) {
         if (totalMembresLabel != null) totalMembresLabel.setText(String.valueOf(total));
@@ -104,9 +117,15 @@ public class AdminDashboardController {
     public void setCurrentUser(User user) {
         this.currentUser = user;
         if (user != null) {
-            lblWelcome.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
-            if (lblAdminName != null) lblAdminName.setText(user.getNom() + " " + user.getPrenom());
-            if (lblAdminEmail != null) lblAdminEmail.setText(user.getEmail());
+            if (lblWelcome != null) {
+                lblWelcome.setText("Bienvenue, " + user.getNom() + " " + user.getPrenom());
+            }
+            if (lblAdminName != null) {
+                lblAdminName.setText(user.getNom() + " " + user.getPrenom());
+            }
+            if (lblAdminEmail != null) {
+                lblAdminEmail.setText(user.getEmail());
+            }
         }
     }
 
@@ -134,6 +153,7 @@ public class AdminDashboardController {
     private void showStats() {
         System.out.println("=== Accès aux statistiques ===");
         animatePageTransition("/fxml/Statistics.fxml");
+        setActiveButton(btnStats);
     }
 
     private void animatePageTransition(String fxmlPath) {
@@ -185,25 +205,25 @@ public class AdminDashboardController {
 
             // Membres
             if (controller instanceof MemberListController) {
-                ((MemberListController) controller).setDashboardController(null);
+                ((MemberListController) controller).setDashboardController(getInstance());
                 System.out.println("✅ DashboardController passé à MemberListController");
             }
             if (controller instanceof AddMemberController) {
-                ((AddMemberController) controller).setDashboardController(null);
+                ((AddMemberController) controller).setDashboardController(getInstance());
                 System.out.println("✅ DashboardController passé à AddMemberController");
             }
             if (controller instanceof EditMemberController) {
-                ((EditMemberController) controller).setDashboardController(null);
+                ((EditMemberController) controller).setDashboardController(getInstance());
                 System.out.println("✅ DashboardController passé à EditMemberController");
             }
 
             // Profils
             if (controller instanceof ProfilListController) {
-                ((ProfilListController) controller).setDashboardController(null);
+                ((ProfilListController) controller).setDashboardController(getInstance());
                 System.out.println("✅ DashboardController passé à ProfilListController");
             }
             if (controller instanceof AddProfilController) {
-                ((AddProfilController) controller).setDashboardController(null);
+                ((AddProfilController) controller).setDashboardController(getInstance());
                 System.out.println("✅ DashboardController passé à AddProfilController");
             }
 
@@ -221,8 +241,6 @@ public class AdminDashboardController {
                 System.out.println("✅ DashboardController passé à ModifierLogementController");
             }
 
-            // Trouver le contentArea du AdminDashboardController
-            // Comme loadPage est static, on doit accéder à l'instance via une méthode statique
             AdminDashboardController instance = getInstance();
             if (instance != null && instance.contentArea != null) {
                 instance.contentArea.getChildren().setAll(page);
@@ -241,23 +259,14 @@ public class AdminDashboardController {
         }
     }
 
-    // Instance unique du controller
-    private static AdminDashboardController instance;
-
-    public AdminDashboardController() {
-        instance = this;
-    }
-
-    public static AdminDashboardController getInstance() {
-        return instance;
-    }
-
     public void setContent(Parent content) {
-        contentArea.getChildren().setAll(content);
-        AnchorPane.setTopAnchor(content, 0.0);
-        AnchorPane.setBottomAnchor(content, 0.0);
-        AnchorPane.setLeftAnchor(content, 0.0);
-        AnchorPane.setRightAnchor(content, 0.0);
+        if (contentArea != null) {
+            contentArea.getChildren().setAll(content);
+            AnchorPane.setTopAnchor(content, 0.0);
+            AnchorPane.setBottomAnchor(content, 0.0);
+            AnchorPane.setLeftAnchor(content, 0.0);
+            AnchorPane.setRightAnchor(content, 0.0);
+        }
     }
 
     private void setActiveButton(Button activeButton) {
@@ -279,7 +288,11 @@ public class AdminDashboardController {
         if (btnLocationDashboard != null) btnLocationDashboard.setStyle(inactiveStyle);
         if (btnVoyages != null) btnVoyages.setStyle(inactiveStyle);
         if (btnReservations != null) btnReservations.setStyle(inactiveStyle);
+        if(btncatalogue != null) btncatalogue.setStyle(inactiveStyle);
         if (btnLogements != null) btnLogements.setStyle(inactiveStyle);
+        if (btnPublications != null) btnPublications.setStyle(inactiveStyle);
+        if (btnCommentaires != null) btnCommentaires.setStyle(inactiveStyle);
+        if (btnStats != null) btnStats.setStyle(inactiveStyle);
 
         // Activer le bouton sélectionné
         if (activeButton != null) {
@@ -302,7 +315,7 @@ public class AdminDashboardController {
             FXMLLoader loader = new FXMLLoader(AdminDashboardController.class.getResource("/fxml/Login.fxml"));
             Parent root = loader.load();
 
-            Stage stage = (Stage) lblWelcome.getScene().getWindow();
+            Stage stage = (Stage) contentArea.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Connexion Administrateur");
             stage.setMaximized(false);
@@ -313,25 +326,73 @@ public class AdminDashboardController {
         }
     }
 
-
-
     @FXML
-    private void showlogement(ActionEvent event) {
+    private void showLogements(ActionEvent event) {
         System.out.println("=== Chargement de la gestion des logements ===");
         loadPage("/fxml/Logements.fxml");
+        setActiveButton(btnLogements);
     }
+
     @FXML
     private void showVoyages() {
         System.out.println("=== Chargement de la gestion des voyages ===");
         loadPage("/fxml/GestionVoyage.fxml");
-        setActiveButton(btnVoyages); // ← AJOUTER CETTE LIGNE pour mettre le bouton en surbrillance
+        setActiveButton(btnVoyages);
     }
 
     @FXML
     private void showReservations() {
         System.out.println("=== Chargement de la gestion des réservations ===");
         loadPage("/fxml/GestionReservationsAdmin.fxml");
-        setActiveButton(btnReservations); // ← AJOUTER CETTE LIGNE pour mettre le bouton en surbrillance
+        setActiveButton(btnReservations);
+    }
+    @FXML
+    private void showcatalogue() {
+        System.out.println("=== Chargement de la gestion des réservations ===");
+        loadPage("/fxml/GestionCategorie.fxml");
+        setActiveButton(btncatalogue);
+    }
+
+    @FXML
+    private void showPublications(ActionEvent event) {
+        System.out.println("=== Chargement de la gestion des publications ===");
+        loadPage("/fxml/GestionPublications.fxml");
+        setActiveButton(btnPublications);
+    }
+
+    @FXML
+    private void showCommentaires(ActionEvent event) {
+        System.out.println("=== Chargement de la gestion des commentaires ===");
+        loadPage("/fxml/Commentaires.fxml");
+        setActiveButton(btnCommentaires);
+    }
+
+    @FXML
+    private void openChat(ActionEvent event) {
+        System.out.println("=== Ouverture du chat ===");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ChatView.fxml"));
+            Parent chatView = loader.load();
+
+            Stage chatStage = new Stage();
+            chatStage.setTitle("Chat - Horozia");
+            chatStage.setScene(new Scene(chatView));
+            chatStage.setMinWidth(400);
+            chatStage.setMinHeight(500);
+            chatStage.show();
+
+        } catch (IOException e) {
+            System.err.println("❌ Erreur lors de l'ouverture du chat");
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showProfile(ActionEvent event) {
+        System.out.println("=== Chargement du profil ===");
+        // Charge la liste des profils (ou créez une vue profil dédiée)
+        loadPage("/fxml/ProfilList.fxml");
+        setActiveButton(btnProfils);
     }
 
     public static void setSelectedLogement(logement log) {
@@ -341,5 +402,4 @@ public class AdminDashboardController {
     public static logement getSelectedLogement() {
         return selectedLogement;
     }
-
 }

@@ -16,46 +16,6 @@
 
 <BorderPane prefHeight="700.0" prefWidth="1200.0" style="-fx-background-color: #F5F1E9;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.GestionCategorieController">
 
-    <left>
-        <VBox prefWidth="250.0" spacing="10.0" style="-fx-background-color: #000328;" alignment="CENTER">
-            <padding>
-                <Insets bottom="20.0" left="15.0" right="15.0" top="40.0" />
-            </padding>
-            <children>
-                <ImageView fx:id="logoApp" fitHeight="60.0" fitWidth="180.0" focusTraversable="true" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
-                    <VBox.margin>
-                        <Insets bottom="40.0" left="10.0" />
-                    </VBox.margin>
-                    <image>
-                        <Image url="@../images/logo.png" />
-                    </image>
-               <cursor>
-                  <Cursor fx:constant="SE_RESIZE" />
-               </cursor>
-                </ImageView>
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0" style="-fx-background-color: #3D94CA; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" text="Catégories" />
-
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity"
-                        onAction="#naviguerVoyages"
-                        prefHeight="45.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6;"
-                        text="Voyages" />
-
-                <Button alignment="BASELINE_LEFT" maxWidth="Infinity" prefHeight="45.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: #DACEB6; -fx-font-size: 14;"
-                        text="Réservations"
-                        onAction="#naviguerReservations"/>
-
-
-                <Region VBox.vgrow="ALWAYS" />
-
-                <Button prefHeight="45.0" prefWidth="210.0"
-                        style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 10;"
-                        text="Déconnexion"
-                        onAction="#handleDeconnexion"/>
-            </children>
-        </VBox>
-    </left>
 
     <center>
         <HBox spacing="20.0">

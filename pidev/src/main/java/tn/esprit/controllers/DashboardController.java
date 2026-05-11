@@ -34,28 +34,44 @@ import java.util.ResourceBundle;
 public class DashboardController implements Initializable {
 
     // ─── Labels statistiques ──────────────────────────────────────
-    @FXML private Label lblModeleTopNom;
-    @FXML private Label lblModeleTopCount;
-    @FXML private Label lblLocationsActives;
-    @FXML private Label lblVehiculesDisponibles;
-    @FXML private Label lblVehiculesLoues;
+    @FXML
+    private Label lblModeleTopNom;
+    @FXML
+    private Label lblModeleTopCount;
+    @FXML
+    private Label lblLocationsActives;
+    @FXML
+    private Label lblVehiculesDisponibles;
+    @FXML
+    private Label lblVehiculesLoues;
 
     // ─── Graphiques ───────────────────────────────────────────────
-    @FXML private BarChart<String, Number> barChartTopModeles;
-    @FXML private CategoryAxis xAxis;
-    @FXML private NumberAxis yAxis;
-    @FXML private PieChart pieChartStatuts;
+    @FXML
+    private BarChart<String, Number> barChartTopModeles;
+    @FXML
+    private CategoryAxis xAxis;
+    @FXML
+    private NumberAxis yAxis;
+    @FXML
+    private PieChart pieChartStatuts;
 
     // ─── Cards de navigation ──────────────────────────────────────
-    @FXML private HBox cardGestionLocations;
-    @FXML private HBox cardGestionVehicules;
-    @FXML private HBox cardGestionMarques;
-    @FXML private HBox cardDocuments;
-    @FXML private HBox cardPlanning;
+    @FXML
+    private HBox cardGestionLocations;
+    @FXML
+    private HBox cardGestionVehicules;
+    @FXML
+    private HBox cardGestionMarques;
+    @FXML
+    private HBox cardDocuments;
+    @FXML
+    private HBox cardPlanning;
 
     // ─── Boutons ──────────────────────────────────────────────────
-    @FXML private Button btnRafraichir;
-    @FXML private Button btnMettreAJourStatuts;
+    @FXML
+    private Button btnRafraichir;
+    @FXML
+    private Button btnMettreAJourStatuts;
 
     private Dashboardservice dashboardService;
     private LocationService locationService;

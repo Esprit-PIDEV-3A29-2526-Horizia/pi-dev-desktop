@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
 import tn.esprit.entities.Profil;
 import tn.esprit.entities.User;
 import tn.esprit.services.ServiceProfil;
@@ -39,6 +40,12 @@ public class StatisticsController {
 
     @FXML private Label lblMessage;
 
+    // ScrollPanes pour rendre responsive
+    @FXML private ScrollPane mainScrollPane;
+    @FXML private ScrollPane chartsScrollPane;
+    @FXML private ScrollPane barChartScrollPane;
+    @FXML private ScrollPane tableScrollPane;
+
     private final Serviceuser serviceUser = new Serviceuser();
     private final ServiceProfil serviceProfil = new ServiceProfil();
 
@@ -52,7 +59,35 @@ public class StatisticsController {
         System.out.println("=== Initialisation StatisticsController ===");
 
         setupTableColumns();
+        setupResponsiveScrollPanes();
         loadData();
+    }
+
+    private void setupResponsiveScrollPanes() {
+        // Configurer le ScrollPane principal
+        if (mainScrollPane != null) {
+            mainScrollPane.setFitToWidth(true);
+            mainScrollPane.setFitToHeight(true);
+            mainScrollPane.setPannable(true); // Permettre le panning avec la souris
+        }
+
+        // Configurer le ScrollPane des graphiques
+        if (chartsScrollPane != null) {
+            chartsScrollPane.setFitToWidth(true);
+            chartsScrollPane.setFitToHeight(true);
+        }
+
+        // Configurer le ScrollPane du graphique en barres
+        if (barChartScrollPane != null) {
+            barChartScrollPane.setFitToWidth(true);
+            barChartScrollPane.setFitToHeight(true);
+        }
+
+        // Configurer le ScrollPane du tableau
+        if (tableScrollPane != null) {
+            tableScrollPane.setFitToWidth(true);
+            tableScrollPane.setFitToHeight(true);
+        }
     }
 
     private void setupTableColumns() {
@@ -67,6 +102,9 @@ public class StatisticsController {
         colBloque.setStyle("-fx-text-fill: #EF4444; -fx-alignment: CENTER;");
         colInactif.setStyle("-fx-text-fill: #6B7280; -fx-alignment: CENTER;");
         colTotal.setStyle("-fx-font-weight: bold; -fx-alignment: CENTER;");
+
+        // Rendre le tableau redimensionnable
+        summaryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     @FXML
@@ -129,8 +167,16 @@ public class StatisticsController {
             activePercentageLabel.setText(String.format("%.1f%% du total", activePercentage));
             blockedPercentageLabel.setText(String.format("%.1f%% du total", blockedPercentage));
 
-            // Évolution simulée (à remplacer par de vraies données historiques)
-            membersEvolutionLabel.setText("+" + String.format("%.1f", Math.random() * 10) + "% vs mois dernier");
+            // Évolution simulée
+            Random rand = new Random();
+            double evolution = (rand.nextDouble() * 15) - 5; // Entre -5% et +10%
+            String evolutionText = evolution >= 0 ?
+                    String.format("+%.1f%% vs mois dernier", evolution) :
+                    String.format("%.1f%% vs mois dernier", evolution);
+            membersEvolutionLabel.setText(evolutionText);
+            membersEvolutionLabel.setStyle(evolution >= 0 ?
+                    "-fx-text-fill: #10B981; -fx-font-size: 14px;" :
+                    "-fx-text-fill: #EF4444; -fx-font-size: 14px;");
         }
 
         // Total profils
@@ -159,6 +205,11 @@ public class StatisticsController {
 
         typePieChart.setData(typeData);
         typePieChart.setTitle("Répartition par Type");
+        typePieChart.setLabelsVisible(true);
+        typePieChart.setClockwise(true);
+
+        // Ajouter des couleurs personnalisées
+        applyPieChartColors(typePieChart);
     }
 
     private void updateStatutPieChart() {
@@ -177,6 +228,30 @@ public class StatisticsController {
 
         statutPieChart.setData(statutData);
         statutPieChart.setTitle("Répartition par Statut");
+        statutPieChart.setLabelsVisible(true);
+        statutPieChart.setClockwise(true);
+
+        applyPieChartColors(statutPieChart);
+    }
+
+    private void applyPieChartColors(PieChart pieChart) {
+        // Appliquer les couleurs après un court délai
+        javafx.application.Platform.runLater(() -> {
+            int index = 0;
+            for (PieChart.Data data : pieChart.getData()) {
+                String color;
+                switch (index % 6) {
+                    case 0: color = "#3B82F6"; break; // Bleu
+                    case 1: color = "#10B981"; break; // Vert
+                    case 2: color = "#F59E0B"; break; // Orange
+                    case 3: color = "#EF4444"; break; // Rouge
+                    case 4: color = "#8B5CF6"; break; // Violet
+                    default: color = "#6B7280"; break; // Gris
+                }
+                data.getNode().setStyle("-fx-pie-color: " + color + ";");
+                index++;
+            }
+        });
     }
 
     private void updateBarChart() {
@@ -196,9 +271,13 @@ public class StatisticsController {
         // Obtenir tous les types uniques
         Set<String> types = new HashSet<>();
         for (User user : users) {
-            if (user.getType() != null) {
+            if (user.getType() != null && !user.getType().isEmpty()) {
                 types.add(user.getType());
             }
+        }
+
+        if (types.isEmpty()) {
+            types.add("Aucun type");
         }
 
         // Trier les types pour un affichage cohérent
@@ -222,44 +301,44 @@ public class StatisticsController {
                             !"BLOQUE".equals(u.getStatut()))
                     .count();
 
-            actifSeries.getData().add(new XYChart.Data<>(type, actif));
-            bloqueSeries.getData().add(new XYChart.Data<>(type, bloque));
-            inactifSeries.getData().add(new XYChart.Data<>(type, inactif));
+            if (actif > 0 || bloque > 0 || inactif > 0) {
+                actifSeries.getData().add(new XYChart.Data<>(type, actif));
+                bloqueSeries.getData().add(new XYChart.Data<>(type, bloque));
+                inactifSeries.getData().add(new XYChart.Data<>(type, inactif));
+            }
         }
 
         // Ajouter les séries au graphique
         distributionBarChart.getData().addAll(actifSeries, bloqueSeries, inactifSeries);
 
-        // Appliquer les styles APRÈS que les séries soient ajoutées
+        // Appliquer les styles
         applyBarChartStyles();
     }
 
     private void applyBarChartStyles() {
-        // Appliquer les styles après un court délai pour que les nœuds soient créés
         javafx.application.Platform.runLater(() -> {
             try {
+                // Appliquer les couleurs aux barres
                 if (!distributionBarChart.getData().isEmpty()) {
-                    // Série Actif (index 0)
-                    if (distributionBarChart.getData().size() > 0) {
-                        XYChart.Series<String, Number> serie = distributionBarChart.getData().get(0);
-                        if (serie.getNode() != null) {
-                            serie.getNode().setStyle("-fx-bar-fill: #10B981;");
+                    for (int i = 0; i < distributionBarChart.getData().size(); i++) {
+                        XYChart.Series<String, Number> series = distributionBarChart.getData().get(i);
+                        String color;
+                        switch (series.getName()) {
+                            case "Actif":
+                                color = "#10B981";
+                                break;
+                            case "Bloqué":
+                                color = "#EF4444";
+                                break;
+                            default:
+                                color = "#6B7280";
+                                break;
                         }
-                    }
 
-                    // Série Bloqué (index 1)
-                    if (distributionBarChart.getData().size() > 1) {
-                        XYChart.Series<String, Number> serie = distributionBarChart.getData().get(1);
-                        if (serie.getNode() != null) {
-                            serie.getNode().setStyle("-fx-bar-fill: #EF4444;");
-                        }
-                    }
-
-                    // Série Inactif (index 2)
-                    if (distributionBarChart.getData().size() > 2) {
-                        XYChart.Series<String, Number> serie = distributionBarChart.getData().get(2);
-                        if (serie.getNode() != null) {
-                            serie.getNode().setStyle("-fx-bar-fill: #6B7280;");
+                        for (XYChart.Data<String, Number> data : series.getData()) {
+                            if (data.getNode() != null) {
+                                data.getNode().setStyle("-fx-bar-fill: " + color + ";");
+                            }
                         }
                     }
                 }
@@ -275,7 +354,7 @@ public class StatisticsController {
         // Obtenir tous les types uniques
         Set<String> types = new HashSet<>();
         for (User user : users) {
-            if (user.getType() != null) {
+            if (user.getType() != null && !user.getType().isEmpty()) {
                 types.add(user.getType());
             }
         }
@@ -305,7 +384,9 @@ public class StatisticsController {
                     .filter(u -> type.equals(u.getType()))
                     .count();
 
-            statistics.add(new TypeStatistic(type, (int) actif, (int) bloque, (int) inactif, (int) total));
+            if (total > 0) {
+                statistics.add(new TypeStatistic(type, (int) actif, (int) bloque, (int) inactif, (int) total));
+            }
         }
 
         // Ajouter une ligne "TOTAL"
@@ -314,7 +395,7 @@ public class StatisticsController {
         int totalInactif = statistics.stream().mapToInt(TypeStatistic::getInactif).sum();
         int totalGlobal = statistics.stream().mapToInt(TypeStatistic::getTotal).sum();
 
-        statistics.add(new TypeStatistic("TOTAL", totalActif, totalBloque, totalInactif, totalGlobal));
+        statistics.add(new TypeStatistic("📊 TOTAL", totalActif, totalBloque, totalInactif, totalGlobal));
 
         summaryTable.setItems(statistics);
     }
@@ -327,9 +408,9 @@ public class StatisticsController {
     private void showMessage(String message, String type) {
         lblMessage.setText(message);
         if ("error".equals(type)) {
-            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
+            lblMessage.setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-font-size: 14px;");
         } else {
-            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold;");
+            lblMessage.setStyle("-fx-text-fill: #10B981; -fx-font-weight: bold; -fx-font-size: 14px;");
         }
 
         // Faire disparaître le message après 3 secondes

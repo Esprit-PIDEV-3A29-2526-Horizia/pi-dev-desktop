@@ -203,3 +203,42 @@
     -fx-padding: 8 20;
     -fx-cursor: hand;
 }
+/* Style transparent pour les Accordion et TitledPane */
+.accordion {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.titled-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 11 18;
+    -fx-cursor: hand;
+    -fx-background-radius: 0;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.72);
+}
+
+.titled-pane > .title:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.titled-pane > .title > .arrow-button .arrow {
+    -fx-background-color: rgba(255, 255, 255, 0.6);
+}
+
+.titled-pane > .content {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Style pour le texte du TitledPane quand il est ouvert */
+.titled-pane:expanded > .title {
+    -fx-text-fill: white;
+}
