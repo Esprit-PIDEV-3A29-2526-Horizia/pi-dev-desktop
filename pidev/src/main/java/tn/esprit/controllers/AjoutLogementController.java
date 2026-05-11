@@ -79,13 +79,20 @@ public class AjoutLogementController implements Initializable {
 
     private Servicelogement servicelogement = new Servicelogement();
 
-    // CONSTANTES AJUSTÉES pour switch 50x26
     private static final double CIRCLE_TRANSLATE_OFF = 0;
     private static final double CIRCLE_TRANSLATE_ON = 24;
     private static final String COLOR_OFF = "#e74c3c";
     private static final String COLOR_ON = "#2ecc71";
 
+    // Variable pour stocker l'ID de l'utilisateur connecté
+    private int currentUserId = 1; // Par défaut 1, à modifier selon votre système d'authentification
+
     public AjoutLogementController() {
+    }
+
+    // Setter pour l'ID de l'utilisateur connecté
+    public void setCurrentUserId(int userId) {
+        this.currentUserId = userId;
     }
 
     @Override
@@ -106,7 +113,6 @@ public class AjoutLogementController implements Initializable {
 
         initialiserSwitch();
 
-        // Initialisation de Vosk (thread séparé)
         new Thread(() -> {
             try {
                 String userDir = System.getProperty("user.dir");
@@ -124,6 +130,7 @@ public class AjoutLogementController implements Initializable {
             }
         }).start();
     }
+
     private void initialiserSwitch() {
         disponibiliteToggle.setSelected(false);
         mettreAJourSwitchUI();
@@ -196,13 +203,12 @@ public class AjoutLogementController implements Initializable {
 
                 Platform.runLater(() -> {
                     String resultat;
-                    // Si c'est le champ tarif, on essaie de convertir en nombre
                     if (field == tarifField) {
                         Integer nombre = convertirMotsEnNombre(recognizedText);
                         if (nombre != null) {
                             resultat = nombre.toString();
                         } else {
-                            resultat = recognizedText; // fallback au texte brut
+                            resultat = recognizedText;
                         }
                     } else {
                         resultat = formatFirstLetterCapital(recognizedText);
@@ -222,10 +228,10 @@ public class AjoutLogementController implements Initializable {
             }
         }).start();
     }
+
     private Integer convertirMotsEnNombre(String mots) {
         if (mots == null || mots.trim().isEmpty()) return null;
 
-        // Dictionnaire simple pour les nombres de 0 à 19
         java.util.Map<String, Integer> nombres = new java.util.HashMap<>();
         nombres.put("zéro", 0);
         nombres.put("un", 1); nombres.put("deux", 2); nombres.put("trois", 3);
@@ -236,7 +242,6 @@ public class AjoutLogementController implements Initializable {
         nombres.put("seize", 16); nombres.put("dix-sept", 17); nombres.put("dix-huit", 18);
         nombres.put("dix-neuf", 19);
 
-        // Dizaines
         java.util.Map<String, Integer> dizaines = new java.util.HashMap<>();
         dizaines.put("vingt", 20); dizaines.put("trente", 30); dizaines.put("quarante", 40);
         dizaines.put("cinquante", 50); dizaines.put("soixante", 60); dizaines.put("soixante-dix", 70);
@@ -257,14 +262,14 @@ public class AjoutLogementController implements Initializable {
                 current += nombres.get(mot);
             } else if (dizaines.containsKey(mot)) {
                 current += dizaines.get(mot);
-            } else if (mot.matches("\\d+")) { // si l'utilisateur dit directement "150"
+            } else if (mot.matches("\\d+")) {
                 current += Integer.parseInt(mot);
             }
-            // Gérer les cas comme "vingt et un" (simplifié)
         }
         total += current;
         return total;
     }
+
     private void ajouterLogement() {
         StringBuilder erreurs = new StringBuilder();
 
@@ -332,6 +337,7 @@ public class AjoutLogementController implements Initializable {
             l.setEquipement(equipement);
             l.setTarif_nuit(tarif);
             l.setDisponibilite(disponibiliteToggle.isSelected());
+            l.setCreated_by_id(currentUserId);  // Ajout de l'ID utilisateur
 
             servicelogement.ajouter(l);
 
@@ -343,13 +349,14 @@ public class AjoutLogementController implements Initializable {
     }
 
     private void retourListe() {
-        // CORRECTION: Utiliser AdminDashboardController au lieu de Dashboard
         AdminDashboardController.loadPage("/fxml/Logements.fxml");
     }
+
     private String formatFirstLetterCapital(String text) {
         if (text == null || text.isEmpty()) return "";
         return text.substring(0, 1).toUpperCase() + text.substring(1).toLowerCase();
     }
+
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);

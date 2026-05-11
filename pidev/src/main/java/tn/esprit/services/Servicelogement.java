@@ -18,7 +18,7 @@ public class Servicelogement implements IService<logement> {
 
     @Override
     public void ajouter(logement logement) throws SQLException {
-        String sql = "INSERT INTO `logement`(`type`, `nom`, `image`, `adresse`, `capacite`, `equipement`, `tarif_nuit`, `disponibilite`) VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO `logement`(`type`, `nom`, `image`, `adresse`, `capacite`, `equipement`, `tarif_nuit`, `disponibilite`, `created_by_id`) VALUES (?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, logement.getType());
             ps.setString(2, logement.getNom());
@@ -28,6 +28,7 @@ public class Servicelogement implements IService<logement> {
             ps.setString(6, logement.getEquipement());
             ps.setFloat(7, logement.getTarif_nuit());
             ps.setBoolean(8, logement.isDisponibilite());
+            ps.setInt(9, logement.getCreated_by_id());  // Nouveau champ ajouté
             ps.executeUpdate();
 
             // Récupérer l'ID généré et le setter dans l'objet (optionnel)
@@ -41,7 +42,7 @@ public class Servicelogement implements IService<logement> {
 
     @Override
     public void modifier(logement logement) throws SQLException {
-        String sql = "UPDATE `logement` SET `type`=?, `nom`=?, `image`=?, `adresse`=?, `capacite`=?, `equipement`=?, `tarif_nuit`=?, `disponibilite`=? WHERE `id`=?";
+        String sql = "UPDATE `logement` SET `type`=?, `nom`=?, `image`=?, `adresse`=?, `capacite`=?, `equipement`=?, `tarif_nuit`=?, `disponibilite`=?, `created_by_id`=? WHERE `id`=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, logement.getType());
             ps.setString(2, logement.getNom());
@@ -51,7 +52,8 @@ public class Servicelogement implements IService<logement> {
             ps.setString(6, logement.getEquipement());
             ps.setFloat(7, logement.getTarif_nuit());
             ps.setBoolean(8, logement.isDisponibilite());
-            ps.setInt(9, logement.getId());
+            ps.setInt(9, logement.getCreated_by_id());  // Nouveau champ ajouté
+            ps.setInt(10, logement.getId());
             ps.executeUpdate();
         }
     }
@@ -82,6 +84,7 @@ public class Servicelogement implements IService<logement> {
                 l.setEquipement(rs.getString("equipement"));
                 l.setTarif_nuit(rs.getFloat("tarif_nuit"));
                 l.setDisponibilite(rs.getBoolean("disponibilite"));
+                l.setCreated_by_id(rs.getInt("created_by_id"));  // Nouveau champ ajouté
                 logements.add(l);
             }
         }
@@ -120,13 +123,13 @@ public class Servicelogement implements IService<logement> {
                     l.setEquipement(rs.getString("equipement"));
                     l.setTarif_nuit(rs.getFloat("tarif_nuit"));
                     l.setDisponibilite(rs.getBoolean("disponibilite"));
+                    l.setCreated_by_id(rs.getInt("created_by_id"));  // Nouveau champ ajouté
                     logements.add(l);
                 }
             }
         }
         return logements;
     }
-
 
     public List<logement> rechercherParAttribut(String nomAttribut, Object valeurRecherchee) throws SQLException {
         List<logement> touteslogements = afficher();
@@ -142,7 +145,7 @@ public class Servicelogement implements IService<logement> {
                         if (valeurChamp instanceof Float && valeurRecherchee instanceof Float) {
                             float valeurFloat = (Float) valeurChamp;
                             float rechercheFloat = (Float) valeurRecherchee;
-                            return Math.abs(valeurFloat - rechercheFloat) < 0.001; // Tolérance pour les floats
+                            return Math.abs(valeurFloat - rechercheFloat) < 0.001;
                         }
 
                         // Gestion spéciale pour les booléens
@@ -152,7 +155,7 @@ public class Servicelogement implements IService<logement> {
                             return boolValue.toString().equalsIgnoreCase(stringValue);
                         }
 
-                        // Gestion spéciale pour les chaînes de caractères : recherche partielle et insensible à la casse
+                        // Gestion spéciale pour les chaînes de caractères
                         if (valeurChamp instanceof String && valeurRecherchee instanceof String) {
                             String stringValue = (String) valeurChamp;
                             String searchValue = (String) valeurRecherchee;
@@ -176,8 +179,7 @@ public class Servicelogement implements IService<logement> {
     public List<logement> trierParAttribut(String attribut, boolean ordreCroissant) throws SQLException {
         List<logement> logements = new ArrayList<>();
 
-        // Updated allowed attributes to match DB column names: removed non-matching ones like "ville", "pays", "id_proprietaire" (not in schema), added "nom", "image"
-        List<String> attributsAutorises = List.of("type", "nom", "image", "adresse", "capacite", "equipement", "tarif_nuit", "disponibilite");
+        List<String> attributsAutorises = List.of("type", "nom", "image", "adresse", "capacite", "equipement", "tarif_nuit", "disponibilite", "created_by_id");
 
         if (!attributsAutorises.contains(attribut)) {
             throw new IllegalArgumentException("Attribut de tri non valide : " + attribut);
@@ -190,7 +192,6 @@ public class Servicelogement implements IService<logement> {
         ResultSet rs = st.executeQuery(sql);
         while (rs.next()) {
             logement l = new logement();
-            // Updated column names in ResultSet getters
             l.setId(rs.getInt("id"));
             l.setType(rs.getString("type"));
             l.setNom(rs.getString("nom"));
@@ -200,18 +201,20 @@ public class Servicelogement implements IService<logement> {
             l.setEquipement(rs.getString("equipement"));
             l.setTarif_nuit(rs.getFloat("tarif_nuit"));
             l.setDisponibilite(rs.getBoolean("disponibilite"));
+            l.setCreated_by_id(rs.getInt("created_by_id"));  // Nouveau champ ajouté
             logements.add(l);
         }
         return logements;
     }
+
     public logement rechercherParId(int id) throws SQLException {
-        List<logement> tousLesLogements = afficher();  // Récupère tous les logements
+        List<logement> tousLesLogements = afficher();
         return tousLesLogements.stream()
-                .filter(log -> log.getId() == id)  // Filtre par ID
-                .findFirst()  // Retourne le premier (ou null si aucun)
+                .filter(log -> log.getId() == id)
+                .findFirst()
                 .orElse(null);
     }
-    // Ajouter cette méthode dans Servicelogement.java
+
     public logement getOneById(int id) throws SQLException {
         String req = "SELECT * FROM logement WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(req)) {
@@ -227,7 +230,8 @@ public class Servicelogement implements IService<logement> {
                         rs.getInt("capacite"),
                         rs.getString("equipement"),
                         rs.getFloat("tarif_nuit"),
-                        rs.getBoolean("disponibilite")
+                        rs.getBoolean("disponibilite"),
+                        rs.getInt("created_by_id")  // Nouveau champ ajouté
                 );
             }
         }

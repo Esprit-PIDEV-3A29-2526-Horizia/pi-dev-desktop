@@ -3,19 +3,20 @@ package tn.esprit.entities;
 public class logement {
     private int id;
     private String type;
-    private String nom;    // Moved right after type
+    private String nom;
     private String adresse;
     private int capacite;
     private String equipement;
     private float tarif_nuit;
     private boolean disponibilite;
     private String image;
+    private int created_by_id;  // Nouveau champ ajouté
 
     public logement() {
     }
 
     // Constructor with id
-    public logement(int id, String type, String nom, String image, String adresse, int capacite, String equipement, float tarif_nuit, boolean disponibilite) {
+    public logement(int id, String type, String nom, String image, String adresse, int capacite, String equipement, float tarif_nuit, boolean disponibilite, int created_by_id) {
         this.id = id;
         this.type = type;
         this.nom = nom;
@@ -25,11 +26,11 @@ public class logement {
         this.equipement = equipement;
         this.tarif_nuit = tarif_nuit;
         this.disponibilite = disponibilite;
-
+        this.created_by_id = created_by_id;
     }
 
     // Constructor without id (for new entities)
-    public logement(String type, String nom, String image, String adresse, int capacite, String equipement, float tarif_nuit, boolean disponibilite) {
+    public logement(String type, String nom, String image, String adresse, int capacite, String equipement, float tarif_nuit, boolean disponibilite, int created_by_id) {
         this.type = type;
         this.nom = nom;
         this.image = image;
@@ -38,7 +39,7 @@ public class logement {
         this.equipement = equipement;
         this.tarif_nuit = tarif_nuit;
         this.disponibilite = disponibilite;
-
+        this.created_by_id = created_by_id;
     }
 
     // Getters and setters
@@ -114,6 +115,14 @@ public class logement {
         this.image = image;
     }
 
+    public int getCreated_by_id() {
+        return created_by_id;
+    }
+
+    public void setCreated_by_id(int created_by_id) {
+        this.created_by_id = created_by_id;
+    }
+
     @Override
     public String toString() {
         return "logement{" +
@@ -126,7 +135,7 @@ public class logement {
                 ", equipement='" + equipement + '\'' +
                 ", tarif_nuit=" + tarif_nuit +
                 ", disponibilite=" + disponibilite +
-
+                ", created_by_id=" + created_by_id +
                 '}';
     }
 }

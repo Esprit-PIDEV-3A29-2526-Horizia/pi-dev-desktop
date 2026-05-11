@@ -21,8 +21,11 @@
 
     <!-- NAVBAR PARTAGÉE (visible seulement si connecté) -->
     <top>
-        <fx:include fx:id="navbar" source="/fxml/Navbar.fxml" />
+        <VBox fx:id="navbarContainer">
+            <fx:include fx:id="navbar" source="/fxml/Navbar.fxml" />
+        </VBox>
     </top>
+
 
     <center>
         <ScrollPane fitToWidth="true"
