@@ -48,15 +48,11 @@ public class UserExplorerController implements Initializable {
             navbarController.setActivePublications();
         }
 
-        System.out.println("🔍 UserExplorerController - Utilisateur: " +
-                (currentUser != null ? currentUser.getEmail() : "null"));
-
         allPublications = publicationService.getAll();
 
         sortCombo.getItems().addAll("Plus récents", "Plus anciens", "Plus aimés", "A-Z");
         sortCombo.setValue("Plus récents");
         sortCombo.setOnAction(e -> appliquerFiltres());
-
         searchField.textProperty().addListener((obs, old, val) -> appliquerFiltres());
 
         btnTous.setOnAction(e -> setFilter(btnTous, Categorie.TOUS));
@@ -104,7 +100,6 @@ public class UserExplorerController implements Initializable {
                     break;
                 default:
                     filtered.sort((p1, p2) -> p2.getDateCreation().compareTo(p1.getDateCreation()));
-                    break;
             }
         }
 
@@ -122,14 +117,14 @@ public class UserExplorerController implements Initializable {
         }
 
         for (Publication p : publications) {
-            VBox card = createCard(p);
-            itemsGrid.getChildren().add(card);
+            itemsGrid.getChildren().add(createCard(p));
         }
     }
 
     private VBox createCard(Publication p) {
         VBox card = new VBox(10);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 10; -fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
+        card.setStyle("-fx-background-color: white; -fx-border-color: #e2e8f0; -fx-border-radius: 10; " +
+                "-fx-padding: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);");
         card.setPrefWidth(280);
         card.setMaxWidth(280);
 
@@ -142,8 +137,19 @@ public class UserExplorerController implements Initializable {
         if (p.getImage() != null && !p.getImage().isEmpty()) {
             try {
                 String path = p.getImage().startsWith("/") ? p.getImage() : "/" + p.getImage();
-                Image img = new Image(getClass().getResourceAsStream(path));
-                imageView.setImage(img);
+                var stream = getClass().getResourceAsStream(path);
+                if (stream != null) {
+                    imageView.setImage(new Image(stream));
+                } else {
+                    // Essai chemin absolu
+                    String projectPath = System.getProperty("user.dir");
+                    java.io.File file = new java.io.File(projectPath + "/src/main/resources" + path);
+                    if (file.exists()) {
+                        imageView.setImage(new Image(file.toURI().toString()));
+                    } else {
+                        setDefaultImage(imageView);
+                    }
+                }
             } catch (Exception e) {
                 setDefaultImage(imageView);
             }
@@ -157,47 +163,56 @@ public class UserExplorerController implements Initializable {
         titre.setWrapText(true);
 
         // Catégorie
-        String categorieLabel = p.getCategorie() != null ? p.getCategorie().getLabel() : "Non catégorisé";
-        Label categorie = new Label(categorieLabel);
-        categorie.setStyle("-fx-text-fill: #3b82f6; -fx-background-color: #EFF6FF; -fx-background-radius: 15; -fx-padding: 4 12;");
+        Label categorie = new Label(p.getCategorie() != null ? p.getCategorie().getLabel() : "Non catégorisé");
+        categorie.setStyle("-fx-text-fill: #3b82f6; -fx-background-color: #EFF6FF; " +
+                "-fx-background-radius: 15; -fx-padding: 4 12;");
 
         // Auteur
-        Label auteur = new Label("✍️ " + (p.getAuteur() != null ? p.getAuteur() : "Anonyme"));
+        Label auteur = new Label("Par " + (p.getAuteur() != null ? p.getAuteur() : "Anonyme"));
         auteur.setStyle("-fx-text-fill: #64748b; -fx-font-size: 12px");
 
         // Date
-        Label date = new Label("📅 " + (p.getDateCreation() != null ? p.getDateCreation().toLocalDate().toString() : "Date inconnue"));
+        Label date = new Label(p.getDateCreation() != null
+                ? p.getDateCreation().toLocalDate().toString() : "Date inconnue");
         date.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px");
 
-        // Vérifier si la publication est en favori
-        boolean estFavori = false;
+        // ✅ État favori — tableau pour permettre modification dans lambda
+        boolean[] estFavori = {false};
         if (currentUser != null) {
             try {
-                estFavori = favorisService.estFavori(currentUser.getId(), p.getId());
+                estFavori[0] = favorisService.estFavori(currentUser.getId(), p.getId());
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
 
-        boolean finalEstFavori = estFavori;
-
-        // Bouton Favori (étoile)
-        Button favoriBtn = new Button(finalEstFavori ? "⭐" : "☆");
-        favoriBtn.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #f59e0b; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; -fx-font-size: 14px; -fx-font-weight: bold;");
+        // ✅ Bouton Favori avec état mutable
+        Button favoriBtn = new Button(estFavori[0] ? "⭐" : "☆");
+        favoriBtn.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #f59e0b; " +
+                "-fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; " +
+                "-fx-font-size: 14px; -fx-font-weight: bold;");
         favoriBtn.setOnAction(e -> {
             if (currentUser == null) {
                 showAlert("Connexion requise", "Veuillez vous connecter pour ajouter aux favoris");
                 return;
             }
             try {
-                if (finalEstFavori) {
+                if (estFavori[0]) {
+                    // ✅ Retirer des favoris
                     favorisService.supprimerFavori(currentUser.getId(), p.getId());
+                    estFavori[0] = false;
                     favoriBtn.setText("☆");
-                    showAlert("Succès", "Publication retirée des favoris");
+                    favoriBtn.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #94a3b8; " +
+                            "-fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; " +
+                            "-fx-font-size: 14px; -fx-font-weight: bold;");
                 } else {
+                    // ✅ Ajouter aux favoris
                     favorisService.ajouterFavori(currentUser.getId(), p.getId());
+                    estFavori[0] = true;
                     favoriBtn.setText("⭐");
-                    showAlert("Succès", "Publication ajoutée aux favoris");
+                    favoriBtn.setStyle("-fx-background-color: #fef3c7; -fx-text-fill: #f59e0b; " +
+                            "-fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; " +
+                            "-fx-font-size: 14px; -fx-font-weight: bold;");
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -205,17 +220,10 @@ public class UserExplorerController implements Initializable {
             }
         });
 
-        // Bouton Commentaires
-        Button commentBtn = new Button("💬 Commentaires");
-        commentBtn.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #3b82f6; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; -fx-font-size: 12px;");
-        commentBtn.setOnAction(e -> {
-            SelectedItem.setCurrentPublication(p);
-            NavigationManager.loadView("/fxml/Commentaires.fxml", "Commentaires");
-        });
-
         // Bouton Like
         Button likeBtn = new Button("❤️ " + p.getLikes());
-        likeBtn.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #ef4444; -fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; -fx-font-size: 12px;");
+        likeBtn.setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #ef4444; " +
+                "-fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; -fx-font-size: 12px;");
         likeBtn.setOnAction(e -> {
             if (currentUser == null) {
                 showAlert("Connexion requise", "Veuillez vous connecter pour aimer");
@@ -225,20 +233,24 @@ public class UserExplorerController implements Initializable {
                 publicationService.incrementerLikes(p.getId());
                 p.setLikes(p.getLikes() + 1);
                 likeBtn.setText("❤️ " + p.getLikes());
-                showAlert("Succès", "Vous avez aimé cette publication");
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showAlert("Erreur", "Impossible d'aimer cette publication");
             }
         });
 
+        // Bouton Commentaires
+        Button commentBtn = new Button("💬 Commentaires");
+        commentBtn.setStyle("-fx-background-color: #e0f2fe; -fx-text-fill: #3b82f6; " +
+                "-fx-background-radius: 6; -fx-cursor: hand; -fx-padding: 6 12; -fx-font-size: 12px;");
+        commentBtn.setOnAction(e -> {
+            SelectedItem.setCurrentPublication(p);
+            NavigationManager.loadView("/fxml/Commentaires.fxml", "Commentaires");
+        });
+
         HBox actionBox = new HBox(10);
         actionBox.setAlignment(Pos.CENTER_LEFT);
-        actionBox.getChildren().addAll(commentBtn, likeBtn, favoriBtn);
-
-        // Label likes séparé (optionnel)
-        Label likesLabel = new Label("❤️ " + p.getLikes() + " likes");
-        likesLabel.setStyle("-fx-text-fill: #64748b; -fx-font-size: 11px");
+        actionBox.getChildren().addAll(likeBtn, commentBtn, favoriBtn);
 
         VBox infoBox = new VBox(5);
         infoBox.getChildren().addAll(categorie, auteur, date);
@@ -258,11 +270,11 @@ public class UserExplorerController implements Initializable {
 
     private void setFilter(Button btn, Categorie cat) {
         if (activeFilterBtn != null) {
-            activeFilterBtn.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; -fx-font-weight: bold; " +
-                    "-fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
+            activeFilterBtn.setStyle("-fx-background-color: #DACEB6; -fx-text-fill: #1F2937; " +
+                    "-fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
         }
-        btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; -fx-font-weight: bold; " +
-                "-fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
+        btn.setStyle("-fx-background-color: #E8B156; -fx-text-fill: white; " +
+                "-fx-font-weight: bold; -fx-background-radius: 18; -fx-padding: 6 16; -fx-cursor: hand;");
         activeFilterBtn = btn;
         currentCategorie = cat;
         appliquerFiltres();

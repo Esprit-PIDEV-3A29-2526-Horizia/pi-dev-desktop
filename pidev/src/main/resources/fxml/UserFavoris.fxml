@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.effect.DropShadow?>
+
+<BorderPane prefHeight="800" prefWidth="1300" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.UserFavorisController">
+
+    <!-- NAVBAR PARTAGÉE -->
+    <top>
+        <fx:include fx:id="navbar" source="/fxml/Navbar.fxml" />
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="false"
+                    style="-fx-background-color: transparent; -fx-background: transparent;"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED">
+
+            <VBox spacing="35" fillWidth="true" alignment="TOP_CENTER">
+                <padding><Insets top="30" right="30" bottom="30" left="30" /></padding>
+
+                <!-- Section Héro -->
+                <VBox alignment="CENTER" spacing="15"
+                      style="-fx-background-color: linear-gradient(to right, #23779C, #3D94CA); -fx-background-radius: 25; -fx-padding: 50;">
+                    <effect><DropShadow color="#00000022" radius="15" offsetY="5"/></effect>
+
+                    <Label text="⭐ Mes favoris"
+                           textFill="WHITE"
+                           style="-fx-font-size: 36; -fx-font-weight: bold;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
+
+                    <Label text="Retrouvez toutes vos publications favorites"
+                           textFill="#DACEB6"
+                           style="-fx-font-size: 17;"
+                           wrapText="true"
+                           alignment="CENTER"
+                           maxWidth="Infinity" />
+
+                    <Region prefHeight="15" />
+
+                    <!-- Bouton Explorer -->
+                    <Button fx:id="btnExplorer" text="🔍 Explorer les publications"
+                            style="-fx-background-color: #E8B156; -fx-text-fill: white; -fx-background-radius: 25; -fx-padding: 12 30; -fx-cursor: hand; -fx-font-size: 14; -fx-font-weight: bold;"/>
+                </VBox>
+
+                <!-- Grille des favoris -->
+                <FlowPane fx:id="favorisGrid" hgap="25" vgap="25" alignment="CENTER" prefWrapLength="1200" />
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

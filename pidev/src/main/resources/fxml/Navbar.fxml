@@ -73,11 +73,12 @@
                             minWidth="110"  minHeight="34"
                             maxWidth="150"  maxHeight="34">
                     <items>
+                        <MenuItem fx:id="menuAjouterPublication" text="📰 Decouvrir" />
+
                         <MenuItem fx:id="menuExplorerPublications" text="🔍 Explorer" />
                         <MenuItem fx:id="menuMesPublications" text="📝 Mes publications" />
-                        <MenuItem fx:id="menuMesFavoris" text="⭐ Mes favoris" />
                         <SeparatorMenuItem />
-                        <MenuItem fx:id="menuAjouterPublication" text="➕ Ajouter une publication" />
+                        <MenuItem fx:id="menuMesFavoris" text="⭐ Mes favoris" />
                     </items>
                 </MenuButton>
 

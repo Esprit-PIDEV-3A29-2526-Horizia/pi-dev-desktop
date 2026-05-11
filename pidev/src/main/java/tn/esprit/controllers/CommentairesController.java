@@ -106,7 +106,9 @@ public class CommentairesController implements Initializable {
                 return null;
             });
         });
-
+        if (navbarController != null) {
+            navbarController.setActiveNosLogements();
+        }
         loadCommentaires();
     }
 

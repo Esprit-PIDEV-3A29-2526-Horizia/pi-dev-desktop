@@ -14,7 +14,26 @@ public class AuthService {
     public AuthService() {
         connection = MyDataBase.getInstance().getMyConnection();
     }
+    // À ajouter dans AuthService.java
 
+    public String getAccountStatusMessage(String email) {
+        String sql = "SELECT p.statut FROM user u LEFT JOIN profil p ON u.profil_id = p.id WHERE u.email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String statut = rs.getString("statut");
+                if (statut == null) return "Profil non défini.";
+                if (!statut.equalsIgnoreCase("ACTIF")) {
+                    return "❌ Votre compte est " + statut.toLowerCase() + ". Vous ne pouvez pas vous connecter.";
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null; // compte actif ou inexistant
+    }
+    // ==================== LOGIN (compatible Symfony $2y$ + vérification statut) ====================
     public User login(String email, String password) throws SQLException {
         String sql = "SELECT u.id, u.nom, u.prenom, u.email, u.password, u.telephone, u.addresse, u.face_descriptor, " +
                 "p.id as profil_id, p.type, p.statut " +
@@ -27,13 +46,36 @@ public class AuthService {
         ResultSet rs = ps.executeQuery();
 
         if (rs.next()) {
+            // ------------------------------------------------------------
+            // VÉRIFICATION DU STATUT DU PROFIL
+            // ------------------------------------------------------------
+            String profilStatut = rs.getString("p.statut");
+            if (profilStatut == null || !profilStatut.equalsIgnoreCase("ACTIF")) {
+                // Compte inactif, bloqué ou sans profil -> refus connexion
+                System.out.println("Connexion refusée pour " + email + " : statut = " + profilStatut);
+                return null;
+            }
+
             String dbPassword = rs.getString("u.password");
 
-            if (dbPassword.startsWith("$2a$")) {
+            // Compatibilité Symfony ($2y$)
+            if (dbPassword.startsWith("$2y$")) {
+                String convertedHash = "$2a$" + dbPassword.substring(4);
+                if (BCrypt.checkpw(password, convertedHash)) {
+                    // Migrer vers $2a$
+                    String newHash = BCrypt.hashpw(password, BCrypt.gensalt(12));
+                    updatePasswordHash(email, newHash);
+                    return createUserFromResultSet(rs);
+                }
+            }
+            // Format Java ($2a$)
+            else if (dbPassword.startsWith("$2a$")) {
                 if (BCrypt.checkpw(password, dbPassword)) {
                     return createUserFromResultSet(rs);
                 }
-            } else {
+            }
+            // Ancien mot de passe en clair
+            else {
                 if (password.equals(dbPassword)) {
                     String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(12));
                     updatePasswordHash(email, hashedPassword);
@@ -44,6 +86,63 @@ public class AuthService {
         return null;
     }
 
+    // ==================== CHANGER LE MOT DE PASSE ====================
+    public boolean changePassword(int userId, String oldPassword, String newPassword) {
+        String sql = "SELECT password FROM user WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String storedHash = rs.getString("password");
+                // Vérifier avec BCrypt (supporte $2a$ et $2y$)
+                if (storedHash.startsWith("$2y$")) {
+                    String converted = "$2a$" + storedHash.substring(4);
+                    if (!BCrypt.checkpw(oldPassword, converted)) {
+                        return false;
+                    }
+                } else if (storedHash.startsWith("$2a$")) {
+                    if (!BCrypt.checkpw(oldPassword, storedHash)) {
+                        return false;
+                    }
+                } else {
+                    if (!oldPassword.equals(storedHash)) {
+                        return false;
+                    }
+                }
+
+                String newHashed = BCrypt.hashpw(newPassword, BCrypt.gensalt(12));
+                String updateSql = "UPDATE user SET password = ? WHERE id = ?";
+                try (PreparedStatement updatePs = connection.prepareStatement(updateSql)) {
+                    updatePs.setString(1, newHashed);
+                    updatePs.setInt(2, userId);
+                    return updatePs.executeUpdate() > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // ==================== MISE À JOUR DU PROFIL (sans mot de passe) ====================
+    public boolean updateUserProfile(User user) {
+        String sql = "UPDATE user SET nom = ?, prenom = ?, email = ?, telephone = ?, addresse = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getNom());
+            ps.setString(2, user.getPrenom());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getTelephone());
+            ps.setString(5, user.getAddresse());
+            ps.setInt(6, user.getId());
+            int rows = ps.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ==================== UTILITAIRES ====================
     private void updatePasswordHash(String email, String hashedPassword) {
         String sql = "UPDATE user SET password = ? WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -61,19 +160,12 @@ public class AuthService {
         user.setNom(rs.getString("u.nom"));
         user.setPrenom(rs.getString("u.prenom"));
         user.setEmail(rs.getString("u.email"));
-
-        // ✅ Vérifier si la colonne password existe
         try {
             user.setPassword(rs.getString("u.password"));
-        } catch (SQLException e) {
-            // La colonne n'existe pas dans cette requête (getUserByEmail)
-            System.out.println("ℹ️ Colonne password non disponible dans cette requête");
-        }
-
+        } catch (SQLException e) { /* ignore */ }
         user.setTelephone(rs.getString("u.telephone"));
         user.setAddresse(rs.getString("u.addresse"));
         user.setFaceDescriptor(rs.getString("u.face_descriptor"));
-
         int profilId = rs.getInt("profil_id");
         if (!rs.wasNull()) {
             Profil profil = new Profil();
@@ -84,6 +176,8 @@ public class AuthService {
         }
         return user;
     }
+
+    // ==================== AUTRES MÉTHODES EXISTANTES ====================
     public boolean checkEmailExists(String email) {
         String query = "SELECT COUNT(*) FROM user WHERE email = ?";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
@@ -104,7 +198,6 @@ public class AuthService {
                 "FROM user u " +
                 "LEFT JOIN profil p ON u.profil_id = p.id " +
                 "WHERE u.email = ?";
-
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
@@ -123,7 +216,6 @@ public class AuthService {
                 "FROM user u " +
                 "LEFT JOIN profil p ON u.profil_id = p.id " +
                 "WHERE u.id = ?";
-
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ResultSet rs = ps.executeQuery();
@@ -159,15 +251,15 @@ public class AuthService {
             return false;
         }
     }
+
     public boolean createUserFromGoogle(User user) {
         String sql = "INSERT INTO user (email, nom, prenom, password, profil_id) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getNom());
             ps.setString(3, user.getPrenom());
-            ps.setString(4, ""); // Pas de mot de passe
-            ps.setInt(5, 2); // ID du profil CLIENT (à adapter selon ta base)
-
+            ps.setString(4, "");
+            ps.setInt(5, 2);
             int result = ps.executeUpdate();
             return result > 0;
         } catch (SQLException e) {

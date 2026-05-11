@@ -7,7 +7,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -28,7 +27,7 @@ public class AccueilClientController {
     @FXML private VBox             featuresSection;
     @FXML private Label            lblStatVehicules;
     @FXML private Label            lblStatLocations;
-    @FXML private HBox             navbar;
+    // @FXML private HBox             navbar;  // ← À SUPPRIMER - La navbar est gérée par le BorderPane
 
     // ─── Stage ───────────────────────────────────────────────────
     private Stage cachedStage = null;
@@ -36,7 +35,6 @@ public class AccueilClientController {
     // ─── Services ────────────────────────────────────────────────
     private final VehiculeService  vehiculeService  = new VehiculeService();
     private final Dashboardservice dashboardservice = new Dashboardservice();
-    // ✅ SUPPRIMÉ : private final NotificationService notificationService = new NotificationService();
 
     // ─────────────────────────────────────────────────────────────
     @FXML
@@ -57,8 +55,6 @@ public class AccueilClientController {
         configurerRecherche();
         chargerStats();
         animerEntree();
-
-        // ✅ SUPPRIMÉ : notificationService.executerVerificationsQuotidiennes();
     }
 
     private void configurerRecherche() {
@@ -134,10 +130,6 @@ public class AccueilClientController {
         ouvrirCatalogue(null, null, "Tous les types");
     }
 
-    @FXML private void scrollToTop()             {
-        // déjà sur la page d'accueil
-    }
-
     @FXML private void allerCatalogue()          {
         ouvrirCatalogue(null, null, "Tous les types");
     }
@@ -208,8 +200,6 @@ public class AccueilClientController {
             return cachedStage = (Stage) featuresSection.getScene().getWindow();
         if (lblStatVehicules != null && lblStatVehicules.getScene() != null)
             return cachedStage = (Stage) lblStatVehicules.getScene().getWindow();
-        if (navbar != null && navbar.getScene() != null)
-            return cachedStage = (Stage) navbar.getScene().getWindow();
 
         System.err.println("[AccueilClient] Impossible de récupérer le Stage");
         return null;

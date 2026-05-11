@@ -5,14 +5,16 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
 
+<?import javafx.scene.shape.Circle?>
 <BorderPane prefHeight="800" prefWidth="1300" style="-fx-background-color: #F6F7FB;" xmlns="http://javafx.com/javafx/20.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controllers.UserProfilController" stylesheets="@../style.css">
 
-    <!-- Barre de navigation partagée -->
-    <top>
-        <fx:include fx:id="navbar" source="Navbar.fxml" />
-    </top>
+    <!-- Barre de navigation supérieure (identique à Accueil) -->
+        <top>
+            <fx:include fx:id="navbar" source="/fxml/Navbar.fxml" />
+        </top>
+
 
     <!-- Contenu principal -->
     <center>
@@ -44,10 +46,10 @@
 
                         <GridPane hgap="20" vgap="10" alignment="CENTER">
                             <Label text="Réservations:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-                            <Label fx:id="totalReservationsLabel" text="0" style="-fx-text-fill: #666;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                            <Label fx:id="totalReservationsLabel" text="12" style="-fx-text-fill: #666;" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
                             <Label text="Membre depuis:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-                            <Label fx:id="memberSinceLabel" text="-" style="-fx-text-fill: #666;" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                            <Label fx:id="memberSinceLabel" text="Janvier 2024" style="-fx-text-fill: #666;" GridPane.rowIndex="1" GridPane.columnIndex="1" />
                         </GridPane>
 
                         <Button fx:id="btnModifierPhoto" text="Changer la photo" style="-fx-background-color: transparent; -fx-text-fill: #3D94CA; -fx-border-color: #3D94CA; -fx-border-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;" />
@@ -58,18 +60,23 @@
                         <Label text="Informations personnelles" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A3C5A;" />
 
                         <GridPane hgap="20" vgap="15" alignment="CENTER_LEFT">
+                            <!-- Prénom -->
                             <Label text="Prénom:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="0" GridPane.columnIndex="0" />
                             <TextField fx:id="prenomField" promptText="Votre prénom" prefWidth="200" GridPane.rowIndex="0" GridPane.columnIndex="1" />
 
+                            <!-- Nom -->
                             <Label text="Nom:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="1" GridPane.columnIndex="0" />
                             <TextField fx:id="nomField" promptText="Votre nom" prefWidth="200" GridPane.rowIndex="1" GridPane.columnIndex="1" />
 
+                            <!-- Email -->
                             <Label text="Email:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="2" GridPane.columnIndex="0" />
                             <TextField fx:id="emailField" promptText="Votre email" prefWidth="200" GridPane.rowIndex="2" GridPane.columnIndex="1" />
 
+                            <!-- Téléphone -->
                             <Label text="Téléphone:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="3" GridPane.columnIndex="0" />
                             <TextField fx:id="telephoneField" promptText="Votre téléphone" prefWidth="200" GridPane.rowIndex="3" GridPane.columnIndex="1" />
 
+                            <!-- Adresse -->
                             <Label text="Adresse:" style="-fx-font-weight: bold; -fx-text-fill: #23779C;" GridPane.rowIndex="4" GridPane.columnIndex="0" />
                             <TextField fx:id="adresseField" promptText="Votre adresse" prefWidth="200" GridPane.rowIndex="4" GridPane.columnIndex="1" />
                         </GridPane>

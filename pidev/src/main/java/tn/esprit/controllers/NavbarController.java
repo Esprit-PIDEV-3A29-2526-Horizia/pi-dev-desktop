@@ -44,7 +44,7 @@ public class NavbarController {
                     "-fx-cursor: hand;";
 
     private static final String S_HOVER =
-            "-fx-background-color: rgba(255,255,255,0.10);" +
+            "-fx-background-color: rgba(8,30,44,0.68);" +
                     "-fx-text-fill: white;" +
                     "-fx-font-size: 13px;" +
                     "-fx-font-weight: bold;" +
@@ -201,7 +201,7 @@ public class NavbarController {
         if (btnLocation != null)
             btnLocation.setOnAction(e -> {
                 setActive(btnLocation);
-                NavigationManager.loadView("/fxml/Location.fxml", "Location");
+                NavigationManager.loadView("/client/AccueilClient.fxml", "Location");
             });
 
         // Nouveaux menus Publications
@@ -214,19 +214,19 @@ public class NavbarController {
         if (menuMesPublications != null)
             menuMesPublications.setOnAction(e -> {
                 setActivePublications();
-                NavigationManager.loadView("/views/user/MesPublications.fxml", "Mes publications");
+                NavigationManager.loadView("/fxml/UserPublications.fxml", "Mes publications");
             });
 
         if (menuMesFavoris != null)
             menuMesFavoris.setOnAction(e -> {
                 setActivePublications();
-                NavigationManager.loadView("/views/user/MesFavoris.fxml", "Mes favoris");
+                NavigationManager.loadView("/fxml/UserFavoris.fxml", "Mes favoris");
             });
 
         if (menuAjouterPublication != null)
             menuAjouterPublication.setOnAction(e -> {
                 setActivePublications();
-                NavigationManager.loadView("/views/common/AjouterPublication.fxml", "Ajouter une publication");
+                NavigationManager.loadView("/fxml/UserAccueil.fxml", "Decouvrir les publications");
             });
 
         if (btnContact != null)

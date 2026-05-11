@@ -82,6 +82,9 @@ public class UserAccueilController implements Initializable {
 
         // Afficher toutes les publications
         afficherPublications(allPublications);
+        if (navbarController != null) {
+            navbarController.setActivePublications();
+        }
     }
 
     private void setupCategoryFilters() {
